@@ -23,15 +23,15 @@ baseline before feature work begins.
 
 ### Repository structure
 
-- [ ] Create `src/context/` — KiCad data extraction modules
-- [ ] Create `src/prompts/` — prompt templates and prompt builder
-- [ ] Create `src/providers/` — AI provider abstraction and implementations
-- [ ] Create `src/ui/` — wxPython user interface components
-- [ ] Create `src/utils/` — shared helpers (config, units, serialization)
-- [ ] Create `src/plugin/` — placeholder for Phase 2 native plugin entry points
-- [ ] Create `tests/` — unit and integration tests
-- [ ] Create `examples/` — sample projects and reference workflows
-- [ ] Create `scripts/` — KiCad-runnable entry-point scripts
+- [x] Create `src/context/` — KiCad data extraction modules
+- [x] Create `src/prompts/` — prompt templates and prompt builder
+- [x] Create `src/providers/` — AI provider abstraction and implementations
+- [x] Create `src/ui/` — wxPython user interface components
+- [x] Create `src/utils/` — shared helpers (config, units, serialization)
+- [x] Create `src/plugin/` — placeholder for Phase 2 native plugin entry points
+- [x] Create `tests/` — unit and integration tests
+- [x] Create `examples/` — sample projects and reference workflows
+- [x] Create `scripts/` — KiCad-runnable entry-point scripts
 - [ ] Add package `__init__.py` files and a minimal importable package layout
 
 ### KiCad compatibility & dev workflow
