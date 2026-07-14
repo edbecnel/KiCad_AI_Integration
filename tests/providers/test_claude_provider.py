@@ -43,9 +43,10 @@ class _FakeResponse:
 def _opener_for_json(data: dict):
     body = json.dumps(data).encode("utf-8")
 
-    def opener(request, timeout):
+    def opener(request, timeout=None):
         assert request.get_method() == "POST"
         assert request.full_url == "https://api.anthropic.com/v1/messages"
+        assert request.data is not None
         return _FakeResponse(body)
 
     return opener

@@ -23,6 +23,10 @@ class ProjectContext:
     schematic_image: bytes | None = None
     schematic_image_meta: SchematicImageMeta | None = None
     artifact_manifest_path: str | None = None
+    schematic_connectivity: dict[str, Any] | None = None
+    pcb_summary: dict[str, Any] | None = None
+    netlist_summary: dict[str, Any] | None = None
+    schematic_image_error: str | None = None
 
     def to_dict(self, *, include_image_bytes: bool = False) -> dict[str, Any]:
         data: dict[str, Any] = {
@@ -56,6 +60,9 @@ class ProjectContext:
                 for ref, res in self.datasheet_resolutions.items()
             },
             "artifact_manifest_path": self.artifact_manifest_path,
+            "schematic_connectivity": self.schematic_connectivity,
+            "pcb_summary": self.pcb_summary,
+            "netlist_summary": self.netlist_summary,
             "schematic_image_meta": (
                 self.schematic_image_meta.to_dict()
                 if self.schematic_image_meta

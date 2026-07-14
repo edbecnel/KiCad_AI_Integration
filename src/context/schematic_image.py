@@ -132,8 +132,10 @@ def export_schematic_image(
                     f"kicad-cli pdf export failed: {result.stderr or result.stdout}"
                 )
             if not pdf_path.is_file():
-                alt = tmp_path / f"{schematic_path.stem}"
-                if alt.with_suffix(".pdf").is_file():
+                alt = tmp_path / schematic_path.stem
+                if alt.is_file():
+                    pdf_path = alt
+                elif alt.with_suffix(".pdf").is_file():
                     pdf_path = alt.with_suffix(".pdf")
                 elif list(tmp_path.glob("*.pdf")):
                     pdf_path = next(tmp_path.glob("*.pdf"))

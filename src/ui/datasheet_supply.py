@@ -50,6 +50,7 @@ def collect_project_context(
     *,
     config: AppConfig | None = None,
     retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
     verbose: bool = False,
 ) -> ProjectContext:
     """Run stretch context collection (symbols + datasheet resolutions)."""
@@ -57,6 +58,7 @@ def collect_project_context(
         project_path,
         config=config,
         retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
         verbose=verbose,
     )
 
@@ -66,6 +68,7 @@ def get_missing_datasheet_rows(
     *,
     config: AppConfig | None = None,
     retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
     verbose: bool = False,
 ) -> tuple[ProjectContext, list[MissingDatasheetRow]]:
     """Collect context and return grouped missing required datasheet rows."""
@@ -73,6 +76,7 @@ def get_missing_datasheet_rows(
         project_path,
         config=config,
         retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
         verbose=verbose,
     )
     summary = summarize_required_missing_datasheets(ctx.symbols, ctx.datasheet_resolutions)

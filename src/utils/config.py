@@ -17,6 +17,7 @@ DEFAULT_CONFIG_FILENAME = "kicad_ai_config.json"
 DEFAULT_AI_PROVIDER = "claude"
 DEFAULT_CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
 DEFAULT_PROVIDER_TIMEOUT_SEC = 120
+DEFAULT_PROVIDER_READ_TIMEOUT_SEC = 600
 DEFAULT_PROVIDER_MAX_TOKENS = 4096
 
 DatasheetUrlFetchPolicy = Literal["if_missing", "always", "never"]
@@ -40,6 +41,7 @@ class AppConfig:
     ai_provider: AiProviderKind = DEFAULT_AI_PROVIDER
     claude_model: str = DEFAULT_CLAUDE_MODEL
     provider_timeout_sec: int = DEFAULT_PROVIDER_TIMEOUT_SEC
+    provider_read_timeout_sec: int = DEFAULT_PROVIDER_READ_TIMEOUT_SEC
     provider_max_tokens: int = DEFAULT_PROVIDER_MAX_TOKENS
 
     @classmethod
@@ -73,6 +75,9 @@ class AppConfig:
             claude_model=str(data.get("claude_model", DEFAULT_CLAUDE_MODEL)),
             provider_timeout_sec=int(
                 data.get("provider_timeout_sec", DEFAULT_PROVIDER_TIMEOUT_SEC)
+            ),
+            provider_read_timeout_sec=int(
+                data.get("provider_read_timeout_sec", DEFAULT_PROVIDER_READ_TIMEOUT_SEC)
             ),
             provider_max_tokens=int(
                 data.get("provider_max_tokens", DEFAULT_PROVIDER_MAX_TOKENS)

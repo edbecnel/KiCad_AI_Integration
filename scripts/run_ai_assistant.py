@@ -23,7 +23,9 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 
 ``--ui-datasheets`` opens the Missing Required Datasheets wxPython panel (requires wx; use inside KiCad or a wx-enabled Python).
 
-``--ask "question"`` sends an interim dev prompt to Claude (requires ``ANTHROPIC_API_KEY``). This bypasses the future Approve & Send UI and transmits project context to Anthropic — for development smoke tests only.
+``--ui-chat`` opens the KiCad AI chat panel with context preview and Approve & Send (requires wx).
+
+``--ask "question"`` sends a prompt to Claude via the prompt builder (requires API key in config). Dev smoke path — bypasses Approve & Send UI.
 
 Some distributor URLs (Mouser, Littelfuse/Akamai) block automated clients even when they
 work in a browser — use direct manufacturer PDF links in symbol ``Datasheet`` fields when possible.
@@ -42,7 +44,7 @@ if str(_SRC) not in sys.path:
 
 from context.collector import collect_stretch_context  # noqa: E402
 from context.datasheet_requirements import format_required_datasheet_notice  # noqa: E402
-from context.model import ProjectContext  # noqa: E402
+from prompts import build_general_review_prompt  # noqa: E402
 from providers import get_provider  # noqa: E402
 from providers.errors import ProviderError  # noqa: E402
 from utils.config import DatasheetUrlFetchPolicy, load_config  # noqa: E402
@@ -68,14 +70,15 @@ def _default_project_path() -> Path | None:
 
 def _parse_cli_args(
     argv: list[str],
-) -> tuple[str | None, bool, DatasheetUrlFetchPolicy | None, bool, bool, bool, str | None]:
-    """Return (project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets, ask)."""
+) -> tuple[str | None, bool, DatasheetUrlFetchPolicy | None, bool, bool, bool, bool, str | None]:
+    """Return (project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets, ui_chat, ask)."""
     project_path: str | None = None
     include_image = False
     url_fetch: DatasheetUrlFetchPolicy | None = None
     quiet = False
     retry_failed = False
     ui_datasheets = False
+    ui_chat = False
     ask: str | None = None
     i = 0
     while i < len(argv):
@@ -92,6 +95,8 @@ def _parse_cli_args(
             retry_failed = True
         elif arg == "--ui-datasheets":
             ui_datasheets = True
+        elif arg == "--ui-chat":
+            ui_chat = True
         elif arg == "--quiet":
             quiet = True
         elif arg == "--ask":
@@ -102,7 +107,7 @@ def _parse_cli_args(
         elif not arg.startswith("-"):
             project_path = arg
         i += 1
-    return project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets, ask
+    return project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets, ui_chat, ask
 
 
 def main(
@@ -146,20 +151,6 @@ def main(
         print(f"\n{notice}")
 
 
-def _build_interim_prompt(ctx: ProjectContext, question: str) -> str:
-    """Minimal dev prompt until the Prompt Builder (§1.3) is implemented."""
-    resolved = sum(1 for r in ctx.datasheet_resolutions.values() if r.status == "resolved")
-    lines = [
-        f"Project: {ctx.project_name}",
-        f"Schematics: {', '.join(ctx.schematics) or '(none)'}",
-        f"Symbols: {len(ctx.symbols)} ({resolved} datasheets resolved)",
-        "",
-        "User question:",
-        question.strip(),
-    ]
-    return "\n".join(lines)
-
-
 def main_ask(
     project_path: str | Path | None,
     question: str,
@@ -170,10 +161,9 @@ def main_ask(
     verbose: bool = True,
 ) -> None:
     """
-    Dev smoke path: collect context and send an interim prompt to Claude.
+    Dev smoke path: collect context and send a built prompt to Claude.
 
-    Sends project metadata (and optional schematic image) to Anthropic without the
-    future Approve & Send UI. For local development only.
+    Bypasses the Approve & Send UI — for local development only.
     """
     path = Path(project_path) if project_path else _default_project_path()
     if path is None:
@@ -192,12 +182,13 @@ def main_ask(
         retry_failed_urls=retry_failed_urls,
         verbose=verbose,
     )
-    prompt = _build_interim_prompt(ctx, question)
+    built = build_general_review_prompt(ctx, question, include_image=include_image)
     provider = get_provider(cfg)
     try:
         response = provider.send_message(
-            prompt,
-            image=ctx.schematic_image if include_image else None,
+            built.text,
+            system=built.system,
+            image=ctx.schematic_image if built.include_image else None,
             config=cfg,
         )
     except ProviderError as exc:
@@ -209,7 +200,34 @@ def main_ask(
     print(
         f"\n--- Tokens: {response.usage.input_tokens} in, "
         f"{response.usage.output_tokens} out "
-        f"(model: {response.model}) ---"
+        f"(model: {response.model}, template: {built.template}) ---"
+    )
+
+
+def main_ui_chat(
+    project_path: str | Path | None = None,
+    *,
+    retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
+) -> None:
+    """Open the KiCad AI chat panel."""
+    try:
+        import wx  # noqa: F401
+    except ImportError:
+        print("Chat UI requires wxPython (run inside KiCad or install wx).")
+        return
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
+        return
+
+    from ui.launcher import show_chat_dialog
+
+    show_chat_dialog(
+        path,
+        retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
     )
 
 
@@ -236,11 +254,13 @@ def main_ui_datasheets(
 
 
 if __name__ == "__main__":
-    arg_path, include, url_fetch, quiet, retry_failed, ui_datasheets, ask = _parse_cli_args(
-        sys.argv[1:]
+    arg_path, include, url_fetch, quiet, retry_failed, ui_datasheets, ui_chat, ask = (
+        _parse_cli_args(sys.argv[1:])
     )
     if ui_datasheets:
         main_ui_datasheets(arg_path, retry_failed_urls=retry_failed)
+    elif ui_chat:
+        main_ui_chat(arg_path, retry_failed_urls=retry_failed)
     elif ask:
         main_ask(
             arg_path,

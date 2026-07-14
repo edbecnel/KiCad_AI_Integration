@@ -28,8 +28,8 @@ def test_export_uses_pdftoppm_at_600_dpi(tmp_path: Path) -> None:
         if "export" in cmd_str and "pdf" in cmd_str:
             out_idx = cmd.index("--output") + 1
             prefix = Path(cmd[out_idx])
-            pdf_path = prefix.with_suffix(".pdf")
-            pdf_path.write_bytes(b"%PDF")
+            # KiCad writes PDF to --output path without adding .pdf
+            prefix.write_bytes(b"%PDF-1.4 mock")
             return FakeResult()
         if "pdftoppm" in cmd_str:
             prefix = Path(cmd[-1])

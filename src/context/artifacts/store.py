@@ -58,6 +58,37 @@ class ArtifactStore:
         (self.library_path / "datasheets").mkdir(parents=True, exist_ok=True)
         (self.library_path / "libs").mkdir(parents=True, exist_ok=True)
 
+    def scan_datasheets_folder(self) -> int:
+        """
+        Register PDFs already in ``datasheets/`` that are not in the catalog.
+
+        Returns the number of new catalog entries added.
+        """
+        self.bootstrap()
+        folder = self.library_path / "datasheets"
+        if not folder.is_dir():
+            return 0
+        added = 0
+        for pdf in sorted(folder.glob("*.pdf")):
+            part = pdf.stem
+            if self.catalog.get_by_part(part, "datasheet"):
+                continue
+            digest = sha256_file(pdf)
+            if self.catalog.get_by_sha256(digest) is not None:
+                continue
+            relative = self._relative_artifact_path("datasheet", pdf.name)
+            entry = ArtifactEntry(
+                id=generate_artifact_id("datasheet", part),
+                type="datasheet",
+                part=part,
+                file=relative,
+                sha256=digest,
+                source="folder_scan",
+            )
+            self.catalog.add_artifact(entry)
+            added += 1
+        return added
+
     def bootstrap_project(self, project_pro_path: Path) -> Path:
         root = project_pro_path.expanduser().resolve().parent
         exports = root / "kicad_ai" / "exports"

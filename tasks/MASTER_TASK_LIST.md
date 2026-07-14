@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 stretch slice implemented — artifact library, datasheet resolver, schematic image export, minimal `ProjectContext`, Missing Datasheets wx panel (`src/ui/`), and Claude provider layer (`src/providers/`). Core MVP (PCB extractor, prompt builder, full chat UI) not yet started.
+**Current repository status:** Phase 1 stretch slice + Tier 1 MVP path — artifact library, datasheet resolver, schematic image export, `ProjectContext`, Missing Datasheets wx panel, Claude provider, general-review prompt builder, and chat UI with Approve & Send (`--ui-chat`). PCB extractor and full template library not yet started.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -61,8 +61,8 @@ baseline before feature work begins.
 
 ### Security baseline
 
-- [ ] Require explicit user approval before any cloud API transmission
-- [ ] Provide a context preview so users can see what will be sent
+- [ ] Require explicit user approval before any cloud API transmission — done for `--ui-chat`; `--ask` is dev bypass
+- [x] Provide a context preview so users can see what will be sent — chat dialog
 - [ ] Support selective context inclusion (user toggles per data type)
 - [ ] Document data-handling and credential-storage practices
 
@@ -87,7 +87,7 @@ S-expression file parsing.
 #### Schematic (`.kicad_sch`)
 
 - [x] Extract component references, values, and footprints — `src/context/schematic_parse.py`
-- [ ] Extract pin connections and net labels
+- [ ] Extract pin connections and net labels — schematic labels via `schematic_connectivity.py` (pins TBD)
 - [x] Extract schematic hierarchy (sheets, subsheets) — one-level subsheet walk
 - [x] Extract custom component fields (e.g. `Datasheet`, `Vds_max`)
 
@@ -146,8 +146,8 @@ S-expression file parsing.
 - [x] **Datasheet resolver:** controlled `https:` fetch when symbol field is URL only (SSRF-safe, size/timeout limits, cache PDF)
 - [x] **Datasheet resolver:** persistent `url_fetch_log.json` per part+URL (`downloaded` / `failed`); skip repeat fetches; set `needs_ai_datasheet_discovery` on failure
 - [ ] **AI datasheet discovery mode:** opt-in web search for official PDF URLs, auto-download, `ai_discovery_log.json`; on failure show URL + manual attach / `{Value}.pdf` instructions — see [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
-- [ ] **Force refresh datasheets (UI):** user action to re-fetch all symbol HTTPS URLs; bypass catalog + `url_fetch_log` caches including prior failures (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#force-refresh-datasheets-future-ui))
-- [ ] **Catalog scan:** pick up new files in shared `datasheets/` without manual registration (see [Datasheet Requirements](../docs/Specifications/Datasheet_Requirements_and_User_Supply.md))
+- [ ] **Force refresh datasheets (UI):** user action to re-fetch all symbol HTTPS URLs — **Force refresh URLs** button on Missing datasheets panel
+- [x] **Catalog scan:** pick up new files in shared `datasheets/` — `ArtifactStore.scan_datasheets_folder()`
 - [x] **CLI user notice:** print **Manual datasheets required** when auto-fetch fails for datasheet-required parts (`context/datasheet_requirements.py`)
 - [x] SUBCKT routing: Tier A/B/C tier hints via `DatasheetResolution.tier_hint` (AI prompts not yet implemented)
 - [ ] Tier A: extract structured component facts from resolved PDF before `.SUBCKT` synthesis
@@ -171,8 +171,8 @@ S-expression file parsing.
 
 ### 1.3 Prompt Builder
 
-- [ ] Implement template system with named engineering audit templates
-- [ ] General design review template
+- [x] Implement template system with named engineering audit templates — `src/prompts/builder.py`, `general_review`
+- [x] General design review template — `src/prompts/templates/general_review.py`
 - [ ] PCB layout / trace audit template
 - [ ] Isolation and clearance audit template
 - [ ] Netlist-vs-visual cross-reference template — [AI Tools guide](../docs/Reference/AI_Tools_for_Advanced_Circuit_Analysis.md)
@@ -180,8 +180,8 @@ S-expression file parsing.
 - [ ] SUBCKT Tier A two-stage prompts (PDF fact extraction, then model synthesis matched to KiCad pin order)
 - [ ] SUBCKT Tier B multi-source context prompt (symbol pins, fields, footprint, schematic context — no part-number-only)
 - [ ] SUBCKT Tier C last-resort prompt with mandatory `needs-manual-review` labeling
-- [ ] Use structured XML-style sections: `<functional_description>`, `<kicad_python_extracted_data>`, `<kicad_netlist>`, `<pico_firmware>`, etc.
-- [ ] Append user natural-language question to structured context
+- [x] Use structured XML-style sections: `<functional_description>`, `<kicad_python_extracted_data>`, `<kicad_netlist>`, etc. — general review template
+- [x] Append user natural-language question to structured context
 - [ ] Token optimization: summarize large nets, omit S-expression noise, chunk oversized payloads
 - [ ] Configurable system-role persona per template (power electronics, embedded, general)
 
@@ -201,27 +201,26 @@ S-expression file parsing.
 
 Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCad_Claude_Chat_Integration.md), extended for production use.
 
-- [ ] wxPython dialog with password-masked API key field (load from env/config if set)
+- [x] wxPython dialog with password-masked API key field (load from env/config if set) — `src/ui/chat_dialog.py`
 - [ ] Context inclusion checkboxes: schematic, PCB, BOM, ERC, DRC, netlist, firmware
-- [ ] "Include schematic image" checkbox (off by default; optional remember-last-choice)
-- [ ] Context preview thumbnail and approximate image size when schematic image is enabled
-- [ ] Optional design-intent / functional-description textarea
-- [ ] User prompt input field and Send button
-- [ ] Context preview panel showing payload summary before transmission
+- [x] "Include schematic image" checkbox (off by default; optional remember-last-choice) — chat dialog
+- [x] Optional design-intent / functional-description textarea — chat dialog
+- [x] User prompt input field and Send button — chat dialog (Approve & Send)
+- [x] Context preview panel showing payload summary before transmission — chat dialog
 - [x] **Missing required datasheets panel (wxPython)** — list + Attach PDF + Refresh — `src/ui/missing_datasheets_dialog.py`, `src/ui/launcher.py`
 - [x] Per-component **Attach PDF** file picker — `attach_datasheet_pdf()` + `--ui-datasheets` on CLI
-- [ ] **Datasheet drag-and-drop UI** — drop PDF → `datasheets/{Value}.pdf` + catalog/manifest registration
-- [ ] Explicit Approve & Send step (security requirement)
-- [ ] Read-only response display area
-- [ ] Status bar or inline messages for errors and connection status
-- [x] Entry-point script runnable from KiCad Scripting Console (`scripts/run_ai_assistant.py`) — stretch slice stub
+- [x] **Datasheet drag-and-drop UI** — drop PDF on selected row in Missing datasheets panel
+- [x] Explicit Approve & Send step (security requirement) — chat dialog confirmation
+- [x] Read-only response display area — chat dialog
+- [x] Status bar or inline messages for errors and connection status — chat dialog status line
+- [x] Entry-point script runnable from KiCad Scripting Console (`scripts/run_ai_assistant.py`) — `--ui-chat`, `--ui-datasheets`, `--ask`
 
 ### 1.6 Integration, Tests & Examples
 
 #### Unit tests
 
 - [x] Context model serialization / deserialization
-- [ ] Prompt assembly from fixtures (golden-file snapshots)
+- [x] Prompt assembly from fixtures (golden-file snapshots) — `tests/prompts/test_builder.py`
 - [x] Provider layer with mocked HTTP responses — `tests/providers/test_claude_provider.py`
 
 #### Integration tests

@@ -1,0 +1,20 @@
+<kicad_python_extracted_data>
+{
+  "project_path": "/Users/edbecnel/Development/GitHub/KiCad_AI_Integration/tests/fixtures/testproj.kicad_pro",
+  "project_name": "testproj",
+  "schematics": [
+    "testproj.kicad_sch"
+  ],
+  "symbols": [
+    {
+      "reference": "R1",
+      "value": "10k",
+      "datasheet": "",
+      "footprint": "Resistor_SMD:R_0805",
+      "sheet_path": "testproj.kicad_sch",
+      "sheet_name": "/",
+      "lib_id": "Device:R"
+    },
+    {
+      "reference": "U3",
+      "value":

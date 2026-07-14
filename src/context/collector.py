@@ -14,6 +14,7 @@ from context.schematic_image import (
     SchematicExportError,
     export_schematic_image,
 )
+from context.schematic_connectivity import connectivity_summary, parse_project_labels
 from context.schematic_parse import (
     discover_schematic_paths,
     parse_project_schematics,
@@ -29,6 +30,7 @@ def collect_stretch_context(
     fetch_datasheet_urls: bool | None = None,
     datasheet_url_fetch: DatasheetUrlFetchPolicy | None = None,
     retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
     verbose: bool = True,
 ) -> ProjectContext:
     """
@@ -41,6 +43,8 @@ def collect_stretch_context(
         cfg.datasheet_url_fetch = datasheet_url_fetch
     elif fetch_datasheet_urls is not None:
         cfg.datasheet_url_fetch = "if_missing" if fetch_datasheet_urls else "never"
+    if force_refresh_urls:
+        cfg.datasheet_url_fetch = "always"
     pro_path = _resolve_project_file(project_path)
     schematic_paths = discover_schematic_paths(pro_path)
     project_root = pro_path.parent
@@ -57,9 +61,12 @@ def collect_stretch_context(
     )
     store = ArtifactStore(cfg.artifact_library_path)
     store.bootstrap_project(pro_path)
+    store.scan_datasheets_folder()
     resolver = DatasheetResolver(cfg, store, verbose=verbose)
     resolutions = resolver.resolve_all(
-        symbols, project_info, retry_failed_urls=retry_failed_urls
+        symbols,
+        project_info,
+        retry_failed_urls=retry_failed_urls or force_refresh_urls,
     )
 
     _sync_catalog_references(store, pro_path, resolutions, symbols)
@@ -76,6 +83,16 @@ def collect_stretch_context(
         artifact_manifest_path=str(manifest_path),
     )
 
+    labels = parse_project_labels(project_root, schematic_paths)
+    if labels:
+        ctx.schematic_connectivity = connectivity_summary(labels)
+
+    from context.pcb_summary import collect_pcb_summary
+    from context.netlist_export import collect_netlist_summary
+
+    ctx.pcb_summary = collect_pcb_summary(pro_path)
+    ctx.netlist_summary = collect_netlist_summary(pro_path, config=cfg)
+
     if include_image and schematic_paths:
         exports_dir = project_root / "kicad_ai" / "exports"
         try:
@@ -87,8 +104,8 @@ def collect_stretch_context(
             )
             ctx.schematic_image = png_bytes
             ctx.schematic_image_meta = meta
-        except (KicadCliNotFoundError, PdftoppmNotFoundError, SchematicExportError):
-            pass
+        except (KicadCliNotFoundError, PdftoppmNotFoundError, SchematicExportError) as exc:
+            ctx.schematic_image_error = str(exc)
 
     return ctx
 

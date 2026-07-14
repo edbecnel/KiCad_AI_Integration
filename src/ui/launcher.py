@@ -60,6 +60,7 @@ def show_missing_datasheets_dialog(
     project_path: Path | str | None = None,
     *,
     retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
 ) -> None:
     """
     Open the Missing Required Datasheets panel (modal).
@@ -79,4 +80,22 @@ def show_missing_datasheets_dialog(
 
     ensure_wx_app()
     pro = resolve_project_pro_path(project_path)
-    _show(pro, retry_failed_urls=retry_failed_urls)
+    _show(pro, retry_failed_urls=retry_failed_urls, force_refresh_urls=force_refresh_urls)
+
+
+def show_chat_dialog(
+    project_path: Path | str | None = None,
+    *,
+    retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
+) -> None:
+    """Open the KiCad AI chat panel (modal)."""
+    from ui.chat_dialog import show_chat_dialog as _show
+
+    ensure_wx_app()
+    pro = resolve_project_pro_path(project_path)
+    _show(
+        pro,
+        retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
+    )

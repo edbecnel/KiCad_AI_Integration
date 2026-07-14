@@ -61,7 +61,12 @@ class ClaudeProvider:
             image_media_type=image_media_type,
             config=cfg,
         )
-        raw = self._post_json(payload, api_key=api_key, timeout_sec=cfg.provider_timeout_sec)
+        raw = self._post_json(
+            payload,
+            api_key=api_key,
+            connect_timeout_sec=min(30, cfg.provider_timeout_sec),
+            read_timeout_sec=cfg.provider_read_timeout_sec,
+        )
         return self._parse_response(raw, model=cfg.claude_model)
 
     def _build_payload(
@@ -102,7 +107,8 @@ class ClaudeProvider:
         payload: dict[str, Any],
         *,
         api_key: str,
-        timeout_sec: int,
+        connect_timeout_sec: int,
+        read_timeout_sec: int,
     ) -> dict[str, Any]:
         body = json.dumps(payload).encode("utf-8")
         request = urllib.request.Request(
@@ -115,8 +121,9 @@ class ClaudeProvider:
             },
             method="POST",
         )
+        timeout = float(max(connect_timeout_sec, read_timeout_sec))
         try:
-            with self._opener(request, float(timeout_sec)) as response:
+            with self._opener(request, timeout=timeout) as response:
                 raw_bytes = response.read()
         except urllib.error.HTTPError as exc:
             raise self._classify_http_error(exc) from exc
@@ -124,16 +131,16 @@ class ClaudeProvider:
             reason = exc.reason
             if isinstance(reason, (TimeoutError, socket.timeout)):
                 raise ProviderTimeoutError(
-                    f"Anthropic API request timed out after {timeout_sec}s"
+                    f"Anthropic API request timed out after {read_timeout_sec}s"
                 ) from exc
             if "timed out" in str(reason).lower():
                 raise ProviderTimeoutError(
-                    f"Anthropic API request timed out after {timeout_sec}s"
+                    f"Anthropic API request timed out after {read_timeout_sec}s"
                 ) from exc
             raise ProviderError(f"Anthropic API request failed: {reason}") from exc
         except TimeoutError as exc:
             raise ProviderTimeoutError(
-                f"Anthropic API request timed out after {timeout_sec}s"
+                f"Anthropic API request timed out after {read_timeout_sec}s"
             ) from exc
 
         try:

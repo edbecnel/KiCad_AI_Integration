@@ -12,8 +12,8 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 | Item | Status |
 |------|--------|
-| Phase | Planning / Initial Development |
-| Code | Scaffold only — no `src/` implementation yet |
+| Phase | Phase 1 — stretch slice + provider + chat UI (in progress) |
+| Code | Schematic context, datasheet resolver, Missing Datasheets UI, Claude provider, prompt builder (general review), chat UI (`--ui-chat`) |
 | Documentation framework | EDF Phase 3 — ADRs and architecture stubs complete |
 | License | To be determined |
 

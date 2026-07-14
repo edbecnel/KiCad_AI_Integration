@@ -18,6 +18,29 @@ except ImportError:  # pragma: no cover - wx only inside KiCad
     wx = None  # type: ignore[assignment]
 
 
+if wx is not None:
+
+    class _PdfDropTarget(wx.FileDropTarget):
+        def __init__(self, dialog: MissingDatasheetsDialog) -> None:
+            super().__init__()
+            self._dialog = dialog
+
+        def OnDropFiles(self, x: int, y: int, filenames: list[str]) -> bool:
+            pdfs = [Path(f) for f in filenames if f.lower().endswith(".pdf")]
+            if not pdfs:
+                return False
+            row = self._dialog._selected_row()
+            if row is None:
+                wx.MessageBox(
+                    "Select a part row, then drop a PDF.",
+                    "Attach PDF",
+                    wx.OK | wx.ICON_INFORMATION,
+                )
+                return False
+            self._dialog._attach_pdf_path(row, pdfs[0])
+            return True
+
+
 class MissingDatasheetsDialog:
     """Modal dialog listing datasheet-required parts still missing a PDF."""
 
@@ -27,11 +50,13 @@ class MissingDatasheetsDialog:
         project_path: Path,
         *,
         retry_failed_urls: bool = False,
+        force_refresh_urls: bool = False,
     ) -> None:
         if wx is None:
             raise RuntimeError("wxPython is required for MissingDatasheetsDialog")
         self._project_path = project_path.expanduser().resolve()
         self._retry_failed_urls = retry_failed_urls
+        self._force_refresh_urls = force_refresh_urls
         self._cfg = load_config()
         self._rows: list[MissingDatasheetRow] = []
 
@@ -48,7 +73,7 @@ class MissingDatasheetsDialog:
             panel,
             label=(
                 "These parts need a datasheet PDF for detailed / SUBCKT analysis. "
-                "Use Attach PDF to register a file for the part Value, or save manually as "
+                "Attach PDF, drop a PDF on a selected row, or save manually as "
                 f"{manual_pdf_path_for_part(self._cfg.artifact_library_path, '<Value>')}."
             ),
         )
@@ -63,14 +88,17 @@ class MissingDatasheetsDialog:
         self._list.InsertColumn(1, "Refs", width=50)
         self._list.InsertColumn(2, "Status", width=90)
         self._list.InsertColumn(3, "Error / URL", width=380)
+        self._list.SetDropTarget(_PdfDropTarget(self))
         vbox.Add(self._list, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=10)
 
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
         self._btn_attach = wx.Button(panel, label="Attach PDF…")
         self._btn_refresh = wx.Button(panel, label="Refresh")
+        self._btn_force = wx.Button(panel, label="Force refresh URLs")
         self._btn_close = wx.Button(panel, label="Close")
         btn_row.Add(self._btn_attach, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
+        btn_row.Add(self._btn_force, flag=wx.RIGHT, border=6)
         btn_row.AddStretchSpacer()
         btn_row.Add(self._btn_close)
         vbox.Add(btn_row, flag=wx.EXPAND | wx.ALL, border=10)
@@ -82,6 +110,7 @@ class MissingDatasheetsDialog:
 
         self._btn_attach.Bind(wx.EVT_BUTTON, self._on_attach)
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
+        self._btn_force.Bind(wx.EVT_BUTTON, self._on_force_refresh)
         self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
 
         self._refresh_rows()
@@ -93,7 +122,14 @@ class MissingDatasheetsDialog:
         self._dialog.EndModal(wx.ID_OK)
 
     def _on_refresh(self, _event: wx.CommandEvent) -> None:
+        self._force_refresh_urls = False
         self._refresh_rows()
+
+    def _on_force_refresh(self, _event: wx.CommandEvent) -> None:
+        self._force_refresh_urls = True
+        self._status.SetLabel("Force refreshing HTTPS datasheet URLs…")
+        self._refresh_rows()
+        self._force_refresh_urls = False
 
     def _selected_row(self) -> MissingDatasheetRow | None:
         idx = self._list.GetFirstSelected()
@@ -118,7 +154,9 @@ class MissingDatasheetsDialog:
         ) as dlg:
             if dlg.ShowModal() != wx.ID_OK:
                 return
-            pdf_path = Path(dlg.GetPath())
+            self._attach_pdf_path(row, Path(dlg.GetPath()))
+
+    def _attach_pdf_path(self, row: MissingDatasheetRow, pdf_path: Path) -> None:
         try:
             attach_datasheet_pdf(
                 self._project_path,
@@ -143,15 +181,12 @@ class MissingDatasheetsDialog:
             self._project_path,
             config=self._cfg,
             retry_failed_urls=self._retry_failed_urls,
+            force_refresh_urls=self._force_refresh_urls,
             verbose=False,
         )
         if not self._rows:
-            self._list.InsertItem(0, "(none)")
-            self._list.SetItem(0, 1, "")
-            self._list.SetItem(0, 2, "resolved")
-            self._list.SetItem(0, 3, "All required datasheets are resolved.")
             self._btn_attach.Enable(False)
-            self._status.SetLabel("")
+            self._status.SetLabel("All required datasheets are resolved.")
             return
         self._btn_attach.Enable(True)
         for i, row in enumerate(self._rows):
@@ -174,10 +209,16 @@ def show_missing_datasheets_dialog(
     *,
     parent: wx.Window | None = None,
     retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
 ) -> None:
     """Show the missing datasheets dialog modally."""
     if wx is None:
         raise RuntimeError("wxPython is required; run inside KiCad or install wx on PYTHONPATH")
     path = Path(project_path).expanduser()
-    dlg = MissingDatasheetsDialog(parent, path, retry_failed_urls=retry_failed_urls)
+    dlg = MissingDatasheetsDialog(
+        parent,
+        path,
+        retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
+    )
     dlg.show_modal()

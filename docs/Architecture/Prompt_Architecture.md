@@ -2,7 +2,7 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › Prompt Architecture
 
-> **Status:** Draft
+> **Status:** Implemented (general review template; additional templates planned)
 > **Owner:** Project maintainers
 > **Applies To:** KiCad AI Integration prompt construction
 > **Authoritative:** No
