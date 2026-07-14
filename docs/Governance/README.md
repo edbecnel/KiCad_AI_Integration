@@ -1,28 +1,34 @@
 # Governance
 
-[Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md)
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › Governance
 
-> **Status:** Draft
+> **Status:** Approved
 > **Owner:** Project maintainers
-> **Applies To:** KiCad AI Integration documentation governance
+> **Applies To:** KiCad AI Integration
+> **Last Reviewed:** 2026-07-14
+> **Review Frequency:** Annual
+> **Authoritative:** Yes
+
+## Applicability
+
+This domain contains baseline documentation governance for KiCad AI Integration,
+adopted from the Engineering Documentation Framework.
 
 ## Purpose
 
-This domain will hold documentation governance policies, metadata standards, lifecycle rules, and change management practices for KiCad AI Integration.
+This domain defines how engineering documentation is owned, reviewed, approved,
+maintained, deprecated, archived, analyzed, and validated.
 
-## Phase 2 Adoption
+## Governance Documents
 
-Full EDF Governance domain adoption is deferred to Phase 2. When ready, copy and customize the governance documents from the [Engineering Documentation Framework](https://github.com/edbecnel/Engineering-Documentation-Framework) repository.
-
-Planned documents include:
-
-- Governance Overview
-- Document Metadata Standard
-- Document Lifecycle
-- Ownership and Review
-- Change Management
-- Analyzer Compliance
-- Governance Checklist
+- [Governance Overview](Governance_Overview.md)
+- [EDF Governance](EDF_Governance.md)
+- [Document Metadata Standard](Document_Metadata_Standard.md)
+- [Document Lifecycle](Document_Lifecycle.md)
+- [Ownership and Review](Ownership_and_Review.md)
+- [Documentation Change Management](Change_Management.md)
+- [Governance Analyzer Compliance](Analyzer_Compliance.md)
+- [Governance Checklist](Governance_Checklist.md)
 
 ## Parent
 
@@ -31,4 +37,5 @@ Planned documents include:
 ## Related Documents
 
 - [Engineering Documentation Framework](../../ENGINEERING_DOCUMENTATION_FRAMEWORK.md)
-- [Project Index](../../PROJECT_INDEX.md)
+- [AI Governance](../AI/Governance.md)
+- [Development](../Development/README.md)

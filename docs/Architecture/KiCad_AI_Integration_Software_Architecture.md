@@ -2,7 +2,10 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › Software Architecture
 
-> Initial draft — primary system design document for KiCad AI Integration.
+> **Status:** Draft
+> **Owner:** Project maintainers
+> **Applies To:** KiCad AI Integration architecture
+> **Authoritative:** No
 
 ## Overview
 

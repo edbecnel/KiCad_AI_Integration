@@ -2,6 +2,13 @@
 
 [Home](README.md) · [Project Index](PROJECT_INDEX.md)
 
+> **Status:** Approved
+> **Owner:** Project maintainers
+> **Applies To:** KiCad AI Integration
+> **Last Reviewed:** 2026-07-14
+> **Review Frequency:** Annual
+> **Authoritative:** Yes
+
 ## Mission
 
 Integrate modern Large Language Models directly into the KiCad electronic design environment so AI acts as an experienced engineering assistant throughout the entire design process — with automatic project context rather than manual copy-and-paste workflows.

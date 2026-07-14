@@ -14,7 +14,7 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 |------|--------|
 | Phase | Planning / Initial Development |
 | Code | Scaffold only — no `src/` implementation yet |
-| Documentation framework | EDF structure-first adoption (Phase 1) |
+| Documentation framework | EDF Phase 2 complete |
 | License | To be determined |
 
 ## Core Documents
@@ -32,6 +32,30 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [Architecture](docs/Architecture/README.md)
 - [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 
+### AI Engineering Handbook
+
+- [AI Engineering Handbook](docs/AI/README.md)
+- [AI Philosophy](docs/AI/AI_Philosophy.md)
+- [AI Roles](docs/AI/AI_Roles.md)
+- [AI Decision Matrix](docs/AI/AI_Decision_Matrix.md)
+- [Prompting Guide](docs/AI/Prompting_Guide.md)
+- [Context Checklist](docs/AI/Context_Checklist.md)
+- [Security](docs/AI/Security.md)
+- [Verification](docs/AI/Verification.md)
+- [Cost Optimization](docs/AI/Cost_Optimization.md)
+- [Repository Workflow](docs/AI/Repository_Workflow.md)
+- [AI Governance](docs/AI/Governance.md)
+
+### Governance
+
+- [Governance](docs/Governance/README.md)
+- [Governance Overview](docs/Governance/Governance_Overview.md)
+- [Document Metadata Standard](docs/Governance/Document_Metadata_Standard.md)
+- [Document Lifecycle](docs/Governance/Document_Lifecycle.md)
+- [Ownership and Review](docs/Governance/Ownership_and_Review.md)
+- [Change Management](docs/Governance/Change_Management.md)
+- [Governance Checklist](docs/Governance/Governance_Checklist.md)
+
 ### Developer Handbook
 
 - [Developer Handbook](docs/Developer_Handbook/README.md)
@@ -46,11 +70,6 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [Reference](docs/Reference/README.md)
 - [AI Tools for Advanced Circuit Analysis](docs/Reference/AI_Tools_for_Advanced_Circuit_Analysis.md)
 
-### Phase 2 (Deferred)
-
-- [AI Engineering Handbook](docs/AI/README.md) — modular handbook not yet adopted
-- [Governance](docs/Governance/README.md) — full governance domain deferred to Phase 2
-
 ### Other Domains
 
 - [Development](docs/Development/README.md)
@@ -64,13 +83,13 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 ## Current Priorities
 
 1. Complete Phase 1 Python script MVP (context extraction, prompt builder, Claude provider)
-2. Document KiCad 8+ development workflow in the Developer Handbook
-3. Record first architecture decision (provider abstraction, KiCad version target)
-4. Phase 2: adopt full EDF Governance and AI Engineering Handbook
+2. Record first architecture decision (provider abstraction, KiCad 8+ target)
+3. Resolve project license
+4. Begin `src/` implementation per [Master Task List](tasks/MASTER_TASK_LIST.md)
 
 ## AI Context
 
-AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. The primary architecture document is [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
+AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. The primary architecture document is [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
 
 ## Last Reviewed
 

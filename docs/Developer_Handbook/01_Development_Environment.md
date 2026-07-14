@@ -73,7 +73,7 @@ Some unit tests can run outside KiCad using mocked `pcbnew` objects and file-bas
 
 - **Cursor / VS Code:** Open the repository root; use Python extension for `src/` development
 - **KiCad Scripting Console:** Use for integration testing with live board data
-- **AI-assisted development:** See [AI domain — Phase 2](../AI/README.md) for the modular AI Engineering Handbook
+- **AI-assisted development:** See [AI Engineering Handbook](../AI/README.md) for repository and in-KiCad AI policies
 
 ## Troubleshooting
 

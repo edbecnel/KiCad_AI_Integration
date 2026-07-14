@@ -16,8 +16,8 @@ This project has adopted the **Engineering Documentation Framework** (EDF) for o
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| Phase 1 | Structure, navigation, document migration | In progress |
-| Phase 2 | Full Governance domain, AI Engineering Handbook, metadata | Deferred |
+| Phase 1 | Structure, navigation, document migration | Complete |
+| Phase 2 | Governance domain, AI Engineering Handbook, templates, metadata | Complete |
 
 ## Legacy Content
 
@@ -37,10 +37,10 @@ The former **`documentation/`** folder has been migrated to canonical EDF locati
 |---|---|
 | `docs/Architecture/` | System architecture and documentation architecture |
 | `docs/Architecture/ADRs/` | Individual Architecture Decision Records |
-| `docs/AI/` | Modular AI Engineering Handbook (Phase 2) |
+| `docs/AI/` | Modular AI Engineering Handbook |
 | `docs/Developer_Handbook/` | Day-to-day project engineering: setup, environment, integration guides |
 | `docs/Development/` | Framework adoption engineering |
-| `docs/Governance/` | Documentation governance (Phase 2 placeholder) |
+| `docs/Governance/` | Documentation governance |
 | `docs/Specifications/` | Requirements and feature specifications |
 | `docs/API/` | API contracts and interface documentation |
 | `docs/Database/` | Schema and persistence design |
@@ -69,13 +69,13 @@ Reports are written to `reports/conformance/` in this project.
 
 ## AI Engineering Handbook
 
-The authoritative AI documentation entry point will be `docs/AI/README.md` after Phase 2 adoption. Until then, AI-related content is distributed across Architecture, Developer Handbook, and Reference domains.
+The authoritative AI documentation entry point is [`docs/AI/README.md`](docs/AI/README.md).
 
 ## Related Documents
 
 - [Project Index](PROJECT_INDEX.md)
-- [Governance — Phase 2](docs/Governance/README.md)
-- [Engineering Documentation Framework — upstream](https://github.com/edbecnel/Engineering-Documentation-Framework)
+- [Governance](docs/Governance/README.md)
+- [AI Engineering Handbook](docs/AI/README.md)
 
 ---
 

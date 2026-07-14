@@ -2,6 +2,12 @@
 
 [Home](../README.md) › [Project Index](../PROJECT_INDEX.md) › Master Task List
 
+> **Status:** Maintained
+> **Owner:** Project maintainers
+> **Applies To:** KiCad AI Integration implementation tracking
+> **Last Reviewed:** 2026-07-14
+> **Review Frequency:** Monthly
+
 > Phased implementation backlog for the Python-scripting API integration with AI,
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
