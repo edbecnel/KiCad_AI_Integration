@@ -11,8 +11,17 @@ System architecture, technical design, diagrams, and architecture decisions for 
 ## Authoritative Documents
 
 - [Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
+- [Prompt Architecture](Prompt_Architecture.md)
+- [AI Provider Interface](AI_Provider_Interface.md)
+- [Roadmap](Roadmap.md)
 - [Architecture Decision Records](ADRs/README.md)
 - [Project Architecture Decisions](../../ARCHITECTURE_DECISIONS.md)
+
+## Architecture Decision Records
+
+- [ADR-0001: KiCad 8+ Minimum Version](ADRs/ADR-0001-KiCad-8-Minimum-Version.md)
+- [ADR-0002: Provider Abstraction Layer](ADRs/ADR-0002-Provider-Abstraction-Layer.md)
+- [ADR-0003: Stateless Phase 1 Context Model](ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
 
 ## What Belongs Here
 

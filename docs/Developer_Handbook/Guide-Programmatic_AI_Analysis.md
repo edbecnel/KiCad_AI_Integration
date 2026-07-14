@@ -2,6 +2,11 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Developer Handbook](README.md) › Programmatic AI Analysis
 
+> **Status:** Draft
+> **Owner:** Project maintainers
+> **Applies To:** KiCad AI Integration developers
+> **Authoritative:** No
+
 ### Guide: Programmatic AI Analysis via KiCad Python Scripting
 
 When optimizing advanced switching matrices like a **Bedini/Babcock flyback recovery system**, manual text dumping can introduce formatting human errors. Because KiCad saves schematics (`.kicad_sch`) and PCBs (`.kicad_pcb`) as plain text **S-expressions**, you can use Python to parse, extract, and clean hardware metadata automatically.

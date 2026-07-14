@@ -58,14 +58,19 @@ The former **`documentation/`** folder has been migrated to canonical EDF locati
 
 ## Validation
 
-Run conformance validation from the EDF repository:
+Run conformance validation from the project root:
 
 ```bash
-bash /path/to/Engineering-Documentation-Framework/scripts/run_conformance_validation.sh \
-  "/path/to/KiCad_AI_Integration"
+./scripts/run_conformance_validation.sh .
 ```
 
-Reports are written to `reports/conformance/` in this project.
+Or run a read-only scan without saving a report:
+
+```bash
+./scripts/analyze_project_structure.sh .
+```
+
+Reports are written to `reports/conformance/` in this project. See [scripts/README.md](scripts/README.md).
 
 ## AI Engineering Handbook
 

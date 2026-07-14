@@ -21,7 +21,9 @@ Entry point for new contributors setting up a local development environment for 
 4. **Review architecture** → [Software Architecture](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
 5. **Read integration guides** → [Developer Handbook](README.md)
 6. **Check implementation status** → [Master Task List](../../tasks/MASTER_TASK_LIST.md)
-7. **IDE and AI tooling** → [IDE configuration](./01_Development_Environment.md#ide-configuration) · [[01_Development_Environment#IDE configuration|IDE configuration]]
+7. **AI development rules** → [AI Development](./02_AI_Development.md) · [[02_AI_Development|AI Development]]
+8. **Testing strategy** → [Testing](./05_Testing.md) · [[05_Testing|Testing]]
+9. **IDE and AI tooling** → [IDE configuration](./01_Development_Environment.md#ide-configuration) · [[01_Development_Environment#IDE configuration|IDE configuration]]
 
 ## Integration guides
 

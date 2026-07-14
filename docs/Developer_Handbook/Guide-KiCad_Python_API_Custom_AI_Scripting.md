@@ -2,6 +2,11 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Developer Handbook](README.md) › KiCad Python API Scripting
 
+> **Status:** Draft
+> **Owner:** Project maintainers
+> **Applies To:** KiCad AI Integration developers
+> **Authoritative:** No
+
 ### Guide: KiCad Python API + Custom AI Scripting for Circuit Review
 
 When working with an open-source toolchain, general LLMs (like Claude 3.5 Sonnet) struggle to analyze an entire raw PCB layout file due to noise, formatting, and file size. However, KiCad features a robust, fully exposed Python scripting API (`pcbnew`).

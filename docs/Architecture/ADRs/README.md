@@ -6,13 +6,15 @@
 
 ## Purpose
 
-This directory contains individual Architecture Decision Records.
+This directory contains individual Architecture Decision Records for KiCad AI Integration.
 
 ## ADR Index
 
 | ID | Decision | Status | Date |
 |---|---|---|---|
-| _None yet_ | | | |
+| [ADR-0001](ADR-0001-KiCad-8-Minimum-Version.md) | KiCad 8+ minimum version | Accepted | 2026-07-14 |
+| [ADR-0002](ADR-0002-Provider-Abstraction-Layer.md) | Provider abstraction layer | Accepted | 2026-07-14 |
+| [ADR-0003](ADR-0003-Stateless-Phase-1-Context-Model.md) | Stateless Phase 1 context model | Accepted | 2026-07-14 |
 
 ## Navigation
 

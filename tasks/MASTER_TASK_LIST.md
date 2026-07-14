@@ -44,7 +44,7 @@ baseline before feature work begins.
 
 ### KiCad compatibility & dev workflow
 
-- [ ] Target KiCad 8+; document minimum supported version in README
+- [x] Target KiCad 8+; document minimum supported version in README — see [ADR-0001](../docs/Architecture/ADRs/ADR-0001-KiCad-8-Minimum-Version.md)
 - [ ] Confirm availability of `pcbnew`, schematic access, and `wxPython` inside KiCad
 - [ ] Document how to run code inside KiCad (Scripting Console vs external plugin action)
 - [ ] Define strategy for testing outside KiCad (mock `pcbnew` objects, file-based fixtures)
@@ -292,7 +292,7 @@ not only free-form chat.
 
 - [ ] User install and setup guide (API key, KiCad version, first run)
 - [ ] Developer guide (repo layout, running tests, adding extractors/providers)
-- [ ] Architecture docs: Prompt Architecture, AI Provider Interface, Roadmap
+- [x] Architecture docs: Prompt Architecture, AI Provider Interface, Roadmap
 - [ ] Keep README current status section updated per phase completion
 
 ### Security

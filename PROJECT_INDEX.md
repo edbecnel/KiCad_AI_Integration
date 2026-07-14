@@ -14,7 +14,7 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 |------|--------|
 | Phase | Planning / Initial Development |
 | Code | Scaffold only — no `src/` implementation yet |
-| Documentation framework | EDF Phase 2 complete |
+| Documentation framework | EDF Phase 3 — ADRs and architecture stubs complete |
 | License | To be determined |
 
 ## Core Documents
@@ -31,6 +31,12 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 - [Architecture](docs/Architecture/README.md)
 - [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- [Prompt Architecture](docs/Architecture/Prompt_Architecture.md)
+- [AI Provider Interface](docs/Architecture/AI_Provider_Interface.md)
+- [Roadmap](docs/Architecture/Roadmap.md)
+- [ADR-0001: KiCad 8+ Minimum Version](docs/Architecture/ADRs/ADR-0001-KiCad-8-Minimum-Version.md)
+- [ADR-0002: Provider Abstraction Layer](docs/Architecture/ADRs/ADR-0002-Provider-Abstraction-Layer.md)
+- [ADR-0003: Stateless Phase 1 Context Model](docs/Architecture/ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
 
 ### AI Engineering Handbook
 
@@ -61,6 +67,8 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [Developer Handbook](docs/Developer_Handbook/README.md)
 - [First-Time Setup](docs/Developer_Handbook/00_First_Time_Setup.md)
 - [Development Environment](docs/Developer_Handbook/01_Development_Environment.md)
+- [AI Development](docs/Developer_Handbook/02_AI_Development.md)
+- [Testing](docs/Developer_Handbook/05_Testing.md)
 - [KiCad Python API Scripting Guide](docs/Developer_Handbook/Guide-KiCad_Python_API_Custom_AI_Scripting.md)
 - [Programmatic AI Analysis Guide](docs/Developer_Handbook/Guide-Programmatic_AI_Analysis.md)
 - [In-KiCad Claude Chat Integration Guide](docs/Developer_Handbook/Guide-In_KiCad_Claude_Chat_Integration.md)
@@ -83,13 +91,12 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 ## Current Priorities
 
 1. Complete Phase 1 Python script MVP (context extraction, prompt builder, Claude provider)
-2. Record first architecture decision (provider abstraction, KiCad 8+ target)
-3. Resolve project license
-4. Begin `src/` implementation per [Master Task List](tasks/MASTER_TASK_LIST.md)
+2. Resolve project license
+3. Begin `src/` implementation per [Master Task List](tasks/MASTER_TASK_LIST.md)
 
 ## AI Context
 
-AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. The primary architecture document is [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
+AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. The primary architecture document is [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Architecture decisions are in [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
 
 ## Last Reviewed
 

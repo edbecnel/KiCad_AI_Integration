@@ -14,13 +14,9 @@ Individual ADRs belong in [docs/Architecture/ADRs/](docs/Architecture/ADRs/READM
 
 | ID | Decision | Status | Date |
 |---|---|---|---|
-| _None yet_ | | | |
-
-Planned first ADRs:
-
-- Provider abstraction layer design
-- KiCad 8+ minimum version target
-- Stateless vs. conversational context model (Phase 1 vs. Phase 2)
+| [ADR-0001](docs/Architecture/ADRs/ADR-0001-KiCad-8-Minimum-Version.md) | KiCad 8+ minimum version | Accepted | 2026-07-14 |
+| [ADR-0002](docs/Architecture/ADRs/ADR-0002-Provider-Abstraction-Layer.md) | Provider abstraction layer | Accepted | 2026-07-14 |
+| [ADR-0003](docs/Architecture/ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md) | Stateless Phase 1 context model | Accepted | 2026-07-14 |
 
 ## Related Documents
 

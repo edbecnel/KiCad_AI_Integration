@@ -16,6 +16,8 @@ New contributors begin with [00_First_Time_Setup.md](./00_First_Time_Setup.md).
 
 - [00_First_Time_Setup.md](./00_First_Time_Setup.md)
 - [01_Development_Environment.md](./01_Development_Environment.md)
+- [02_AI_Development.md](./02_AI_Development.md)
+- [05_Testing.md](./05_Testing.md)
 - [KiCad Python API Scripting Guide](Guide-KiCad_Python_API_Custom_AI_Scripting.md)
 - [Programmatic AI Analysis Guide](Guide-Programmatic_AI_Analysis.md)
 - [In-KiCad Claude Chat Integration Guide](Guide-In_KiCad_Claude_Chat_Integration.md)
