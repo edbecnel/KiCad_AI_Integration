@@ -55,6 +55,8 @@ baseline before feature work begins.
 - [ ] Define configuration schema (API keys, provider profile, model selection)
 - [ ] Support API key via environment variable (e.g. `ANTHROPIC_API_KEY`)
 - [ ] Support optional local config file for user preferences
+- [ ] Config: `artifact_library_path` — shared library root for datasheets and libs (default `~/kicad_ai_library/`)
+- [ ] Config: `datasheet_search_paths` — local folders scanned for import into shared library
 - [ ] Never hardcode credentials in source or committed files
 
 ### Security baseline
@@ -118,6 +120,35 @@ S-expression file parsing.
 - [ ] Gather ERC violation results (run or read existing report)
 - [ ] Gather DRC violation results (run or read existing report)
 
+#### Optional schematic image (Phase 1 stretch)
+
+- [x] Document export pipeline — [ADR-0004](../docs/Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)
+- [ ] Implement `export_schematic_image(path, dpi=600, pages=None) -> bytes` in `src/context/schematic_image.py`
+- [ ] Resolve `kicad-cli` path (`KICAD_CLI` env var, `shutil.which`, macOS app bundle fallback)
+- [ ] Export via `kicad-cli sch export pdf --black-and-white --exclude-drawing-sheet`
+- [ ] Rasterize with `pdftoppm -png -r 600 -singlefile`
+- [ ] Detect KiCad 9+ native `sch export png --dpi` and prefer when available
+- [ ] Check `pdftoppm` availability; surface clear UI error if Poppler is missing
+- [ ] Prompt user to save project before export when schematic has unsaved edits
+- [ ] Extend `ProjectContext` with optional `schematic_image` and `schematic_image_meta`
+
+#### Netlist gap-fill detection (Phase 1 stretch)
+
+- [ ] Detect symbols with incomplete netlist connectivity — see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md)
+- [ ] Flag auto-generated net names (`Net-(…)`) and unconnected pins in context model
+- [ ] Detect symbols missing `Spice_Model` or unresolved `.include`/`.lib` references in exported SPICE netlist
+- [ ] **Shared artifact library:** create `artifact_library_path` with `catalog.json`, `datasheets/`, `libs/`; dedupe by `sha256`
+- [ ] **Per-project registry:** `kicad_ai/project_manifest.json` beside `.kicad_pro`; link to catalog entries
+- [ ] **Reference tracking:** update `referenced_by` in catalog (project, schematic path, sheet, component ref) on each scan
+- [ ] **Datasheet resolver:** read shared `catalog.json` and per-project `project_manifest.json`
+- [ ] **Datasheet resolver:** read symbol `Datasheet` field from `.kicad_sch`; import into shared library when not cataloged
+- [ ] **Datasheet resolver:** support user PDF attach/register per component; cache under project artifact store
+- [ ] **Datasheet resolver:** controlled `https:` fetch when symbol field is URL only (SSRF-safe, size/timeout limits, cache PDF)
+- [ ] SUBCKT routing: Tier A (datasheet-backed two-stage) → Tier B (multi-source KiCad context) → Tier C (last-resort inference)
+- [ ] Tier A: extract structured component facts from resolved PDF before `.SUBCKT` synthesis
+- [ ] Tier B: include symbol pin list, fields, footprint, schematic JSON, optional 600 DPI image in prompt
+- [ ] Emit `provenance.json` with datasheet path or `sources_used[]` per generated model
+
 #### Optional (Phase 1 stretch)
 
 - [ ] Extract currently selected schematic/PCB objects as focused context
@@ -131,6 +162,7 @@ S-expression file parsing.
 - [ ] Serialize to JSON for prompt assembly and debugging
 - [ ] Support partial context flags (e.g. PCB-only, schematic-only, critical-nets-only)
 - [ ] Design for token budgeting (summarization hooks, size estimation)
+- [ ] Include optional `schematic_image` and `schematic_image_meta` fields when multimodal context is enabled
 
 ### 1.3 Prompt Builder
 
@@ -139,6 +171,10 @@ S-expression file parsing.
 - [ ] PCB layout / trace audit template
 - [ ] Isolation and clearance audit template
 - [ ] Netlist-vs-visual cross-reference template — [AI Tools guide](../docs/Reference/AI_Tools_for_Advanced_Circuit_Analysis.md)
+- [ ] Netlist gap-fill template — connectivity inference and SUBCKT `.lib` generation — [Netlist Gap Fill spec](../docs/Specifications/Netlist_Gap_Fill.md)
+- [ ] SUBCKT Tier A two-stage prompts (PDF fact extraction, then model synthesis matched to KiCad pin order)
+- [ ] SUBCKT Tier B multi-source context prompt (symbol pins, fields, footprint, schematic context — no part-number-only)
+- [ ] SUBCKT Tier C last-resort prompt with mandatory `needs-manual-review` labeling
 - [ ] Use structured XML-style sections: `<functional_description>`, `<kicad_python_extracted_data>`, `<kicad_netlist>`, `<pico_firmware>`, etc.
 - [ ] Append user natural-language question to structured context
 - [ ] Token optimization: summarize large nets, omit S-expression noise, chunk oversized payloads
@@ -152,6 +188,7 @@ S-expression file parsing.
 - [ ] Use model ID: `claude-3-5-sonnet-20241022` (or current Sonnet 3.5 identifier)
 - [ ] Handle API errors: auth failure, rate limits, timeouts, malformed responses
 - [ ] Parse `content[]` blocks from API response
+- [ ] Attach schematic image as multimodal `image` content block when `ProjectContext.schematic_image` is present
 - [ ] Return token usage metadata (input/output counts) for future Phase 2 display
 - [ ] Design provider enum and config for future providers (OpenAI, Gemini, Ollama, etc.)
 
@@ -161,6 +198,8 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 
 - [ ] wxPython dialog with password-masked API key field (load from env/config if set)
 - [ ] Context inclusion checkboxes: schematic, PCB, BOM, ERC, DRC, netlist, firmware
+- [ ] "Include schematic image" checkbox (off by default; optional remember-last-choice)
+- [ ] Context preview thumbnail and approximate image size when schematic image is enabled
 - [ ] Optional design-intent / functional-description textarea
 - [ ] User prompt input field and Send button
 - [ ] Context preview panel showing payload summary before transmission
@@ -266,7 +305,8 @@ beyond free-form chat.
 ### Component & datasheet intelligence
 
 - [ ] Component comparison from BOM parametric data
-- [ ] Datasheet analysis (BOM field links, optional text/PDF ingestion)
+- [ ] Datasheet resolver for gap-fill — symbol `Datasheet` field, local paths, user registration, controlled URL fetch (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md))
+- [ ] Datasheet text extraction from resolved PDFs for SUBCKT Tier A
 - [ ] Circuit explanation mode (topology walkthrough from schematic context)
 
 ### Code & simulation generation

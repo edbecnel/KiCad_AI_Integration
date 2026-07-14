@@ -9,9 +9,20 @@ Entry point for new contributors setting up a local development environment for 
 ## Prerequisites
 
 - KiCad 8 or later installed
+- Poppler utilities (`pdftoppm`) for optional schematic image export at 600 DPI
 - An Anthropic API key for Claude Sonnet 3.5 (Phase 1 provider)
 - Git for repository access
 - A code editor (Cursor or VS Code recommended for AI-assisted development)
+
+### Install Poppler for schematic image export
+
+Optional schematic image context requires `pdftoppm` from Poppler:
+
+- **macOS:** `brew install poppler`
+- **Linux:** `apt install poppler-utils` or equivalent
+- **Windows:** Install Poppler for Windows and ensure `pdftoppm` is on `PATH`
+
+See [ADR-0004](../Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md).
 
 ## Setup checklist
 

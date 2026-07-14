@@ -30,6 +30,7 @@ For role definitions, see [AI Roles](../AI/AI_Roles.md) and [AI Decision Matrix]
 ### May send to cloud AI — with user approval
 
 - Schematic, PCB, netlist, BOM, ERC/DRC data the user explicitly selects
+- Optional high-resolution schematic image (600 DPI PNG via `kicad-cli` + `pdftoppm`) when user enables "Include schematic image"
 - User-entered design intent text
 - Structured extraction JSON from KiCad project context
 
@@ -45,6 +46,17 @@ For role definitions, see [AI Roles](../AI/AI_Roles.md) and [AI Decision Matrix]
 - Never commit API keys to the repository
 
 See [Security](../AI/Security.md) and [Development Environment](01_Development_Environment.md).
+
+## External dependencies for multimodal context
+
+Schematic image export uses subprocess calls outside KiCad's embedded Python:
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| `kicad-cli` | Export schematic to PDF | Bundled with KiCad 8+ |
+| `pdftoppm` | Rasterize PDF to PNG at 600 DPI | Poppler — see [First-Time Setup](00_First_Time_Setup.md) |
+
+Set `KICAD_CLI` environment variable if `kicad-cli` is not on `PATH` (common on macOS).
 
 ## Providing context to AI
 

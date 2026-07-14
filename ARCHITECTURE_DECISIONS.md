@@ -17,6 +17,7 @@ Individual ADRs belong in [docs/Architecture/ADRs/](docs/Architecture/ADRs/READM
 | [ADR-0001](docs/Architecture/ADRs/ADR-0001-KiCad-8-Minimum-Version.md) | KiCad 8+ minimum version | Accepted | 2026-07-14 |
 | [ADR-0002](docs/Architecture/ADRs/ADR-0002-Provider-Abstraction-Layer.md) | Provider abstraction layer | Accepted | 2026-07-14 |
 | [ADR-0003](docs/Architecture/ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md) | Stateless Phase 1 context model | Accepted | 2026-07-14 |
+| [ADR-0004](docs/Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md) | Optional multimodal schematic context | Accepted | 2026-07-14 |
 
 ## Related Documents
 

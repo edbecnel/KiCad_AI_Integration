@@ -109,9 +109,15 @@ Inputs
 - ERC
 - DRC
 
+Optional inputs (user opt-in)
+
+- schematic image — high-resolution PNG rasterized at 600 DPI via `kicad-cli sch export pdf` + `pdftoppm` (see [ADR-0004](ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md))
+
 Outputs
 
-Structured project model.
+Structured project model including optional `schematic_image` bytes and metadata (dpi, sheet, byte size).
+
+Optional artifact paths: shared library (`artifact_library_path`) and per-project `kicad_ai/project_manifest.json` — see [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md).
 
 ---
 
@@ -129,6 +135,7 @@ Should contain
 - constraints
 - selected objects
 - user preferences
+- schematic_image (optional) — PNG bytes and metadata when multimodal context is enabled
 
 ---
 
@@ -220,3 +227,4 @@ Transform KiCad into an AI-assisted engineering environment where the AI underst
 - [Project Index](../../PROJECT_INDEX.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)
 - [Developer Handbook](../Developer_Handbook/README.md)
+- [ADR-0004: Optional Multimodal Schematic Context](ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)

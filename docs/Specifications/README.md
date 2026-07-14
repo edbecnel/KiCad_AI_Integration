@@ -10,7 +10,7 @@ Functional requirements, non-functional requirements, feature specifications, an
 
 ## Authoritative Documents
 
-- Add links to authoritative documents in this domain.
+- [Netlist Gap Fill](Netlist_Gap_Fill.md) — AI-assisted inference of missing symbol connectivity (Draft)
 
 ## What Belongs Here
 

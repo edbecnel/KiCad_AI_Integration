@@ -37,6 +37,12 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [ADR-0001: KiCad 8+ Minimum Version](docs/Architecture/ADRs/ADR-0001-KiCad-8-Minimum-Version.md)
 - [ADR-0002: Provider Abstraction Layer](docs/Architecture/ADRs/ADR-0002-Provider-Abstraction-Layer.md)
 - [ADR-0003: Stateless Phase 1 Context Model](docs/Architecture/ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
+- [ADR-0004: Optional Multimodal Schematic Context](docs/Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)
+
+### Specifications
+
+- [Specifications](docs/Specifications/README.md)
+- [Netlist Gap Fill](docs/Specifications/Netlist_Gap_Fill.md)
 
 ### AI Engineering Handbook
 

@@ -84,6 +84,9 @@ Large KiCad projects can produce oversized prompts. Before calling the Anthropic
 - omit S-expression noise from raw file dumps
 - use partial context flags — PCB-only, schematic-only, critical-nets-only
 - display token usage metadata for cost visibility in Phase 2
+- treat schematic images as expensive context — include only when the user enables "Include schematic image" for spatial/topology audits
+- show thumbnail and approximate image size in the context preview before Approve & Send
+- prefer 600 DPI rasterization (see [ADR-0004](../Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)) — lower DPI sacrifices label readability; higher DPI increases file size and token cost without proportional benefit
 
 See [Software Architecture](../Architecture/KiCad_AI_Integration_Software_Architecture.md) for the Project Context Model design.
 

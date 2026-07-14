@@ -80,12 +80,16 @@ When reviewing AI circuit analysis output:
 - verify component ratings against BOM datasheet fields
 - validate AI-generated KiCad Python scripts in the Scripting Console before production use
 - compare netlist consistency with schematic connectivity
+- verify AI-inferred netlist gap-fill output against ERC, DRC, and the schematic before applying any connectivity changes — see [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md)
+- verify AI-generated `.lib`/`.SUBCKT` models against datasheet (when resolved) and KiCad symbol pin order before simulation
+- treat context-synthesized and last-resort inferred models as drafts requiring datasheet or bench verification
 
 ## Related Documents
 
 - [Governance.md](./Governance.md)
 - [Security.md](./Security.md)
 - [AI_Philosophy.md](./AI_Philosophy.md)
+- [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md)
 
 ## Parent
 

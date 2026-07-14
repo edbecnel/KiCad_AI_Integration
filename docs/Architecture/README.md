@@ -22,6 +22,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADR-0001: KiCad 8+ Minimum Version](ADRs/ADR-0001-KiCad-8-Minimum-Version.md)
 - [ADR-0002: Provider Abstraction Layer](ADRs/ADR-0002-Provider-Abstraction-Layer.md)
 - [ADR-0003: Stateless Phase 1 Context Model](ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
+- [ADR-0004: Optional Multimodal Schematic Context](ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)
 
 ## What Belongs Here
 
