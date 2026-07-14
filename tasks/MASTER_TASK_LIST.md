@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 stretch slice implemented — artifact library, datasheet resolver, schematic image export, minimal `ProjectContext`, and Missing Datasheets wx panel (`src/ui/`). Core MVP (PCB extractor, prompt builder, Claude provider, full chat UI) not yet started.
+**Current repository status:** Phase 1 stretch slice implemented — artifact library, datasheet resolver, schematic image export, minimal `ProjectContext`, Missing Datasheets wx panel (`src/ui/`), and Claude provider layer (`src/providers/`). Core MVP (PCB extractor, prompt builder, full chat UI) not yet started.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -187,15 +187,15 @@ S-expression file parsing.
 
 ### 1.4 AI Provider Layer
 
-- [ ] Define abstract provider interface: `send_message(prompt, config) -> response`
-- [ ] Implement Claude 3.5 Sonnet provider (Anthropic Messages API)
-- [ ] Use correct endpoint: `https://api.anthropic.com/v1/messages`
-- [ ] Use model ID: `claude-3-5-sonnet-20241022` (or current Sonnet 3.5 identifier)
-- [ ] Handle API errors: auth failure, rate limits, timeouts, malformed responses
-- [ ] Parse `content[]` blocks from API response
-- [ ] Attach schematic image as multimodal `image` content block when `ProjectContext.schematic_image` is present
-- [ ] Return token usage metadata (input/output counts) for future Phase 2 display
-- [ ] Design provider enum and config for future providers (OpenAI, Gemini, Ollama, etc.)
+- [x] Define abstract provider interface: `send_message(prompt, config) -> response` — `src/providers/base.py`
+- [x] Implement Claude 3.5 Sonnet provider (Anthropic Messages API) — `src/providers/claude.py`
+- [x] Use correct endpoint: `https://api.anthropic.com/v1/messages`
+- [x] Use model ID: `claude-3-5-sonnet-20241022` (or current Sonnet 3.5 identifier) — config `claude_model`
+- [x] Handle API errors: auth failure, rate limits, timeouts, malformed responses — `src/providers/errors.py`
+- [x] Parse `content[]` blocks from API response
+- [x] Attach schematic image as multimodal `image` content block when `ProjectContext.schematic_image` is present
+- [x] Return token usage metadata (input/output counts) for future Phase 2 display
+- [x] Design provider enum and config for future providers (OpenAI, Gemini, Ollama, etc.) — `ProviderKind`, `ai_provider` config
 
 ### 1.5 KiCad User Interface (wxPython)
 
@@ -222,7 +222,7 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 
 - [x] Context model serialization / deserialization
 - [ ] Prompt assembly from fixtures (golden-file snapshots)
-- [ ] Provider layer with mocked HTTP responses
+- [x] Provider layer with mocked HTTP responses — `tests/providers/test_claude_provider.py`
 
 #### Integration tests
 

@@ -105,7 +105,7 @@ class KiCadAIChatWindow(wx.Frame):
         file_path = board.GetFileName()
         
         # Package the request payload explicitly for the Claude API
-        url = "https://anthropic.com"
+        url = "https://api.anthropic.com/v1/messages"
         headers = {
             "x-api-key": api_key,
             "anthropic-version": "2023-06-01",

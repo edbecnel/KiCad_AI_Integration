@@ -23,6 +23,8 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 
 ``--ui-datasheets`` opens the Missing Required Datasheets wxPython panel (requires wx; use inside KiCad or a wx-enabled Python).
 
+``--ask "question"`` sends an interim dev prompt to Claude (requires ``ANTHROPIC_API_KEY``). This bypasses the future Approve & Send UI and transmits project context to Anthropic — for development smoke tests only.
+
 Some distributor URLs (Mouser, Littelfuse/Akamai) block automated clients even when they
 work in a browser — use direct manufacturer PDF links in symbol ``Datasheet`` fields when possible.
 """
@@ -40,6 +42,9 @@ if str(_SRC) not in sys.path:
 
 from context.collector import collect_stretch_context  # noqa: E402
 from context.datasheet_requirements import format_required_datasheet_notice  # noqa: E402
+from context.model import ProjectContext  # noqa: E402
+from providers import get_provider  # noqa: E402
+from providers.errors import ProviderError  # noqa: E402
 from utils.config import DatasheetUrlFetchPolicy, load_config  # noqa: E402
 
 
@@ -63,15 +68,18 @@ def _default_project_path() -> Path | None:
 
 def _parse_cli_args(
     argv: list[str],
-) -> tuple[str | None, bool, DatasheetUrlFetchPolicy | None, bool, bool, bool]:
-    """Return (project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets)."""
+) -> tuple[str | None, bool, DatasheetUrlFetchPolicy | None, bool, bool, bool, str | None]:
+    """Return (project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets, ask)."""
     project_path: str | None = None
     include_image = False
     url_fetch: DatasheetUrlFetchPolicy | None = None
     quiet = False
     retry_failed = False
     ui_datasheets = False
-    for arg in argv:
+    ask: str | None = None
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
         if arg == "--image":
             include_image = True
         elif arg == "--no-fetch":
@@ -86,9 +94,15 @@ def _parse_cli_args(
             ui_datasheets = True
         elif arg == "--quiet":
             quiet = True
+        elif arg == "--ask":
+            if i + 1 >= len(argv):
+                raise SystemExit("--ask requires a question string")
+            ask = argv[i + 1]
+            i += 1
         elif not arg.startswith("-"):
             project_path = arg
-    return project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets
+        i += 1
+    return project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets, ask
 
 
 def main(
@@ -132,6 +146,73 @@ def main(
         print(f"\n{notice}")
 
 
+def _build_interim_prompt(ctx: ProjectContext, question: str) -> str:
+    """Minimal dev prompt until the Prompt Builder (§1.3) is implemented."""
+    resolved = sum(1 for r in ctx.datasheet_resolutions.values() if r.status == "resolved")
+    lines = [
+        f"Project: {ctx.project_name}",
+        f"Schematics: {', '.join(ctx.schematics) or '(none)'}",
+        f"Symbols: {len(ctx.symbols)} ({resolved} datasheets resolved)",
+        "",
+        "User question:",
+        question.strip(),
+    ]
+    return "\n".join(lines)
+
+
+def main_ask(
+    project_path: str | Path | None,
+    question: str,
+    *,
+    include_image: bool = False,
+    datasheet_url_fetch: DatasheetUrlFetchPolicy | None = None,
+    retry_failed_urls: bool = False,
+    verbose: bool = True,
+) -> None:
+    """
+    Dev smoke path: collect context and send an interim prompt to Claude.
+
+    Sends project metadata (and optional schematic image) to Anthropic without the
+    future Approve & Send UI. For local development only.
+    """
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print(
+            "KiCad AI Assistant: no project path. "
+            "Open a board or pass a .kicad_pro path."
+        )
+        return
+
+    cfg = load_config()
+    ctx = collect_stretch_context(
+        path,
+        config=cfg,
+        include_image=include_image,
+        datasheet_url_fetch=datasheet_url_fetch,
+        retry_failed_urls=retry_failed_urls,
+        verbose=verbose,
+    )
+    prompt = _build_interim_prompt(ctx, question)
+    provider = get_provider(cfg)
+    try:
+        response = provider.send_message(
+            prompt,
+            image=ctx.schematic_image if include_image else None,
+            config=cfg,
+        )
+    except ProviderError as exc:
+        print(f"Provider error: {exc}")
+        return
+
+    print("--- Claude response ---")
+    print(response.text)
+    print(
+        f"\n--- Tokens: {response.usage.input_tokens} in, "
+        f"{response.usage.output_tokens} out "
+        f"(model: {response.model}) ---"
+    )
+
+
 def main_ui_datasheets(
     project_path: str | Path | None = None,
     *,
@@ -155,11 +236,20 @@ def main_ui_datasheets(
 
 
 if __name__ == "__main__":
-    arg_path, include, url_fetch, quiet, retry_failed, ui_datasheets = _parse_cli_args(
+    arg_path, include, url_fetch, quiet, retry_failed, ui_datasheets, ask = _parse_cli_args(
         sys.argv[1:]
     )
     if ui_datasheets:
         main_ui_datasheets(arg_path, retry_failed_urls=retry_failed)
+    elif ask:
+        main_ask(
+            arg_path,
+            ask,
+            include_image=include,
+            datasheet_url_fetch=url_fetch,
+            retry_failed_urls=retry_failed,
+            verbose=not quiet,
+        )
     else:
         main(
             arg_path,

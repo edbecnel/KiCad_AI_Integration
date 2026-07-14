@@ -14,9 +14,14 @@ DEFAULT_URL_FETCH_TIMEOUT_SEC = 10
 DEFAULT_URL_FETCH_READ_TIMEOUT_SEC = 60
 DEFAULT_URL_FETCH_WARMUP = True
 DEFAULT_CONFIG_FILENAME = "kicad_ai_config.json"
+DEFAULT_AI_PROVIDER = "claude"
+DEFAULT_CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+DEFAULT_PROVIDER_TIMEOUT_SEC = 120
+DEFAULT_PROVIDER_MAX_TOKENS = 4096
 
 DatasheetUrlFetchPolicy = Literal["if_missing", "always", "never"]
 DEFAULT_DATASHEET_URL_FETCH: DatasheetUrlFetchPolicy = "if_missing"
+AiProviderKind = Literal["claude"]
 
 
 @dataclass
@@ -32,6 +37,10 @@ class AppConfig:
     url_fetch_warmup: bool = DEFAULT_URL_FETCH_WARMUP
     kicad_cli: str | None = None
     anthropic_api_key: str | None = None
+    ai_provider: AiProviderKind = DEFAULT_AI_PROVIDER
+    claude_model: str = DEFAULT_CLAUDE_MODEL
+    provider_timeout_sec: int = DEFAULT_PROVIDER_TIMEOUT_SEC
+    provider_max_tokens: int = DEFAULT_PROVIDER_MAX_TOKENS
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AppConfig:
@@ -60,7 +69,22 @@ class AppConfig:
             kicad_cli=data.get("kicad_cli") or os.environ.get("KICAD_CLI"),
             anthropic_api_key=data.get("anthropic_api_key")
             or os.environ.get("ANTHROPIC_API_KEY"),
+            ai_provider=_parse_ai_provider(data),
+            claude_model=str(data.get("claude_model", DEFAULT_CLAUDE_MODEL)),
+            provider_timeout_sec=int(
+                data.get("provider_timeout_sec", DEFAULT_PROVIDER_TIMEOUT_SEC)
+            ),
+            provider_max_tokens=int(
+                data.get("provider_max_tokens", DEFAULT_PROVIDER_MAX_TOKENS)
+            ),
         )
+
+
+def _parse_ai_provider(data: dict[str, Any]) -> AiProviderKind:
+    provider = str(data.get("ai_provider", DEFAULT_AI_PROVIDER)).lower()
+    if provider == "claude":
+        return "claude"
+    return DEFAULT_AI_PROVIDER
 
 
 def _parse_datasheet_url_fetch(data: dict[str, Any]) -> DatasheetUrlFetchPolicy:
@@ -113,5 +137,7 @@ def load_config(config_path: Path | None = None) -> AppConfig:
             "true",
             "yes",
         )
+    if os.environ.get("KICAD_AI_PROVIDER"):
+        merged["ai_provider"] = os.environ["KICAD_AI_PROVIDER"].lower()
 
     return AppConfig.from_dict(merged)

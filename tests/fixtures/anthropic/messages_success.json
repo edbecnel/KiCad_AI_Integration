@@ -1,0 +1,17 @@
+{
+  "id": "msg_01TEST",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-3-5-sonnet-20241022",
+  "content": [
+    {
+      "type": "text",
+      "text": "The schematic contains 12 active parts including gate drivers and TVS diodes."
+    }
+  ],
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 150,
+    "output_tokens": 28
+  }
+}

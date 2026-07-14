@@ -2,7 +2,7 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › AI Provider Interface
 
-> **Status:** Draft
+> **Status:** Implemented (Phase 1.4)
 > **Owner:** Project maintainers
 > **Applies To:** KiCad AI Integration provider layer
 > **Authoritative:** No
@@ -13,43 +13,73 @@ Define the abstract contract between the Prompt Builder and external LLM provide
 
 ## Abstract Interface
 
-_To be detailed during Phase 1 implementation._
+Implemented in `src/providers/base.py` and `src/providers/claude.py`:
 
 ```python
-send_message(prompt, config) -> response
+def send_message(
+    prompt: str,
+    *,
+    system: str | None = None,
+    image: bytes | None = None,
+    image_media_type: str = "image/png",
+    config: AppConfig | None = None,
+) -> ProviderResponse:
+    ...
 ```
+
+Factory: `get_provider(config: AppConfig) -> BaseProvider` in `src/providers/factory.py`.
+
+Phase 1 providers are **stateless** — the caller passes the full prompt on each call (ADR-0003).
 
 ## Configuration Schema
 
-Planned configuration fields:
+Loaded via `src/utils/config.py` (`~/kicad_ai_config.json` or `KICAD_AI_CONFIG`):
 
-- API key source — environment variable `ANTHROPIC_API_KEY` for Phase 1
-- Provider selection — enum for future multi-provider support
-- Model identifier — e.g. `claude-3-5-sonnet-20241022`
-- Timeout and retry policy
+| Key | Env override | Default | Description |
+|-----|--------------|---------|-------------|
+| `anthropic_api_key` | `ANTHROPIC_API_KEY` | — | Anthropic API key |
+| `ai_provider` | `KICAD_AI_PROVIDER` | `claude` | Provider backend |
+| `claude_model` | — | `claude-3-5-sonnet-20241022` | Messages API model ID |
+| `provider_timeout_sec` | — | `120` | HTTP timeout (seconds) |
+| `provider_max_tokens` | — | `4096` | Max output tokens per request |
 
 ## Response Model
 
-Planned response fields:
+`ProviderResponse` (`src/providers/types.py`):
 
-- Parsed text content from provider `content[]` blocks
-- Token usage metadata — input and output counts
-- Error classification for UI display
+| Field | Type | Description |
+|-------|------|-------------|
+| `text` | `str` | Concatenated text from all `content[]` blocks |
+| `model` | `str` | Model ID from API response |
+| `usage` | `TokenUsage` | `input_tokens`, `output_tokens` |
+| `stop_reason` | `str \| None` | API stop reason when present |
+| `raw` | `dict \| None` | Full API JSON (debugging) |
 
 ## Error Handling
 
-Planned error categories:
+`src/providers/errors.py`:
 
-- Authentication failure
-- Rate limits
-- Timeouts
-- Malformed responses
+| Exception | When |
+|-----------|------|
+| `AuthError` | Missing API key or HTTP 401 |
+| `RateLimitError` | HTTP 429 |
+| `TimeoutError` | Socket/HTTP timeout |
+| `MalformedResponseError` | Non-JSON body or empty text content |
+| `ProviderError` | Other HTTP or transport failures |
+
+## Multimodal
+
+When `image` bytes are provided (e.g. `ProjectContext.schematic_image` PNG from schematic export), `ClaudeProvider` sends an Anthropic Messages API `content` array with `image` + `text` blocks (ADR-0004).
 
 ## Provider Enum
 
-Phase 1: Claude Sonnet 3.5 only.
+Phase 1: `ProviderKind.CLAUDE` only (`ai_provider: "claude"`).
 
 Planned future providers: OpenAI, Gemini, Groq, Ollama, DeepSeek.
+
+## Dev entry point
+
+`scripts/run_ai_assistant.py --ask "question"` collects stretch context and calls the provider for local smoke tests. This bypasses the future Approve & Send UI — development only.
 
 ## Related Documents
 
