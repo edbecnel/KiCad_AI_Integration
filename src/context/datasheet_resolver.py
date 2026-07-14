@@ -121,12 +121,15 @@ class DatasheetResolver:
         artifact_id: str,
         project: ProjectContextInfo,
         component_ref: ComponentRef,
+        *,
+        part: str | None = None,
     ) -> None:
         assert self._session is not None
         self.store.link_existing(
             artifact_id,
             project,
             component_ref,
+            part=part,
             manifest=self._session.manifest,
             save_manifest=False,
         )
@@ -151,7 +154,7 @@ class DatasheetResolver:
                 component_ref=None,
                 source_url=source_url,
             )
-            self._link(entry.id, project, component_ref)
+            self._link(entry.id, project, component_ref, part=part)
         else:
             entry = self.store.register_datasheet(
                 source_path,
@@ -228,7 +231,7 @@ class DatasheetResolver:
         local = self.store.resolve_local_path(artifact_id)
         if local is None:
             return None
-        self._link_or_store(artifact_id, project, component_ref)
+        self._link_or_store(artifact_id, project, component_ref, part=symbol.value or symbol.reference)
         resolution.url_fetch_outcome = "downloaded"
         return self._resolved(resolution, artifact_id, local, symbol)
 
@@ -237,11 +240,13 @@ class DatasheetResolver:
         artifact_id: str,
         project: ProjectContextInfo,
         component_ref: ComponentRef,
+        *,
+        part: str | None = None,
     ) -> None:
         if self._session is not None:
-            self._link(artifact_id, project, component_ref)
+            self._link(artifact_id, project, component_ref, part=part)
         else:
-            self.store.link_existing(artifact_id, project, component_ref)
+            self.store.link_existing(artifact_id, project, component_ref, part=part)
 
     def _note_url_downloaded_from_cache(
         self,
@@ -327,7 +332,7 @@ class DatasheetResolver:
             """Link cached artifact; return True if resolution is complete."""
             nonlocal cached_id, cached_path
             cached_id, cached_path = artifact_id, local
-            self._link_or_store(artifact_id, project, component_ref)
+            self._link_or_store(artifact_id, project, component_ref, part=part)
             if policy == "always" and is_https:
                 return False
             return True

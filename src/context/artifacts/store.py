@@ -144,7 +144,9 @@ class ArtifactStore:
         existing = self.catalog.get_by_sha256(digest)
         if existing is not None:
             if component_ref is not None:
-                self.link_existing(existing.id, project, component_ref)
+                self.link_existing(
+                    existing.id, project, component_ref, part=part.strip()
+                )
             return existing
 
         relative = self._relative_artifact_path(artifact_type, dest_name)
@@ -165,7 +167,7 @@ class ArtifactStore:
         self.catalog.add_artifact(entry)
 
         if component_ref is not None:
-            self.link_existing(entry.id, project, component_ref)
+            self.link_existing(entry.id, project, component_ref, part=part.strip())
         return entry
 
     def link_existing(
@@ -174,6 +176,7 @@ class ArtifactStore:
         project: ProjectContextInfo,
         component_ref: ComponentRef,
         *,
+        part: str | None = None,
         manifest: Manifest | None = None,
         save_manifest: bool = True,
     ) -> ArtifactEntry:
@@ -190,9 +193,10 @@ class ArtifactStore:
         self.catalog.upsert_reference(artifact_id, project_ref, component_ref)
 
         manifest_obj = manifest if manifest is not None else Manifest.load(project.project_pro_path)
+        manifest_part = (part or entry.part).strip()
         manifest_obj.upsert_link(
             artifact_id=artifact_id,
-            part=entry.part,
+            part=manifest_part,
             component=ManifestComponentLink(
                 reference=component_ref.reference,
                 sheet_path=component_ref.sheet_path,

@@ -1,0 +1,82 @@
+"""Launch KiCad AI UI from the Scripting Console or dev shell."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+# wx.App must stay referenced or it is GC'd before dialogs open (PyNoAppError).
+_wx_app: object | None = None
+
+
+def resolve_project_pro_path(project_path: Path | str | None = None) -> Path:
+    """Resolve .kicad_pro from explicit path, directory, or open KiCad board."""
+    if project_path is not None:
+        path = Path(project_path).expanduser().resolve()
+        if path.is_file() and path.suffix == ".kicad_pro":
+            return path
+        if path.is_dir():
+            pros = sorted(path.glob("*.kicad_pro"))
+            if pros:
+                return pros[0]
+        raise FileNotFoundError(f"No .kicad_pro found for {project_path}")
+
+    try:
+        import pcbnew  # type: ignore[import-untyped]
+
+        board = pcbnew.GetBoard()
+        if board is None:
+            raise RuntimeError("No board open in KiCad")
+        pcb_path = Path(board.GetFileName())
+        if not pcb_path:
+            raise RuntimeError("Board has no file name")
+        for pro in pcb_path.parent.glob("*.kicad_pro"):
+            return pro
+    except ImportError as exc:
+        raise RuntimeError(
+            "No project path given and pcbnew is unavailable (run inside KiCad)"
+        ) from exc
+    raise FileNotFoundError("No .kicad_pro next to open board")
+
+
+def ensure_wx_app() -> bool:
+    """
+    Ensure a wx.App exists before showing UI.
+
+    Returns True when embedded in KiCad (wx main loop already running).
+    External scripts must not call ``MainLoop()`` after a modal dialog — ``ShowModal``
+    runs until Close; KiCad keeps its own loop alive for the session.
+    """
+    import wx
+
+    global _wx_app
+    app = wx.GetApp()
+    if app is None:
+        _wx_app = wx.App(False)
+        return False
+    return app.IsMainLoopRunning()
+
+
+def show_missing_datasheets_dialog(
+    project_path: Path | str | None = None,
+    *,
+    retry_failed_urls: bool = False,
+) -> None:
+    """
+    Open the Missing Required Datasheets panel (modal).
+
+    Safe from KiCad Scripting Console or an external Terminal script. When run inside
+    KiCad, closing the dialog returns to the editor; KiCad's wx app keeps running.
+    When run externally, the Python process exits after Close (no ``MainLoop`` needed).
+
+    KiCad Scripting Console example::
+
+        import sys
+        sys.path.insert(0, "/path/to/KiCad_AI_Integration/src")
+        from ui.launcher import show_missing_datasheets_dialog
+        show_missing_datasheets_dialog()  # uses open board's project
+    """
+    from ui.missing_datasheets_dialog import show_missing_datasheets_dialog as _show
+
+    ensure_wx_app()
+    pro = resolve_project_pro_path(project_path)
+    _show(pro, retry_failed_urls=retry_failed_urls)

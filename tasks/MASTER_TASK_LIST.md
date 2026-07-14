@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 stretch slice implemented — artifact library, datasheet resolver, schematic image export, and minimal `ProjectContext` in `src/`. Core MVP (PCB extractor, prompt builder, Claude provider, wxPython UI) not yet started.
+**Current repository status:** Phase 1 stretch slice implemented — artifact library, datasheet resolver, schematic image export, minimal `ProjectContext`, and Missing Datasheets wx panel (`src/ui/`). Core MVP (PCB extractor, prompt builder, Claude provider, full chat UI) not yet started.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -145,7 +145,7 @@ S-expression file parsing.
 - [x] **Datasheet resolver:** support user PDF attach/register per component; cache under project artifact store
 - [x] **Datasheet resolver:** controlled `https:` fetch when symbol field is URL only (SSRF-safe, size/timeout limits, cache PDF)
 - [x] **Datasheet resolver:** persistent `url_fetch_log.json` per part+URL (`downloaded` / `failed`); skip repeat fetches; set `needs_ai_datasheet_discovery` on failure
-- [ ] **AI datasheet discovery:** when `needs_ai_datasheet_discovery`, suggest official PDF URL from KiCad context; user approves before fetch (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#url-fetch-log-and-ai-datasheet-discovery))
+- [ ] **AI datasheet discovery mode:** opt-in web search for official PDF URLs, auto-download, `ai_discovery_log.json`; on failure show URL + manual attach / `{Value}.pdf` instructions — see [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
 - [ ] **Force refresh datasheets (UI):** user action to re-fetch all symbol HTTPS URLs; bypass catalog + `url_fetch_log` caches including prior failures (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#force-refresh-datasheets-future-ui))
 - [ ] **Catalog scan:** pick up new files in shared `datasheets/` without manual registration (see [Datasheet Requirements](../docs/Specifications/Datasheet_Requirements_and_User_Supply.md))
 - [x] **CLI user notice:** print **Manual datasheets required** when auto-fetch fails for datasheet-required parts (`context/datasheet_requirements.py`)
@@ -208,9 +208,9 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 - [ ] Optional design-intent / functional-description textarea
 - [ ] User prompt input field and Send button
 - [ ] Context preview panel showing payload summary before transmission
-- [ ] **Missing required datasheets** panel — list parts needing user PDFs; link to [Datasheet Requirements](../docs/Specifications/Datasheet_Requirements_and_User_Supply.md)
-- [ ] **Datasheet drag-and-drop UI** — drop PDF → `datasheets/{Value}.pdf` + catalog/manifest registration; map to schematic Value
-- [ ] Per-component **Attach PDF** file picker (uses `user_attach_path` resolver API)
+- [x] **Missing required datasheets panel (wxPython)** — list + Attach PDF + Refresh — `src/ui/missing_datasheets_dialog.py`, `src/ui/launcher.py`
+- [x] Per-component **Attach PDF** file picker — `attach_datasheet_pdf()` + `--ui-datasheets` on CLI
+- [ ] **Datasheet drag-and-drop UI** — drop PDF → `datasheets/{Value}.pdf` + catalog/manifest registration
 - [ ] Explicit Approve & Send step (security requirement)
 - [ ] Read-only response display area
 - [ ] Status bar or inline messages for errors and connection status
@@ -315,7 +315,7 @@ beyond free-form chat.
 
 - [ ] Component comparison from BOM parametric data
 - [ ] Datasheet resolver for gap-fill — symbol `Datasheet` field, local paths, user registration, controlled URL fetch, `url_fetch_log.json` (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md))
-- [ ] AI-assisted datasheet discovery when URL fetch is logged `failed` (`needs_ai_datasheet_discovery`)
+- [ ] AI-assisted datasheet discovery mode — web search, auto-download, failure URLs + manual fallback — [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
 - [ ] Force refresh datasheets — user-facing action to re-download all HTTPS URLs (bypass catalog + failed log)
 - [ ] Datasheet text extraction from resolved PDFs for SUBCKT Tier A
 - [ ] Circuit explanation mode (topology walkthrough from schematic context)

@@ -93,10 +93,13 @@ class Manifest:
             fh.write("\n")
         return path
 
-    def get_link(self, artifact_id: str) -> ManifestLink | None:
+    def get_link(self, artifact_id: str, part: str | None = None) -> ManifestLink | None:
         for link in self.links:
-            if link.artifact_id == artifact_id:
-                return link
+            if link.artifact_id != artifact_id:
+                continue
+            if part is not None and link.part != part:
+                continue
+            return link
         return None
 
     def get_links_for_part(self, part: str) -> list[ManifestLink]:
@@ -108,7 +111,7 @@ class Manifest:
         part: str,
         component: ManifestComponentLink,
     ) -> None:
-        link = self.get_link(artifact_id)
+        link = self.get_link(artifact_id, part)
         if link is None:
             link = ManifestLink(artifact_id=artifact_id, part=part, components=[])
             self.links.append(link)

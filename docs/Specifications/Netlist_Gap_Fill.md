@@ -278,13 +278,18 @@ The shared library maintains `url_fetch_log.json` so HTTPS datasheet URLs are **
 - **New URL on same part** — if the user updates the symbol `Datasheet` field, the new URL is tried (log key includes URL)
 - **`always` fetch policy** — re-fetch successful URLs; still skip URLs logged as `failed` (see [Force refresh datasheets](#force-refresh-datasheets-future-ui))
 
-When `needs_ai_datasheet_discovery` is set, the Context Collection Engine has exhausted automatic resolution for that symbol's current URL. **Phase 1 stretch slice** records the handoff only; the AI Provider Layer (not yet implemented) should:
+When `needs_ai_datasheet_discovery` is set, the Context Collection Engine has exhausted automatic resolution for that symbol's current URL. **Phase 1 stretch slice** records the handoff only.
+
+**Full specification:** [AI Datasheet Discovery Mode](AI_Datasheet_Discovery.md) — opt-in AI web search, auto-download, failure logging with URLs and manual import / `{Value}.pdf` instructions.
+
+Summary of planned AI Provider Layer behavior:
 
 1. Collect KiCad context for the part — `Value`, `Footprint`, pin table, custom fields (`MPN`, manufacturer), optional schematic image
-2. Ask the model for an **official manufacturer `https:` PDF URL** (not open-ended web search as default UX)
-3. Present suggested URL(s) in the context preview for **user approval** before fetch
-4. On approval, fetch via the same SSRF-safe `url_fetch` path, register in catalog, and update `url_fetch_log` to `downloaded`
-5. If discovery fails, continue with **Tier B** (context synthesis) or **Tier C** (last-resort inference) — never block the user
+2. Use AI web search to find an **official manufacturer `https:` PDF URL** (validate before fetch)
+3. Auto-download when user enables AI mode (optional per-URL approval in UI)
+4. On success — fetch via SSRF-safe `url_fetch`, register in catalog, update `url_fetch_log` to `downloaded`
+5. On failure — record error + attempted URL(s); show user **Attach PDF** in Missing datasheets UI or save as `datasheets/{Value}.pdf`
+6. If discovery fails entirely, continue with **Tier B** or **Tier C** — never block the user
 
 Implementation tracking: [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) — *AI-assisted datasheet discovery when URL fetch fails*.
 

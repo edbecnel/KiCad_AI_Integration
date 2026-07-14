@@ -84,3 +84,35 @@ def test_delete_blocked_when_referenced(tmp_path: Path) -> None:
     )
     with pytest.raises(ArtifactDeletionError):
         store.delete_artifact(entry.id)
+
+
+def test_register_datasheet_links_requested_part_on_sha256_dedupe(tmp_path: Path) -> None:
+    """Attaching an existing library PDF for a different Value must link that part name."""
+    from context.artifacts.manifest import Manifest
+
+    lib = tmp_path / "library"
+    store = ArtifactStore(lib)
+    pdf = _make_pdf(tmp_path / "FOD3180.pdf")
+    project = _project_ctx(tmp_path)
+
+    entry1 = store.register_datasheet(
+        pdf,
+        "FOD3180",
+        "user_attach",
+        project,
+        ComponentRef(reference="U1", sheet_path="testproj.kicad_sch"),
+    )
+    entry2 = store.register_datasheet(
+        pdf,
+        "FOD3180-TEST",
+        "user_attach",
+        project,
+        ComponentRef(reference="U14", sheet_path="testproj.kicad_sch"),
+    )
+    assert entry1.id == entry2.id
+    assert len(list((lib / "datasheets").glob("*.pdf"))) == 1
+
+    manifest = Manifest.load(project.project_pro_path)
+    assert len(manifest.get_links_for_part("FOD3180")) == 1
+    assert len(manifest.get_links_for_part("FOD3180-TEST")) == 1
+    assert manifest.get_links_for_part("FOD3180-TEST")[0].artifact_id == entry1.id

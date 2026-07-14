@@ -69,12 +69,25 @@ After context collection, if any **datasheet-required** symbol has `fetch_failed
 
 1. **List unique part numbers** (Value) affected, with reference count and failure reason.
 2. **State that PDFs are required** for SUBCKT / detailed analysis of those parts.
-3. **Point to supply methods** below (manual file, drag-and-drop UI when available).
+3. **Point to supply methods** below (manual file, UI attach, AI discovery when enabled).
 4. **Do not block** netlist-only or Tier B analysis for the rest of the design — but label output as incomplete for the listed parts.
 
 **CLI today:** `scripts/run_ai_assistant.py` prints a **Manual datasheets required** section after the summary when applicable.
 
-**Planned wxPython UI:** context preview panel with an amber/red **“Missing required datasheets”** list before Approve & Send; per-row **Attach PDF** action.
+**Planned wxPython UI:** context preview panel with an amber/red **“Missing required datasheets”** list before Approve & Send; per-row **Attach PDF** action and links to failed URLs. See [AI Datasheet Discovery Mode](AI_Datasheet_Discovery.md) for optional AI web search and auto-download when direct fetch fails.
+
+---
+
+## AI datasheet discovery mode (planned)
+
+When enabled, the assistant uses an AI provider (with web search) to find official manufacturer PDF URLs for parts where automatic fetch failed, then attempts download via the same SSRF-safe fetch path.
+
+**On failure**, the system records the reason in `url_fetch_log.json` (and a planned `ai_discovery_log.json`), displays the **symbol URL** and any **AI-suggested URL**, and instructs the user to either:
+
+1. **Attach PDF in the UI** — Missing datasheets panel → **Attach PDF…** on the row for that **Value** (maps to all references sharing the Value), or  
+2. **Rename manually** — save the browser-downloaded file as `{artifact_library_path}/datasheets/<Value>.pdf` (e.g. `FOD3180.pdf`).
+
+Full specification: [AI Datasheet Discovery Mode](AI_Datasheet_Discovery.md).
 
 ---
 
@@ -159,7 +172,7 @@ Prefer **direct manufacturer PDF URLs** over distributor links:
 | `not_applicable` | `missing` | None |
 | `optional` | `missing` / `fetch_failed` | Optional; supply PDF for higher fidelity |
 | `required` | `resolved` | None |
-| `required` | `fetch_failed` | **Supply PDF** (Methods 1–3) or wait for AI discovery |
+| `required` | `fetch_failed` | **Supply PDF** (Methods 1–3), enable [AI discovery](AI_Datasheet_Discovery.md), or fix symbol URL |
 | `required` | `missing` (no URL) | **Supply PDF** or set symbol `Datasheet` URL |
 
 ---
@@ -167,5 +180,6 @@ Prefer **direct manufacturer PDF URLs** over distributor links:
 ## Navigation
 
 - [Netlist Gap Fill](Netlist_Gap_Fill.md)
+- [AI Datasheet Discovery Mode](AI_Datasheet_Discovery.md)
 - [Prompt Architecture](../Architecture/Prompt_Architecture.md)
 - [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md)

@@ -21,6 +21,8 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 
 ``--retry-failed`` re-attempts HTTPS URLs that were previously logged as failed (after fetch improvements).
 
+``--ui-datasheets`` opens the Missing Required Datasheets wxPython panel (requires wx; use inside KiCad or a wx-enabled Python).
+
 Some distributor URLs (Mouser, Littelfuse/Akamai) block automated clients even when they
 work in a browser — use direct manufacturer PDF links in symbol ``Datasheet`` fields when possible.
 """
@@ -61,13 +63,14 @@ def _default_project_path() -> Path | None:
 
 def _parse_cli_args(
     argv: list[str],
-) -> tuple[str | None, bool, DatasheetUrlFetchPolicy | None, bool, bool]:
-    """Return (project_path, include_image, url_fetch override, quiet, retry_failed)."""
+) -> tuple[str | None, bool, DatasheetUrlFetchPolicy | None, bool, bool, bool]:
+    """Return (project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets)."""
     project_path: str | None = None
     include_image = False
     url_fetch: DatasheetUrlFetchPolicy | None = None
     quiet = False
     retry_failed = False
+    ui_datasheets = False
     for arg in argv:
         if arg == "--image":
             include_image = True
@@ -79,11 +82,13 @@ def _parse_cli_args(
             url_fetch = "if_missing"
         elif arg == "--retry-failed":
             retry_failed = True
+        elif arg == "--ui-datasheets":
+            ui_datasheets = True
         elif arg == "--quiet":
             quiet = True
         elif not arg.startswith("-"):
             project_path = arg
-    return project_path, include_image, url_fetch, quiet, retry_failed
+    return project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets
 
 
 def main(
@@ -127,12 +132,39 @@ def main(
         print(f"\n{notice}")
 
 
+def main_ui_datasheets(
+    project_path: str | Path | None = None,
+    *,
+    retry_failed_urls: bool = False,
+) -> None:
+    """Open the Missing Required Datasheets panel."""
+    try:
+        import wx  # noqa: F401 — availability check
+    except ImportError:
+        print("Missing datasheets UI requires wxPython (run inside KiCad or install wx).")
+        return
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
+        return
+
+    from ui.launcher import show_missing_datasheets_dialog
+
+    show_missing_datasheets_dialog(path, retry_failed_urls=retry_failed_urls)
+
+
 if __name__ == "__main__":
-    arg_path, include, url_fetch, quiet, retry_failed = _parse_cli_args(sys.argv[1:])
-    main(
-        arg_path,
-        include_image=include,
-        datasheet_url_fetch=url_fetch,
-        retry_failed_urls=retry_failed,
-        verbose=not quiet,
+    arg_path, include, url_fetch, quiet, retry_failed, ui_datasheets = _parse_cli_args(
+        sys.argv[1:]
     )
+    if ui_datasheets:
+        main_ui_datasheets(arg_path, retry_failed_urls=retry_failed)
+    else:
+        main(
+            arg_path,
+            include_image=include,
+            datasheet_url_fetch=url_fetch,
+            retry_failed_urls=retry_failed,
+            verbose=not quiet,
+        )
