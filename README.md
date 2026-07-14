@@ -2,6 +2,8 @@
 
 > Bringing AI-assisted circuit design, review, and engineering directly into KiCad.
 
+**Documentation:** Start at the [Project Index](PROJECT_INDEX.md) for the full documentation map.
+
 ## Overview
 
 KiCad AI Integration is an open-source project that integrates modern Large Language Models (LLMs) directly into the KiCad electronic design environment. Its goal is to transform KiCad from a traditional Electronic Design Automation (EDA) tool into an intelligent engineering workspace where AI acts as an experienced design assistant throughout the entire design process.
@@ -129,21 +131,33 @@ This architecture intentionally separates AI providers from the rest of the appl
 
 ---
 
-# Repository Structure (Planned)
+# Repository Structure
 
 ```
-kicad-ai-integration/
-
-│
+KiCad_AI_Integration/
 ├── README.md
-├── LICENSE
-├── docs/
+├── PROJECT_INDEX.md              # Primary documentation hub
+├── PROJECT_CHARTER.md
+├── ARCHITECTURE_DECISIONS.md
+├── CHANGELOG.md
+├── ENGINEERING_DOCUMENTATION_FRAMEWORK.md
 │
-├── architecture/
-│   ├── Software_Architecture.md
-│   ├── Prompt_Architecture.md
-│   ├── AI_Provider_Interface.md
-│   └── Roadmap.md
+├── docs/
+│   ├── Architecture/             # System design, ADRs
+│   ├── AI/                         # AI handbook (Phase 2)
+│   ├── Developer_Handbook/         # Setup, environment, integration guides
+│   ├── Development/
+│   ├── Governance/                 # Phase 2 placeholder
+│   ├── Specifications/
+│   ├── API/
+│   ├── Database/
+│   ├── Deployment/
+│   ├── User_Guides/
+│   ├── Reference/
+│   └── Templates/
+│
+├── tasks/                          # Implementation tracking
+├── archive/                        # Retired documentation
 │
 ├── src/
 │   ├── context/
@@ -154,11 +168,11 @@ kicad-ai-integration/
 │   └── plugin/
 │
 ├── tests/
-│
 ├── examples/
-│
 └── scripts/
 ```
+
+See [PROJECT_INDEX.md](PROJECT_INDEX.md) for links to all authoritative documents.
 
 ---
 

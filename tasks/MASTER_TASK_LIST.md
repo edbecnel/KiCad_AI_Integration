@@ -1,8 +1,10 @@
 # KiCad AI Integration — Master Task List
 
+[Home](../README.md) › [Project Index](../PROJECT_INDEX.md) › Master Task List
+
 > Phased implementation backlog for the Python-scripting API integration with AI,
-> aligned to [Software Architecture](../architecture/KiCad_AI_Integration_Software_Architecture.md)
-> and [README](../../README.md).
+> aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
+> and [README](../README.md).
 
 **Current repository status:** Planning / documentation only — no `src/` code yet.
 
@@ -84,9 +86,9 @@ S-expression file parsing.
 #### PCB (`pcbnew.GetBoard()`)
 
 - [ ] Extract footprints (reference, value, position, layer)
-- [ ] Extract tracks per net (width, length, layer) — [Script A pattern](../architecture/Guide-KiCad_Python_API_Custom_AI_Scripting_for_Circuit_Review.md)
+- [ ] Extract tracks per net (width, length, layer) — [Script A pattern](../docs/Developer_Handbook/Guide-KiCad_Python_API_Custom_AI_Scripting.md)
 - [ ] Extract vias and zones
-- [ ] Extract net classes (clearance, track width rules) — [Script B pattern](../architecture/Guide-KiCad_Python_API_Custom_AI_Scripting_for_Circuit_Review.md)
+- [ ] Extract net classes (clearance, track width rules) — [Script B pattern](../docs/Developer_Handbook/Guide-KiCad_Python_API_Custom_AI_Scripting.md)
 - [ ] Extract board design settings and constraints
 - [ ] Compute board statistics (layer usage, trace totals, etc.)
 
@@ -98,7 +100,7 @@ S-expression file parsing.
 #### Netlist
 
 - [ ] Export or parse netlist (SPICE or OrcadPCB2 format)
-- [ ] Build connectivity graph / critical-node map — [kicad_ai_prep pattern](../architecture/Guide-Programmatic_AI_Analysis_via_KiCad_Python_Scripting.md)
+- [ ] Build connectivity graph / critical-node map — [kicad_ai_prep pattern](../docs/Developer_Handbook/Guide-Programmatic_AI_Analysis.md)
 
 #### BOM
 
@@ -130,7 +132,7 @@ S-expression file parsing.
 - [ ] General design review template
 - [ ] PCB layout / trace audit template
 - [ ] Isolation and clearance audit template
-- [ ] Netlist-vs-visual cross-reference template — [AI Tools guide](../architecture/AI_Tools_for_Advanced_Circuit_Analysis.md)
+- [ ] Netlist-vs-visual cross-reference template — [AI Tools guide](../docs/Reference/AI_Tools_for_Advanced_Circuit_Analysis.md)
 - [ ] Use structured XML-style sections: `<functional_description>`, `<kicad_python_extracted_data>`, `<kicad_netlist>`, `<pico_firmware>`, etc.
 - [ ] Append user natural-language question to structured context
 - [ ] Token optimization: summarize large nets, omit S-expression noise, chunk oversized payloads
@@ -149,7 +151,7 @@ S-expression file parsing.
 
 ### 1.5 KiCad User Interface (wxPython)
 
-Based on [Direct Claude API Chat guide](../architecture/Guide-Direct_Claude_3.5_Sonnet_API_Chat_Integration_inside_KiCad.md), extended for production use.
+Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCad_Claude_Chat_Integration.md), extended for production use.
 
 - [ ] wxPython dialog with password-masked API key field (load from env/config if set)
 - [ ] Context inclusion checkboxes: schematic, PCB, BOM, ERC, DRC, netlist, firmware

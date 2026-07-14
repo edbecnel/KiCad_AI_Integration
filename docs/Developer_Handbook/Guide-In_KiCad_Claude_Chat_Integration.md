@@ -1,3 +1,7 @@
+# Guide: Direct Claude 3.5 Sonnet API Chat Integration inside KiCad
+
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Developer Handbook](README.md) › In-KiCad Claude Chat Integration
+
 ### Guide: Direct Claude 3.5 Sonnet API Chat Integration inside KiCad
 
 You do not have to constantly export data and copy-paste it into an external browser tab. Because KiCad exposes its internal python data layer (`pcbnew`) and utilizes an open-source graphical layout library (`wxPython`), you can run interactive, multi-turn AI chat interfaces directly inside your electronic design workspace using your own Anthropic API key.

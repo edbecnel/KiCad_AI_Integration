@@ -1,7 +1,10 @@
-# KiCad AI Integration
-## Software Architecture (Initial Draft)
+# KiCad AI Integration — Software Architecture
 
-# Overview
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › Software Architecture
+
+> Initial draft — primary system design document for KiCad AI Integration.
+
+## Overview
 
 KiCad AI Integration is an engineering assistant that operates directly inside KiCad.
 
@@ -204,3 +207,13 @@ Future
 # Long-Term Vision
 
 Transform KiCad into an AI-assisted engineering environment where the AI understands the active design, remembers prior discussions, and acts as an engineering partner rather than a generic chatbot.
+
+## Parent
+
+- [Architecture](README.md)
+
+## Related Documents
+
+- [Project Index](../../PROJECT_INDEX.md)
+- [Master Task List](../../tasks/MASTER_TASK_LIST.md)
+- [Developer Handbook](../Developer_Handbook/README.md)

@@ -1,3 +1,7 @@
+# AI-Assisted Circuit Analysis Using KiCad and Open Models
+
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Reference](README.md) › AI Tools for Advanced Circuit Analysis
+
 ### AI-Assisted Circuit Analysis Using KiCad & Open Models
 
 The choice of the best AI for advanced circuit analysis within a non-proprietary ecosystem depends heavily on whether your workflow requires conceptual reasoning, topology analysis, or automated code and netlist verification. Because there is no automated proprietary simulation engine, the AI must parse KiCad's open-text file structures, high-resolution schematics, and functional descriptions to perform manual safety, timing, and topology audits.
