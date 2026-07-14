@@ -1,0 +1,20 @@
+(kicad_sch
+  (version 20250114)
+  (generator "eeschema")
+  (uuid "00000000-0000-0000-0000-000000000002")
+  (paper "A4")
+  (symbol
+    (lib_id "Regulator:LM7805")
+    (at 50 50 0)
+    (uuid "00000000-0000-0000-0000-000000000030")
+    (property "Reference" "U1"
+      (at 50 40 0)
+    )
+    (property "Value" "LM7805"
+      (at 50 60 0)
+    )
+    (property "Datasheet" "https://example.com/lm7805.pdf"
+      (at 50 70 0)
+    )
+  )
+)

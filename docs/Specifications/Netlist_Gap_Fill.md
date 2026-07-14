@@ -81,6 +81,7 @@ This minimizes duplication when the same part (e.g. `F0D3180`) appears in multip
 ```text
 ~/kicad_ai_library/
   catalog.json             # global index + cross-project reference tracking
+  url_fetch_log.json       # per-part HTTPS URL outcomes (downloaded / failed)
   datasheets/
     F0D3180.pdf            # one canonical file per unique content/part
   libs/
@@ -250,10 +251,63 @@ Try sources in this order; stop at the first usable PDF or structured document:
 | 3 | **Symbol `Datasheet` field — local file** | Import into shared library if not already cataloged |
 | 4 | **User attach via UI** | Store in shared library (or link); update catalog + project manifest |
 | 5 | **User config `datasheet_search_paths`** | Import-once into shared library when matched |
-| 6 | **Symbol `Datasheet` field — URL fetch** | `https:` only; cache to shared library; update `referenced_by` |
+| 6 | **Symbol `Datasheet` field — URL fetch** | `https:` only; cache to shared library; update `referenced_by`; skip URLs already logged in `url_fetch_log.json` |
 | 7 | **Other symbol fields + footprint metadata** | Matching hints only |
+| 8 | **AI datasheet discovery** *(future)* | When step 6 fails, hand off to AI provider with KiCad symbol context — see [URL fetch log](#url-fetch-log-and-ai-datasheet-discovery) |
 
 **Not a primary workflow:** asking the user to search the web for a datasheet. The UI may offer optional manual URL entry or file attach when resolution fails, but must not block generation on a web search.
+
+### URL fetch log and AI datasheet discovery
+
+The shared library maintains `url_fetch_log.json` so HTTPS datasheet URLs are **not revisited** once an outcome is known. Each entry is keyed by **part number (`Value`) + normalized URL** and records:
+
+| Field | Description |
+|-------|-------------|
+| `part` | Symbol `Value` at resolution time |
+| `source_url` | Normalized `https:` URL from the symbol `Datasheet` field |
+| `status` | `downloaded` or `failed` |
+| `artifact_id` | Catalog entry when `downloaded` |
+| `error` | Last fetch error when `failed` |
+| `updated_at` | ISO-8601 UTC timestamp |
+
+**Behavior:**
+
+- **`downloaded`** — skip network fetch; resolve from `artifact_id` / catalog when policy is `if_missing`
+- **`failed`** — skip network fetch; set `DatasheetResolution.needs_ai_datasheet_discovery = true` and `url_fetch_outcome = failed`
+- **Bot protection (403 / HTML “access denied”)** — Mouser, Littelfuse (Akamai), and similar hosts often allow browser downloads but block scripted clients. Prefer **direct manufacturer PDF URLs** in symbol `Datasheet` fields (e.g. `onsemi.com/.../fod3180-d.pdf` instead of a Mouser redirect). Manual attach remains supported.
+- **New URL on same part** — if the user updates the symbol `Datasheet` field, the new URL is tried (log key includes URL)
+- **`always` fetch policy** — re-fetch successful URLs; still skip URLs logged as `failed` (see [Force refresh datasheets](#force-refresh-datasheets-future-ui))
+
+When `needs_ai_datasheet_discovery` is set, the Context Collection Engine has exhausted automatic resolution for that symbol's current URL. **Phase 1 stretch slice** records the handoff only; the AI Provider Layer (not yet implemented) should:
+
+1. Collect KiCad context for the part — `Value`, `Footprint`, pin table, custom fields (`MPN`, manufacturer), optional schematic image
+2. Ask the model for an **official manufacturer `https:` PDF URL** (not open-ended web search as default UX)
+3. Present suggested URL(s) in the context preview for **user approval** before fetch
+4. On approval, fetch via the same SSRF-safe `url_fetch` path, register in catalog, and update `url_fetch_log` to `downloaded`
+5. If discovery fails, continue with **Tier B** (context synthesis) or **Tier C** (last-resort inference) — never block the user
+
+Implementation tracking: [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) — *AI-assisted datasheet discovery when URL fetch fails*.
+
+### Force refresh datasheets (future UI)
+
+Users need an explicit **Force refresh datasheets** action (in-KiCad UI; not required on every run) to re-download PDFs from symbol `Datasheet` HTTPS URLs after correcting links, replacing stale cached files, or recovering from transient fetch failures.
+
+**Expected behavior when the user chooses force refresh:**
+
+1. Scope — all placed symbols on the active project schematics that have an `https:` `Datasheet` URL (optionally: selected components only in a later iteration)
+2. Bypass catalog cache — re-fetch even when a PDF is already in `catalog.json` / `project_manifest.json`
+3. Bypass `url_fetch_log` — retry URLs previously logged as `failed` or `downloaded` for the current part+URL pair
+4. Update shared library — replace or re-register catalog entries; refresh `url_fetch_log` to `downloaded` or `failed` with new timestamps
+5. Show progress — per-part status (`downloading`, `downloaded`, `failed`) in the UI; do not block other assistant features on completion
+
+**Partial backend support today (CLI / config only):**
+
+- `datasheet_url_fetch: "always"` or `--fetch-always` re-downloads when a cached PDF exists, but **still skips** URLs logged as `failed` in `url_fetch_log.json`
+- Full force refresh requires a dedicated resolver flag (e.g. `force_refresh=True`) that ignores `url_fetch_log` and always attempts HTTPS fetch — **not yet implemented**
+
+**UI placement (planned):** context collection preview or artifact library panel — alongside attach PDF, add search folder, and future AI discovery actions.
+
+Implementation tracking: [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) — *Force refresh datasheets (user-facing)*.
 
 ### KiCad symbol properties
 
@@ -268,15 +322,29 @@ Path resolution rules:
 
 - Relative paths → resolve against project root (directory containing `.kicad_pro`)
 - `file://` URLs → normalize to local path
-- `https:` URLs → fetch only if allowed by policy; cache result for reuse
+- `https:` URLs → fetch only if allowed by policy; cache result for reuse; default **10s** connect/response timeout (`url_fetch_timeout_sec`) plus **60s** PDF read timeout (`url_fetch_read_timeout_sec`) — slow vendor CDNs (e.g. Littelfuse) may need the full connect budget
 - KiCad variable substitution (e.g. `${KICAD_USER_TEMPLATE_DIR}`) → expand when possible
 
 ### User PDF registration
 
-When automatic resolution fails, support explicit registration without web search:
+When automatic resolution fails, support explicit registration without web search. See **[Datasheet Requirements and User PDF Supply](Datasheet_Requirements_and_User_Supply.md)** for when PDFs are required vs optional, user notification rules, and the planned drag-and-drop UI.
+
+**Today (no wxPython UI yet):**
+
+- **Manual drop** — save as `{artifact_library_path}/datasheets/<Value>.pdf` using the schematic **Value** field; re-run context collection (catalog lookup by part).
+- **Programmatic attach** — `DatasheetResolver.resolve_symbol(..., user_attach_path=…)` registers in catalog + project manifest (backend ready; UI not wired).
+- **Search folder** — `datasheet_search_paths` in config for an inbox directory.
+
+**Planned UI:**
+
+- **Drag-and-drop** — drop PDF onto a part row or drop zone; file copied to shared `datasheets/`, `catalog.json` + `project_manifest.json` updated, optional symbol `Datasheet` field update.
+- **Missing required datasheets panel** — list parts with `fetch_failed` / `missing` where a PDF is **required** (active silicon, drivers, specialized diodes); amber highlight before Approve & Send.
+
+**User notification:** CLI prints a **Manual datasheets required** section when auto-fetch failed for datasheet-required parts. UI must show the same list with attach/drop actions.
+
+Legacy bullets:
 
 - **Per-component attach** — user picks a PDF; store in shared library (link if duplicate `sha256`); update catalog `referenced_by` and project manifest
-- **Manual drop** — user may add files to shared `datasheets/`; catalog scan on next run; projects link when symbols match
 - **Optional: offer to update symbol `Datasheet` field** to catalog URI or `${KICAD_AI_LIBRARY}/…` path after attach (user confirms)
 
 Registered PDFs are reused on subsequent runs for the same project.
@@ -396,7 +464,7 @@ Automated SUBCKT generation is **opt-in** and **never silent**. Context preview 
 
 When the user requests SUBCKT / `.lib` generation:
 
-1. **Resolve datasheet** — symbol `Datasheet` field → local paths → user search paths → registered attachments → controlled URL fetch → cache
+1. **Resolve datasheet** — symbol `Datasheet` field → local paths → user search paths → registered attachments → controlled URL fetch (respecting `url_fetch_log.json`) → **AI discovery when logged `failed`** *(future)* → cache
 2. If PDF resolved → **Tier A** (two-stage extract + synthesize + validate)
 3. Else if symbol pins + value/footprint/fields (and optionally schematic image) → **Tier B** (multi-source context synthesis)
 4. Else → **Tier C** (last-resort inference with mandatory review labeling)

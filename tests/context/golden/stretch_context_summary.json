@@ -1,0 +1,37 @@
+{
+  "project_path": "<PROJECT>",
+  "project_name": "testproj",
+  "schematics": [
+    "testproj.kicad_sch"
+  ],
+  "datasheet_resolutions": {
+    "R1": {
+      "status": "missing",
+      "artifact_id": null,
+      "local_path": null,
+      "tier_hint": "B",
+      "reference": "R1",
+      "part": "10k"
+    },
+    "U3": {
+      "status": "resolved",
+      "artifact_id": "<ARTIFACT_ID>",
+      "local_path": "<LOCAL_PATH>",
+      "tier_hint": "A",
+      "reference": "U3",
+      "part": "F0D3180"
+    },
+    "U1": {
+      "status": "fetch_failed",
+      "artifact_id": null,
+      "local_path": null,
+      "tier_hint": "B",
+      "reference": "U1",
+      "part": "LM7805"
+    }
+  },
+  "artifact_manifest_path": "<MANIFEST>",
+  "schematic_image_meta": null,
+  "symbol_count": 3,
+  "resolved_count": 1
+}

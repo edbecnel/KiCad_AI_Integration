@@ -39,3 +39,14 @@ Desktop.ini
 # Logs
 *.log
 *.csv
+
+# KiCad AI local config and caches
+kicad_ai_config.json
+*.kicad_ai_local
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Per-project assistant exports (machine-local)
+kicad_ai/exports/
+tests/fixtures/kicad_ai/

@@ -1,0 +1,12 @@
+[project]
+name = "kicad-ai-integration"
+version = "0.1.0"
+description = "In-KiCad AI engineering assistant"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: tests requiring kicad-cli or pdftoppm on PATH",
+]

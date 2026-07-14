@@ -1,0 +1,58 @@
+(kicad_sch
+  (version 20250114)
+  (generator "eeschema")
+  (generator_version "9.0")
+  (uuid "00000000-0000-0000-0000-000000000001")
+  (paper "A4")
+  (title_block
+    (title "Minimal Test Schematic")
+  )
+  (symbol
+    (lib_id "Device:R")
+    (at 100 100 0)
+    (uuid "00000000-0000-0000-0000-000000000010")
+    (property "Reference" "R1"
+      (at 100 90 0)
+    )
+    (property "Value" "10k"
+      (at 100 110 0)
+    )
+    (property "Footprint" "Resistor_SMD:R_0805"
+      (at 100 120 0)
+    )
+    (property "Datasheet" ""
+      (at 100 130 0)
+    )
+  )
+  (symbol
+    (lib_id "Opto:FOD3180")
+    (at 200 100 0)
+    (uuid "00000000-0000-0000-0000-000000000011")
+    (property "Reference" "U3"
+      (at 200 90 0)
+    )
+    (property "Value" "F0D3180"
+      (at 200 110 0)
+    )
+    (property "Footprint" "Package_DIP:DIP-6_W7.62mm"
+      (at 200 120 0)
+    )
+    (property "Datasheet" "datasheets/F0D3180.pdf"
+      (at 200 130 0)
+    )
+    (property "Spice_Model" ""
+      (at 200 140 0)
+    )
+  )
+  (sheet
+    (at 300 50 0)
+    (size 50 30)
+    (uuid "00000000-0000-0000-0000-000000000020")
+    (property "Sheetname" "power"
+      (at 300 40 0)
+    )
+    (property "Sheetfile" "power.kicad_sch"
+      (at 300 45 0)
+    )
+  )
+)

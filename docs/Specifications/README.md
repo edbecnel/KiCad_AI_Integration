@@ -11,6 +11,7 @@ Functional requirements, non-functional requirements, feature specifications, an
 ## Authoritative Documents
 
 - [Netlist Gap Fill](Netlist_Gap_Fill.md) — AI-assisted inference of missing symbol connectivity (Draft)
+- [Datasheet Requirements and User PDF Supply](Datasheet_Requirements_and_User_Supply.md) — when PDFs are required, user notification, manual supply, planned drag-and-drop UI
 
 ## What Belongs Here
 

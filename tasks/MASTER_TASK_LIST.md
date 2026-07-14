@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Planning / documentation only — no `src/` code yet.
+**Current repository status:** Phase 1 stretch slice implemented — artifact library, datasheet resolver, schematic image export, and minimal `ProjectContext` in `src/`. Core MVP (PCB extractor, prompt builder, Claude provider, wxPython UI) not yet started.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -40,7 +40,7 @@ baseline before feature work begins.
 - [x] Create `tests/` — unit and integration tests
 - [x] Create `examples/` — sample projects and reference workflows
 - [x] Create `scripts/` — KiCad-runnable entry-point scripts
-- [ ] Add package `__init__.py` files and a minimal importable package layout
+- [x] Add package `__init__.py` files and a minimal importable package layout
 
 ### KiCad compatibility & dev workflow
 
@@ -48,16 +48,16 @@ baseline before feature work begins.
 - [ ] Confirm availability of `pcbnew`, schematic access, and `wxPython` inside KiCad
 - [ ] Document how to run code inside KiCad (Scripting Console vs external plugin action)
 - [ ] Define strategy for testing outside KiCad (mock `pcbnew` objects, file-based fixtures)
-- [ ] Add a minimal sample KiCad project under `examples/` for integration testing
+- [x] File-based schematic fixtures under `tests/fixtures/` for integration testing
 
 ### Configuration
 
-- [ ] Define configuration schema (API keys, provider profile, model selection)
-- [ ] Support API key via environment variable (e.g. `ANTHROPIC_API_KEY`)
-- [ ] Support optional local config file for user preferences
-- [ ] Config: `artifact_library_path` — shared library root for datasheets and libs (default `~/kicad_ai_library/`)
-- [ ] Config: `datasheet_search_paths` — local folders scanned for import into shared library
-- [ ] Never hardcode credentials in source or committed files
+- [x] Define configuration schema (API keys, provider profile, model selection) — `src/utils/config.py`
+- [x] Support API key via environment variable (e.g. `ANTHROPIC_API_KEY`)
+- [x] Support optional local config file for user preferences
+- [x] Config: `artifact_library_path` — shared library root for datasheets and libs (default `~/kicad_ai_library/`)
+- [x] Config: `datasheet_search_paths` — local folders scanned for import into shared library
+- [x] Never hardcode credentials in source or committed files
 
 ### Security baseline
 
@@ -86,10 +86,10 @@ S-expression file parsing.
 
 #### Schematic (`.kicad_sch`)
 
-- [ ] Extract component references, values, and footprints
+- [x] Extract component references, values, and footprints — `src/context/schematic_parse.py`
 - [ ] Extract pin connections and net labels
-- [ ] Extract schematic hierarchy (sheets, subsheets)
-- [ ] Extract custom component fields (e.g. `Datasheet`, `Vds_max`)
+- [x] Extract schematic hierarchy (sheets, subsheets) — one-level subsheet walk
+- [x] Extract custom component fields (e.g. `Datasheet`, `Vds_max`)
 
 #### PCB (`pcbnew.GetBoard()`)
 
@@ -123,28 +123,33 @@ S-expression file parsing.
 #### Optional schematic image (Phase 1 stretch)
 
 - [x] Document export pipeline — [ADR-0004](../docs/Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)
-- [ ] Implement `export_schematic_image(path, dpi=600, pages=None) -> bytes` in `src/context/schematic_image.py`
-- [ ] Resolve `kicad-cli` path (`KICAD_CLI` env var, `shutil.which`, macOS app bundle fallback)
-- [ ] Export via `kicad-cli sch export pdf --black-and-white --exclude-drawing-sheet`
-- [ ] Rasterize with `pdftoppm -png -r 600 -singlefile`
-- [ ] Detect KiCad 9+ native `sch export png --dpi` and prefer when available
+- [x] Implement `export_schematic_image(path, dpi=600, pages=None) -> bytes` in `src/context/schematic_image.py`
+- [x] Resolve `kicad-cli` path (`KICAD_CLI` env var, `shutil.which`, macOS app bundle fallback)
+- [x] Export via `kicad-cli sch export pdf --black-and-white --exclude-drawing-sheet`
+- [x] Rasterize with `pdftoppm -png -r 600 -singlefile`
+- [x] Detect KiCad 9+ native `sch export png --dpi` and prefer when available
 - [ ] Check `pdftoppm` availability; surface clear UI error if Poppler is missing
 - [ ] Prompt user to save project before export when schematic has unsaved edits
-- [ ] Extend `ProjectContext` with optional `schematic_image` and `schematic_image_meta`
+- [x] Extend `ProjectContext` with optional `schematic_image` and `schematic_image_meta`
 
 #### Netlist gap-fill detection (Phase 1 stretch)
 
 - [ ] Detect symbols with incomplete netlist connectivity — see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md)
 - [ ] Flag auto-generated net names (`Net-(…)`) and unconnected pins in context model
 - [ ] Detect symbols missing `Spice_Model` or unresolved `.include`/`.lib` references in exported SPICE netlist
-- [ ] **Shared artifact library:** create `artifact_library_path` with `catalog.json`, `datasheets/`, `libs/`; dedupe by `sha256`
-- [ ] **Per-project registry:** `kicad_ai/project_manifest.json` beside `.kicad_pro`; link to catalog entries
-- [ ] **Reference tracking:** update `referenced_by` in catalog (project, schematic path, sheet, component ref) on each scan
-- [ ] **Datasheet resolver:** read shared `catalog.json` and per-project `project_manifest.json`
-- [ ] **Datasheet resolver:** read symbol `Datasheet` field from `.kicad_sch`; import into shared library when not cataloged
-- [ ] **Datasheet resolver:** support user PDF attach/register per component; cache under project artifact store
-- [ ] **Datasheet resolver:** controlled `https:` fetch when symbol field is URL only (SSRF-safe, size/timeout limits, cache PDF)
-- [ ] SUBCKT routing: Tier A (datasheet-backed two-stage) → Tier B (multi-source KiCad context) → Tier C (last-resort inference)
+- [x] **Shared artifact library:** create `artifact_library_path` with `catalog.json`, `datasheets/`, `libs/`; dedupe by `sha256`
+- [x] **Per-project registry:** `kicad_ai/project_manifest.json` beside `.kicad_pro`; link to catalog entries
+- [x] **Reference tracking:** update `referenced_by` in catalog (project, schematic path, sheet, component ref) on each scan
+- [x] **Datasheet resolver:** read shared `catalog.json` and per-project `project_manifest.json`
+- [x] **Datasheet resolver:** read symbol `Datasheet` field from `.kicad_sch`; import into shared library when not cataloged
+- [x] **Datasheet resolver:** support user PDF attach/register per component; cache under project artifact store
+- [x] **Datasheet resolver:** controlled `https:` fetch when symbol field is URL only (SSRF-safe, size/timeout limits, cache PDF)
+- [x] **Datasheet resolver:** persistent `url_fetch_log.json` per part+URL (`downloaded` / `failed`); skip repeat fetches; set `needs_ai_datasheet_discovery` on failure
+- [ ] **AI datasheet discovery:** when `needs_ai_datasheet_discovery`, suggest official PDF URL from KiCad context; user approves before fetch (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#url-fetch-log-and-ai-datasheet-discovery))
+- [ ] **Force refresh datasheets (UI):** user action to re-fetch all symbol HTTPS URLs; bypass catalog + `url_fetch_log` caches including prior failures (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#force-refresh-datasheets-future-ui))
+- [ ] **Catalog scan:** pick up new files in shared `datasheets/` without manual registration (see [Datasheet Requirements](../docs/Specifications/Datasheet_Requirements_and_User_Supply.md))
+- [x] **CLI user notice:** print **Manual datasheets required** when auto-fetch fails for datasheet-required parts (`context/datasheet_requirements.py`)
+- [x] SUBCKT routing: Tier A/B/C tier hints via `DatasheetResolution.tier_hint` (AI prompts not yet implemented)
 - [ ] Tier A: extract structured component facts from resolved PDF before `.SUBCKT` synthesis
 - [ ] Tier B: include symbol pin list, fields, footprint, schematic JSON, optional 600 DPI image in prompt
 - [ ] Emit `provenance.json` with datasheet path or `sources_used[]` per generated model
@@ -156,13 +161,13 @@ S-expression file parsing.
 
 ### 1.2 Project Context Model
 
-- [ ] Define `ProjectContext` schema (dataclass or typed dict)
+- [x] Define `ProjectContext` schema (dataclass or typed dict) — stretch slice in `src/context/model.py`
 - [ ] Include: metadata, components, nets, footprints, board_stats, constraints, bom, erc_results, drc_results
 - [ ] Support optional `user_description` (design intent text) and `selection` context
-- [ ] Serialize to JSON for prompt assembly and debugging
+- [x] Serialize to JSON for prompt assembly and debugging
 - [ ] Support partial context flags (e.g. PCB-only, schematic-only, critical-nets-only)
 - [ ] Design for token budgeting (summarization hooks, size estimation)
-- [ ] Include optional `schematic_image` and `schematic_image_meta` fields when multimodal context is enabled
+- [x] Include optional `schematic_image` and `schematic_image_meta` fields when multimodal context is enabled
 
 ### 1.3 Prompt Builder
 
@@ -203,22 +208,26 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 - [ ] Optional design-intent / functional-description textarea
 - [ ] User prompt input field and Send button
 - [ ] Context preview panel showing payload summary before transmission
+- [ ] **Missing required datasheets** panel — list parts needing user PDFs; link to [Datasheet Requirements](../docs/Specifications/Datasheet_Requirements_and_User_Supply.md)
+- [ ] **Datasheet drag-and-drop UI** — drop PDF → `datasheets/{Value}.pdf` + catalog/manifest registration; map to schematic Value
+- [ ] Per-component **Attach PDF** file picker (uses `user_attach_path` resolver API)
 - [ ] Explicit Approve & Send step (security requirement)
 - [ ] Read-only response display area
 - [ ] Status bar or inline messages for errors and connection status
-- [ ] Entry-point script runnable from KiCad Scripting Console (`scripts/run_ai_assistant.py`)
+- [x] Entry-point script runnable from KiCad Scripting Console (`scripts/run_ai_assistant.py`) — stretch slice stub
 
 ### 1.6 Integration, Tests & Examples
 
 #### Unit tests
 
-- [ ] Context model serialization / deserialization
+- [x] Context model serialization / deserialization
 - [ ] Prompt assembly from fixtures (golden-file snapshots)
 - [ ] Provider layer with mocked HTTP responses
 
 #### Integration tests
 
-- [ ] File-based fixtures: sample `.kicad_sch`, `.kicad_pcb`, netlist files
+- [x] File-based fixtures: sample `.kicad_sch`, `.kicad_pcb`, netlist files — `tests/fixtures/`
+- [x] Stretch pipeline: fixture → context → JSON summary — `tests/context/test_collector.py`
 - [ ] End-to-end pipeline: fixture → context → prompt → mocked provider response
 
 #### Manual E2E validation
@@ -305,7 +314,9 @@ beyond free-form chat.
 ### Component & datasheet intelligence
 
 - [ ] Component comparison from BOM parametric data
-- [ ] Datasheet resolver for gap-fill — symbol `Datasheet` field, local paths, user registration, controlled URL fetch (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md))
+- [ ] Datasheet resolver for gap-fill — symbol `Datasheet` field, local paths, user registration, controlled URL fetch, `url_fetch_log.json` (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md))
+- [ ] AI-assisted datasheet discovery when URL fetch is logged `failed` (`needs_ai_datasheet_discovery`)
+- [ ] Force refresh datasheets — user-facing action to re-download all HTTPS URLs (bypass catalog + failed log)
 - [ ] Datasheet text extraction from resolved PDFs for SUBCKT Tier A
 - [ ] Circuit explanation mode (topology walkthrough from schematic context)
 
@@ -344,7 +355,7 @@ not only free-form chat.
 
 ### Testing & CI
 
-- [ ] pytest suite runnable without KiCad installed
+- [x] pytest suite runnable without KiCad installed
 - [ ] Mock `pcbnew` for unit tests
 - [ ] Golden-file prompt snapshots to catch regressions
 - [ ] CI pipeline: lint + unit tests (optional KiCad-in-Docker for integration)
