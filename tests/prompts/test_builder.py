@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from context.collector import collect_stretch_context
-from prompts import build_general_review_prompt, estimate_tokens
+from prompts import build_general_review_prompt, build_subckt_prompt, estimate_tokens
 from utils.config import AppConfig
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
@@ -70,3 +70,19 @@ def test_build_general_review_prompt_golden(tmp_path: Path) -> None:
     )
     assert data["project_name"] == "testproj"
     assert len(data["symbols"]) >= 2
+
+
+def test_build_subckt_prompt_for_part(tmp_path: Path) -> None:
+    ds_dir = FIXTURES / "datasheets"
+    ds_dir.mkdir(exist_ok=True)
+    (ds_dir / "F0D3180.pdf").write_bytes(b"%PDF-1.4 test")
+    config = AppConfig(artifact_library_path=tmp_path / "library")
+    ctx = collect_stretch_context(
+        FIXTURES / "testproj.kicad_pro",
+        config=config,
+        include_image=False,
+    )
+    built = build_subckt_prompt(ctx, "F0D3180", tier="B")
+    assert built.template == "subckt_tier_b"
+    assert "F0D3180" in built.text
+    assert built.system is not None

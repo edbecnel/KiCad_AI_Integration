@@ -43,6 +43,12 @@ class AppConfig:
     provider_timeout_sec: int = DEFAULT_PROVIDER_TIMEOUT_SEC
     provider_read_timeout_sec: int = DEFAULT_PROVIDER_READ_TIMEOUT_SEC
     provider_max_tokens: int = DEFAULT_PROVIDER_MAX_TOKENS
+    datasheet_ai_discovery: bool = False
+    datasheet_ai_discovery_auto_fetch: bool = False
+    datasheet_ai_discovery_max_urls: int = 3
+    datasheet_reset_quarantine_local_pdf: bool = True
+    datasheet_write_symbol_url: bool = False
+    spice_write_symbol_fields: bool = False
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AppConfig:
@@ -82,6 +88,18 @@ class AppConfig:
             provider_max_tokens=int(
                 data.get("provider_max_tokens", DEFAULT_PROVIDER_MAX_TOKENS)
             ),
+            datasheet_ai_discovery=bool(data.get("datasheet_ai_discovery", False)),
+            datasheet_ai_discovery_auto_fetch=bool(
+                data.get("datasheet_ai_discovery_auto_fetch", False)
+            ),
+            datasheet_ai_discovery_max_urls=int(
+                data.get("datasheet_ai_discovery_max_urls", 3)
+            ),
+            datasheet_reset_quarantine_local_pdf=bool(
+                data.get("datasheet_reset_quarantine_local_pdf", True)
+            ),
+            datasheet_write_symbol_url=bool(data.get("datasheet_write_symbol_url", False)),
+            spice_write_symbol_fields=bool(data.get("spice_write_symbol_fields", False)),
         )
 
 
@@ -144,5 +162,15 @@ def load_config(config_path: Path | None = None) -> AppConfig:
         )
     if os.environ.get("KICAD_AI_PROVIDER"):
         merged["ai_provider"] = os.environ["KICAD_AI_PROVIDER"].lower()
+    env_ai_ds = os.environ.get("KICAD_AI_DATASHEET_AI_DISCOVERY")
+    if env_ai_ds is not None:
+        merged["datasheet_ai_discovery"] = env_ai_ds.lower() in ("1", "true", "yes")
+    env_ai_ds_auto = os.environ.get("KICAD_AI_DATASHEET_AI_DISCOVERY_AUTO_FETCH")
+    if env_ai_ds_auto is not None:
+        merged["datasheet_ai_discovery_auto_fetch"] = env_ai_ds_auto.lower() in (
+            "1",
+            "true",
+            "yes",
+        )
 
     return AppConfig.from_dict(merged)

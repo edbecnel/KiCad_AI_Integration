@@ -62,6 +62,67 @@ def build_prompt_summary(ctx: ProjectContext, *, include_image: bool = False) ->
     return "\n".join(lines)
 
 
+def build_subckt_prompt(
+    ctx: ProjectContext,
+    part: str,
+    *,
+    tier: str | None = None,
+    stage: str = "synthesis",
+    facts: dict | None = None,
+    datasheet_text: str = "",
+    pdf_path: str | None = None,
+) -> BuiltPrompt:
+    """Build a SUBCKT generation prompt for one part Value."""
+    from prompts.templates.subckt import build_subckt_prompt_for_tier
+
+    part_norm = part.strip()
+    sym = next(
+        (
+            s
+            for s in ctx.symbols
+            if (s.value or s.reference).strip() == part_norm
+        ),
+        None,
+    )
+    if sym is None:
+        raise ValueError(f"No symbol with Value {part_norm!r}")
+
+    res = ctx.datasheet_resolutions.get(sym.reference)
+    chosen = tier or (res.tier_hint if res else "C")
+    sym_ctx = {
+        "reference": sym.reference,
+        "value": sym.value,
+        "footprint": sym.footprint,
+        "lib_id": sym.lib_id,
+        "datasheet": sym.datasheet,
+        "spice_model": sym.spice_model,
+        "spice_lib": sym.spice_lib,
+        "custom_fields": sym.custom_fields,
+    }
+    project_ctx = {
+        "project_name": ctx.project_name,
+        "schematics": ctx.schematics,
+    }
+    user, system = build_subckt_prompt_for_tier(
+        chosen,  # type: ignore[arg-type]
+        part_norm,
+        sym_ctx,
+        datasheet_text=datasheet_text,
+        pdf_path=pdf_path,
+        facts=facts,
+        project_context=project_ctx,
+        stage=stage,  # type: ignore[arg-type]
+    )
+    preview = f"SUBCKT generation (Tier {chosen}) for {part_norm} ({sym.reference})"
+    return BuiltPrompt(
+        text=user,
+        system=system,
+        template=f"subckt_tier_{chosen.lower()}",
+        preview_summary=preview,
+        estimated_text_tokens=estimate_tokens(user),
+    )
+
+
 def build_general_review_prompt(
     ctx: ProjectContext,
     question: str,

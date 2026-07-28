@@ -15,7 +15,7 @@
 ### Datasheet management
 - Shared library for datasheet PDFs across projects
 - Automatic resolution when PDFs exist or URLs can be fetched
-- **Missing Datasheets** panel: see which parts still need PDFs, attach files, drag-and-drop, refresh
+- **Datasheets** panel: **Missing** and **All required** tabs; attach files, drag-and-drop, refresh, **Reset & re-resolve** per part Value, **Use AI to find datasheets** (opt-in URL suggestion + approval)
 - Catalog picks up manually added PDFs in the library folder
 
 ### AI integration
@@ -58,7 +58,7 @@
 ### More AI capabilities
 - Additional **prompt templates** (layout audit, isolation/clearance, netlist cross-check)
 - **Netlist gap-fill** and SUBCKT model generation from datasheets
-- **AI-assisted datasheet discovery** (web search when URL fetch fails) — specified, deferred
+- **AI-assisted datasheet discovery** (Claude URL suggestion when HTTPS fetch fails; opt-in via config, CLI, or Missing Datasheets panel)
 
 ### Product polish
 - **Native KiCad plugin** (menu/toolbar entry, no separate terminal)
@@ -89,7 +89,7 @@
 
 An engineer can open a real KiCad project, launch the chat panel, ask something like *"What are the main active parts on this schematic?"* or *"Which parts are missing datasheets?"*, review what will be sent, approve it, and get a **schematic-aware** answer from Claude — without exporting or copy-pasting.
 
-The **datasheet workflow** is also usable: identify missing PDFs, attach them, and refresh until resolved.
+The **datasheet workflow** is also usable: identify missing PDFs, attach them, reset stale links per part Value, and refresh until resolved.
 
 ---
 
@@ -97,7 +97,7 @@ The **datasheet workflow** is also usable: identify missing PDFs, attach them, a
 
 | | |
 |---|---|
-| **Proven** | Schematic-aware AI Q&A with user approval; datasheet library and missing-PDF workflow |
+| **Proven** | Schematic-aware AI Q&A with user approval; datasheet library, missing-PDF workflow, and opt-in AI datasheet discovery |
 | **In progress** | Broader context (PCB, BOM, rules), more templates, production-ready UX |
 | **Later** | In-editor plugin, ongoing conversations, specialized engineering audits |
 

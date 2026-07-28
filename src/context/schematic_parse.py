@@ -16,6 +16,11 @@ class SymbolInstance:
     spice_model: str = ""
     spice_lib: str = ""
     spice_primitive: str = ""
+    sim_device: str = ""
+    sim_library: str = ""
+    sim_name: str = ""
+    sim_pins: str = ""
+    sim_params: str = ""
     sheet_path: str = ""
     sheet_name: str = "/"
     lib_id: str = ""
@@ -144,6 +149,11 @@ def parse_schematic_symbols(
             "Spice_Model",
             "Spice_Lib",
             "Spice_Primitive",
+            "Sim.Device",
+            "Sim.Library",
+            "Sim.Name",
+            "Sim.Pins",
+            "Sim.Params",
         }
         custom = {k: v for k, v in props.items() if k not in standard}
         symbols.append(
@@ -155,6 +165,11 @@ def parse_schematic_symbols(
                 spice_model=props.get("Spice_Model", ""),
                 spice_lib=props.get("Spice_Lib", ""),
                 spice_primitive=props.get("Spice_Primitive", ""),
+                sim_device=props.get("Sim.Device", ""),
+                sim_library=props.get("Sim.Library", ""),
+                sim_name=props.get("Sim.Name", ""),
+                sim_pins=props.get("Sim.Pins", ""),
+                sim_params=props.get("Sim.Params", ""),
                 sheet_path=sheet_path,
                 sheet_name=sheet_name,
                 lib_id=_lib_id_from_block(block),

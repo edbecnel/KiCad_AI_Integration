@@ -3,9 +3,11 @@
 from pathlib import Path
 
 from context.schematic_parse import SymbolInstance
+from context.schematic_write import DatasheetFieldUpdate, DatasheetFieldWriteResult
 from ui.datasheet_supply import (
     MissingDatasheetRow,
     attach_datasheet_pdf,
+    format_write_url_success_message,
     get_missing_datasheet_rows,
     manual_pdf_path_for_part,
 )
@@ -17,6 +19,27 @@ FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
 def test_manual_pdf_path_for_part() -> None:
     lib = Path("/tmp/lib")
     assert manual_pdf_path_for_part(lib, "FOD3180") == lib / "datasheets" / "FOD3180.pdf"
+
+
+def test_format_write_url_success_message_includes_reload_guidance() -> None:
+    result = DatasheetFieldWriteResult(
+        updated=[
+            DatasheetFieldUpdate(
+                sheet_path="power.kicad_sch",
+                reference="U3",
+                part="FOD3180",
+                old_value="",
+                new_url="https://example.com/fod3180.pdf",
+            )
+        ],
+        skipped=[],
+    )
+    message = format_write_url_success_message(result)
+    assert "U3" in message
+    assert "https://example.com/fod3180.pdf" in message
+    assert "power.kicad_sch" in message
+    assert "File → Revert" in message
+    assert "Do not use File → Save" in message
 
 
 def test_missing_row_from_summary_includes_url() -> None:
@@ -103,3 +126,50 @@ def test_attach_same_pdf_for_alias_part_resolves_via_manifest(tmp_path: Path) ->
     result = resolver.resolve_all([symbol], project)["U14"]
     assert result.status == "resolved"
     assert result.artifact_id is not None
+
+
+def test_attach_replaces_stale_catalog_entry_without_file(tmp_path: Path) -> None:
+    """Attach must work when catalog has a part entry whose PDF file was removed."""
+    from context.artifacts.catalog import ComponentRef
+    from context.artifacts.store import ArtifactStore, ProjectContextInfo
+
+    pro = tmp_path / "p.kicad_pro"
+    pro.touch()
+    sch = tmp_path / "p.kicad_sch"
+    sch_content = """
+(kicad_sch (version 20230121) (generator "test")
+  (symbol (lib_id "x:FOD3180") (at 0 0 0) (unit 1)
+    (property "Reference" "U1" (at 0 0 0))
+    (property "Value" "FOD3180" (at 0 0 0))
+    (property "Datasheet" "https://example.invalid/fod3180.pdf" (at 0 0 0))
+  )
+)
+"""
+    sch.write_text(sch_content, encoding="utf-8")
+    lib = tmp_path / "lib"
+    config = AppConfig(artifact_library_path=lib, datasheet_url_fetch="if_missing")
+
+    store = ArtifactStore(lib)
+    project = ProjectContextInfo(project_pro_path=pro, schematic_paths=[sch])
+    stale_pdf = tmp_path / "stale.pdf"
+    stale_pdf.write_bytes(b"%PDF-1.4 stale")
+    entry = store.register_datasheet(
+        stale_pdf,
+        "FOD3180",
+        "https_fetch",
+        project,
+        ComponentRef(reference="U1", sheet_path="p.kicad_sch"),
+        source_url="https://example.invalid/fod3180.pdf",
+    )
+    (lib / "datasheets" / "FOD3180.pdf").unlink()
+    assert store.resolve_local_path(entry.id) is None
+
+    user_pdf = tmp_path / "FOD3180-1008860.pdf"
+    user_pdf.write_bytes(b"%PDF-1.4 user downloaded")
+
+    ctx = attach_datasheet_pdf(pro, "FOD3180", user_pdf, config=config, verbose=False)
+    res = ctx.datasheet_resolutions["U1"]
+    assert res.status == "resolved"
+    assert (lib / "datasheets" / "FOD3180.pdf").is_file()
+    assert res.local_path is not None
+    assert res.local_path.name == "FOD3180.pdf"

@@ -91,6 +91,27 @@ Full specification: [AI Datasheet Discovery Mode](AI_Datasheet_Discovery.md).
 
 ---
 
+## Reset stale datasheet (per part Value)
+
+When a part already shows **resolved** but the PDF is wrong or outdated, use **Reset & re-resolve** instead of manually deleting catalog entries.
+
+**UI:** **Datasheets** panel → **All required** tab (or **Missing** when applicable) → select the part row → **Reset & re-resolve…**
+
+1. Confirm dialog shows the **Value** and reference count.
+2. Optional: **Delete orphaned PDF from library** — removes the catalog file when no other project references it.
+3. The app unlinks manifest/catalog bindings, clears `url_fetch_log` for that Value, quarantines `datasheets/{Value}.pdf` (default), and re-runs resolution with catalog/manifest/local-PDF bypass for that Value only.
+4. If **Use AI to find datasheets** is enabled, AI discovery runs for the part when still unresolved after URL fetch.
+
+**CLI:** `--reset-datasheet VALUE` on `scripts/run_ai_assistant.py` (repeatable; combine with `--ai-datasheets`).
+
+**When to use:** corrected symbol `Datasheet` URL but old PDF still linked; wrong `{Value}.pdf` in the library; transient fetch failure logged as `failed` for an empty-field part.
+
+**Not the same as Force refresh URLs:** that button retries HTTPS fetches project-wide but does not bypass catalog/manifest/local PDF for parts without a symbol URL.
+
+See [Netlist Gap Fill — Per-part datasheet reset](Netlist_Gap_Fill.md#per-part-datasheet-reset).
+
+---
+
 ## How the user supplies PDFs
 
 ### Shared library layout

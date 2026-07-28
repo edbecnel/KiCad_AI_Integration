@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from context.artifacts.manifest import Manifest
@@ -31,6 +32,11 @@ def collect_stretch_context(
     datasheet_url_fetch: DatasheetUrlFetchPolicy | None = None,
     retry_failed_urls: bool = False,
     force_refresh_urls: bool = False,
+    force_refresh_parts: set[str] | None = None,
+    datasheet_ai_discovery: bool | None = None,
+    datasheet_ai_discovery_auto_fetch: bool | None = None,
+    approve_ai_datasheet_url: Callable[[str, list[str]], str | None] | None = None,
+    on_datasheet_status: Callable[[str], None] | None = None,
     verbose: bool = True,
 ) -> ProjectContext:
     """
@@ -45,6 +51,10 @@ def collect_stretch_context(
         cfg.datasheet_url_fetch = "if_missing" if fetch_datasheet_urls else "never"
     if force_refresh_urls:
         cfg.datasheet_url_fetch = "always"
+    if datasheet_ai_discovery is not None:
+        cfg.datasheet_ai_discovery = datasheet_ai_discovery
+    if datasheet_ai_discovery_auto_fetch is not None:
+        cfg.datasheet_ai_discovery_auto_fetch = datasheet_ai_discovery_auto_fetch
     pro_path = _resolve_project_file(project_path)
     schematic_paths = discover_schematic_paths(pro_path)
     project_root = pro_path.parent
@@ -63,11 +73,41 @@ def collect_stretch_context(
     store.bootstrap_project(pro_path)
     store.scan_datasheets_folder()
     resolver = DatasheetResolver(cfg, store, verbose=verbose)
+    refresh_parts = {p.strip() for p in (force_refresh_parts or set())}
     resolutions = resolver.resolve_all(
         symbols,
         project_info,
-        retry_failed_urls=retry_failed_urls or force_refresh_urls,
+        retry_failed_urls=retry_failed_urls or force_refresh_urls or bool(refresh_parts),
+        force_refresh_parts=refresh_parts,
     )
+
+    ai_discovery_results: dict = {}
+    if cfg.datasheet_ai_discovery:
+        from context.ai_datasheet_discovery import run_ai_datasheet_discovery
+
+        ai_discovery_results = run_ai_datasheet_discovery(
+            symbols,
+            resolutions,
+            project_info,
+            store,
+            cfg,
+            approve_url=approve_ai_datasheet_url,
+            on_part_status=(
+                (lambda part, msg: on_datasheet_status(f"{part}: {msg}"))
+                if on_datasheet_status
+                else None
+            ),
+            verbose=verbose,
+        )
+        if any(r.outcome == "downloaded" for r in ai_discovery_results.values()):
+            resolutions = resolver.resolve_all(
+                symbols,
+                project_info,
+                retry_failed_urls=retry_failed_urls or force_refresh_urls or bool(refresh_parts),
+                force_refresh_parts=refresh_parts,
+            )
+        store.url_fetch_log.save()
+        store.ai_discovery_log.save()
 
     _sync_catalog_references(store, pro_path, resolutions, symbols)
 
@@ -81,6 +121,7 @@ def collect_stretch_context(
         symbols=symbols,
         datasheet_resolutions=resolutions,
         artifact_manifest_path=str(manifest_path),
+        ai_discovery_results=ai_discovery_results,
     )
 
     labels = parse_project_labels(project_root, schematic_paths)

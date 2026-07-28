@@ -145,8 +145,9 @@ S-expression file parsing.
 - [x] **Datasheet resolver:** support user PDF attach/register per component; cache under project artifact store
 - [x] **Datasheet resolver:** controlled `https:` fetch when symbol field is URL only (SSRF-safe, size/timeout limits, cache PDF)
 - [x] **Datasheet resolver:** persistent `url_fetch_log.json` per part+URL (`downloaded` / `failed`); skip repeat fetches; set `needs_ai_datasheet_discovery` on failure
-- [ ] **AI datasheet discovery mode:** opt-in web search for official PDF URLs, auto-download, `ai_discovery_log.json`; on failure show URL + manual attach / `{Value}.pdf` instructions — see [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
-- [ ] **Force refresh datasheets (UI):** user action to re-fetch all symbol HTTPS URLs — **Force refresh URLs** button on Missing datasheets panel
+- [x] **AI datasheet discovery mode:** opt-in web search for official PDF URLs, auto-download, `ai_discovery_log.json`; on failure show URL + manual attach / `{Value}.pdf` instructions — see [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
+- [x] **Per-part datasheet reset:** unlink manifest/catalog, clear `url_fetch_log`, quarantine `{Value}.pdf`, `force_refresh_parts` resolver bypass; **Datasheets** panel (Missing | All required) + `--reset-datasheet` CLI
+- [ ] **Project-wide force refresh datasheets (UI):** re-fetch all symbol HTTPS URLs with full catalog/`url_fetch_log` bypass — **Force refresh URLs** today only retries failed URL fetches
 - [x] **Catalog scan:** pick up new files in shared `datasheets/` — `ArtifactStore.scan_datasheets_folder()`
 - [x] **CLI user notice:** print **Manual datasheets required** when auto-fetch fails for datasheet-required parts (`context/datasheet_requirements.py`)
 - [x] SUBCKT routing: Tier A/B/C tier hints via `DatasheetResolution.tier_hint` (AI prompts not yet implemented)
@@ -315,7 +316,8 @@ beyond free-form chat.
 - [ ] Component comparison from BOM parametric data
 - [ ] Datasheet resolver for gap-fill — symbol `Datasheet` field, local paths, user registration, controlled URL fetch, `url_fetch_log.json` (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md))
 - [ ] AI-assisted datasheet discovery mode — web search, auto-download, failure URLs + manual fallback — [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
-- [ ] Force refresh datasheets — user-facing action to re-download all HTTPS URLs (bypass catalog + failed log)
+- [x] Per-part datasheet reset — selective hard refresh by Value; Datasheets panel + `--reset-datasheet` CLI (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#per-part-datasheet-reset))
+- [ ] Project-wide force refresh datasheets — re-download all HTTPS URLs with full catalog + failed-log bypass (partial: **Force refresh URLs** retries failed fetches only)
 - [ ] Datasheet text extraction from resolved PDFs for SUBCKT Tier A
 - [ ] Circuit explanation mode (topology walkthrough from schematic context)
 

@@ -17,6 +17,7 @@ from .catalog import (
     generate_artifact_id,
 )
 from .manifest import Manifest, ManifestComponentLink
+from .ai_discovery_log import AiDiscoveryLog
 from .url_fetch_log import UrlFetchLog
 
 
@@ -51,10 +52,12 @@ class ArtifactStore:
         self.library_path = library_path.expanduser().resolve()
         self.catalog = Catalog(self.library_path)
         self.url_fetch_log = UrlFetchLog(self.library_path)
+        self.ai_discovery_log = AiDiscoveryLog(self.library_path)
 
     def bootstrap(self) -> None:
         self.catalog.bootstrap()
         self.url_fetch_log.bootstrap()
+        self.ai_discovery_log.bootstrap()
         (self.library_path / "datasheets").mkdir(parents=True, exist_ok=True)
         (self.library_path / "libs").mkdir(parents=True, exist_ok=True)
 
@@ -146,6 +149,9 @@ class ArtifactStore:
         )
         if tier:
             entry.tier = tier
+            from datetime import datetime, timezone
+
+            entry.generated = datetime.now(timezone.utc).isoformat()
             self.catalog.update_artifact(entry)
         return entry
 

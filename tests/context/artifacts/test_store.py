@@ -116,3 +116,23 @@ def test_register_datasheet_links_requested_part_on_sha256_dedupe(tmp_path: Path
     assert len(manifest.get_links_for_part("FOD3180")) == 1
     assert len(manifest.get_links_for_part("FOD3180-TEST")) == 1
     assert manifest.get_links_for_part("FOD3180-TEST")[0].artifact_id == entry1.id
+
+
+def test_register_lib_creates_catalog_entry(tmp_path: Path) -> None:
+    lib_root = tmp_path / "library"
+    store = ArtifactStore(lib_root)
+    lib_file = tmp_path / "F0D3180.lib"
+    lib_file.write_text(".SUBCKT F0D3180 1 2\n.ENDS\n", encoding="utf-8")
+    project = _project_ctx(tmp_path)
+    entry = store.register_lib(
+        lib_file,
+        "F0D3180",
+        "ai_subckt",
+        project,
+        ComponentRef(reference="U3", sheet_path="testproj.kicad_sch"),
+        tier="datasheet_backed",
+    )
+    assert (lib_root / "libs" / "F0D3180.lib").is_file()
+    assert entry.tier == "datasheet_backed"
+    assert entry.generated is not None
+    assert len(store.get_by_part("F0D3180", "lib")) == 1

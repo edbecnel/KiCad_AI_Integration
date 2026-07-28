@@ -27,6 +27,7 @@ class ProjectContext:
     pcb_summary: dict[str, Any] | None = None
     netlist_summary: dict[str, Any] | None = None
     schematic_image_error: str | None = None
+    ai_discovery_results: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self, *, include_image_bytes: bool = False) -> dict[str, Any]:
         data: dict[str, Any] = {

@@ -276,7 +276,7 @@ The shared library maintains `url_fetch_log.json` so HTTPS datasheet URLs are **
 - **`failed`** — skip network fetch; set `DatasheetResolution.needs_ai_datasheet_discovery = true` and `url_fetch_outcome = failed`
 - **Bot protection (403 / HTML “access denied”)** — Mouser, Littelfuse (Akamai), and similar hosts often allow browser downloads but block scripted clients. Prefer **direct manufacturer PDF URLs** in symbol `Datasheet` fields (e.g. `onsemi.com/.../fod3180-d.pdf` instead of a Mouser redirect). Manual attach remains supported.
 - **New URL on same part** — if the user updates the symbol `Datasheet` field, the new URL is tried (log key includes URL)
-- **`always` fetch policy** — re-fetch successful URLs; still skip URLs logged as `failed` (see [Force refresh datasheets](#force-refresh-datasheets-future-ui))
+- **`always` fetch policy** — re-fetch successful URLs; still skip URLs logged as `failed` (see [Per-part datasheet reset](#per-part-datasheet-reset) and [Project-wide force refresh](#project-wide-force-refresh-urls))
 
 When `needs_ai_datasheet_discovery` is set, the Context Collection Engine has exhausted automatic resolution for that symbol's current URL. **Phase 1 stretch slice** records the handoff only.
 
@@ -293,26 +293,55 @@ Summary of planned AI Provider Layer behavior:
 
 Implementation tracking: [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) — *AI-assisted datasheet discovery when URL fetch fails*.
 
-### Force refresh datasheets (future UI)
+### Per-part datasheet reset
 
-Users need an explicit **Force refresh datasheets** action (in-KiCad UI; not required on every run) to re-download PDFs from symbol `Datasheet` HTTPS URLs after correcting links, replacing stale cached files, or recovering from transient fetch failures.
+Users can **reset and re-resolve** a single part **Value** (all references sharing that Value) when a cached PDF or catalog link is stale or wrong. This is a selective hard refresh: it bypasses catalog, manifest, local `{Value}.pdf`, and `url_fetch_log` fallbacks for that Value only, then re-runs URL fetch and optional AI discovery.
 
-**Expected behavior when the user chooses force refresh:**
+**UI:** **Datasheets** panel (Missing | **All required** tabs) → select a row → **Reset & re-resolve…** — confirms scope, optional **Delete orphaned PDF from library**, then runs in the background and refreshes both tabs.
 
-1. Scope — all placed symbols on the active project schematics that have an `https:` `Datasheet` URL (optionally: selected components only in a later iteration)
-2. Bypass catalog cache — re-fetch even when a PDF is already in `catalog.json` / `project_manifest.json`
-3. Bypass `url_fetch_log` — retry URLs previously logged as `failed` or `downloaded` for the current part+URL pair
-4. Update shared library — replace or re-register catalog entries; refresh `url_fetch_log` to `downloaded` or `failed` with new timestamps
-5. Show progress — per-part status (`downloading`, `downloaded`, `failed`) in the UI; do not block other assistant features on completion
+**CLI:**
 
-**Partial backend support today (CLI / config only):**
+```bash
+python scripts/run_ai_assistant.py project.kicad_pro --reset-datasheet FOD3180
+python scripts/run_ai_assistant.py project.kicad_pro --reset-datasheet FOD3180 --ai-datasheets
+```
 
-- `datasheet_url_fetch: "always"` or `--fetch-always` re-downloads when a cached PDF exists, but **still skips** URLs logged as `failed` in `url_fetch_log.json`
-- Full force refresh requires a dedicated resolver flag (e.g. `force_refresh=True`) that ignores `url_fetch_log` and always attempts HTTPS fetch — **not yet implemented**
+**API:** `reset_datasheet_for_part(project_path, part, ...)` in `src/ui/datasheet_supply.py`.
 
-**UI placement (planned):** context collection preview or artifact library panel — alongside attach PDF, add search folder, and future AI discovery actions.
+**Per Value workflow:**
 
-Implementation tracking: [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) — *Force refresh datasheets (user-facing)*.
+1. Unlink `project_manifest.json` links and catalog `referenced_by` for all symbols with that Value
+2. Remove all `url_fetch_log.json` entries for the part (audit `ai_discovery_log` is retained)
+3. Move `datasheets/{Value}.pdf` to `datasheets/.quarantine/{Value}-{timestamp}.pdf` when quarantine is enabled (default)
+4. Optionally delete the catalog artifact when `can_delete()` (no remaining project references)
+5. Re-resolve with `force_refresh_parts={Value}` and `retry_failed_urls=True`
+6. Run AI datasheet discovery when enabled and the part is still unresolved
+
+**Resolver behavior when `part in force_refresh_parts`:**
+
+| Step | Normal | Force refresh for this Value |
+|------|--------|------------------------------|
+| 1 catalog by part | early resolve | **skip** |
+| 1b catalog by URL | early resolve | **skip** |
+| 2 manifest | early resolve | **skip** |
+| 5 `{Value}.pdf` local | early resolve | **skip** |
+| 6 url_fetch_log failed skip | skip fetch | **retry fetch** |
+| 6 post-failure local PDF fallback | fallback | **skip** |
+
+Steps 3–4 (symbol local path, user attach) are unchanged.
+
+### Project-wide force refresh URLs
+
+The **Force refresh URLs** button on the Datasheets panel re-fetches symbol `Datasheet` HTTPS URLs project-wide (`retry_failed_urls=True`). It does **not** bypass catalog/manifest/local-PDF fallbacks for parts with empty `Datasheet` fields — use **per-part reset** above for that case.
+
+**Planned (not yet implemented):** project-wide hard refresh that ignores catalog and `url_fetch_log` for every symbol with an `https:` URL.
+
+**Partial backend support today (CLI / config):**
+
+- `datasheet_url_fetch: "always"` or `--fetch-always` re-downloads when a cached PDF exists, but **still skips** URLs logged as `failed` in `url_fetch_log.json` unless combined with per-part reset or `retry_failed_urls=True`
+- Per-part reset uses `force_refresh_parts` on the resolver session to bypass catalog/manifest/local-PDF/`url_fetch_log` for listed Values — **implemented**
+
+Implementation tracking: [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) — *Per-part datasheet reset* (done); *Project-wide force refresh datasheets* (future).
 
 ### KiCad symbol properties
 

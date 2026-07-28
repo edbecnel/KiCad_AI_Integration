@@ -149,6 +149,16 @@ class UrlFetchLog:
         self._dirty = True
         return entry
 
+    def remove_entries_for_part(self, part: str) -> int:
+        """Remove all log entries for a part Value. Returns count removed."""
+        part_norm = part.strip()
+        before = len(self.entries)
+        self._entries = [e for e in self.entries if e.part != part_norm]
+        removed = before - len(self._entries)
+        if removed:
+            self._dirty = True
+        return removed
+
     def save(self) -> None:
         if not self._dirty or self._entries is None:
             return

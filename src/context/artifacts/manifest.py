@@ -139,3 +139,16 @@ class Manifest:
                 if (link.artifact_id, c.reference, c.sheet_path) in active_keys
             ]
         self.links = [link for link in self.links if link.components]
+
+    def remove_links_for_part(self, part: str) -> list[str]:
+        """Remove all manifest links for a part Value. Returns removed artifact_ids."""
+        part_norm = part.strip()
+        removed_ids: list[str] = []
+        kept: list[ManifestLink] = []
+        for link in self.links:
+            if link.part == part_norm:
+                removed_ids.append(link.artifact_id)
+            else:
+                kept.append(link)
+        self.links = kept
+        return removed_ids

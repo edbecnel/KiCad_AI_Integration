@@ -4,7 +4,7 @@
 
 > **Documentation path:** [Project Index](../../PROJECT_INDEX.md) → [Specifications](README.md) → AI Datasheet Discovery  
 > **Related:** [Datasheet Requirements and User PDF Supply](Datasheet_Requirements_and_User_Supply.md) · [Netlist Gap Fill](Netlist_Gap_Fill.md) · [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md)  
-> **Status:** Specified — not yet implemented
+> **Status:** Phase 1 implemented (Claude JSON URL suggestion — no live web search)
 
 ## Purpose
 
@@ -90,7 +90,7 @@ Continue to key by **part + normalized URL**. For AI-discovered URLs that fail f
 | `error` | Human-readable reason (bot protection, 404, not a PDF, timeout, etc.) |
 | `source_url` | The URL that was attempted (symbol field URL or AI-suggested URL) |
 
-### `ai_discovery_log.json` (planned, shared library)
+### `ai_discovery_log.json` (shared library)
 
 One entry per **part + discovery attempt** when AI mode runs:
 
@@ -139,7 +139,7 @@ FOD3180 (7 refs): AI discovery failed — Site blocked automated download (bot p
 
 ---
 
-## Configuration (planned)
+## Configuration
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -147,7 +147,9 @@ FOD3180 (7 refs): AI discovery failed — Site blocked automated download (bot p
 | `datasheet_ai_discovery_auto_fetch` | bool | `false` | Fetch suggested URL without per-URL approval |
 | `datasheet_ai_discovery_max_urls` | int | `3` | Max suggested URLs to try per part per run |
 
-CLI (planned): `--ai-datasheets`, `--ai-datasheets-auto-fetch`
+Env: `KICAD_AI_DATASHEET_AI_DISCOVERY`, `KICAD_AI_DATASHEET_AI_DISCOVERY_AUTO_FETCH`
+
+CLI: `--ai-datasheets`, `--ai-datasheets-auto-fetch`
 
 ---
 
@@ -179,11 +181,11 @@ See [Datasheet Requirements — Method 2 & 3](Datasheet_Requirements_and_User_Su
 |------|--------|
 | `needs_ai_datasheet_discovery` flag on resolution | Done (stretch slice) |
 | `url_fetch_log.json` failed URL skip | Done |
-| AI provider + search tool integration | Not started |
-| `ai_discovery_log.json` | Not started |
-| Config / CLI flags | Not started |
-| UI toggle + progress in Missing datasheets panel | Not started |
-| Enhanced failure messages with suggested URL | Not started |
+| AI provider URL suggestion (Claude JSON, Option A — no live search) | Done (Phase 1) |
+| `ai_discovery_log.json` | Done |
+| Config / CLI flags (`--ai-datasheets`, `--ai-datasheets-auto-fetch`) | Done |
+| UI toggle + progress in Missing datasheets panel | Done |
+| Enhanced failure messages with suggested URL | Done |
 
 See [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) — *AI-assisted datasheet discovery when URL fetch fails*.
 

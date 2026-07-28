@@ -120,6 +120,8 @@ def needs_user_pdf(resolution_status: str, requirement: DatasheetRequirement) ->
 def summarize_required_missing_datasheets(
     symbols: list[SymbolInstance],
     resolutions: dict[str, object],
+    *,
+    ai_discovery_results: dict[str, object] | None = None,
 ) -> list[dict[str, object]]:
     """Group datasheet-required symbols that still lack a resolved PDF."""
     grouped: dict[str, dict[str, object]] = {}
@@ -158,6 +160,87 @@ def summarize_required_missing_datasheets(
         refs = entry["references"]
         assert isinstance(refs, list)
         entry["reference_count"] = len(refs)
+        discovery = (ai_discovery_results or {}).get(part)
+        if discovery is not None:
+            entry["suggested_urls"] = list(getattr(discovery, "suggested_urls", []) or [])
+            entry["discovery_outcome"] = getattr(discovery, "outcome", None)
+            entry["discovery_error"] = getattr(discovery, "error", None)
+            entry["selected_url"] = getattr(discovery, "selected_url", None)
+        out.append(entry)
+    return out
+
+
+def summarize_required_datasheets(
+    symbols: list[SymbolInstance],
+    resolutions: dict[str, object],
+    *,
+    ai_discovery_results: dict[str, object] | None = None,
+) -> list[dict[str, object]]:
+    """Group all datasheet-required symbols by Value (resolved and unresolved)."""
+    grouped: dict[str, dict[str, object]] = {}
+    status_rank = {"missing": 2, "fetch_failed": 1, "resolved": 0}
+
+    for sym in symbols:
+        res = resolutions.get(sym.reference)
+        if res is None:
+            continue
+        requirement = classify_datasheet_requirement(sym)
+        if requirement != "required":
+            continue
+        part = sym.value or sym.reference
+        status = str(getattr(res, "status", "missing"))
+        bucket = grouped.setdefault(
+            part,
+            {
+                "part": part,
+                "references": [],
+                "status": status,
+                "errors": set(),
+                "artifact_id": None,
+                "local_path": None,
+                "sources_tried": set(),
+            },
+        )
+        refs = bucket["references"]
+        assert isinstance(refs, list)
+        refs.append(sym.reference)
+        current_status = str(bucket["status"])
+        if status_rank.get(status, 0) > status_rank.get(current_status, 0):
+            bucket["status"] = status
+        for src in getattr(res, "sources_tried", []):
+            tried = bucket["sources_tried"]
+            assert isinstance(tried, set)
+            tried.add(str(src))
+            if str(src).startswith("fetch_error:"):
+                errors = bucket["errors"]
+                assert isinstance(errors, set)
+                errors.add(str(src).replace("fetch_error:", "", 1))
+        artifact_id = getattr(res, "artifact_id", None)
+        if artifact_id and bucket["artifact_id"] is None:
+            bucket["artifact_id"] = artifact_id
+        local_path = getattr(res, "local_path", None)
+        if local_path and bucket["local_path"] is None:
+            bucket["local_path"] = str(local_path)
+
+    out: list[dict[str, object]] = []
+    for part in sorted(grouped):
+        entry = grouped[part]
+        errors = entry["errors"]
+        assert isinstance(errors, set)
+        entry["errors"] = sorted(errors)
+        tried = entry["sources_tried"]
+        assert isinstance(tried, set)
+        entry["sources_tried"] = sorted(tried)
+        refs = entry["references"]
+        assert isinstance(refs, list)
+        entry["reference_count"] = len(refs)
+        entry["is_resolved"] = entry["status"] == "resolved"
+        discovery = (ai_discovery_results or {}).get(part)
+        if discovery is not None:
+            entry["suggested_urls"] = list(getattr(discovery, "suggested_urls", []) or [])
+            entry["discovery_outcome"] = getattr(discovery, "outcome", None)
+            entry["discovery_error"] = getattr(discovery, "error", None)
+            entry["selected_url"] = getattr(discovery, "selected_url", None)
         out.append(entry)
     return out
 
@@ -167,9 +250,14 @@ def format_required_datasheet_notice(
     resolutions: dict[str, object],
     *,
     library_path: Path | None = None,
+    ai_discovery_results: dict[str, object] | None = None,
 ) -> str | None:
     """Human-readable notice when the user must supply PDFs manually."""
-    missing = summarize_required_missing_datasheets(symbols, resolutions)
+    missing = summarize_required_missing_datasheets(
+        symbols,
+        resolutions,
+        ai_discovery_results=ai_discovery_results,
+    )
     if not missing:
         return None
     lib = library_path.expanduser() if library_path else Path("~/kicad_ai_library")
@@ -183,13 +271,42 @@ def format_required_datasheet_notice(
         count = entry["reference_count"]
         status = entry["status"]
         errors = entry["errors"]
-        err_text = f" — {errors[0]}" if isinstance(errors, list) and errors else ""
-        lines.append(f"  {part} ({count} ref(s)): {status}{err_text}")
-    lines.extend(
-        [
-            "",
-            f"Supply PDFs: save as {lib}/datasheets/<Value>.pdf and re-run,",
-            "or use the planned drag-and-drop UI (see docs/Specifications/Datasheet_Requirements_and_User_Supply.md).",
-        ]
-    )
+        discovery_outcome = entry.get("discovery_outcome")
+        discovery_error = entry.get("discovery_error")
+        suggested = entry.get("suggested_urls") or []
+        selected = entry.get("selected_url")
+        symbol_url: str | None = None
+        for sym in symbols:
+            if (sym.value or sym.reference) == part and sym.datasheet.startswith("https://"):
+                symbol_url = sym.datasheet
+                break
+
+        if discovery_outcome in ("fetch_failed", "no_url_found", "user_rejected"):
+            err_text = discovery_error or (
+                errors[0] if isinstance(errors, list) and errors else str(status)
+            )
+            lines.append(f"  {part} ({count} ref(s)): AI discovery failed — {err_text}")
+        else:
+            err_text = f" — {errors[0]}" if isinstance(errors, list) and errors else ""
+            lines.append(f"  {part} ({count} ref(s)): {status}{err_text}")
+
+        if symbol_url:
+            lines.append(f"    Symbol URL: {symbol_url}")
+        if selected and selected != symbol_url:
+            lines.append(f"    Suggested URL: {selected}")
+        elif suggested:
+            for url in suggested[:3]:
+                if url != symbol_url:
+                    lines.append(f"    Suggested URL: {url}")
+                    break
+        safe_part = "".join(
+            ch if ch.isalnum() or ch in "-_" else "_" for ch in str(part).strip()
+        )
+        manual_path = lib / "datasheets" / f"{safe_part or 'unknown_part'}.pdf"
+        lines.append(
+            f"    Manual: Attach PDF in Missing datasheets panel, or save as {manual_path}"
+        )
+        lines.append("")
+    if lines and lines[-1] == "":
+        lines.pop()
     return "\n".join(lines)

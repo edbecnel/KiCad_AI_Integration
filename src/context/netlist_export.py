@@ -57,8 +57,13 @@ def collect_netlist_summary(
             return None
         text = out.read_text(encoding="utf-8", errors="replace")
         lines = [line for line in text.splitlines() if line.strip()]
+        from context.simulation_gaps import parse_spice_netlist_includes
+
+        includes = parse_spice_netlist_includes(text)
         return {
             "format": "spice",
             "line_count": len(lines),
             "preview_lines": lines[:40],
+            "include_paths": includes,
+            "text": text,
         }

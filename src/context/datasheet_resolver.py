@@ -43,6 +43,7 @@ class _ResolveSession:
     pending_manifest_save: bool = False
     pending_url_log_save: bool = False
     retry_failed_urls: bool = False
+    force_refresh_parts: set[str] = field(default_factory=set)
 
 
 def _normalize_file_url(value: str) -> str:
@@ -115,6 +116,12 @@ class DatasheetResolver:
         self.fetch_fn = fetch_fn or fetch_url_to_file
         self.verbose = verbose
         self._session: _ResolveSession | None = None
+
+    def _force_refresh(self, part: str) -> bool:
+        return (
+            self._session is not None
+            and part.strip() in self._session.force_refresh_parts
+        )
 
     def _link(
         self,
@@ -327,10 +334,13 @@ class DatasheetResolver:
         is_https = symbol.datasheet.startswith("https://")
         cached_id: str | None = None
         cached_path: Path | None = None
+        force = self._force_refresh(part)
 
         def use_cached_or_continue(artifact_id: str, local: Path | None) -> bool:
             """Link cached artifact; return True if resolution is complete."""
             nonlocal cached_id, cached_path
+            if force:
+                return False
             cached_id, cached_path = artifact_id, local
             self._link_or_store(artifact_id, project, component_ref, part=part)
             if policy == "always" and is_https:
@@ -338,48 +348,56 @@ class DatasheetResolver:
             return True
 
         # 1. Shared catalog lookup by part
-        resolution.sources_tried.append("catalog")
-        catalog_hits = self.store.get_by_part(part, "datasheet")
-        if catalog_hits:
-            entry = catalog_hits[0]
-            local = self.store.resolve_local_path(entry.id)
-            if local is not None:
-                if use_cached_or_continue(entry.id, local):
-                    return self._resolved(resolution, entry.id, local, symbol)
+        resolution.sources_tried.append(
+            "catalog_skipped_force_refresh" if force else "catalog"
+        )
+        if not force:
+            catalog_hits = self.store.get_by_part(part, "datasheet")
+            for entry in catalog_hits:
+                local = self.store.resolve_local_path(entry.id)
+                if local is not None:
+                    if use_cached_or_continue(entry.id, local):
+                        return self._resolved(resolution, entry.id, local, symbol)
 
         # 1b. Catalog lookup by HTTPS URL (cross-part dedupe)
         if is_https:
             norm_url = normalize_datasheet_url(symbol.datasheet)
-            resolution.sources_tried.append("catalog_url")
-            url_entry = self.store.catalog.get_by_source_url(norm_url)
-            if url_entry is not None:
-                local = self.store.resolve_local_path(url_entry.id)
-                if local is not None:
-                    self._note_url_downloaded_from_cache(part, norm_url, url_entry.id)
-                    if use_cached_or_continue(url_entry.id, local):
-                        resolution.url_fetch_outcome = "downloaded"
-                        return self._resolved(resolution, url_entry.id, local, symbol)
-            if self._session is not None and norm_url in self._session.url_to_artifact:
-                artifact_id = self._session.url_to_artifact[norm_url]
-                local = self.store.resolve_local_path(artifact_id)
-                if local is not None:
-                    self._note_url_downloaded_from_cache(part, norm_url, artifact_id)
-                    if use_cached_or_continue(artifact_id, local):
-                        resolution.url_fetch_outcome = "downloaded"
-                        return self._resolved(resolution, artifact_id, local, symbol)
+            if force:
+                resolution.sources_tried.append("catalog_url_skipped_force_refresh")
+            else:
+                resolution.sources_tried.append("catalog_url")
+                url_entry = self.store.catalog.get_by_source_url(norm_url)
+                if url_entry is not None:
+                    local = self.store.resolve_local_path(url_entry.id)
+                    if local is not None:
+                        self._note_url_downloaded_from_cache(part, norm_url, url_entry.id)
+                        if use_cached_or_continue(url_entry.id, local):
+                            resolution.url_fetch_outcome = "downloaded"
+                            return self._resolved(resolution, url_entry.id, local, symbol)
+                if self._session is not None and norm_url in self._session.url_to_artifact:
+                    artifact_id = self._session.url_to_artifact[norm_url]
+                    local = self.store.resolve_local_path(artifact_id)
+                    if local is not None:
+                        self._note_url_downloaded_from_cache(part, norm_url, artifact_id)
+                        if use_cached_or_continue(artifact_id, local):
+                            resolution.url_fetch_outcome = "downloaded"
+                            return self._resolved(resolution, artifact_id, local, symbol)
 
         # 2. Per-project manifest links
-        resolution.sources_tried.append("project_manifest")
-        manifest = (
-            self._session.manifest
-            if self._session is not None
-            else Manifest.load(project.project_pro_path)
+        resolution.sources_tried.append(
+            "project_manifest_skipped_force_refresh" if force else "project_manifest"
         )
-        for link in manifest.get_links_for_part(part):
-            local = self.store.resolve_local_path(link.artifact_id)
-            if local is not None:
-                if use_cached_or_continue(link.artifact_id, local):
-                    return self._resolved(resolution, link.artifact_id, local, symbol)
+        if not force:
+            manifest = (
+                self._session.manifest
+                if self._session is not None
+                else Manifest.load(project.project_pro_path)
+            )
+            for link in manifest.get_links_for_part(part):
+                local = self.store.resolve_local_path(link.artifact_id)
+                if local is not None:
+                    if use_cached_or_continue(link.artifact_id, local):
+                        return self._resolved(resolution, link.artifact_id, local, symbol)
 
         # 3. Symbol Datasheet field — local path
         if symbol.datasheet and not symbol.datasheet.startswith("http"):
@@ -405,7 +423,7 @@ class DatasheetResolver:
 
         # 5. Local PDF files by part Value (shared library datasheets/ + search_paths)
         # Skip when policy forces HTTPS refresh even if a local copy exists.
-        if not (policy == "always" and is_https):
+        if not force and not (policy == "always" and is_https):
             resolution.sources_tried.append("library_datasheet_file")
             local_resolved = self._try_local_part_pdf(
                 resolution,
@@ -416,11 +434,16 @@ class DatasheetResolver:
             )
             if local_resolved is not None:
                 return local_resolved
+        elif force:
+            resolution.sources_tried.append("library_datasheet_file_skipped_force_refresh")
 
         # 6. HTTPS fetch from symbol field (policy-controlled; deduped by URL)
         if is_https:
             norm_url = normalize_datasheet_url(symbol.datasheet)
             url_log = self.store.url_fetch_log.get(part, norm_url)
+            retry_failed = (
+                self._session is not None and self._session.retry_failed_urls
+            ) or force
             if policy == "never":
                 resolution.sources_tried.append("https_fetch_disabled")
                 if cached_id is not None:
@@ -431,7 +454,7 @@ class DatasheetResolver:
                 resolution.url_fetch_outcome = "downloaded"
                 return self._resolved(resolution, cached_id, cached_path, symbol)
             elif (
-                not (self._session is not None and self._session.retry_failed_urls)
+                not retry_failed
                 and norm_url in self._known_failed_urls()
             ):
                 resolution.sources_tried.append("url_fetch_log:failed")
@@ -440,16 +463,17 @@ class DatasheetResolver:
                         f"  url fetch skipped (failed): {symbol.reference} ({part}) "
                         f"— checking local datasheet file …"
                     )
-                local_resolved = self._try_local_part_pdf(
-                    resolution,
-                    symbol,
-                    project,
-                    component_ref,
-                    part,
-                    source="library_datasheet_file_after_url_failed",
-                )
-                if local_resolved is not None:
-                    return local_resolved
+                if not force:
+                    local_resolved = self._try_local_part_pdf(
+                        resolution,
+                        symbol,
+                        project,
+                        component_ref,
+                        part,
+                        source="library_datasheet_file_after_url_failed",
+                    )
+                    if local_resolved is not None:
+                        return local_resolved
                 if url_log is None or url_log.status == "failed":
                     self._record_url_failed(
                         part,
@@ -474,16 +498,17 @@ class DatasheetResolver:
                         f"  url fetch skipped (already attempted): "
                         f"{symbol.reference} ({part})"
                     )
-                local_resolved = self._try_local_part_pdf(
-                    resolution,
-                    symbol,
-                    project,
-                    component_ref,
-                    part,
-                    source="library_datasheet_file_after_url_failed",
-                )
-                if local_resolved is not None:
-                    return local_resolved
+                if not force:
+                    local_resolved = self._try_local_part_pdf(
+                        resolution,
+                        symbol,
+                        project,
+                        component_ref,
+                        part,
+                        source="library_datasheet_file_after_url_failed",
+                    )
+                    if local_resolved is not None:
+                        return local_resolved
                 return self._apply_url_fetch_failure(
                     resolution,
                     symbol,
@@ -496,6 +521,7 @@ class DatasheetResolver:
                 url_log is not None
                 and url_log.status == "downloaded"
                 and policy != "always"
+                and not force
             ):
                 resolution.sources_tried.append("url_fetch_log:downloaded")
                 if url_log.artifact_id:
@@ -516,7 +542,7 @@ class DatasheetResolver:
                 if cached_id is not None:
                     resolution.url_fetch_outcome = "downloaded"
                     return self._resolved(resolution, cached_id, cached_path, symbol)
-            elif policy in ("if_missing", "always"):
+            elif policy in ("if_missing", "always") or force:
                 resolution.sources_tried.append("https_fetch")
                 if self._session is not None:
                     self._session.urls_attempted.add(norm_url)
@@ -556,16 +582,17 @@ class DatasheetResolver:
                             f"  url fetch failed: {symbol.reference} ({part}) — "
                             f"checking local datasheet file …"
                         )
-                    local_resolved = self._try_local_part_pdf(
-                        resolution,
-                        symbol,
-                        project,
-                        component_ref,
-                        part,
-                        source="library_datasheet_file_after_url_failed",
-                    )
-                    if local_resolved is not None:
-                        return local_resolved
+                    if not force:
+                        local_resolved = self._try_local_part_pdf(
+                            resolution,
+                            symbol,
+                            project,
+                            component_ref,
+                            part,
+                            source="library_datasheet_file_after_url_failed",
+                        )
+                        if local_resolved is not None:
+                            return local_resolved
                     if self.verbose:
                         _log(
                             f"  no local datasheet for {part} — "
@@ -613,26 +640,36 @@ class DatasheetResolver:
         project: ProjectContextInfo,
         *,
         retry_failed_urls: bool = False,
+        force_refresh_parts: set[str] | None = None,
     ) -> dict[str, DatasheetResolution]:
         manifest = Manifest.load(project.project_pro_path)
         self.store.bootstrap()
+        refresh_parts = {p.strip() for p in (force_refresh_parts or set())}
+        retry = retry_failed_urls or bool(refresh_parts)
         self._session = _ResolveSession(
             manifest=manifest,
             url_to_artifact=self._build_url_index(),
             failed_urls=(
                 set()
-                if retry_failed_urls
+                if retry
                 else self.store.url_fetch_log.failed_urls()
             ),
             urls_attempted=set(),
-            retry_failed_urls=retry_failed_urls,
+            retry_failed_urls=retry,
+            force_refresh_parts=refresh_parts,
         )
         if self.verbose:
             https_count = sum(1 for s in symbols if s.datasheet.startswith("https://"))
-            retry_note = ", retry_failed_urls" if retry_failed_urls else ""
+            retry_note = ", retry_failed_urls" if retry else ""
+            refresh_note = (
+                f", force_refresh_parts={sorted(refresh_parts)}"
+                if refresh_parts
+                else ""
+            )
             _log(
                 f"Resolving datasheets for {len(symbols)} placed symbols "
-                f"({https_count} with HTTPS URLs, url_fetch={self.config.datasheet_url_fetch}{retry_note}) …"
+                f"({https_count} with HTTPS URLs, url_fetch={self.config.datasheet_url_fetch}"
+                f"{retry_note}{refresh_note}) …"
             )
         try:
             results: dict[str, DatasheetResolution] = {}

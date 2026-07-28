@@ -61,6 +61,7 @@ def show_missing_datasheets_dialog(
     *,
     retry_failed_urls: bool = False,
     force_refresh_urls: bool = False,
+    ai_datasheets: bool = False,
 ) -> None:
     """
     Open the Missing Required Datasheets panel (modal).
@@ -80,7 +81,7 @@ def show_missing_datasheets_dialog(
 
     ensure_wx_app()
     pro = resolve_project_pro_path(project_path)
-    _show(pro, retry_failed_urls=retry_failed_urls, force_refresh_urls=force_refresh_urls)
+    _show(pro, retry_failed_urls=retry_failed_urls, force_refresh_urls=force_refresh_urls, ai_datasheets=ai_datasheets)
 
 
 def show_chat_dialog(
@@ -99,3 +100,14 @@ def show_chat_dialog(
         retry_failed_urls=retry_failed_urls,
         force_refresh_urls=force_refresh_urls,
     )
+
+
+def show_simulation_dialog(
+    project_path: Path | str | None = None,
+) -> None:
+    """Open the Simulation models (SUBCKT) panel (modal)."""
+    from ui.simulation_dialog import show_simulation_dialog as _show
+
+    ensure_wx_app()
+    pro = resolve_project_pro_path(project_path)
+    _show(pro)
