@@ -90,6 +90,7 @@ Capabilities
 - Generate KiCad scripts
 - Generate SPICE simulations
 - Suggest alternative circuits
+- Staged circuit analysis via [AERF](ADP-008-AI-Engineering-Reasoning-Framework.md) (proposed; not implemented)
 
 ---
 
@@ -136,6 +137,23 @@ Should contain
 - selected objects
 - user preferences
 - schematic_image (optional) — PNG bytes and metadata when multimodal context is enabled
+
+---
+
+## 2a. AERF Orchestrator (proposed, not implemented)
+
+Staged engineering reasoning pipeline between context collection and prompt conclusions. See [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md).
+
+Responsibilities (planned)
+
+- Circuit family recognition
+- Load Circuit Family KB excerpts from `docs/Engineering_Knowledge/`
+- Execute AERF stages 0–7 sequentially with accumulated context
+- Emit structured JSON per stage
+- Route simulation hooks to simulation subsystem (future ADP-006)
+- Distill approved conclusions to EKM (future ADP-007)
+
+Target location: `src/reasoning/` (not yet created)
 
 ---
 
@@ -224,6 +242,7 @@ Transform KiCad into an AI-assisted engineering environment where the AI underst
 
 ## Related Documents
 
+- [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Project Index](../../PROJECT_INDEX.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)
 - [Developer Handbook](../Developer_Handbook/README.md)

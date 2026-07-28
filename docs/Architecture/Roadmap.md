@@ -45,10 +45,12 @@ Domain-specific audit workflows beyond free-form chat:
 - Power integrity, signal integrity, EMI/EMC guidance
 - Component comparison and datasheet analysis
 - KiCad Python script and SPICE simulation generation
+- Staged circuit analysis via [AERF](ADP-008-AI-Engineering-Reasoning-Framework.md) — eight-stage engineering reasoning with circuit-family knowledge overlays
 
 ## Related Documents
 
 - [Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
+- [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)
 - [Project Charter](../../PROJECT_CHARTER.md)
 

@@ -17,6 +17,8 @@ This directory contains individual Architecture Decision Records for KiCad AI In
 | [ADR-0003](ADR-0003-Stateless-Phase-1-Context-Model.md) | Stateless Phase 1 context model | Accepted | 2026-07-14 |
 | [ADR-0004](ADR-0004-Optional-Multimodal-Schematic-Context.md) | Optional multimodal schematic context | Accepted | 2026-07-14 |
 | [ADR-0005](ADR-0005-EKM-Foundation.md) | Engineering Knowledge Model foundation | Accepted | 2026-07-28 |
+| [ADR-0006](ADR-0006-Engineering-Notebook-UI.md) | Engineering Notebook user interface | Accepted | 2026-07-28 |
+| [ADR-0007](ADR-0007-AERF-Foundation.md) | AI Engineering Reasoning Framework foundation | Accepted | 2026-07-28 |
 
 ## Navigation
 

@@ -38,6 +38,16 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [ADR-0002: Provider Abstraction Layer](docs/Architecture/ADRs/ADR-0002-Provider-Abstraction-Layer.md)
 - [ADR-0003: Stateless Phase 1 Context Model](docs/Architecture/ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
 - [ADR-0004: Optional Multimodal Schematic Context](docs/Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)
+- [ADR-0005: EKM Foundation](docs/Architecture/ADRs/ADR-0005-EKM-Foundation.md)
+- [ADR-0006: Engineering Notebook UI](docs/Architecture/ADRs/ADR-0006-Engineering-Notebook-UI.md)
+- [ADR-0007: AERF Foundation](docs/Architecture/ADRs/ADR-0007-AERF-Foundation.md)
+- [ADP-008: AI Engineering Reasoning Framework](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+
+### Engineering Knowledge
+
+- [Engineering Knowledge](docs/Engineering_Knowledge/README.md)
+- [AERF Stage Index](docs/Engineering_Knowledge/AERF_Stage_Index.md)
+- [Circuit Families](docs/Engineering_Knowledge/Circuit_Families/README.md)
 
 ### Specifications
 
@@ -106,4 +116,4 @@ AI assistants should begin here, follow links to authoritative documents, and av
 
 ## Last Reviewed
 
-2026-07-14
+2026-07-28

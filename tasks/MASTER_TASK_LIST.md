@@ -400,6 +400,36 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 
 ---
 
+## AERF — AI Engineering Reasoning Framework
+
+**Goal:** Establish staged engineering reasoning as a foundational architectural pillar. See [ADP-008](../docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) and [ADR-0007](../docs/Architecture/ADRs/ADR-0007-AERF-Foundation.md).
+
+### Milestone 1 — Architecture formalization (complete)
+
+- [x] ADP-008: AERF Foundation specification
+- [x] ADR-0007: Ratify AERF as architectural pillar
+- [x] EDF domain scaffold: `docs/Engineering_Knowledge/`
+- [x] AERF Stage Index and Circuit Families registry
+- [x] Navigation integration (PROJECT_INDEX, EDF, Architecture indexes)
+
+### Next milestone — Reference circuit family KB
+
+- [ ] Blocking Oscillator as first circuit family (`docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/`)
+- [ ] Stage files 00–07 with family-specific content
+
+### Future implementation
+
+- [ ] `src/reasoning/` orchestrator module
+- [ ] Circuit family classifier
+- [ ] Per-stage prompt templates (ADP-007)
+- [ ] EKM stage-output mapping and write-back (ADP-007)
+- [ ] Simulation closed loop — validate/refine stages (ADP-006)
+- [ ] AERF UI mode in chat or dedicated analysis panel
+
+**AERF exit criteria (future):** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM.
+
+---
+
 ## Architecture Component Mapping
 
 | Architecture component | Primary phase | Key deliverable |
@@ -410,6 +440,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 | AI Provider Layer | Phase 1 | `src/providers/` abstraction + Claude impl |
 | KiCad User Interface | Phase 1 → 2 | `src/ui/` dialog → dockable plugin |
 | Conversation Manager | Phase 2 | `src/` session/history module |
+| AERF Orchestrator | Phase 3 | `src/reasoning/` staged analysis pipeline |
 
 ---
 

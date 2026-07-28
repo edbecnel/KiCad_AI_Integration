@@ -13,6 +13,16 @@ This project uses AI in two distinct contexts:
 
 See [Software Architecture](../Architecture/KiCad_AI_Integration_Software_Architecture.md) for the runtime architecture.
 
+## In-KiCad Analysis Philosophy
+
+For deep circuit analysis, the project adopts **staged engineering reasoning** ([AERF](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)) rather than single-shot LLM prompts:
+
+1. **Reason first** — progressively build understanding through eight canonical stages before drawing conclusions
+2. **Simulate to validate** — simulation confirms or refines prior reasoning; it does not substitute for engineering analysis
+3. **Explain transparently** — each stage produces structured, reviewable output with explicit confidence and unknowns
+
+Ad-hoc questions may still use the `general_review` template. AERF is the structured path for comprehensive circuit analysis. See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md).
+
 ## Purpose
 
 The AI Engineering Handbook defines:
@@ -56,5 +66,6 @@ Saving a small amount of model usage cost is not worthwhile if it creates hours 
 ## Related Documents
 
 - [Software Architecture](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- [ADP-008: AI Engineering Reasoning Framework](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Developer Handbook](../Developer_Handbook/README.md)
 - [Governance](../Governance/README.md)

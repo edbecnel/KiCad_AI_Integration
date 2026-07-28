@@ -126,6 +126,8 @@ AI / Plugin / ngspice
 
 The EKM becomes the single source of truth for **engineering knowledge** — intent, rationale, assumptions, and curated decisions. It does not replace KiCad or extracted design snapshots (see §16–18).
 
+**AERF (reasoning layer):** Between KiCad context extraction and EKM population, the [AI Engineering Reasoning Framework (ADP-008)](ADP-008-AI-Engineering-Reasoning-Framework.md) progressively builds engineering understanding through eight staged reasoning steps. AERF stage outputs are transient reasoning artifacts; the EKM stores curated conclusions after user approval. Circuit-family reference knowledge lives in [`docs/Engineering_Knowledge/`](../Engineering_Knowledge/README.md).
+
 ---
 
 ## 7. Canonical Representation
@@ -421,9 +423,9 @@ Implementation is intentionally deferred.
 
 Subsequent ADPs will define:
 
-- Engineering Notebook UI
+- ~~Engineering Notebook UI~~ — accepted as [ADP-003](ADP-003-Engineering-Notebook-User-Interface.md)
 - Natural Language → EKM conversion
-- Dynamic notebook rendering
+- Dynamic notebook rendering (implementation)
 - Provenance
 - Simulation integration
 - Measurement integration
@@ -462,6 +464,7 @@ The following topics are intentionally out of scope for ADP-001. Each is assigne
 | Staleness detection for KiCad object links | ADP-002 or ADP-007 |
 | Conflict resolution (user edits during AI update) | ADP-003 or ADP-004 |
 | EKM summarization and token management for prompts | ADP-007 |
+| AI Engineering Reasoning Framework (stages, circuit family ontology) | [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md) |
 
 ### Future ADP dependency graph
 
@@ -474,6 +477,7 @@ flowchart TD
     ADP005[ADP-005 Provenance]
     ADP006[ADP-006 Simulation and Measurement]
     ADP007[ADP-007 Prompt Integration]
+    ADP008[ADP-008 AERF Foundation]
 
     ADP001 --> ADP002
     ADP002 --> ADP003
@@ -483,6 +487,8 @@ flowchart TD
     ADP002 --> ADP007
     ADP003 --> ADP004
     ADP005 --> ADP007
+    ADP008 --> ADP007
+    ADP008 --> ADP006
 ```
 
 ---
@@ -493,6 +499,9 @@ flowchart TD
 - [Prompt Architecture](Prompt_Architecture.md)
 - [ADR-0003: Stateless Phase 1 Context Model](ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
 - [ADR-0005: EKM Foundation](ADRs/ADR-0005-EKM-Foundation.md)
+- [ADR-0006: Engineering Notebook UI](ADRs/ADR-0006-Engineering-Notebook-UI.md)
+- [ADP-003: Engineering Notebook User Interface](ADP-003-Engineering-Notebook-User-Interface.md)
+- [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Security](../AI/Security.md)
 - [Database](../Database/README.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)

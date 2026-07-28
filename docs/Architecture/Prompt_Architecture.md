@@ -105,6 +105,22 @@ Expected SUBCKT deliverables: `generated.lib`, KiCad hookup notes, `validation.j
 
 Gap-fill and SUBCKT output is **advisory only** — engineers must verify against ERC, the schematic, and datasheets before applying changes.
 
+## AERF Stage Prompt Templates
+
+_Future work under ADP-007. Architecture defined in [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md)._
+
+Planned per-stage prompt templates for the eight AERF reasoning stages (0–7). Each stage prompt will include:
+
+- `<aerf_stage>` — current stage metadata (id, key, title, question)
+- `<aerf_prior_stages>` — accumulated JSON from prior stages
+- `<circuit_family_kb>` — excerpts from the loaded circuit family knowledge base
+- `<kicad_python_extracted_data>` — `ProjectContext` JSON
+- `<engineering_knowledge>` — relevant EKM sections when present
+
+Stage templates follow the same XML-section conventions as other prompts. The SUBCKT two-stage pipeline (`facts` → `synthesis`) is a precedent for staged orchestration but is not itself an AERF stage.
+
+See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md) and [Engineering Knowledge](../Engineering_Knowledge/README.md).
+
 ## Token Budgeting
 
 _To be detailed during Phase 1 implementation._
@@ -123,6 +139,7 @@ See [Cost Optimization](../AI/Cost_Optimization.md).
 - [Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
 - [ADR-0003: Stateless Phase 1 Context Model](ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
 - [ADR-0004: Optional Multimodal Schematic Context](ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)
+- [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md) § 1.3
 
