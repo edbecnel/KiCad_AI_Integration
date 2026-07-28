@@ -11,6 +11,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 ## Authoritative Documents
 
 - [Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
+- [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md)
 - [Prompt Architecture](Prompt_Architecture.md)
 - [AI Provider Interface](AI_Provider_Interface.md)
 - [Roadmap](Roadmap.md)
@@ -23,12 +24,18 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADR-0002: Provider Abstraction Layer](ADRs/ADR-0002-Provider-Abstraction-Layer.md)
 - [ADR-0003: Stateless Phase 1 Context Model](ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
 - [ADR-0004: Optional Multimodal Schematic Context](ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md)
+- [ADR-0005: Engineering Knowledge Model Foundation](ADRs/ADR-0005-EKM-Foundation.md)
+
+## Architectural Design Proposals
+
+- [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md)
 
 ## What Belongs Here
 
 - System component design and data flow
 - Phase roadmaps and architectural boundaries
 - Architecture Decision Records (ADRs)
+- Architectural Design Proposals (ADPs)
 
 ## Navigation
 

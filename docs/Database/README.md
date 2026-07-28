@@ -10,7 +10,10 @@ Data models, schemas, migrations, persistence design, backup, restore, and reten
 
 ## Authoritative Documents
 
-- Add links to authoritative documents in this domain.
+- [ADP-001: Engineering Knowledge Model Foundation](../Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) — EKM architecture and minimum metamodel (v1.1)
+- [ADR-0005: EKM Foundation](../Architecture/ADRs/ADR-0005-EKM-Foundation.md) — ratified decision
+
+Full EKM JSON Schema, migrations, and persistence details are deferred to ADP-002.
 
 ## What Belongs Here
 
