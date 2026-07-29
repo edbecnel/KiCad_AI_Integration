@@ -1,5 +1,7 @@
 # KiCad AI Integration — Feature Overview
 
+For project philosophy and vision, see [Project Overview](../../PROJECT_OVERVIEW.md).
+
 **What it is:** An open-source project to bring AI (Claude today, other models later) into KiCad so engineers can ask design questions against the **actual project** — schematic, parts, datasheets — instead of copying files into a generic chatbot.
 
 **Status:** Early working prototype. Core flow is demonstrated; full Phase 1 vision is not complete.

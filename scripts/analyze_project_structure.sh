@@ -29,7 +29,7 @@ required_dirs=(
 )
 
 recommended_root_files=(
-  README.md PROJECT_INDEX.md PROJECT_CHARTER.md ARCHITECTURE_DECISIONS.md
+  README.md PROJECT_INDEX.md PROJECT_OVERVIEW.md PROJECT_CHARTER.md ARCHITECTURE_DECISIONS.md
   CHANGELOG.md
 )
 
@@ -96,7 +96,7 @@ while IFS= read -r -d '' file; do
   all_md+=("$file")
   rel="${file#"$PROJECT_ROOT"/}"
   case "$rel" in
-    docs/*|archive/*|tasks/*|scripts/README.md|README.md|PROJECT_INDEX.md|PROJECT_CHARTER.md|ARCHITECTURE_DECISIONS.md|CHANGELOG.md|ENGINEERING_DOCUMENTATION_FRAMEWORK.md) ;;
+    docs/*|archive/*|tasks/*|scripts/README.md|README.md|PROJECT_INDEX.md|PROJECT_OVERVIEW.md|PROJECT_CHARTER.md|ARCHITECTURE_DECISIONS.md|CHANGELOG.md|ENGINEERING_DOCUMENTATION_FRAMEWORK.md) ;;
     *) markdown_outside+=("$rel") ;;
   esac
 done < <(find "$PROJECT_ROOT" -type f \( -iname '*.md' -o -iname '*.markdown' \) -print0)

@@ -10,11 +10,14 @@ End-user instructions, tutorials, walkthroughs, and troubleshooting guidance.
 
 ## Authoritative Documents
 
-- Add links to authoritative documents in this domain.
+- [Project Overview](../../PROJECT_OVERVIEW.md) — project philosophy, evolution, and long-term vision
+- [Feature Overview](Feature_Overview.md) — current capabilities and gaps
 
 ## What Belongs Here
 
-Add documents whose primary responsibility matches this domain.
+- Feature overviews and capability summaries
+- End-user tutorials and walkthroughs
+- Troubleshooting guides
 
 ## Navigation
 

@@ -2,34 +2,17 @@
 
 > Bringing AI-assisted circuit design, review, and engineering directly into KiCad.
 
+**New here?** Read [What is the KiCad AI Integration Project?](PROJECT_OVERVIEW.md) for the project's philosophy, evolution, and long-term vision.
+
 **Documentation:** Start at the [Project Index](PROJECT_INDEX.md) for the full documentation map.
 
 ## Overview
 
-KiCad AI Integration is an open-source project that integrates modern Large Language Models (LLMs) directly into the KiCad electronic design environment. Its goal is to transform KiCad from a traditional Electronic Design Automation (EDA) tool into an intelligent engineering workspace where AI acts as an experienced design assistant throughout the entire design process.
+KiCad AI Integration is an open-source project that integrates modern Large Language Models (LLMs) directly into the KiCad electronic design environment. Rather than a generic AI chat window, it is designed as an **AI-assisted electrical engineering reasoning platform** that builds structured engineering understanding before asking an LLM to reason about a design.
 
-Unlike traditional AI chatbots, this project gives the AI rich knowledge of the active KiCad project by automatically collecting engineering context—including schematics, PCB layouts, netlists, design rules, BOMs, ERC/DRC results, and other project metadata—before sending requests to an AI provider.
+The project automatically collects engineering context from the active KiCad project—including schematics, PCB layouts, netlists, datasheets, and other metadata—and progressively transforms it into structured knowledge through the [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) and [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md). See [Project Overview](PROJECT_OVERVIEW.md) for the full story of how the project evolved and where it is headed.
 
-The initial implementation targets **Anthropic Claude Sonnet 3.5**, with a long-term architecture designed to support multiple AI providers through a common abstraction layer.
-
----
-
-# Vision
-
-The long-term vision is to create an AI Engineering Assistant capable of:
-
-- Understanding complete KiCad projects
-- Reviewing schematics and PCB layouts
-- Explaining existing circuits
-- Detecting potential design issues
-- Recommending improvements
-- Assisting with component selection
-- Helping optimize PCB layouts
-- Generating KiCad Python scripts
-- Generating SPICE simulations
-- Explaining datasheets
-- Providing educational guidance
-- Acting as an engineering design partner rather than a generic chatbot
+The initial implementation targets **Anthropic Claude**, with a long-term architecture designed to support multiple AI providers through a common abstraction layer.
 
 ---
 
@@ -127,7 +110,7 @@ Advanced engineering capabilities including:
    Groq       DeepSeek     Ollama
 ```
 
-This architecture intentionally separates AI providers from the rest of the application to make future expansion straightforward.
+This architecture intentionally separates AI providers from the rest of the application to make future expansion straightforward. The EKM and AERF architecture is documented in [`docs/Architecture/`](docs/Architecture/README.md).
 
 ---
 
@@ -136,6 +119,7 @@ This architecture intentionally separates AI providers from the rest of the appl
 ```
 KiCad_AI_Integration/
 ├── README.md
+├── PROJECT_OVERVIEW.md           # Project philosophy and vision
 ├── PROJECT_INDEX.md              # Primary documentation hub
 ├── PROJECT_CHARTER.md
 ├── ARCHITECTURE_DECISIONS.md
@@ -208,31 +192,18 @@ Guiding principles include:
 
 ---
 
-# Design Philosophy
-
-The project follows several core architectural principles:
-
-- Modular design
-- Separation of concerns
-- Provider independence
-- Extensibility
-- Maintainability
-- Strong documentation
-- Engineering-first user experience
-
----
-
 # Current Status
 
-**Phase:** Planning / Initial Development
+**Phase:** Phase 1 — stretch slice + provider + chat UI (in progress)
 
-Current work includes:
+Current capabilities include:
 
-- Software architecture
-- Context extraction framework
-- Prompt generation engine
-- Claude provider implementation
-- Initial KiCad Python integration
+- Schematic context extraction and prompt builder (general review template)
+- Datasheet resolver and Missing Datasheets UI
+- Claude provider integration
+- Chat UI (`--ui-chat`) with approve-before-send gate
+
+See [Feature Overview](docs/User_Guides/Feature_Overview.md) for a detailed breakdown of what works today and what remains.
 
 ---
 
@@ -261,11 +232,3 @@ License to be determined.
 This project builds upon the excellent open-source KiCad ecosystem and modern AI technologies to create a next-generation engineering workflow for electronics designers.
 
 Special thanks to the KiCad development community and the AI research community for making this type of integration possible.
-
----
-
-## Future Vision
-
-The ultimate objective is to make AI feel like an experienced electrical engineer sitting beside you—one that understands your schematic, your PCB layout, your design intent, and your engineering questions without requiring repetitive explanations.
-
-Rather than replacing the engineer, KiCad AI Integration aims to enhance creativity, improve design quality, reduce repetitive work, and accelerate the entire hardware development process.

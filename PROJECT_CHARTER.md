@@ -69,6 +69,7 @@ Integrate modern Large Language Models directly into the KiCad electronic design
 
 ## Related Documents
 
+- [Project Overview](PROJECT_OVERVIEW.md)
 - [Project Index](PROJECT_INDEX.md)
 - [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 - [Master Task List](tasks/MASTER_TASK_LIST.md)

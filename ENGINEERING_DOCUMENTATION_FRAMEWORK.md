@@ -10,7 +10,7 @@ This project has adopted the **Engineering Documentation Framework** (EDF) for o
 
 ## Primary Documentation Entry Point
 
-[`PROJECT_INDEX.md`](PROJECT_INDEX.md) is the primary navigation hub for both humans and AI assistants. The project root [`README.md`](README.md) links to it.
+[`PROJECT_INDEX.md`](PROJECT_INDEX.md) is the primary navigation hub for both humans and AI assistants. The project root [`README.md`](README.md) links to it. New readers should start with [`PROJECT_OVERVIEW.md`](PROJECT_OVERVIEW.md) for project philosophy and vision.
 
 ## Adoption Status
 

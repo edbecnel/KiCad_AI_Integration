@@ -19,6 +19,7 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 ## Core Documents
 
+- [Project Overview](PROJECT_OVERVIEW.md)
 - [Project Charter](PROJECT_CHARTER.md)
 - [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
 - [Master Task List](tasks/MASTER_TASK_LIST.md)
