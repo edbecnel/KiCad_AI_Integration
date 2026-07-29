@@ -395,7 +395,7 @@ This boundary is compatible with [ADR-0003](ADRs/ADR-0003-Stateless-Phase-1-Cont
 
 ## 19. Minimum Metamodel
 
-Extensibility does not require a schema-free model. The EKM is built on a versioned minimum metamodel. Full schema definition is deferred to ADP-002 and [`docs/Database/`](../Database/README.md).
+Extensibility does not require a schema-free model. The EKM is built on a versioned minimum metamodel. Full schema definition is formalized in [ADP-002](ADP-002-EKM-Schema-and-Persistence.md) and [`docs/Database/`](../Database/README.md).
 
 ADP-001 commits to the following structural primitives:
 
@@ -424,6 +424,7 @@ Implementation is intentionally deferred.
 Subsequent ADPs will define:
 
 - ~~Engineering Notebook UI~~ — accepted as [ADP-003](ADP-003-Engineering-Notebook-User-Interface.md)
+- ~~EKM schema and persistence~~ — accepted as [ADP-002](ADP-002-EKM-Schema-and-Persistence.md)
 - Natural Language → EKM conversion
 - Dynamic notebook rendering (implementation)
 - Provenance
@@ -500,6 +501,8 @@ flowchart TD
 - [ADR-0003: Stateless Phase 1 Context Model](ADRs/ADR-0003-Stateless-Phase-1-Context-Model.md)
 - [ADR-0005: EKM Foundation](ADRs/ADR-0005-EKM-Foundation.md)
 - [ADR-0006: Engineering Notebook UI](ADRs/ADR-0006-Engineering-Notebook-UI.md)
+- [ADR-0008: EKM Schema and Persistence](ADRs/ADR-0008-EKM-Schema-and-Persistence.md)
+- [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md)
 - [ADP-003: Engineering Notebook User Interface](ADP-003-Engineering-Notebook-User-Interface.md)
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Security](../AI/Security.md)

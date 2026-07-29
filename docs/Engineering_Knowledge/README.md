@@ -28,7 +28,8 @@ Rather than sending a schematic directly to an LLM, the plugin progressively bui
 
 | Document | Purpose |
 |----------|---------|
-| [AERF_Stage_Index.md](AERF_Stage_Index.md) | Canonical stage definitions, determinations, and output schemas |
+| [AERF_Stage_Index.md](AERF_Stage_Index.md) | Canonical stage definitions, determinations, and output schemas (what each stage must determine) |
+| [Engineering_Reasoning_Methodology.md](Engineering_Reasoning_Methodology.md) | Common engineering reasoning process used by every AERF stage (how each stage reasons) |
 | [Circuit_Families/README.md](Circuit_Families/README.md) | Circuit family registry, naming conventions, overlay rules |
 
 ## AI Workflow (Conceptual)
@@ -40,7 +41,7 @@ Recognize Circuit Family
        ↓
 Load Circuit Family KB
        ↓
-Reason through Stages 0–7
+Reason through Stages 0–7 (using Engineering Reasoning Methodology)
        ↓
 Generate Questions / Simulation Hooks
        ↓
@@ -52,6 +53,7 @@ Generate Engineering Conclusions → EKM (after user approval)
 ## What Belongs Here
 
 - AERF stage definitions and output schemas
+- Engineering reasoning methodology (how each stage performs analysis)
 - Circuit-family reference knowledge organized by stage
 - Recognition signatures and family overviews
 - Engineering ontology content that generalizes across projects
@@ -66,6 +68,7 @@ Generate Engineering Conclusions → EKM (after user approval)
 ## Related Documents
 
 - [ADP-008: AERF Foundation](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- [Engineering Reasoning Methodology](Engineering_Reasoning_Methodology.md)
 - [ADR-0007: AERF Foundation](../Architecture/ADRs/ADR-0007-AERF-Foundation.md)
 - [ADP-001: EKM Foundation](../Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md)
 - [Software Architecture](../Architecture/KiCad_AI_Integration_Software_Architecture.md)

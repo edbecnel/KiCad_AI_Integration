@@ -11,9 +11,17 @@ Data models, schemas, migrations, persistence design, backup, restore, and reten
 ## Authoritative Documents
 
 - [ADP-001: Engineering Knowledge Model Foundation](../Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) — EKM architecture and minimum metamodel (v1.1)
-- [ADR-0005: EKM Foundation](../Architecture/ADRs/ADR-0005-EKM-Foundation.md) — ratified decision
+- [ADP-002: EKM Schema and Persistence](../Architecture/ADP-002-EKM-Schema-and-Persistence.md) — canonical JSON Schema, persistence contract, validation (v1.0)
+- [ADR-0005: EKM Foundation](../Architecture/ADRs/ADR-0005-EKM-Foundation.md) — ratified EKM foundation decision
+- [ADR-0008: EKM Schema and Persistence](../Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md) — ratified schema and persistence decision
 
-Full EKM JSON Schema, migrations, and persistence details are deferred to ADP-002.
+## Schema Artifacts
+
+| File | Version | Description |
+|------|---------|-------------|
+| [`ekm_schema_v1.json`](ekm_schema_v1.json) | 1.0.0 | Canonical JSON Schema for `kicad_ai/engineering_knowledge.json` |
+
+Migration tooling and CI validation tests are deferred to implementation.
 
 ## What Belongs Here
 

@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kicad-ai-integration.dev/schemas/ekm/v1.0.0",
+  "title": "Engineering Knowledge Model Document",
+  "description": "Canonical JSON Schema for EKM documents (ADP-002 v1.0). Persisted as kicad_ai/engineering_knowledge.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "sections"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semver schema version. First release: 1.0.0"
+    },
+    "project_path": {
+      "type": "string",
+      "description": "Optional path to the KiCad project file (.kicad_pro)"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of last save"
+    },
+    "sections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Section" }
+    }
+  },
+  "$defs": {
+    "Section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "fields"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable section identifier, unique within document"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable section title"
+        },
+        "parent_id": {
+          "type": ["string", "null"],
+          "description": "Parent section id for hierarchy; null or omitted for root"
+        },
+        "order": {
+          "type": "integer",
+          "description": "Sort key among siblings with same parent_id"
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Field" }
+        },
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        }
+      }
+    },
+    "Field": {
+      "oneOf": [
+        { "$ref": "#/$defs/TextField" },
+        { "$ref": "#/$defs/NumberField" },
+        { "$ref": "#/$defs/EnumField" },
+        { "$ref": "#/$defs/ReferenceField" },
+        { "$ref": "#/$defs/MeasurementField" },
+        { "$ref": "#/$defs/AttachmentField" }
+      ]
+    },
+    "FieldBase": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable field identifier, unique within section"
+        },
+        "label": {
+          "type": "string",
+          "description": "Optional field label for notebook display"
+        },
+        "links": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/KiCadLink" },
+          "description": "Optional supplementary KiCad object references"
+        },
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        }
+      },
+      "required": ["id"]
+    },
+    "TextField": {
+      "allOf": [
+        { "$ref": "#/$defs/FieldBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "value"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "type": { "const": "text" },
+            "label": { "type": "string" },
+            "value": { "type": "string" },
+            "links": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/KiCadLink" }
+            },
+            "metadata": { "$ref": "#/$defs/Metadata" }
+          }
+        }
+      ]
+    },
+    "NumberField": {
+      "allOf": [
+        { "$ref": "#/$defs/FieldBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "value"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "type": { "const": "number" },
+            "label": { "type": "string" },
+            "value": { "type": "number" },
+            "unit": {
+              "type": "string",
+              "description": "Display unit hint (e.g. V, Ohm, MHz)"
+            },
+            "links": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/KiCadLink" }
+            },
+            "metadata": { "$ref": "#/$defs/Metadata" }
+          }
+        }
+      ]
+    },
+    "EnumField": {
+      "allOf": [
+        { "$ref": "#/$defs/FieldBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "value", "options"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "type": { "const": "enum" },
+            "label": { "type": "string" },
+            "value": { "type": "string" },
+            "options": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "links": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/KiCadLink" }
+            },
+            "metadata": { "$ref": "#/$defs/Metadata" }
+          }
+        }
+      ]
+    },
+    "ReferenceField": {
+      "allOf": [
+        { "$ref": "#/$defs/FieldBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "value"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "type": { "const": "reference" },
+            "label": { "type": "string" },
+            "value": { "$ref": "#/$defs/KiCadLink" },
+            "links": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/KiCadLink" }
+            },
+            "metadata": { "$ref": "#/$defs/Metadata" }
+          }
+        }
+      ]
+    },
+    "MeasurementField": {
+      "allOf": [
+        { "$ref": "#/$defs/FieldBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "value"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "type": { "const": "measurement" },
+            "label": { "type": "string" },
+            "value": { "$ref": "#/$defs/MeasurementValue" },
+            "links": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/KiCadLink" }
+            },
+            "metadata": { "$ref": "#/$defs/Metadata" }
+          }
+        }
+      ]
+    },
+    "AttachmentField": {
+      "allOf": [
+        { "$ref": "#/$defs/FieldBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "value"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "type": { "const": "attachment" },
+            "label": { "type": "string" },
+            "value": { "$ref": "#/$defs/ArtifactReference" },
+            "links": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/KiCadLink" }
+            },
+            "metadata": { "$ref": "#/$defs/Metadata" }
+          }
+        }
+      ]
+    },
+    "KiCadLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["component", "net", "symbol", "sheet"],
+          "description": "KiCad object kind"
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference designator, net name, symbol id, or sheet identifier"
+        },
+        "sheet_path": {
+          "type": "string",
+          "description": "Schematic file path for hierarchical designs"
+        }
+      }
+    },
+    "MeasurementValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string", "minLength": 1 },
+        "conditions": {
+          "type": "string",
+          "description": "Measurement conditions (e.g. no load, T=25C)"
+        }
+      }
+    },
+    "ArtifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id"],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Shared artifact library catalog entry ID"
+        }
+      }
+    },
+    "Metadata": {
+      "type": "object",
+      "description": "Open extension object; provenance keys deferred to ADP-005",
+      "additionalProperties": true
+    }
+  }
+}

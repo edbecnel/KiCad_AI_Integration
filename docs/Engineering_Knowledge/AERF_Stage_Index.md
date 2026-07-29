@@ -4,6 +4,8 @@
 
 > **Authoritative specification:** [ADP-008: AI Engineering Reasoning Framework](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
 
+> **Reasoning methodology:** [Engineering Reasoning Methodology](Engineering_Reasoning_Methodology.md) defines *how* each stage performs engineering reasoning. This document defines *what* each stage must determine.
+
 This document is the human-readable index of canonical AERF reasoning stages. Circuit families may override stage titles for stages 1–6; `stage_id` and dependency order are fixed.
 
 ---
@@ -286,11 +288,14 @@ Every stage output includes this envelope in addition to `determinations`:
 }
 ```
 
+Significant determinations should carry knowledge classification and evidence chains per [Engineering Reasoning Methodology](Engineering_Reasoning_Methodology.md). Formal JSON schema extension for evidence chains is deferred to ADP-007.
+
 ---
 
 ## Related Documents
 
 - [ADP-008: AERF Foundation](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- [Engineering Reasoning Methodology](Engineering_Reasoning_Methodology.md)
 - [Circuit Families](Circuit_Families/README.md)
 - [Engineering Knowledge](README.md)
 

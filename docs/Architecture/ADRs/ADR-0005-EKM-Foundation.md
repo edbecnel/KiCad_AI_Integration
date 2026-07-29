@@ -30,7 +30,7 @@ Adopt the **Engineering Knowledge Model (EKM)** as the canonical representation 
 - **Authority:** EKM owns authored knowledge (intent, rationale, assumptions, curated decisions). KiCad owns connectivity. `ProjectContext` owns extracted design facts. Conversation Manager owns raw chat transcripts.
 - **Persistence:** JSON under per-project `kicad_ai/`, with required `schema_version`. JSON is persistence only; users edit the notebook, not raw JSON.
 - **Domain independence:** Plugin provides domain-agnostic primitives and KiCad linking; domain content is EKM/AI-populated.
-- **Minimum metamodel:** Versioned document with sections, typed fields, stable IDs, optional links, and metadata extension points (full schema deferred to ADP-002).
+- **Minimum metamodel:** Versioned document with sections, typed fields, stable IDs, optional links, and metadata extension points (formalized in [ADP-002](../ADP-002-EKM-Schema-and-Persistence.md)).
 - **Security:** EKM cloud transmission and AI write-back require explicit user approval.
 
 Implementation is deferred. Subsequent ADPs define schema, UI, NL conversion, provenance, simulation integration, and prompt integration per [ADP-001 Appendix A](../ADP-001-Engineering-Knowledge-Model-Foundation.md#appendix-a-deferred-decisions).
@@ -79,7 +79,7 @@ Implementation is deferred. Subsequent ADPs define schema, UI, NL conversion, pr
 
 - No code changes in this ADR; architecture only
 - Ephemeral `functional_description` in chat migrates to EKM over time
-- Suggested persistence path: `kicad_ai/engineering_knowledge.json` (non-binding until ADP-002)
+- Suggested persistence path: `kicad_ai/engineering_knowledge.json` (defined in [ADP-002](docs/Architecture/ADP-002-EKM-Schema-and-Persistence.md))
 - Schema home: [`docs/Database/`](../../Database/README.md)
 
 ## References

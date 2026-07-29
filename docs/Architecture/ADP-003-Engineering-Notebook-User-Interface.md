@@ -16,7 +16,7 @@
 
 **Builds on:** [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md) (v1.1)
 
-**Upstream dependency:** ADP-002 (EKM schema and persistence — proposed, not yet ratified; see [ADP-001 Appendix A](ADP-001-Engineering-Knowledge-Model-Foundation.md#appendix-a-deferred-decisions) and [`docs/Database/`](../Database/README.md)). The minimum metamodel from ADP-001 §19 is sufficient for this architectural definition.
+**Upstream dependency:** [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md) (v1.0, ratified by [ADR-0008](ADRs/ADR-0008-EKM-Schema-and-Persistence.md)). The minimum metamodel from ADP-001 §19 is formalized in ADP-002 and [`ekm_schema_v1.json`](../Database/ekm_schema_v1.json).
 
 ---
 
@@ -172,7 +172,7 @@ The dynamic notebook renderer understands **primitive field types** defined in [
 | `text` | Paragraph, markdown block | Section `title` renders as heading |
 | `number` | Numeric value editor | Unit display when metadata provides units |
 | `enum` | Dropdown or radio group | Validation against allowed values |
-| `reference` | Hyperlink to KiCad object | Staleness indicator deferred to ADP-002 or ADP-007 |
+| `reference` | Hyperlink to KiCad object | Staleness per [ADP-002 §13](ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links); UI indicators at implementation |
 | `measurement` | Value + unit + conditions | Composite display for bench data |
 | `attachment` | Image thumbnail or file link | Resolved via artifact library reference |
 
@@ -395,7 +395,7 @@ Subsequent ADPs will define:
 - AI integration.
 - Provenance visualization ([ADP-005](ADP-001-Engineering-Knowledge-Model-Foundation.md#appendix-a-deferred-decisions)).
 
-Full EKM JSON Schema, persistence file naming, and migration tooling are defined in **ADP-002** (schema and persistence). ADP-003 may proceed architecturally against the minimum metamodel in ADP-001 §19; implementation should coordinate with ADP-002.
+Full EKM JSON Schema, persistence file naming, and migration policy are defined in [ADP-002](ADP-002-EKM-Schema-and-Persistence.md). ADP-003 implementation should validate against [`ekm_schema_v1.json`](../Database/ekm_schema_v1.json).
 
 ---
 
@@ -411,6 +411,7 @@ Ratified as [ADR-0006: Engineering Notebook UI](ADRs/ADR-0006-Engineering-Notebo
 
 ## Related Documents
 
+- [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md)
 - [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md)
 - [ADR-0005: EKM Foundation](ADRs/ADR-0005-EKM-Foundation.md)
 - [ADR-0006: Engineering Notebook UI](ADRs/ADR-0006-Engineering-Notebook-UI.md)

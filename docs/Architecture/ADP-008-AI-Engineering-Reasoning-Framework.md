@@ -2,21 +2,21 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › ADP-008
 
-**Status:** Accepted (v1.0)
+**Status:** Accepted (v1.1 — engineering reasoning methodology)
 
 **Author:** Ed Becnel
 
 **Project:** KiCad AI Integration Plugin
 
-**Version:** 1.0
+**Version:** 1.1
 
-**Date:** 2026-07-28
+**Date:** 2026-07-29
 
 **Ratified by:** [ADR-0007](ADRs/ADR-0007-AERF-Foundation.md)
 
 **Builds on:** [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md) (v1.1)
 
-**Related:** [Engineering Knowledge](../Engineering_Knowledge/README.md) documentation domain
+**Related:** [Engineering Knowledge](../Engineering_Knowledge/README.md) documentation domain, [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md)
 
 ---
 
@@ -176,6 +176,41 @@ Stages execute in order (0 → 7). Each stage prompt receives:
 - Existing EKM sections (if present)
 - Optional user hints or functional description
 
+### Internal Engineering Reasoning Methodology
+
+Every AERF stage executes using a common engineering reasoning methodology defined in [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md).
+
+The stage defines **what** engineering questions must be answered. The Engineering Reasoning Methodology defines **how** those answers are produced.
+
+Regardless of circuit family or engineering discipline, each stage follows a consistent reasoning process including:
+
+- Collection of available evidence
+- Classification of observations
+- Formation of one or more engineering hypotheses
+- Evaluation of competing hypotheses
+- Topology recognition
+- Component interaction analysis
+- Energy and signal path tracing
+- Confidence estimation
+- Identification of unknowns
+- Identification of contradictory evidence
+- Generation of traceable engineering conclusions
+
+The reasoning methodology shall distinguish between:
+
+- Direct observations
+- Derived conclusions
+- Engineering assumptions
+- User-provided information
+- Circuit-family knowledge
+- Outstanding unknowns
+
+Every engineering conclusion should be traceable back to the observations and reasoning that produced it. Significant determinations should carry knowledge classification and evidence chains per the methodology document. The objective is explainable engineering reasoning rather than opaque AI conclusions.
+
+### Scientific neutrality
+
+AERF remains scientifically neutral. It does not arbitrate which scientific theory is ultimately correct. It classifies every conclusion according to evidentiary status, respects project design intent, and reasons transparently within the selected theoretical framework. Full treatment is in [Engineering Reasoning Methodology §6](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md#6-scientific-neutrality-principle).
+
 ### Partial runs
 
 Users may request analysis through Stage N only (for example, Stages 0–1 for quick circuit triage). The orchestrator must not require completion of all eight stages for every request.
@@ -199,10 +234,10 @@ Every stage produces a JSON artifact with this minimum structure:
 }
 ```
 
-- `determinations` — stage-specific structured content (schema defined per stage in the Stage Index)
+- `determinations` — stage-specific structured content (schema defined per stage in the Stage Index); significant determinations should carry knowledge classification and evidence chains per [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md) (formal JSON schema extension deferred to ADP-007)
 - `open_questions` — items requiring user input, measurement, or further analysis
 - `confidence` — overall confidence for this stage's conclusions
-- `unknowns` — explicitly flagged gaps; the AI must not invent facts to fill these
+- `unknowns` — explicitly flagged gaps; the AI must not fabricate information to fill these (see [Integrity Principle](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md#8-integrity-principle))
 - `simulation_hooks` — optional suggestions for simulations that would validate or refine this stage (not a substitute for determinations)
 - `sources` — which inputs informed this stage's reasoning
 
@@ -354,7 +389,7 @@ Stage prompt templates are **not implemented** in this milestone.
 
 AERF produces transient reasoning artifacts. The EKM stores curated conclusions.
 
-### Mapping (conceptual; full schema deferred to ADP-002 and ADP-007)
+### Mapping (conceptual; schema in [ADP-002](ADP-002-EKM-Schema-and-Persistence.md); full write-back mapping deferred to ADP-007)
 
 | AERF output | EKM destination |
 |-------------|-----------------|
@@ -419,9 +454,9 @@ Implementation is intentionally deferred.
 
 ## 20. Decision
 
-**Accepted (v1.0)**
+**Accepted (v1.1)**
 
-This ADP establishes the AI Engineering Reasoning Framework as a foundational architectural pillar of the KiCad AI Integration project, alongside the Engineering Knowledge Model.
+This ADP establishes the AI Engineering Reasoning Framework as a foundational architectural pillar of the KiCad AI Integration project, alongside the Engineering Knowledge Model. Version 1.1 adds the internal engineering reasoning methodology layer without changing stage structure or authority boundaries.
 
 All future deep circuit analysis, prompt integration, and simulation workflows shall build upon AERF staged reasoning.
 
@@ -475,6 +510,7 @@ Detailed schemas are in [`AERF_Stage_Index.md`](../Engineering_Knowledge/AERF_St
 - [Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
 - [Engineering Knowledge](../Engineering_Knowledge/README.md)
 - [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md)
+- [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md)
 - [Circuit Families](../Engineering_Knowledge/Circuit_Families/README.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)
 

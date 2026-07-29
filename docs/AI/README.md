@@ -19,9 +19,9 @@ For deep circuit analysis, the project adopts **staged engineering reasoning** (
 
 1. **Reason first** — progressively build understanding through eight canonical stages before drawing conclusions
 2. **Simulate to validate** — simulation confirms or refines prior reasoning; it does not substitute for engineering analysis
-3. **Explain transparently** — each stage produces structured, reviewable output with explicit confidence and unknowns
+3. **Explain transparently** — each stage produces structured, reviewable output with explicit confidence, unknowns, knowledge classification, and traceable evidence chains
 
-Ad-hoc questions may still use the `general_review` template. AERF is the structured path for comprehensive circuit analysis. See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md).
+Ad-hoc questions may still use the `general_review` template. AERF is the structured path for comprehensive circuit analysis. See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md) and [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md).
 
 ## Purpose
 

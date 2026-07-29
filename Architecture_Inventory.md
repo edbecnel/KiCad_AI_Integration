@@ -14,6 +14,7 @@ docs/Architecture/
 ├── AI_Provider_Interface.md
 ├── Roadmap.md
 ├── ADP-001-Engineering-Knowledge-Model-Foundation.md
+├── ADP-002-EKM-Schema-and-Persistence.md
 ├── ADP-003-Engineering-Notebook-User-Interface.md
 ├── ADP-008-AI-Engineering-Reasoning-Framework.md
 └── ADRs/
@@ -24,7 +25,8 @@ docs/Architecture/
     ├── ADR-0004-Optional-Multimodal-Schematic-Context.md
     ├── ADR-0005-EKM-Foundation.md
     ├── ADR-0006-Engineering-Notebook-UI.md
-    └── ADR-0007-AERF-Foundation.md
+    ├── ADR-0007-AERF-Foundation.md
+    └── ADR-0008-EKM-Schema-and-Persistence.md
 ```
 
 Note: A `.DS_Store` file exists in `docs/Architecture/` but is not part of the documentation set.
@@ -137,11 +139,25 @@ Note: A `.DS_Store` file exists in `docs/Architecture/` but is not part of the d
 |-------|-------|
 | **Filename** | `ADP-008-AI-Engineering-Reasoning-Framework.md` |
 | **Relative path** | `docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md` |
-| **Brief purpose** | Architectural Design Proposal defining the AI Engineering Reasoning Framework (AERF), an eight-stage engineering reasoning process between context collection and EKM population. Covers stage execution, circuit family overlays, knowledge loading, simulation philosophy, and coexistence with `general_review`. |
-| **Approximate size** | ~483 lines, ~19.3 KB |
-| **Major headings/sections** | 1. Purpose; 2. Background; 3. Problem Statement; 4. Goals; 5. Non-Goals; 6. Architecture; 7. Authority Boundaries; 8. Canonical Reasoning Stages; 9. Stage Execution Model; 10. Circuit Family Overlay Model; 11. Circuit Family Recognition; 12. Knowledge Loading Contract; 13. Simulation Philosophy; 14. Relationship to Prompt Architecture; 15. Relationship to EKM; 16. Coexistence with `general_review`; 17. Domain Independence; 18. Security and Approval; 19. Implementation; 20. Decision; Appendix A: Per-Stage Determinations (Summary); Related Documents; Parent |
-| **Documents it references** | `../../README.md`, `../../PROJECT_INDEX.md`, `README.md`, `ADP-001-Engineering-Knowledge-Model-Foundation.md`, `ADRs/ADR-0007-AERF-Foundation.md`, `ADRs/ADR-0005-EKM-Foundation.md`, `ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md`, `Prompt_Architecture.md`, `KiCad_AI_Integration_Software_Architecture.md`, `../Engineering_Knowledge/README.md`, `../Engineering_Knowledge/AERF_Stage_Index.md`, `../Engineering_Knowledge/Circuit_Families/README.md`, `../AI/Security.md`, `../../tasks/MASTER_TASK_LIST.md` |
-| **Classification** | Architectural Design Proposal (ADP) |
+| **Brief purpose** | Architectural Design Proposal defining the AI Engineering Reasoning Framework (AERF), an eight-stage engineering reasoning process between context collection and EKM population. Covers stage execution, internal engineering reasoning methodology, circuit family overlays, knowledge loading, simulation philosophy, and coexistence with `general_review`. |
+| **Approximate size** | ~510 lines, ~20 KB |
+| **Major headings/sections** | 1. Purpose; 2. Background; 3. Problem Statement; 4. Goals; 5. Non-Goals; 6. Architecture; 7. Authority Boundaries; 8. Canonical Reasoning Stages; 9. Stage Execution Model (Internal Engineering Reasoning Methodology, Scientific neutrality); 10. Circuit Family Overlay Model; 11. Circuit Family Recognition; 12. Knowledge Loading Contract; 13. Simulation Philosophy; 14. Relationship to Prompt Architecture; 15. Relationship to EKM; 16. Coexistence with `general_review`; 17. Domain Independence; 18. Security and Approval; 19. Implementation; 20. Decision; Appendix A: Per-Stage Determinations (Summary); Related Documents; Parent |
+| **Documents it references** | `../../README.md`, `../../PROJECT_INDEX.md`, `README.md`, `ADP-001-Engineering-Knowledge-Model-Foundation.md`, `ADRs/ADR-0007-AERF-Foundation.md`, `ADRs/ADR-0005-EKM-Foundation.md`, `ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md`, `Prompt_Architecture.md`, `KiCad_AI_Integration_Software_Architecture.md`, `../Engineering_Knowledge/README.md`, `../Engineering_Knowledge/AERF_Stage_Index.md`, `../Engineering_Knowledge/Engineering_Reasoning_Methodology.md`, `../Engineering_Knowledge/Circuit_Families/README.md`, `../AI/Security.md`, `../../tasks/MASTER_TASK_LIST.md` |
+| **Classification** | Architectural Design Proposal (ADP), v1.1 |
+
+---
+
+## docs/Engineering_Knowledge/Engineering_Reasoning_Methodology.md
+
+| Field | Value |
+|-------|-------|
+| **Filename** | `Engineering_Reasoning_Methodology.md` |
+| **Relative path** | `docs/Engineering_Knowledge/Engineering_Reasoning_Methodology.md` |
+| **Brief purpose** | Defines the common engineering reasoning methodology used internally by every AERF stage: evidence collection, knowledge classification (10 types), evidence chains, scientific neutrality, integrity principle, contradictory evidence handling, and human review points. Not a software architecture document. |
+| **Approximate size** | ~320 lines |
+| **Major headings/sections** | 1. Purpose and Scope; 2. Relationship to AERF; 3. Reasoning Process; 4. Knowledge Classification Model; 5. Evidence Chains; 6. Scientific Neutrality Principle; 7. Respect for Design Intent; 8. Integrity Principle; 9. Contradictory Evidence; 10. Human Review Points; 11. Relationship to EKM Provenance; Related Documents; Parent |
+| **Documents it references** | `../../README.md`, `../../PROJECT_INDEX.md`, `../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md`, `AERF_Stage_Index.md`, `../Architecture/ADRs/ADR-0007-AERF-Foundation.md`, `../Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md`, `README.md` |
+| **Classification** | Engineering Knowledge methodology (referenced by ADP-008 v1.1) |
 
 ---
 
@@ -303,7 +319,7 @@ The project adopts the Engineering Knowledge Model (EKM) as the canonical repres
 
 **Status:** Accepted (2026-07-28)
 
-The Engineering Notebook is adopted as the primary user-facing interface to the EKM, with dynamic rendering from EKM sections and fields, a View Model for validation and presentation state, a field-type registry mapping EKM primitives to presentation components, and dockable KiCad panel integration as a sibling surface to chat. Binary content renders via artifact library references. Hard-coded discipline-specific pages, direct JSON editing as primary surface, and merging notebook into chat were all rejected. Implementation is deferred pending ADP-002 schema work.
+The Engineering Notebook is adopted as the primary user-facing interface to the EKM, with dynamic rendering from EKM sections and fields, a View Model for validation and presentation state, a field-type registry mapping EKM primitives to presentation components, and dockable KiCad panel integration as a sibling surface to chat. Binary content renders via artifact library references. Hard-coded discipline-specific pages, direct JSON editing as primary surface, and merging notebook into chat were all rejected. Implementation is deferred; schema contract defined in ADP-002 / ADR-0008.
 
 ---
 
@@ -312,6 +328,14 @@ The Engineering Notebook is adopted as the primary user-facing interface to the 
 **Status:** Accepted (2026-07-28)
 
 The project adopts the AI Engineering Reasoning Framework (AERF) as a foundational pillar alongside the EKM, defining eight canonical reasoning stages (0–7) with circuit-family-specific knowledge overlays, transient stage outputs, and curated EKM conclusions after user approval. Circuit family content lives in `docs/Engineering_Knowledge/Circuit_Families/` as documentation, not plugin code. Simulation validates prior reasoning rather than substituting for it. `general_review` remains valid for ad-hoc questions. Single-shot prompts, embedded domain logic, and EKM-only models were rejected. Implementation is deferred.
+
+---
+
+## ADR-0008: EKM Schema and Persistence
+
+**Status:** Accepted (2026-07-29)
+
+The project adopts the EKM schema and persistence contract: `kicad_ai/engineering_knowledge.json`, semver `schema_version` (first release 1.0.0), six primitive field types, structured KiCadLink and ArtifactReference objects, optional metadata extension point, staleness computed at read time, and JSON Schema validation via View Model. Nested sections[], string token links, and persisted staleness state were rejected. Implementation of load/save and migration tooling is deferred.
 
 ---
 
@@ -325,19 +349,27 @@ ADP-001 defines the Engineering Knowledge Model as the canonical representation 
 
 ---
 
+## ADP-002: EKM Schema and Persistence
+
+**Status:** Accepted (v1.0, 2026-07-29), ratified by ADR-0008, builds on ADP-001
+
+ADP-002 formalizes the EKM minimum metamodel into a canonical JSON Schema (`docs/Database/ekm_schema_v1.json`), defines persistence at `kicad_ai/engineering_knowledge.json`, semver migration policy, KiCadLink and ArtifactReference formats, metadata extension shell for ADP-005, staleness detection contract, and Git policy. Empty documents are valid. Implementation of View Model validation and migration tooling is deferred.
+
+---
+
 ## ADP-003: Engineering Notebook User Interface
 
 **Status:** Accepted (v1.0, 2026-07-28), ratified by ADR-0006, builds on ADP-001
 
-ADP-003 defines the Engineering Notebook as the primary human interface to the EKM, dynamically generated from EKM content with no hard-coded engineering pages. It specifies the View Model and Notebook Renderer separation, primitive field type mapping (`text`, `number`, `enum`, `reference`, `measurement`, `attachment`), artifact library references for binary content, editing pathway (UI → View Model → EKM → persist), navigation features, and KiCad dockable panel integration as a sibling to chat. The notebook displays authored EKM knowledge only, not editable `ProjectContext` facts. Implementation is deferred; ADP-002 (schema and persistence) is an upstream dependency.
+ADP-003 defines the Engineering Notebook as the primary human interface to the EKM, dynamically generated from EKM content with no hard-coded engineering pages. It specifies the View Model and Notebook Renderer separation, primitive field type mapping (`text`, `number`, `enum`, `reference`, `measurement`, `attachment`), artifact library references for binary content, editing pathway (UI → View Model → EKM → persist), navigation features, and KiCad dockable panel integration as a sibling to chat. The notebook displays authored EKM knowledge only, not editable `ProjectContext` facts. Implementation is deferred; schema upstream dependency satisfied by ADP-002.
 
 ---
 
 ## ADP-008: AI Engineering Reasoning Framework (AERF)
 
-**Status:** Accepted (v1.0, 2026-07-28), ratified by ADR-0007, builds on ADP-001
+**Status:** Accepted (v1.1, 2026-07-29), ratified by ADR-0007, builds on ADP-001
 
-ADP-008 defines AERF as a standardized eight-stage engineering reasoning process (circuit identification through engineering analysis) that sits between context collection and EKM population. It specifies stage execution with accumulated context, per-stage JSON output contracts, circuit family overlay model with title overrides, knowledge loading from `docs/Engineering_Knowledge/Circuit_Families/`, simulation philosophy (reason first, validate second), coexistence with `general_review` for ad-hoc questions, and EKM write-back mapping. Circuit family recognition, orchestrator code, per-stage prompt templates, and simulation closed loop are deferred to future ADPs and implementation work.
+ADP-008 defines AERF as a standardized eight-stage engineering reasoning process (circuit identification through engineering analysis) that sits between context collection and EKM population. It specifies stage execution with accumulated context, per-stage JSON output contracts, internal engineering reasoning methodology (v1.1), knowledge classification and evidence chains, circuit family overlay model with title overrides, knowledge loading from `docs/Engineering_Knowledge/Circuit_Families/`, simulation philosophy (reason first, validate second), coexistence with `general_review` for ad-hoc questions, and EKM write-back mapping. The how-layer is defined in `Engineering_Reasoning_Methodology.md`. Circuit family recognition, orchestrator code, per-stage prompt templates, and simulation closed loop are deferred to future ADPs and implementation work.
 
 ---
 
@@ -346,13 +378,14 @@ ADP-008 defines AERF as a standardized eight-stage engineering reasoning process
 ## Hub and index documents
 
 - `docs/Architecture/README.md` is the central index linking to all major architecture documents, ADRs, ADPs, and `ARCHITECTURE_DECISIONS.md` at the repository root.
-- `docs/Architecture/ADRs/README.md` indexes all seven ADRs with status and date.
+- `docs/Architecture/ADRs/README.md` indexes all eight ADRs with status and date.
 
 ## ADP ↔ ADR ratification pairs
 
 | ADP | Ratified by ADR |
 |-----|-----------------|
 | ADP-001 (EKM Foundation) | ADR-0005 |
+| ADP-002 (EKM Schema and Persistence) | ADR-0008 |
 | ADP-003 (Engineering Notebook UI) | ADR-0006 |
 | ADP-008 (AERF) | ADR-0007 |
 
@@ -361,7 +394,7 @@ Each ADR summarizes and records acceptance of its corresponding ADP; the ADPs co
 ## ADP dependency chain (documented in ADP-001 Appendix A)
 
 ```
-ADP-001 → ADP-002 (proposed, not present in docs/Architecture/)
+ADP-001 → ADP-002 (accepted)
 ADP-001 → ADP-003, ADP-004, ADP-005, ADP-006, ADP-007, ADP-008
 ADP-002 → ADP-003, ADP-004, ADP-005, ADP-006, ADP-007
 ADP-003 → ADP-004
@@ -369,7 +402,7 @@ ADP-005 → ADP-007
 ADP-008 → ADP-007, ADP-006
 ```
 
-ADP-003 explicitly depends on ADP-001 and notes ADP-002 as upstream (proposed, not yet ratified). ADP-008 builds on ADP-001 and relates to ADP-007 (prompt integration, proposed).
+ADP-003 depends on ADP-001 and ADP-002 (ratified). ADP-008 builds on ADP-001 and relates to ADP-007 (prompt integration, proposed).
 
 ## Software Architecture as component hub
 
@@ -404,7 +437,7 @@ ADR-0005, ADR-0006, ADR-0007 and ADP-001, ADP-003, ADP-008 form a second archite
 | `docs/Specifications/Netlist_Gap_Fill.md` | Software Architecture, Prompt Architecture |
 | `docs/Developer_Handbook/` | Software Architecture, ADR-0001, Prompt Architecture |
 | `docs/Database/README.md` | ADP-001, ADP-003, ADR-0005, ADR-0006 |
-| `docs/Engineering_Knowledge/` | ADP-001, ADP-008, ADR-0007, Prompt Architecture |
+| `docs/Engineering_Knowledge/` | ADP-001, ADP-008, ADR-0007, Prompt Architecture; includes `Engineering_Reasoning_Methodology.md` |
 | `src/` code paths | ADP-001 (`src/context/model.py`, `src/prompts/templates/general_review.py`), AI Provider Interface (`src/providers/`) |
 
 ## Reference direction summary
@@ -489,7 +522,7 @@ The following architecture topics are documented under `docs/Architecture/`:
 - Domain independence and extensibility
 - JSON persistence under `kicad_ai/` with `schema_version`
 - Relationship to `ProjectContext` and Conversation Manager
-- Deferred topics: full schema (ADP-002), provenance (ADP-005), NL conversion (ADP-004), simulation (ADP-006), prompt integration (ADP-007)
+- Deferred topics: provenance (ADP-005), NL conversion (ADP-004), simulation (ADP-006), prompt integration (ADP-007)
 
 ## Engineering Notebook UI
 
@@ -506,6 +539,9 @@ The following architecture topics are documented under `docs/Architecture/`:
 
 - Eight canonical reasoning stages (0–7) with stable IDs and overridable titles
 - Stage execution model with accumulated context and partial runs
+- Internal engineering reasoning methodology and knowledge classification (10 types)
+- Evidence chains for traceable, explainable conclusions
+- Scientific neutrality and integrity principle (no misrepresentation of evidentiary status)
 - Per-stage JSON output contract
 - Circuit family overlay model and recognition (conceptual, deferred)
 - Knowledge loading from `docs/Engineering_Knowledge/Circuit_Families/`

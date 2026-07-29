@@ -116,10 +116,11 @@ Planned per-stage prompt templates for the eight AERF reasoning stages (0–7). 
 - `<circuit_family_kb>` — excerpts from the loaded circuit family knowledge base
 - `<kicad_python_extracted_data>` — `ProjectContext` JSON
 - `<engineering_knowledge>` — relevant EKM sections when present
+- `<aerf_methodology>` — knowledge classification and evidence-chain guidance from [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md) (planned)
 
 Stage templates follow the same XML-section conventions as other prompts. The SUBCKT two-stage pipeline (`facts` → `synthesis`) is a precedent for staged orchestration but is not itself an AERF stage.
 
-See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md) and [Engineering Knowledge](../Engineering_Knowledge/README.md).
+See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md), [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md), and [Engineering Knowledge](../Engineering_Knowledge/README.md).
 
 ## Token Budgeting
 

@@ -12,6 +12,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 
 - [Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
 - [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md)
 - [ADP-003: Engineering Notebook User Interface](ADP-003-Engineering-Notebook-User-Interface.md)
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Prompt Architecture](Prompt_Architecture.md)
@@ -29,10 +30,12 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADR-0005: Engineering Knowledge Model Foundation](ADRs/ADR-0005-EKM-Foundation.md)
 - [ADR-0006: Engineering Notebook User Interface](ADRs/ADR-0006-Engineering-Notebook-UI.md)
 - [ADR-0007: AERF Foundation](ADRs/ADR-0007-AERF-Foundation.md)
+- [ADR-0008: EKM Schema and Persistence](ADRs/ADR-0008-EKM-Schema-and-Persistence.md)
 
 ## Architectural Design Proposals
 
 - [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md)
 - [ADP-003: Engineering Notebook User Interface](ADP-003-Engineering-Notebook-User-Interface.md)
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 

@@ -1,0 +1,135 @@
+Engineering Documentation Framework Adoption Conformance Validation
+===================================================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Started: 2026-07-29 07:57:21 +0800
+
+Framework Advisor conformance analysis
+--------------------------------------
+Engineering Documentation Framework Advisor
+Ruleset: 2026-07-10-stage1
+===========================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Project name: KiCad_AI_Integration
+Repository mode: EDF adopting project
+Overall compliance: 76%
+Structure score: 100%
+AI score: 100%
+Navigation score: 25%
+Governance score: 79%
+
+This report is read-only.
+No files or folders were created, modified, moved, renamed, or deleted.
+
+Missing required directories
+----------------------------
+None.
+
+Missing recommended root files
+------------------------------
+None.
+
+Missing AI handbook files
+-------------------------
+None.
+
+Missing Governance files
+------------------------
+None.
+
+Broken links
+------------
+- docs/Engineering_Knowledge/README.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/README.md -> ./00%20-%20Circuit%20Identification.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Engineering_Reasoning_Methodology.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Architecture/ADRs/ADR-0006-Engineering-Notebook-UI.md -> ADP-001-Engineering-Knowledge-Model-Foundation.md
+- docs/Architecture/ADRs/ADR-0006-Engineering-Notebook-UI.md -> ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links
+- docs/Architecture/ADRs/ADR-0005-EKM-Foundation.md -> docs/Architecture/ADP-002-EKM-Schema-and-Persistence.md
+- docs/Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md -> ADP-001-Engineering-Knowledge-Model-Foundation.md
+- docs/Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md -> ADP-003-Engineering-Notebook-User-Interface.md
+- docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md -> [AI Engineering Reasoning Framework (ADP-008)](ADP-008-AI-Engineering-Reasoning-Framework.md)
+- examples/bedini_babcock/README.md -> ../docs/Developer_Handbook/06_E2E_Chat_UI.md
+
+Orphan documents
+----------------
+- .pytest_cache/README.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/00 - Circuit Identification.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/README.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/01 - Basic Oscillation.md
+- docs/User_Guides/Feature_Overview.md
+- docs/Development/Reference_Notes/How_the_Bedini_SSG_Oscillates_Without_a_Capacitor.md
+- docs/Developer_Handbook/06_E2E_Chat_UI.md
+- examples/bedini_babcock/README.md
+- Architecture_Inventory.md
+
+Navigation issues
+-----------------
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/00 - Circuit Identification.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/00 - Circuit Identification.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/README.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/01 - Basic Oscillation.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscilllator/01 - Basic Oscillation.md: missing parent domain README link.
+- docs/User_Guides/Feature_Overview.md: missing breadcrumb navigation.
+- docs/User_Guides/Feature_Overview.md: missing parent domain README link.
+- docs/Development/Reference_Notes/How_the_Bedini_SSG_Oscillates_Without_a_Capacitor.md: missing breadcrumb navigation.
+- docs/Development/Reference_Notes/How_the_Bedini_SSG_Oscillates_Without_a_Capacitor.md: missing parent domain README link.
+
+Governance metadata and lifecycle issues
+----------------------------------------
+- docs/Specifications/AI_Datasheet_Discovery.md: missing or invalid Status.
+- docs/Specifications/AI_Datasheet_Discovery.md: missing Owner.
+- docs/Specifications/AI_Datasheet_Discovery.md: missing Applies To.
+- docs/Architecture/AI_Provider_Interface.md: missing or invalid Status.
+- docs/Architecture/Prompt_Architecture.md: missing or invalid Status.
+- docs/Developer_Handbook/06_E2E_Chat_UI.md: missing or invalid Status.
+- docs/Developer_Handbook/06_E2E_Chat_UI.md: missing Owner.
+
+Overdue reviews
+---------------
+None.
+
+Markdown outside canonical locations
+------------------------------------
+- .pytest_cache/README.md
+- examples/bedini_babcock/README.md
+- Architecture_Inventory.md
+
+Warnings
+--------
+None.
+
+Recommendations
+---------------
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+- Add required breadcrumb and parent navigation.
+- Correct governance metadata and lifecycle issues.
+
+
+Validation completed: 2026-07-29 07:57:38 +0800
+
+============================================================
+Conformance validation completed successfully.
+
+Report:
+reports/conformance/framework-advisor-20260729-075721.txt
+
+Compliance scores:
+- Overall: 76%
+- Structure: 100%
+- AI: 100%
+- Navigation: 25%
+- Governance: 79%
+
+Next recommended actions:
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+- Add required breadcrumb and parent navigation.
+- Correct governance metadata and lifecycle issues.
+============================================================

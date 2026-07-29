@@ -81,7 +81,7 @@ Implementation is deferred. ADP-002 (schema and persistence) should precede or r
 - No code changes in this ADR; architecture only
 - Existing `*_supply.py` headless pattern should evolve into the View Model layer
 - Advanced JSON View is debugging-only, outside normal notebook editing
-- Staleness UI for KiCad object links deferred to ADP-002 or ADP-007
+- Staleness detection contract in [ADP-002 §13](ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links); UI indicators at ADP-003 implementation
 
 ## References
 
