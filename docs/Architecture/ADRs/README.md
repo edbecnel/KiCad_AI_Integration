@@ -20,6 +20,7 @@ This directory contains individual Architecture Decision Records for KiCad AI In
 | [ADR-0006](ADR-0006-Engineering-Notebook-UI.md) | Engineering Notebook user interface | Accepted | 2026-07-28 |
 | [ADR-0007](ADR-0007-AERF-Foundation.md) | AI Engineering Reasoning Framework foundation | Accepted | 2026-07-28 |
 | [ADR-0008](ADR-0008-EKM-Schema-and-Persistence.md) | EKM schema and persistence | Accepted | 2026-07-29 |
+| [ADR-0009](ADR-0009-Platform-Architecture-Foundation.md) | Platform architecture foundation | Accepted | 2026-07-29 |
 
 ## Navigation
 

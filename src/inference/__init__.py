@@ -1,10 +1,4 @@
-"""Headless helpers for the AI chat UI.
-
-Re-exports from ``inference.chat`` for backward compatibility.
-New code should import from ``inference`` directly.
-"""
-
-from __future__ import annotations
+"""Engineering Inference Engine (EIE) — platform inference orchestration."""
 
 from inference.chat import (
     ChatSendResult,

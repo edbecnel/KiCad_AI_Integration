@@ -26,8 +26,13 @@ New contributors begin with [00_First_Time_Setup.md](./00_First_Time_Setup.md).
 ## Navigation
 
 - [Project Index](../../PROJECT_INDEX.md)
-- [Software Architecture](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- [Platform Architecture](../Architecture/Platform_Architecture.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)
+
+## Platform import boundaries
+
+Platform modules (`providers/`, `prompts/`, `platform_core/`, `ekm/`, `reasoning/`, `inference/`) **must not** import KiCad-specific parsers (`context/schematic_*`, `context/pcb_*`), wxPython UI, or `pcbnew`. Host modules (`context/` KiCad I/O, `ui/`, `plugin/`) may import platform modules. See [Platform Architecture](../Architecture/Platform_Architecture.md).
 
 ## Maintenance
 

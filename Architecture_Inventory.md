@@ -9,6 +9,7 @@ Inventory of all documentation under `docs/Architecture/`. Generated from existi
 ```
 docs/Architecture/
 ├── README.md
+├── Platform_Architecture.md
 ├── KiCad_AI_Integration_Software_Architecture.md
 ├── Prompt_Architecture.md
 ├── AI_Provider_Interface.md
@@ -17,6 +18,8 @@ docs/Architecture/
 ├── ADP-002-EKM-Schema-and-Persistence.md
 ├── ADP-003-Engineering-Notebook-User-Interface.md
 ├── ADP-008-AI-Engineering-Reasoning-Framework.md
+├── ADP-009-Host-Integration-Layer.md
+├── ADP-010-Engineering-Inference-Engine.md
 └── ADRs/
     ├── README.md
     ├── ADR-0001-KiCad-8-Minimum-Version.md
@@ -26,7 +29,8 @@ docs/Architecture/
     ├── ADR-0005-EKM-Foundation.md
     ├── ADR-0006-Engineering-Notebook-UI.md
     ├── ADR-0007-AERF-Foundation.md
-    └── ADR-0008-EKM-Schema-and-Persistence.md
+    ├── ADR-0008-EKM-Schema-and-Persistence.md
+    └── ADR-0009-Platform-Architecture-Foundation.md
 ```
 
 Note: A `.DS_Store` file exists in `docs/Architecture/` but is not part of the documentation set.
@@ -42,10 +46,26 @@ Note: A `.DS_Store` file exists in `docs/Architecture/` but is not part of the d
 | **Filename** | `README.md` |
 | **Relative path** | `docs/Architecture/README.md` |
 | **Brief purpose** | Index and navigation hub for the Architecture documentation domain. Lists authoritative documents, ADRs, ADPs, and scope guidance for what belongs in this folder. |
-| **Approximate size** | ~53 lines, ~2.3 KB |
+| **Approximate size** | ~60 lines, ~2.8 KB |
 | **Major headings/sections** | Purpose; Authoritative Documents; Architecture Decision Records; Architectural Design Proposals; What Belongs Here; Navigation; Maintenance |
-| **Documents it references** | `../../README.md`, `../../PROJECT_INDEX.md`, `KiCad_AI_Integration_Software_Architecture.md`, `ADP-001-Engineering-Knowledge-Model-Foundation.md`, `ADP-003-Engineering-Notebook-User-Interface.md`, `ADP-008-AI-Engineering-Reasoning-Framework.md`, `Prompt_Architecture.md`, `AI_Provider_Interface.md`, `Roadmap.md`, `ADRs/README.md`, `../../ARCHITECTURE_DECISIONS.md`, all seven ADR files |
+| **Documents it references** | `../../README.md`, `../../PROJECT_INDEX.md`, `Platform_Architecture.md`, `KiCad_AI_Integration_Software_Architecture.md`, ADP-001 through ADP-010, `Prompt_Architecture.md`, `AI_Provider_Interface.md`, `Roadmap.md`, `ADRs/README.md`, `../../ARCHITECTURE_DECISIONS.md`, all ADR files |
 | **Classification** | Canonical |
+| **Layer** | Platform |
+
+---
+
+## docs/Architecture/Platform_Architecture.md
+
+| Field | Value |
+|-------|-------|
+| **Filename** | `Platform_Architecture.md` |
+| **Relative path** | `docs/Architecture/Platform_Architecture.md` |
+| **Brief purpose** | Authoritative platform overview: three-layer model (Platform / Frameworks / Host Integrations), authority boundaries, source code logical layers, import rules, future host patterns. |
+| **Approximate size** | ~180 lines |
+| **Major headings/sections** | Purpose; Three-Layer Model; Platform Frameworks; AERF vs EIE; Authority Boundaries; Host Integration Layer; Source Code Logical Layers; Future Host Applications; Related Documents |
+| **Documents it references** | ADR-0009, ADP-001, ADP-008, ADP-009, ADP-010, KiCad Software Architecture, Prompt Architecture, AI Provider Interface |
+| **Classification** | Canonical |
+| **Layer** | Platform |
 
 ---
 
@@ -55,11 +75,12 @@ Note: A `.DS_Store` file exists in `docs/Architecture/` but is not part of the d
 |-------|-------|
 | **Filename** | `KiCad_AI_Integration_Software_Architecture.md` |
 | **Relative path** | `docs/Architecture/KiCad_AI_Integration_Software_Architecture.md` |
-| **Brief purpose** | Top-level software architecture for KiCad AI Integration. Describes project goals, phased delivery (Phase 1–3), major software components, security principles, and long-term vision. |
-| **Approximate size** | ~248 lines, ~5.4 KB |
-| **Major headings/sections** | Overview; Project Goals; Phase 1; Phase 2; Phase 3; Major Software Components (Context Collection Engine, Project Context Model, AERF Orchestrator, Prompt Builder, AI Provider Layer, Conversation Manager, KiCad User Interface); Security; Long-Term Vision; Parent; Related Documents |
-| **Documents it references** | `../../README.md`, `../../PROJECT_INDEX.md`, `README.md`, `ADP-008-AI-Engineering-Reasoning-Framework.md`, `ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md`, `../Specifications/Netlist_Gap_Fill.md`, `../../tasks/MASTER_TASK_LIST.md`, `../Developer_Handbook/README.md` |
+| **Brief purpose** | KiCad host implementation view. Describes project goals, phased delivery (Phase 1–3), KiCad-specific software components, security principles, and KiCad host long-term vision. |
+| **Approximate size** | ~270 lines |
+| **Major headings/sections** | Parent; Overview; Project Goals; Phase 1–3; Major Software Components; Security; KiCad Host Long-Term Vision; Related Documents |
+| **Documents it references** | `Platform_Architecture.md`, `ADP-008`, `ADP-009`, `ADP-010`, `ADRs/ADR-0004`, `../Specifications/Netlist_Gap_Fill.md`, `../../tasks/MASTER_TASK_LIST.md`, `../Developer_Handbook/README.md` |
 | **Classification** | Draft |
+| **Layer** | Host (KiCad) |
 
 ---
 
@@ -339,6 +360,14 @@ The project adopts the EKM schema and persistence contract: `kicad_ai/engineerin
 
 ---
 
+## ADR-0009: Platform Architecture Foundation
+
+**Status:** Accepted (2026-07-29)
+
+The project adopts a three-layer platform architecture (Platform / Frameworks / Host Integrations) with KiCad AI Integration as the first host reference implementation. Platform frameworks (EKM, AERF, EIE, prompts, providers) are host-independent. Overlay documentation is preferred over wholesale reorganization. `DesignSnapshot` protocol lives in `src/platform_core/contracts.py`; EIE at `src/inference/`. Physical `src/hosts/` reorganization is deferred until a second host is actively developed. Wholesale repo rename and introducing a new platform acronym were rejected.
+
+---
+
 # 4. Architectural Design Proposals
 
 ## ADP-001: Engineering Knowledge Model (EKM) Foundation
@@ -373,12 +402,29 @@ ADP-008 defines AERF as a standardized eight-stage engineering reasoning process
 
 ---
 
+## ADP-009: Host Integration Layer
+
+**Status:** Accepted (v1.0, 2026-07-29), ratified by ADR-0009, builds on Platform Architecture and ADP-001
+
+ADP-009 defines the Host Integration Layer contract: `DesignSnapshot` protocol, host responsibilities (collect, UI shell, artifact root, object linking, write-back), and KiCad as the reference implementation. Physical `src/hosts/` reorganization and `HostLink` generalization are deferred until a second host is actively developed.
+
+---
+
+## ADP-010: Engineering Inference Engine (EIE)
+
+**Status:** Accepted (v1.0, 2026-07-29), ratified by ADR-0009, builds on ADP-008 and ADP-009
+
+ADP-010 defines EIE as the platform runtime orchestrator distinct from AERF methodology. It specifies ad-hoc chat workflow in `src/inference/`, future AERF staged orchestration, and migration from `*_supply.py` modules. EKM and full AERF orchestration remain deferred.
+
+---
+
 # 5. Cross-Reference Map
 
 ## Hub and index documents
 
 - `docs/Architecture/README.md` is the central index linking to all major architecture documents, ADRs, ADPs, and `ARCHITECTURE_DECISIONS.md` at the repository root.
-- `docs/Architecture/ADRs/README.md` indexes all eight ADRs with status and date.
+- `docs/Architecture/ADRs/README.md` indexes all nine ADRs with status and date.
+- `docs/Architecture/Platform_Architecture.md` is the authoritative platform overview above KiCad-specific documents.
 
 ## ADP ↔ ADR ratification pairs
 
@@ -388,6 +434,8 @@ ADP-008 defines AERF as a standardized eight-stage engineering reasoning process
 | ADP-002 (EKM Schema and Persistence) | ADR-0008 |
 | ADP-003 (Engineering Notebook UI) | ADR-0006 |
 | ADP-008 (AERF) | ADR-0007 |
+| ADP-009 (Host Integration Layer) | ADR-0009 |
+| ADP-010 (EIE) | ADR-0009 |
 
 Each ADR summarizes and records acceptance of its corresponding ADP; the ADPs contain full architectural rationale.
 
@@ -444,7 +492,10 @@ ADR-0005, ADR-0006, ADR-0007 and ADP-001, ADP-003, ADP-008 form a second archite
 
 ```
 README.md (index)
-    ├── KiCad_AI_Integration_Software_Architecture.md (component overview)
+    ├── Platform_Architecture.md (platform overview)
+    │       ├── ADP-009 (Host Integration Layer) ──ratified──► ADR-0009
+    │       └── ADP-010 (EIE) ──ratified──► ADR-0009
+    ├── KiCad_AI_Integration_Software_Architecture.md (KiCad host view)
     │       ├── ADRs 0001–0004 (Phase 1 decisions)
     │       └── ADP-008 (AERF orchestrator, proposed)
     ├── Prompt_Architecture.md
@@ -500,6 +551,16 @@ The following architecture topics are documented under `docs/Architecture/`:
 - Future AERF stage prompt templates
 - Token budgeting strategies (planned)
 
+## Platform architecture
+
+- Three-layer model: Platform / Frameworks / Host Integrations
+- KiCad AI Integration as first host reference implementation
+- `DesignSnapshot` host-neutral contract (`src/platform_core/contracts.py`)
+- Engineering Inference Engine (EIE) as runtime orchestrator separate from AERF methodology
+- Import boundaries between platform and host modules
+- Future host patterns (CLI, web, laboratory, other EDA tools)
+- Physical `src/hosts/` reorganization deferred until second host
+
 ## Platform and dependencies
 
 - KiCad 8+ minimum version requirement
@@ -552,8 +613,8 @@ The following architecture topics are documented under `docs/Architecture/`:
 
 ## Architecture decision governance
 
-- Seven accepted ADRs covering platform version, provider abstraction, Phase 1 statelessness, multimodal context, EKM, Notebook UI, and AERF
-- Three accepted ADPs with full architectural proposals ratified by ADRs 0005–0007
+- Nine accepted ADRs covering platform foundation, KiCad version, provider abstraction, Phase 1 statelessness, multimodal context, EKM, Notebook UI, AERF, and EKM schema
+- Five accepted ADPs (001, 002, 003, 008, 009, 010) with full architectural proposals ratified by ADRs
 - Deferred ADP numbering (002–007) documented in ADP-001 Appendix A
 
 ---
@@ -566,20 +627,20 @@ The following architecture topics are documented under `docs/Architecture/`:
 
 ## docs/Architecture/ADRs/README.md
 
-**Purpose:** Index for the Architecture Decision Records subdirectory. Contains a table of all seven ADRs with ID, decision title, status (all Accepted), and date. Provides navigation links back to the project index, Architecture README, and root `ARCHITECTURE_DECISIONS.md`.
+**Purpose:** Index for the Architecture Decision Records subdirectory. Contains a table of all nine ADRs with ID, decision title, status (all Accepted), and date. Provides navigation links back to the project index, Architecture README, and root `ARCHITECTURE_DECISIONS.md`.
 
 ---
 
 # 8. Executive Summary
 
-The `docs/Architecture/` directory contains **16 Markdown files** organized into a root-level index, five topical architecture documents, three Architectural Design Proposals (ADPs), and seven Architecture Decision Records (ADRs) plus an ADR index.
+The `docs/Architecture/` directory contains **20 Markdown files** organized into a root-level index, six topical architecture documents, five Architectural Design Proposals (ADPs), and nine Architecture Decision Records (ADRs) plus an ADR index.
 
 **Document types and status:**
 
 - **Index documents (2):** `README.md` files at the Architecture root and in `ADRs/` serve as navigation hubs.
-- **Top-level architecture (5):** Software Architecture and Roadmap are marked Draft; Prompt Architecture and AI Provider Interface document implemented Phase 1 behavior; together they cover system components, phasing, prompts, and provider contracts.
-- **ADPs (3):** ADP-001 (EKM), ADP-003 (Engineering Notebook UI), and ADP-008 (AERF) are all Accepted and ratified by corresponding ADRs (0005, 0006, 0007). They define the project's knowledge model, user interface, and staged reasoning framework. Additional ADPs (002, 004–007) are referenced as planned but not present in this directory.
-- **ADRs (7):** All Accepted. ADR-0001 through ADR-0004 (dated 2026-07-14) establish the Phase 1 foundation (KiCad 8+, provider abstraction, stateless context, optional multimodal schematics). ADR-0005 through ADR-0007 (dated 2026-07-28) ratify the EKM, Engineering Notebook, and AERF architectural pillars.
+- **Top-level architecture (6):** Platform Architecture is Canonical; Software Architecture (KiCad host) and Roadmap are Draft; Prompt Architecture and AI Provider Interface document implemented Phase 1 behavior.
+- **ADPs (5):** ADP-001 (EKM), ADP-002 (schema), ADP-003 (Notebook UI), ADP-008 (AERF), ADP-009 (Host Layer), ADP-010 (EIE) are Accepted and ratified by corresponding ADRs.
+- **ADRs (9):** All Accepted. ADR-0001 through ADR-0004 establish Phase 1 foundation. ADR-0005 through ADR-0008 ratify EKM, Notebook, AERF, and EKM schema. ADR-0009 ratifies platform architecture foundation.
 
 **Architectural themes documented:** In-KiCad AI assistant with phased delivery; context collection from KiCad projects; structured prompt construction with optional multimodal schematic images; provider abstraction starting with Claude; persistent engineering knowledge via EKM and Engineering Notebook UI; staged circuit analysis via AERF with circuit-family knowledge overlays; explicit security and user-approval boundaries for cloud transmission.
 

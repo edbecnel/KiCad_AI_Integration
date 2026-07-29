@@ -10,11 +10,14 @@ System architecture, technical design, diagrams, and architecture decisions for 
 
 ## Authoritative Documents
 
-- [Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
+- [Platform Architecture](Platform_Architecture.md)
+- [Software Architecture (KiCad Host)](KiCad_AI_Integration_Software_Architecture.md)
 - [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md)
 - [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md)
 - [ADP-003: Engineering Notebook User Interface](ADP-003-Engineering-Notebook-User-Interface.md)
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
+- [ADP-009: Host Integration Layer](ADP-009-Host-Integration-Layer.md)
+- [ADP-010: Engineering Inference Engine](ADP-010-Engineering-Inference-Engine.md)
 - [Prompt Architecture](Prompt_Architecture.md)
 - [AI Provider Interface](AI_Provider_Interface.md)
 - [Roadmap](Roadmap.md)
@@ -31,6 +34,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADR-0006: Engineering Notebook User Interface](ADRs/ADR-0006-Engineering-Notebook-UI.md)
 - [ADR-0007: AERF Foundation](ADRs/ADR-0007-AERF-Foundation.md)
 - [ADR-0008: EKM Schema and Persistence](ADRs/ADR-0008-EKM-Schema-and-Persistence.md)
+- [ADR-0009: Platform Architecture Foundation](ADRs/ADR-0009-Platform-Architecture-Foundation.md)
 
 ## Architectural Design Proposals
 
@@ -38,6 +42,8 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md)
 - [ADP-003: Engineering Notebook User Interface](ADP-003-Engineering-Notebook-User-Interface.md)
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
+- [ADP-009: Host Integration Layer](ADP-009-Host-Integration-Layer.md)
+- [ADP-010: Engineering Inference Engine](ADP-010-Engineering-Inference-Engine.md)
 
 ## What Belongs Here
 

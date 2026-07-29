@@ -22,6 +22,7 @@ Individual ADRs belong in [docs/Architecture/ADRs/](docs/Architecture/ADRs/READM
 | [ADR-0006](docs/Architecture/ADRs/ADR-0006-Engineering-Notebook-UI.md) | Engineering Notebook user interface | Accepted | 2026-07-28 |
 | [ADR-0007](docs/Architecture/ADRs/ADR-0007-AERF-Foundation.md) | AI Engineering Reasoning Framework foundation | Accepted | 2026-07-28 |
 | [ADR-0008](docs/Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md) | EKM schema and persistence | Accepted | 2026-07-29 |
+| [ADR-0009](docs/Architecture/ADRs/ADR-0009-Platform-Architecture-Foundation.md) | Platform architecture foundation | Accepted | 2026-07-29 |
 
 ## Architectural Design Proposals
 
@@ -31,10 +32,13 @@ Individual ADRs belong in [docs/Architecture/ADRs/](docs/Architecture/ADRs/READM
 | [ADP-002](docs/Architecture/ADP-002-EKM-Schema-and-Persistence.md) | EKM schema and persistence | Accepted (v1.0) | 2026-07-29 |
 | [ADP-003](docs/Architecture/ADP-003-Engineering-Notebook-User-Interface.md) | Engineering Notebook user interface | Accepted (v1.0) | 2026-07-28 |
 | [ADP-008](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) | AI Engineering Reasoning Framework | Accepted (v1.0) | 2026-07-28 |
+| [ADP-009](docs/Architecture/ADP-009-Host-Integration-Layer.md) | Host Integration Layer | Accepted (v1.0) | 2026-07-29 |
+| [ADP-010](docs/Architecture/ADP-010-Engineering-Inference-Engine.md) | Engineering Inference Engine | Accepted (v1.0) | 2026-07-29 |
 
 ## Related Documents
 
 - [Project Index](PROJECT_INDEX.md)
+- [Platform Architecture](docs/Architecture/Platform_Architecture.md)
 - [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 - [Architecture](docs/Architecture/README.md)
 - [ADR Index](docs/Architecture/ADRs/README.md)

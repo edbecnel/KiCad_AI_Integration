@@ -1,4 +1,8 @@
-"""Project context model for stretch slice and future MVP expansion."""
+"""Project context model for stretch slice and future MVP expansion.
+
+``ProjectContext`` is the KiCad host implementation of ``DesignSnapshot``
+(see ``platform_core.contracts``).
+"""
 
 from __future__ import annotations
 

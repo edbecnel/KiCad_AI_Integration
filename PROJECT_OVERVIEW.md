@@ -155,6 +155,22 @@ Large Language Models become interchangeable reasoning engines operating on top 
 
 ---
 
+## Platform, Frameworks, and Host Integrations
+
+The repository implements an **AI-assisted Electrical Engineering Reasoning Platform** with three architectural layers:
+
+| Layer | Description |
+|-------|-------------|
+| **Platform** | Product vision and cross-host contracts |
+| **Frameworks** | EKM, AERF, EIE, Prompt Architecture, AI Provider Layer, and related components |
+| **Host Integrations** | Environment-specific adapters — KiCad AI Integration is the first |
+
+AERF defines *what* to reason about (stages, methodology, circuit-family knowledge). The Engineering Inference Engine (EIE) defines *how* reasoning runs at runtime. KiCad provides schematic connectivity, context collection, and the initial user interface.
+
+See [Platform Architecture](docs/Architecture/Platform_Architecture.md) for the authoritative platform overview.
+
+---
+
 ## Long-Term Vision
 
 The long-term vision is to transform KiCad from a schematic capture application into an intelligent engineering assistant capable of collaborating with engineers throughout the entire design lifecycle.
@@ -180,6 +196,7 @@ The ultimate objective is not to replace engineers, but to augment their experti
 
 | Topic | Document |
 |-------|----------|
+| Platform architecture | [Platform Architecture](docs/Architecture/Platform_Architecture.md) |
 | Governance scope and goals | [Project Charter](PROJECT_CHARTER.md) |
 | Current capabilities | [Feature Overview](docs/User_Guides/Feature_Overview.md) |
 | EKM architecture | [ADP-001: Engineering Knowledge Model Foundation](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) |

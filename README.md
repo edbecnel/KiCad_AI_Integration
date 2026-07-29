@@ -10,6 +10,8 @@
 
 KiCad AI Integration is an open-source project that integrates modern Large Language Models (LLMs) directly into the KiCad electronic design environment. Rather than a generic AI chat window, it is designed as an **AI-assisted electrical engineering reasoning platform** that builds structured engineering understanding before asking an LLM to reason about a design.
 
+**KiCad is the first host application and reference implementation** — not the architectural boundary of the system. Platform frameworks (EKM, AERF, EIE, prompts, providers) are designed to operate independently of KiCad. See [Platform Architecture](docs/Architecture/Platform_Architecture.md) for the full layering model.
+
 The project automatically collects engineering context from the active KiCad project—including schematics, PCB layouts, netlists, datasheets, and other metadata—and progressively transforms it into structured knowledge through the [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) and [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md). See [Project Overview](PROJECT_OVERVIEW.md) for the full story of how the project evolved and where it is headed.
 
 The initial implementation targets **Anthropic Claude**, with a long-term architecture designed to support multiple AI providers through a common abstraction layer.
@@ -110,7 +112,7 @@ Advanced engineering capabilities including:
    Groq       DeepSeek     Ollama
 ```
 
-This architecture intentionally separates AI providers from the rest of the application to make future expansion straightforward. The EKM and AERF architecture is documented in [`docs/Architecture/`](docs/Architecture/README.md).
+This architecture intentionally separates AI providers from the rest of the application to make future expansion straightforward. Platform and host architecture is documented in [`docs/Architecture/`](docs/Architecture/README.md), starting with [Platform Architecture](docs/Architecture/Platform_Architecture.md).
 
 ---
 
@@ -147,6 +149,10 @@ KiCad_AI_Integration/
 │   ├── context/
 │   ├── prompts/
 │   ├── providers/
+│   ├── platform_core/
+│   ├── inference/
+│   ├── reasoning/
+│   ├── ekm/
 │   ├── ui/
 │   ├── utils/
 │   └── plugin/

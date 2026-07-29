@@ -21,6 +21,7 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 - [Project Overview](PROJECT_OVERVIEW.md)
 - [Project Charter](PROJECT_CHARTER.md)
+- [Platform Architecture](docs/Architecture/Platform_Architecture.md)
 - [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
 - [Master Task List](tasks/MASTER_TASK_LIST.md)
 - [Engineering Documentation Framework](ENGINEERING_DOCUMENTATION_FRAMEWORK.md)
@@ -30,8 +31,13 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 ### Architecture
 
+KiCad AI Integration is the **first host integration** of the AI-assisted Electrical Engineering Reasoning Platform. Platform-level architecture is documented separately from KiCad-specific implementation.
+
+- [Platform Architecture](docs/Architecture/Platform_Architecture.md)
 - [Architecture](docs/Architecture/README.md)
-- [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- [Software Architecture (KiCad Host)](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- [ADP-009: Host Integration Layer](docs/Architecture/ADP-009-Host-Integration-Layer.md)
+- [ADP-010: Engineering Inference Engine](docs/Architecture/ADP-010-Engineering-Inference-Engine.md)
 - [Prompt Architecture](docs/Architecture/Prompt_Architecture.md)
 - [AI Provider Interface](docs/Architecture/AI_Provider_Interface.md)
 - [Roadmap](docs/Architecture/Roadmap.md)
@@ -42,6 +48,8 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [ADR-0005: EKM Foundation](docs/Architecture/ADRs/ADR-0005-EKM-Foundation.md)
 - [ADR-0006: Engineering Notebook UI](docs/Architecture/ADRs/ADR-0006-Engineering-Notebook-UI.md)
 - [ADR-0007: AERF Foundation](docs/Architecture/ADRs/ADR-0007-AERF-Foundation.md)
+- [ADR-0008: EKM Schema and Persistence](docs/Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md)
+- [ADR-0009: Platform Architecture Foundation](docs/Architecture/ADRs/ADR-0009-Platform-Architecture-Foundation.md)
 - [ADP-008: AI Engineering Reasoning Framework](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
 
 ### Engineering Knowledge
@@ -113,8 +121,8 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 ## AI Context
 
-AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. The primary architecture document is [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Architecture decisions are in [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
+AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. The platform architecture is in [Platform Architecture](docs/Architecture/Platform_Architecture.md). The KiCad host implementation is in [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Architecture decisions are in [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
 
 ## Last Reviewed
 
-2026-07-28
+2026-07-29
