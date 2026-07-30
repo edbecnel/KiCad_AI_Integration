@@ -98,6 +98,11 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [Programmatic AI Analysis Guide](docs/Developer_Handbook/Guide-Programmatic_AI_Analysis.md)
 - [In-KiCad Claude Chat Integration Guide](docs/Developer_Handbook/Guide-In_KiCad_Claude_Chat_Integration.md)
 
+### User Guides
+
+- [User Guides](docs/User_Guides/README.md)
+- [Feature Overview](docs/User_Guides/Feature_Overview.md) — KiCad capabilities, platform scope, and how the system works
+
 ### Reference
 
 - [Reference](docs/Reference/README.md)
@@ -110,7 +115,6 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [API](docs/API/README.md)
 - [Database](docs/Database/README.md)
 - [Deployment](docs/Deployment/README.md)
-- [User Guides](docs/User_Guides/README.md)
 - [Templates](docs/Templates/README.md)
 
 ## Current Priorities
@@ -121,8 +125,8 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 ## AI Context
 
-AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. The platform architecture is in [Platform Architecture](docs/Architecture/Platform_Architecture.md). The KiCad host implementation is in [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Architecture decisions are in [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
+AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. Scope and capability status: [Feature Overview](docs/User_Guides/Feature_Overview.md). The platform architecture is in [Platform Architecture](docs/Architecture/Platform_Architecture.md). The KiCad host implementation is in [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Architecture decisions are in [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
 
 ## Last Reviewed
 
-2026-07-29
+2026-07-31

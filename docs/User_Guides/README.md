@@ -11,7 +11,8 @@ End-user instructions, tutorials, walkthroughs, and troubleshooting guidance.
 ## Authoritative Documents
 
 - [Project Overview](../../PROJECT_OVERVIEW.md) — project philosophy, evolution, and long-term vision
-- [Feature Overview](Feature_Overview.md) — current capabilities and gaps
+- [Feature Overview](Feature_Overview.md) — KiCad host capabilities, platform/framework scope, how the system works, and gaps (start here for "what works" and "what's next")
+- [Platform Architecture](../Architecture/Platform_Architecture.md) — full platform layering (contributors)
 
 ## What Belongs Here
 
@@ -23,6 +24,7 @@ End-user instructions, tutorials, walkthroughs, and troubleshooting guidance.
 
 - [Project Index](../../PROJECT_INDEX.md)
 - [Project README](../../README.md)
+- [Platform Architecture](../Architecture/Platform_Architecture.md)
 
 ## Maintenance
 

@@ -345,6 +345,7 @@ not only free-form chat.
 - [ ] User install and setup guide (API key, KiCad version, first run)
 - [ ] Developer guide (repo layout, running tests, adding extractors/providers)
 - [x] Architecture docs: Prompt Architecture, AI Provider Interface, Roadmap
+- [x] Feature Overview: KiCad host capabilities, platform scope, how-it-works, and gap summary — [Feature Overview](../docs/User_Guides/Feature_Overview.md) (authoritative scope reference)
 - [ ] Keep README current status section updated per phase completion
 
 ### Security
