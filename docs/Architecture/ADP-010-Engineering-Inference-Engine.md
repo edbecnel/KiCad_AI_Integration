@@ -106,7 +106,7 @@ EIE will:
 
 1. Load circuit family KB excerpts via `src/reasoning/`
 2. Execute stages 0–7 sequentially with accumulated context
-3. Build per-stage prompts (ADP-007, future)
+3. Build per-stage prompts (ADP-007) — implemented in `src/prompts/templates/aerf_stage.py`; dry-run via `build_aerf_stage_prompt_bundle()`
 4. Require user approval per stage or batch before cloud transmission
 5. Route simulation hooks to simulation abstraction (ADP-006, future)
 6. Gate EKM write-back (ADP-007, future)
@@ -131,7 +131,9 @@ EIE will:
 |-----------|--------|
 | `src/inference/chat.py` — general review workflow | Implemented |
 | `src/inference/simulation.py` — simulation/SUBCKT workflow | Implemented |
-| `src/inference/aerf.py` — stage-0 dry-run stub | Implemented |
+| `src/inference/aerf.py` — AERF dry-run bundles + prompt assembly | Implemented |
+| `src/reasoning/classifier.py` — heuristic circuit family classifier | Implemented |
+| `src/prompts/templates/aerf_stage.py` — per-stage AERF prompts (ADP-007) | Implemented |
 | `src/reasoning/` — AERF stage registry + KB loader | Implemented |
 | `src/ekm/` — EKM runtime + validation CLI | Implemented |
 | AERF full multi-stage LLM orchestration | Deferred |

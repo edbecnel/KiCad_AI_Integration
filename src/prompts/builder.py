@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from context.model import ProjectContext
+from platform_core.contracts import DesignSnapshot
 from prompts.templates.general_review import (
     GENERAL_REVIEW_SYSTEM,
     build_general_review_sections,
@@ -149,5 +151,58 @@ def build_general_review_prompt(
         preview_summary=preview,
         estimated_text_tokens=est,
         include_image=include_image and ctx.schematic_image is not None,
+        image_byte_size=image_size,
+    )
+
+
+def build_aerf_stage_prompt(
+    snapshot: DesignSnapshot,
+    family_id: str,
+    stage_id: int,
+    *,
+    prior_stages: list[dict[str, Any]] | None = None,
+    ekm_sections: dict[str, Any] | None = None,
+    include_image: bool = False,
+) -> BuiltPrompt:
+    """Build an AERF stage analysis prompt (dry-run; no provider send)."""
+    from prompts.templates.aerf_stage import (
+        aerf_stage_system_message,
+        build_aerf_stage_sections,
+    )
+    from reasoning import get_family, get_stage
+
+    stage = get_stage(stage_id)
+    family = get_family(family_id)
+    sections = build_aerf_stage_sections(
+        snapshot,
+        family_id,
+        stage_id,
+        prior_stages=prior_stages,
+        ekm_sections=ekm_sections,
+    )
+    text = wrap_xml_sections(sections)
+    preview_lines = [
+        f"Project: {snapshot.project_name}",
+        f"Circuit family: {family.label} ({family_id})",
+        f"AERF stage {stage.stage_id}: {stage.title}",
+        f"Prior stages: {len(prior_stages or [])}",
+    ]
+    image_size = 0
+    if include_image:
+        data = snapshot.to_dict(include_image_bytes=True)
+        image_bytes = data.get("schematic_image")
+        if image_bytes:
+            image_size = len(image_bytes)
+            preview_lines.append(f"Schematic image: {image_size:,} bytes (attached separately)")
+    est = estimate_tokens(text)
+    if include_image and image_size:
+        est += max(1, image_size // 800)
+    return BuiltPrompt(
+        text=text,
+        system=aerf_stage_system_message(stage_id),
+        template=f"aerf_stage_{stage_id}",
+        preview_summary="\n".join(preview_lines),
+        estimated_text_tokens=est,
+        include_image=include_image and image_size > 0,
         image_byte_size=image_size,
     )

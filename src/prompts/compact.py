@@ -1,22 +1,24 @@
-"""Compact ProjectContext for large prompts."""
+"""Compact design snapshots for large prompts."""
 
 from __future__ import annotations
 
 from typing import Any
+
+from platform_core.contracts import DesignSnapshot
 
 from context.model import ProjectContext
 
 _SYMBOL_FULL_LIMIT = 50
 
 
-def compact_context_for_prompt(ctx: ProjectContext) -> dict[str, Any]:
+def compact_snapshot_for_prompt(snapshot: DesignSnapshot) -> dict[str, Any]:
     """
-    Shrink context JSON for large schematics to reduce tokens and upload time.
+    Shrink snapshot JSON for large schematics to reduce tokens and upload time.
 
     Full symbol list is kept when <= ``_SYMBOL_FULL_LIMIT``; otherwise a compact
     table plus unresolved datasheet entries only.
     """
-    data = ctx.to_dict(include_image_bytes=False)
+    data = snapshot.to_dict(include_image_bytes=False)
     symbols = data.get("symbols") or []
     if len(symbols) <= _SYMBOL_FULL_LIMIT:
         return data
@@ -48,3 +50,8 @@ def compact_context_for_prompt(ctx: ProjectContext) -> dict[str, Any]:
         "full pin/datasheet detail omitted to limit request size."
     )
     return data
+
+
+def compact_context_for_prompt(ctx: ProjectContext) -> dict[str, Any]:
+    """Shrink ProjectContext JSON for large schematics (KiCad host adapter)."""
+    return compact_snapshot_for_prompt(ctx)

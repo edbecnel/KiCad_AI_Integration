@@ -401,17 +401,17 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 
 ---
 
-## Track B — Platform Frameworks (active)
+## Track B — Platform Frameworks (complete)
 
 **Goal:** Implement host-independent platform layers per [Platform Architecture](../docs/Architecture/Platform_Architecture.md). Scope reference: [Feature Overview](../docs/User_Guides/Feature_Overview.md).
 
 ### Standing documentation checklist (each milestone)
 
-- [ ] Update [Feature Overview](../docs/User_Guides/Feature_Overview.md) platform gaps table
-- [ ] Check off items in this section
-- [ ] Update [Platform Architecture](../docs/Architecture/Platform_Architecture.md) implementation status
-- [ ] Update [ADP-010](../docs/Architecture/ADP-010-Engineering-Inference-Engine.md) §8 when EIE changes
-- [ ] Run `pytest` (platform tests must not require KiCad/wx)
+- [x] Update [Feature Overview](../docs/User_Guides/Feature_Overview.md) platform gaps table
+- [x] Check off items in this section
+- [x] Update [Platform Architecture](../docs/Architecture/Platform_Architecture.md) implementation status
+- [x] Update [ADP-010](../docs/Architecture/ADP-010-Engineering-Inference-Engine.md) §8 when EIE changes
+- [x] Run `pytest` (platform tests must not require KiCad/wx)
 
 ### Phase B1 — EKM runtime + CLI
 
@@ -459,8 +459,8 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 ### Future implementation
 
 - [x] `src/reasoning/` orchestrator module (stage registry + KB loader; full LLM orchestration deferred)
-- [ ] Circuit family classifier
-- [ ] Per-stage prompt templates (ADP-007)
+- [x] Circuit family classifier
+- [x] Per-stage prompt templates (ADP-007)
 - [ ] EKM stage-output mapping and write-back (ADP-007)
 - [ ] Simulation closed loop — validate/refine stages (ADP-006)
 - [ ] AERF UI mode in chat or dedicated analysis panel

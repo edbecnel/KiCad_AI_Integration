@@ -154,3 +154,24 @@ Rather than immediately interpreting simulation results, the AI should progressi
 8. What engineering conclusions can be drawn?
 
 This mirrors the reasoning process of an experienced electrical engineer.
+
+---
+
+## Recognition signatures
+
+Heuristic signals used by the circuit family classifier (`src/reasoning/classifier.py`):
+
+| Signal | Typical patterns |
+|--------|------------------|
+| Switching device | BJT or MOSFET symbol (`Device:Q_*`) driving a transformer or inductor |
+| Magnetic storage | Transformer (`Device:T_*`) or inductor (`Device:L_*`) with separate primary / trigger / secondary windings |
+| Feedback path | Trigger or feedback winding net names (`trigger`, `feedback`, `coil`) |
+| Topology | Single active switch, transformer energy storage, self-oscillating drive (no external clock) |
+| Net naming | `coil`, `flyback`, `oscillator`, or Bedini-style winding labels |
+
+**Distinguishing from related families:**
+
+- **Flyback converter** — often has rectified secondary output and duty-cycle control; blocking oscillator is usually self-triggered with a feedback winding
+- **Buck / boost** — inductor on switching node without transformer isolation; no separate trigger winding
+
+Machine-readable rules mirror this section in [`families.json`](../families.json) under `recognition`.

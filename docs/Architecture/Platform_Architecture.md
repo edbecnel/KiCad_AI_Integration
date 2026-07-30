@@ -12,7 +12,9 @@
 
 This document defines the **AI-assisted Electrical Engineering Reasoning Platform** — the product vision and architectural layering that KiCad AI Integration implements as its first host integration.
 
-The platform is not a KiCad plugin. KiCad is the **first host application and reference implementation**. Platform frameworks (EKM, AERF, EIE, prompts, providers, and related components) are designed to operate independently of any schematic editor, simulation package, user interface, or large language model.
+The platform is not a KiCad plugin. KiCad is the **first host application and reference implementation**. The host-agnostic framework stack is **AERP** (**A**I-assisted **E**ngineering **R**easoning **P**latform) — EKM, AERF, EIE, prompts, providers, and related components designed to operate independently of any schematic editor, simulation package, user interface, or large language model. See [ADR-0010](ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md).
+
+For acronym and terminology definitions, see the authoritative [Glossary and Acronyms](../Reference/Glossary.md).
 
 Existing ADRs, ADPs, and KiCad-centric documents remain authoritative. This document **extends** them with a platform lens; it does not replace them.
 
@@ -22,7 +24,7 @@ Existing ADRs, ADPs, and KiCad-centric documents remain authoritative. This docu
 
 ```
 AI-assisted Electrical Engineering Reasoning Platform
-    ├── Platform Frameworks
+    ├── AERP (host-agnostic framework stack)
     │       EKM, AERF, EIE, Prompt Architecture, AI Provider Layer,
     │       Artifact Library, Engineering Knowledge Libraries,
     │       Conversation Manager (planned), Simulation Abstraction (planned)
@@ -34,19 +36,21 @@ AI-assisted Electrical Engineering Reasoning Platform
 | Layer | Role | Examples |
 |-------|------|----------|
 | **Platform** | Vision, authority boundaries, cross-host contracts | This document, [ADR-0009](ADRs/ADR-0009-Platform-Architecture-Foundation.md) |
-| **Frameworks** | Reusable engineering reasoning capabilities | [ADP-001](ADP-001-Engineering-Knowledge-Model-Foundation.md), [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md), [ADP-010](ADP-010-Engineering-Inference-Engine.md) |
+| **AERP** | Host-agnostic framework stack | [ADR-0010](ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md); EKM, AERF, EIE — see [Platform Frameworks](#platform-frameworks) |
 | **Host Integrations** | Editor- or environment-specific adapters | [ADP-009](ADP-009-Host-Integration-Layer.md), [KiCad Software Architecture](KiCad_AI_Integration_Software_Architecture.md) |
 
 ---
 
-## Platform Frameworks
+## Platform Frameworks (AERP)
+
+**AERP** is the umbrella acronym for this layer. **AERF** is one framework within AERP, not a synonym for the whole stack.
 
 | Framework | What it defines | Primary references | Implementation |
 |-----------|-----------------|-------------------|----------------|
 | **Engineering Knowledge Model (EKM)** | Canonical authored engineering knowledge | [ADP-001](ADP-001-Engineering-Knowledge-Model-Foundation.md), [ADP-002](ADP-002-EKM-Schema-and-Persistence.md), [ADR-0005](ADRs/ADR-0005-EKM-Foundation.md) | `src/ekm/` (implemented) |
-| **AERF** | *What* to reason about: stages 0–7, circuit-family overlays, methodology | [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md), [ADR-0007](ADRs/ADR-0007-AERF-Foundation.md) | `src/reasoning/` (stage registry + KB loader) |
-| **Engineering Inference Engine (EIE)** | *How* reasoning runs: orchestration, prompt assembly, provider invocation | [ADP-010](ADP-010-Engineering-Inference-Engine.md) | `src/inference/` |
-| **Prompt Architecture** | How design context becomes structured prompts | [Prompt_Architecture.md](Prompt_Architecture.md) | `src/prompts/` |
+| **AERF** | *What* to reason about: stages 0–7, circuit-family overlays, methodology | [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md), [ADR-0007](ADRs/ADR-0007-AERF-Foundation.md) | `src/reasoning/` (stage registry, KB loader, classifier) |
+| **Engineering Inference Engine (EIE)** | *How* reasoning runs: orchestration, prompt assembly, provider invocation | [ADP-010](ADP-010-Engineering-Inference-Engine.md) | `src/inference/` (chat, simulation, AERF dry-run bundles) |
+| **Prompt Architecture** | How design context becomes structured prompts | [Prompt_Architecture.md](Prompt_Architecture.md) | `src/prompts/` (general review, SUBCKT, AERF stage templates) |
 | **AI Provider Layer** | LLM vendor abstraction | [AI_Provider_Interface.md](AI_Provider_Interface.md), [ADR-0002](ADRs/ADR-0002-Provider-Abstraction-Layer.md) | `src/providers/` |
 | **Artifact Library** | Content-addressed datasheets, SPICE libs, exports | [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md) | `src/context/artifacts/` |
 | **Engineering Knowledge Libraries** | Circuit-family reference content | [Engineering Knowledge](../Engineering_Knowledge/README.md) | `docs/Engineering_Knowledge/` |
@@ -55,7 +59,7 @@ AI-assisted Electrical Engineering Reasoning Platform
 
 ### AERF vs EIE
 
-**AERF is a framework within the platform, not the platform itself.**
+**AERF is a framework within AERP, not AERP itself.**
 
 - **AERF** defines the staged engineering reasoning ontology, acceptance criteria, and circuit-family knowledge overlays.
 - **EIE** is the runtime that executes AERF stages, merges `DesignSnapshot` + EKM + KB excerpts, invokes the prompt builder and AI provider layer, handles simulation hooks, and gates EKM write-back.
@@ -99,13 +103,13 @@ Physical directory moves are deferred until a second host is actively developed 
 
 ```
 src/
-  providers/          → Platform: AI Provider Layer
-  prompts/            → Platform: Prompt Architecture
-  platform_core/      → Platform: shared contracts (DesignSnapshot)
-  ekm/                → Platform: EKM runtime
-  reasoning/          → Platform: AERF stage registry and KB loaders
-  inference/          → Platform: EIE orchestrator (chat, simulation, AERF stub)
-  context/artifacts/  → Platform: Artifact Library
+  providers/          → AERP: AI Provider Layer
+  prompts/            → AERP: Prompt Architecture
+  platform_core/      → AERP: shared contracts (DesignSnapshot)
+  ekm/                → AERP: EKM runtime
+  reasoning/          → AERP: AERF stage registry and KB loaders
+  inference/          → AERP: EIE orchestrator (chat, simulation, AERF dry-run)
+  context/artifacts/  → AERP: Artifact Library
   context/model.py    → Shared: DesignSnapshot (KiCad-shaped today)
   context/*parse*     → Host (KiCad): collection and write-back
   ui/                 → Host (KiCad): UI shell
@@ -114,7 +118,7 @@ src/
 
 ### Import boundaries
 
-Platform modules (`providers/`, `prompts/`, `platform_core/`, `ekm/`, `reasoning/`, `inference/`) **must not** import KiCad-specific parsers (`context/schematic_*`, `context/pcb_*`), wxPython UI, or `pcbnew`. Host modules may import platform modules. See [Developer Handbook](../Developer_Handbook/README.md).
+Platform modules (AERP: `providers/`, `prompts/`, `platform_core/`, `ekm/`, `reasoning/`, `inference/`) **must not** import KiCad-specific parsers (`context/schematic_*`, `context/pcb_*`), wxPython UI, or `pcbnew`. Host modules may import platform modules. See [Developer Handbook](../Developer_Handbook/README.md).
 
 ---
 

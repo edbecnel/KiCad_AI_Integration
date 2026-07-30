@@ -214,8 +214,8 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | Framework | Status | Next step |
 |-----------|--------|-----------|
 | EKM runtime (`src/ekm/`) | Implemented | Engineering Notebook UI (ADP-003); View Model validation |
-| AERF orchestrator (`src/reasoning/`) | Stage registry + KB loader | Circuit family classifier; per-stage LLM prompts (ADP-007) |
-| EIE (`src/inference/`) | Chat + simulation + stage-0 stub | Full AERF multi-stage orchestration; EKM write-back gating |
+| AERF orchestrator (`src/reasoning/`) | Stage registry + KB loader + classifier | Full multi-stage LLM orchestration |
+| EIE (`src/inference/`) | Chat + simulation + AERF dry-run prompts | Multi-stage orchestration with approval; EKM write-back gating |
 | Engineering Notebook UI | Spec only | After EKM View Model |
 | Conversation Manager | Deferred Phase 2 | Multi-turn transcripts |
 | Simulation abstraction | ADP-006 planned | Host-agnostic validation hooks |
@@ -226,8 +226,8 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | | |
 |---|---|
 | **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library and missing-PDF workflow; simulation/SUBCKT panel (early) |
-| **Platform (foundation laid)** | EKM runtime + CLI; AERF registry/KB loader; EIE chat/simulation/AERF stub; Blocking Oscillator reference KB complete |
-| **In progress** | Full AERF staged LLM orchestration, Engineering Notebook, broader KiCad context (PCB, BOM, ERC/DRC) |
+| **Platform (foundation laid)** | EKM runtime + CLI; AERF registry/KB loader/classifier; per-stage AERF prompts; EIE chat/simulation; Blocking Oscillator reference KB complete |
+| **In progress** | AERF multi-stage LLM orchestration with approval, Engineering Notebook, broader KiCad context (PCB, BOM, ERC/DRC) |
 | **Later** | Native plugin, additional hosts, conversation persistence via EKM |
 
 This is a **foundation**, not a finished product. The central idea — automatic context, structured engineering reasoning, and controlled AI review — works today for schematic-level questions in KiCad, while the platform architecture is defined to grow beyond any single editor.

@@ -107,16 +107,18 @@ Gap-fill and SUBCKT output is **advisory only** — engineers must verify agains
 
 ## AERF Stage Prompt Templates
 
-_Future work under ADP-007. Architecture defined in [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md)._
+**Implemented** in `src/prompts/templates/aerf_stage.py` and `build_aerf_stage_prompt()` in `src/prompts/builder.py`. Architecture defined in [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md).
 
-Planned per-stage prompt templates for the eight AERF reasoning stages (0–7). Each stage prompt will include:
+Per-stage prompt templates for the eight AERF reasoning stages (0–7). Each stage prompt includes:
 
 - `<aerf_stage>` — current stage metadata (id, key, title, question)
 - `<aerf_prior_stages>` — accumulated JSON from prior stages
 - `<circuit_family_kb>` — excerpts from the loaded circuit family knowledge base
 - `<kicad_python_extracted_data>` — `ProjectContext` JSON
 - `<engineering_knowledge>` — relevant EKM sections when present
-- `<aerf_methodology>` — knowledge classification and evidence-chain guidance from [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md) (planned)
+- `<aerf_methodology>` — knowledge classification and evidence-chain guidance from [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md)
+
+Dry-run assembly: `build_aerf_stage_prompt()` / `build_aerf_stage_prompt_bundle()` in EIE — no auto cloud send. Full multi-stage orchestration with approval gating is deferred.
 
 Stage templates follow the same XML-section conventions as other prompts. The SUBCKT two-stage pipeline (`facts` → `synthesis`) is a precedent for staged orchestration but is not itself an AERF stage.
 

@@ -21,6 +21,7 @@ This directory contains individual Architecture Decision Records for KiCad AI In
 | [ADR-0007](ADR-0007-AERF-Foundation.md) | AI Engineering Reasoning Framework foundation | Accepted | 2026-07-28 |
 | [ADR-0008](ADR-0008-EKM-Schema-and-Persistence.md) | EKM schema and persistence | Accepted | 2026-07-29 |
 | [ADR-0009](ADR-0009-Platform-Architecture-Foundation.md) | Platform architecture foundation | Accepted | 2026-07-29 |
+| [ADR-0010](ADR-0010-AERP-Platform-Umbrella-Acronym.md) | AERP platform umbrella acronym | Accepted | 2026-07-31 |
 
 ## Navigation
 

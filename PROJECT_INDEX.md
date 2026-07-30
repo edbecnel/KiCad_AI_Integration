@@ -25,6 +25,7 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
 - [Master Task List](tasks/MASTER_TASK_LIST.md)
 - [Engineering Documentation Framework](ENGINEERING_DOCUMENTATION_FRAMEWORK.md)
+- [Glossary and Acronyms](docs/Reference/Glossary.md)
 - [Changelog](CHANGELOG.md)
 
 ## Documentation Domains
@@ -50,6 +51,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [ADR-0007: AERF Foundation](docs/Architecture/ADRs/ADR-0007-AERF-Foundation.md)
 - [ADR-0008: EKM Schema and Persistence](docs/Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md)
 - [ADR-0009: Platform Architecture Foundation](docs/Architecture/ADRs/ADR-0009-Platform-Architecture-Foundation.md)
+- [ADR-0010: AERP Platform Umbrella Acronym](docs/Architecture/ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md)
 - [ADP-008: AI Engineering Reasoning Framework](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
 
 ### Engineering Knowledge
@@ -106,6 +108,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 ### Reference
 
 - [Reference](docs/Reference/README.md)
+- [Glossary and Acronyms](docs/Reference/Glossary.md)
 - [AI Tools for Advanced Circuit Analysis](docs/Reference/AI_Tools_for_Advanced_Circuit_Analysis.md)
 
 ### Other Domains
@@ -119,20 +122,22 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 ## Current Priorities
 
-**Track B — Platform frameworks** (see [Feature Overview](docs/User_Guides/Feature_Overview.md) Part 4):
+**Track C — AERF + EIE depth** (see [Feature Overview](docs/User_Guides/Feature_Overview.md) Part 4):
 
-1. EKM runtime (`src/ekm/`) + validation CLI
-2. AERF reasoning registry + KB loader (`src/reasoning/`)
-3. Blocking Oscillator circuit-family KB (stages 00–07)
-4. EIE expansion — simulation migration + AERF orchestration stub (`src/inference/`)
+1. ~~Circuit family classifier from `DesignSnapshot`~~ (done — `src/reasoning/classifier.py`)
+2. ~~Per-stage prompt templates (ADP-007)~~ (done — `src/prompts/templates/aerf_stage.py`)
+3. Full AERF multi-stage orchestration with approval gating
+4. EKM write-back from approved stage outputs (ADP-007)
+
+**Track B (complete):** EKM runtime, AERF registry/KB loader, Blocking Oscillator KB 00–07, EIE simulation + stage-0 stub.
 
 Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
 
-Also open: resolve project license; KiCad Phase 1 host gaps (PCB context, templates) deferred until Track B milestones land.
+Also open: resolve project license; KiCad Phase 1 host gaps (PCB context, templates) — **Track A**, defer unless prioritized.
 
 ## AI Context
 
-AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. Scope and capability status: [Feature Overview](docs/User_Guides/Feature_Overview.md). The platform architecture is in [Platform Architecture](docs/Architecture/Platform_Architecture.md). The KiCad host implementation is in [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Architecture decisions are in [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
+AI assistants should begin here, follow links to authoritative documents, and avoid inventing project facts. Terminology and acronyms: [Glossary](docs/Reference/Glossary.md). Scope and capability status: [Feature Overview](docs/User_Guides/Feature_Overview.md). The platform architecture is in [Platform Architecture](docs/Architecture/Platform_Architecture.md). The KiCad host implementation is in [Software Architecture](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md). Architecture decisions are in [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md). AI engineering policy is in [AI Engineering Handbook](docs/AI/README.md). Implementation tracking is in [Master Task List](tasks/MASTER_TASK_LIST.md).
 
 ## Last Reviewed
 

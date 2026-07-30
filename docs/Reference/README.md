@@ -10,12 +10,13 @@ Glossaries, standards, terminology, external tool surveys, and reference materia
 
 ## Authoritative Documents
 
+- [Glossary and Acronyms](Glossary.md) — canonical project terminology and acronym reference
 - [AI Tools for Advanced Circuit Analysis](AI_Tools_for_Advanced_Circuit_Analysis.md)
 
 ## What Belongs Here
 
+- [Glossary and Acronyms](Glossary.md)
 - External AI tool comparisons and surveys
-- Glossary and terminology (planned)
 - Standards and conventions reference material
 
 ## Navigation

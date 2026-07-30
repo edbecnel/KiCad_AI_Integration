@@ -4,7 +4,12 @@
       "family_id": "blocking_oscillator",
       "directory": "Blocking_Oscillator",
       "label": "Blocking Oscillator",
-      "status": "complete"
+      "status": "complete",
+      "recognition": {
+        "symbol_lib_patterns": ["Device:Q_", "Device:T_", "Device:L_"],
+        "net_keywords": ["trigger", "feedback", "coil", "oscillator", "flyback"],
+        "min_score": 2
+      }
     }
   ]
 }

@@ -35,6 +35,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADR-0007: AERF Foundation](ADRs/ADR-0007-AERF-Foundation.md)
 - [ADR-0008: EKM Schema and Persistence](ADRs/ADR-0008-EKM-Schema-and-Persistence.md)
 - [ADR-0009: Platform Architecture Foundation](ADRs/ADR-0009-Platform-Architecture-Foundation.md)
+- [ADR-0010: AERP Platform Umbrella Acronym](ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md)
 
 ## Architectural Design Proposals
 

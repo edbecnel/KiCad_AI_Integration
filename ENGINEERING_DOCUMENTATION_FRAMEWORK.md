@@ -46,7 +46,7 @@ The former **`documentation/`** folder has been migrated to canonical EDF locati
 | `docs/Database/` | Schema and persistence design |
 | `docs/Deployment/` | Deployment, operations, and runbooks |
 | `docs/User_Guides/` | End-user documentation |
-| `docs/Reference/` | Glossary, standards, terminology, and external references |
+| `docs/Reference/` | [Glossary](docs/Reference/Glossary.md), standards, terminology, and external references |
 | `docs/Engineering_Knowledge/` | AERF stage definitions and circuit-family reference knowledge |
 | `docs/Templates/` | Reusable documentation templates |
 

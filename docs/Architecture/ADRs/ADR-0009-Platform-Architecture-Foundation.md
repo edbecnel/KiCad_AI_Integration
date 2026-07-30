@@ -37,7 +37,7 @@ Adopt a three-layer platform architecture:
 
 Specific commitments:
 
-- **No new platform acronym.** Use "AI-assisted Electrical Engineering Reasoning Platform" in prose; retain EKM, AERF, EIE, and existing acronyms.
+- **AERP** as the formal umbrella acronym for the host-agnostic framework stack ([ADR-0010](ADR-0010-AERP-Platform-Umbrella-Acronym.md)). Supersedes the original “no platform acronym” commitment in this ADR.
 - **KiCad remains the first host.** ADR-0001 and KiCad-specific docs stay authoritative for the reference host.
 - **Overlay documentation, not relocation.** New platform docs sit above existing KiCad-centric architecture; ADRs/ADPs are not moved or rewritten.
 - **`DesignSnapshot` protocol** defined in `src/platform_core/contracts.py`; `ProjectContext` is the KiCad implementation.

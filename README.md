@@ -4,13 +4,13 @@
 
 **New here?** Read [What is the KiCad AI Integration Project?](PROJECT_OVERVIEW.md) for the project's philosophy, evolution, and long-term vision.
 
-**Documentation:** Start at the [Project Index](PROJECT_INDEX.md) for the full documentation map.
+**Documentation:** Start at the [Project Index](PROJECT_INDEX.md) for the full documentation map. Acronyms and terminology: [Glossary](docs/Reference/Glossary.md).
 
 ## Overview
 
 KiCad AI Integration is an open-source project that integrates modern Large Language Models (LLMs) directly into the KiCad electronic design environment. Rather than a generic AI chat window, it is designed as an **AI-assisted electrical engineering reasoning platform** that builds structured engineering understanding before asking an LLM to reason about a design.
 
-**KiCad is the first host application and reference implementation** — not the architectural boundary of the system. Platform frameworks (EKM, AERF, EIE, prompts, providers) are designed to operate independently of KiCad. See [Platform Architecture](docs/Architecture/Platform_Architecture.md) for the full layering model.
+**KiCad is the first host application and reference implementation** — not the architectural boundary of the system. The host-agnostic framework stack is **AERP** (**A**I-assisted **E**ngineering **R**easoning **P**latform): EKM, AERF, EIE, prompts, providers, and related components. See [Platform Architecture](docs/Architecture/Platform_Architecture.md) and [Glossary — AERP](docs/Reference/Glossary.md).
 
 The project automatically collects engineering context from the active KiCad project—including schematics, PCB layouts, netlists, datasheets, and other metadata—and progressively transforms it into structured knowledge through the [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) and [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md). See [Project Overview](PROJECT_OVERVIEW.md) for the full story of how the project evolved and where it is headed.
 
@@ -200,11 +200,11 @@ Guiding principles include:
 
 # Current Status
 
-**Phase:** Track B — platform frameworks (EKM, AERF reasoning, EIE) after architecture and Feature Overview documentation.
+**Phase:** Post Track B — platform frameworks complete; **Track C** (AERF + EIE depth) is the recommended next milestone.
 
 **KiCad host (working):** Schematic context, datasheet library and panels (`--ui-datasheets`), chat UI with Approve & Send (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`, early), Claude provider, general-review prompts.
 
-**Platform:** Architecture ratified ([Platform Architecture](docs/Architecture/Platform_Architecture.md)); provider, prompt, and EIE chat layers implemented; EKM and AERF orchestration in progress.
+**Platform:** EKM runtime + CLI (`src/ekm/`); AERF stage registry + KB loader (`src/reasoning/`); EIE chat, simulation orchestration, and AERF stage-0 stub (`src/inference/`). Blocking Oscillator reference KB complete (stages 00–07).
 
 See [Feature Overview](docs/User_Guides/Feature_Overview.md) for capability status, platform/host separation, and gaps.
 
