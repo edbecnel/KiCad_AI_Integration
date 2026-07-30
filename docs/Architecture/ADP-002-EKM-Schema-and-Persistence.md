@@ -439,13 +439,14 @@ This proposal is considered complete when:
 
 ## 18. Implementation
 
-Implementation is intentionally deferred.
+Platform runtime: [`src/ekm/`](../../src/ekm/) (load/save/validate) and [`scripts/ekm_tool.py`](../../scripts/ekm_tool.py) (headless CLI). View Model and Notebook UI remain deferred.
 
 | Component | Assigned to |
 |-----------|-------------|
+| EKM load/save/validate runtime | `src/ekm/` (implemented) |
 | View Model load/save/validate | ADP-003 implementation |
 | Migration functions per version | Implementation milestone |
-| JSON Schema CI validation tests | Implementation milestone |
+| JSON Schema CI validation tests | `tests/ekm/` (structural validation implemented) |
 | Staleness detection against `ProjectContext` | ADP-003 / ADP-007 implementation |
 
 ---

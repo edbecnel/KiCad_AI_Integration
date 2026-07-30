@@ -43,8 +43,8 @@ AI-assisted Electrical Engineering Reasoning Platform
 
 | Framework | What it defines | Primary references | Implementation |
 |-----------|-----------------|-------------------|----------------|
-| **Engineering Knowledge Model (EKM)** | Canonical authored engineering knowledge | [ADP-001](ADP-001-Engineering-Knowledge-Model-Foundation.md), [ADP-002](ADP-002-EKM-Schema-and-Persistence.md), [ADR-0005](ADRs/ADR-0005-EKM-Foundation.md) | `src/ekm/` (planned) |
-| **AERF** | *What* to reason about: stages 0–7, circuit-family overlays, methodology | [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md), [ADR-0007](ADRs/ADR-0007-AERF-Foundation.md) | `src/reasoning/` (planned) |
+| **Engineering Knowledge Model (EKM)** | Canonical authored engineering knowledge | [ADP-001](ADP-001-Engineering-Knowledge-Model-Foundation.md), [ADP-002](ADP-002-EKM-Schema-and-Persistence.md), [ADR-0005](ADRs/ADR-0005-EKM-Foundation.md) | `src/ekm/` (implemented) |
+| **AERF** | *What* to reason about: stages 0–7, circuit-family overlays, methodology | [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md), [ADR-0007](ADRs/ADR-0007-AERF-Foundation.md) | `src/reasoning/` (stage registry + KB loader) |
 | **Engineering Inference Engine (EIE)** | *How* reasoning runs: orchestration, prompt assembly, provider invocation | [ADP-010](ADP-010-Engineering-Inference-Engine.md) | `src/inference/` |
 | **Prompt Architecture** | How design context becomes structured prompts | [Prompt_Architecture.md](Prompt_Architecture.md) | `src/prompts/` |
 | **AI Provider Layer** | LLM vendor abstraction | [AI_Provider_Interface.md](AI_Provider_Interface.md), [ADR-0002](ADRs/ADR-0002-Provider-Abstraction-Layer.md) | `src/providers/` |
@@ -102,9 +102,9 @@ src/
   providers/          → Platform: AI Provider Layer
   prompts/            → Platform: Prompt Architecture
   platform_core/      → Platform: shared contracts (DesignSnapshot)
-  ekm/                → Platform: EKM runtime (planned)
-  reasoning/          → Platform: AERF stage registry and KB loaders (planned)
-  inference/          → Platform: EIE orchestrator
+  ekm/                → Platform: EKM runtime
+  reasoning/          → Platform: AERF stage registry and KB loaders
+  inference/          → Platform: EIE orchestrator (chat, simulation, AERF stub)
   context/artifacts/  → Platform: Artifact Library
   context/model.py    → Shared: DesignSnapshot (KiCad-shaped today)
   context/*parse*     → Host (KiCad): collection and write-back

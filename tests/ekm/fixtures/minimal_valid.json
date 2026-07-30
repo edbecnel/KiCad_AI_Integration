@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "sections": [
+    {
+      "id": "design_intent",
+      "title": "Design Intent",
+      "fields": [
+        {
+          "id": "summary",
+          "type": "text",
+          "value": "Blocking oscillator reference design"
+        }
+      ]
+    }
+  ]
+}

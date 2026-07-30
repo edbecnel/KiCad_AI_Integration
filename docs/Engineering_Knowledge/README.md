@@ -30,7 +30,9 @@ Rather than sending a schematic directly to an LLM, the plugin progressively bui
 |----------|---------|
 | [AERF_Stage_Index.md](AERF_Stage_Index.md) | Canonical stage definitions, determinations, and output schemas (what each stage must determine) |
 | [Engineering_Reasoning_Methodology.md](Engineering_Reasoning_Methodology.md) | Common engineering reasoning process used by every AERF stage (how each stage reasons) |
-| [Circuit_Families/README.md](Circuit_Families/README.md) | Circuit family registry, naming conventions, overlay rules |
+| [Circuit_Families/README.md](Circuit_Families/README.md) | Circuit family registry (`families.json`), naming conventions, overlay rules |
+
+Runtime KB loading for orchestration: [`src/reasoning/kb_loader.py`](../../src/reasoning/kb_loader.py).
 
 ## AI Workflow (Conceptual)
 

@@ -200,16 +200,13 @@ Guiding principles include:
 
 # Current Status
 
-**Phase:** Phase 1 — stretch slice + provider + chat UI (in progress)
+**Phase:** Track B — platform frameworks (EKM, AERF reasoning, EIE) after architecture and Feature Overview documentation.
 
-Current capabilities include:
+**KiCad host (working):** Schematic context, datasheet library and panels (`--ui-datasheets`), chat UI with Approve & Send (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`, early), Claude provider, general-review prompts.
 
-- Schematic context extraction and prompt builder (general review template)
-- Datasheet resolver and Missing Datasheets UI
-- Claude provider integration
-- Chat UI (`--ui-chat`) with approve-before-send gate
+**Platform:** Architecture ratified ([Platform Architecture](docs/Architecture/Platform_Architecture.md)); provider, prompt, and EIE chat layers implemented; EKM and AERF orchestration in progress.
 
-See [Feature Overview](docs/User_Guides/Feature_Overview.md) for a detailed breakdown of what works today and what remains.
+See [Feature Overview](docs/User_Guides/Feature_Overview.md) for capability status, platform/host separation, and gaps.
 
 ---
 

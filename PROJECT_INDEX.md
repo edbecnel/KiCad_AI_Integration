@@ -119,9 +119,16 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 ## Current Priorities
 
-1. Complete Phase 1 Python script MVP (context extraction, prompt builder, Claude provider)
-2. Resolve project license
-3. Begin `src/` implementation per [Master Task List](tasks/MASTER_TASK_LIST.md)
+**Track B — Platform frameworks** (see [Feature Overview](docs/User_Guides/Feature_Overview.md) Part 4):
+
+1. EKM runtime (`src/ekm/`) + validation CLI
+2. AERF reasoning registry + KB loader (`src/reasoning/`)
+3. Blocking Oscillator circuit-family KB (stages 00–07)
+4. EIE expansion — simulation migration + AERF orchestration stub (`src/inference/`)
+
+Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
+
+Also open: resolve project license; KiCad Phase 1 host gaps (PCB context, templates) deferred until Track B milestones land.
 
 ## AI Context
 

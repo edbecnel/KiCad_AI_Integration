@@ -130,10 +130,11 @@ EIE will:
 | Milestone | Status |
 |-----------|--------|
 | `src/inference/chat.py` — general review workflow | Implemented |
-| `src/reasoning/` — AERF stage registry stub | Stub |
-| `src/ekm/` — EKM runtime stub | Stub |
-| Simulation workflow in EIE | Deferred |
-| AERF staged orchestration | Deferred |
+| `src/inference/simulation.py` — simulation/SUBCKT workflow | Implemented |
+| `src/inference/aerf.py` — stage-0 dry-run stub | Implemented |
+| `src/reasoning/` — AERF stage registry + KB loader | Implemented |
+| `src/ekm/` — EKM runtime + validation CLI | Implemented |
+| AERF full multi-stage LLM orchestration | Deferred |
 | EKM write-back gating | Deferred |
 
 ---

@@ -14,7 +14,7 @@ Planned circuit families (content not yet authored):
 
 | `family_id` | Directory | Status |
 |-------------|-----------|--------|
-| `blocking_oscillator` | `Blocking_Oscillator/` | Planned — first reference KB (next milestone) |
+| `blocking_oscillator` | `Blocking_Oscillator/` | Complete (reference) — stages 00–07 |
 | `flyback` | `Flyback/` | Planned |
 | `buck` | `Buck/` | Planned |
 | `boost` | `Boost/` | Planned |

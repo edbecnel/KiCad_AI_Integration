@@ -1,9 +1,20 @@
-"""AI Engineering Reasoning Framework (AERF) stage registry and KB loaders.
+"""AI Engineering Reasoning Framework (AERF) stage registry and KB loaders."""
 
-Stage definitions live in ADP-008 and docs/Engineering_Knowledge/.
-Implementation is deferred; this package reserves the platform module location.
-"""
+from reasoning.family_registry import CircuitFamily, get_family, load_families
+from reasoning.kb_loader import KBExcerpt, KBLoadError, list_available_stage_files, load_stage_excerpt
+from reasoning.stages import AERF_STAGE_COUNT, AERFStage, STAGES, get_stage, get_stage_by_key
 
-AERF_STAGE_COUNT = 8
-
-__all__ = ["AERF_STAGE_COUNT"]
+__all__ = [
+    "AERF_STAGE_COUNT",
+    "AERFStage",
+    "CircuitFamily",
+    "KBExcerpt",
+    "KBLoadError",
+    "STAGES",
+    "get_family",
+    "get_stage",
+    "get_stage_by_key",
+    "list_available_stage_files",
+    "load_families",
+    "load_stage_excerpt",
+]

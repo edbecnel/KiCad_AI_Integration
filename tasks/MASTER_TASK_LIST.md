@@ -401,6 +401,44 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 
 ---
 
+## Track B — Platform Frameworks (active)
+
+**Goal:** Implement host-independent platform layers per [Platform Architecture](../docs/Architecture/Platform_Architecture.md). Scope reference: [Feature Overview](../docs/User_Guides/Feature_Overview.md).
+
+### Standing documentation checklist (each milestone)
+
+- [ ] Update [Feature Overview](../docs/User_Guides/Feature_Overview.md) platform gaps table
+- [ ] Check off items in this section
+- [ ] Update [Platform Architecture](../docs/Architecture/Platform_Architecture.md) implementation status
+- [ ] Update [ADP-010](../docs/Architecture/ADP-010-Engineering-Inference-Engine.md) §8 when EIE changes
+- [ ] Run `pytest` (platform tests must not require KiCad/wx)
+
+### Phase B1 — EKM runtime + CLI
+
+- [x] `src/ekm/` — model, io, validate, paths, errors
+- [x] `scripts/ekm_tool.py` — validate, init, show
+- [x] `tests/ekm/`
+
+### Phase B2 — AERF reasoning registry
+
+- [x] `src/reasoning/` — stages, kb_loader, family_registry
+- [x] `docs/Engineering_Knowledge/Circuit_Families/families.json`
+- [x] `tests/reasoning/`
+
+### Phase B3 — Blocking Oscillator KB
+
+- [x] Rename `Blocking_Oscilllator/` → `Blocking_Oscillator/` (done)
+- [x] Stage files 02–07 with family-specific content
+- [x] Breadcrumbs and registry status → Complete
+
+### Phase B4 — EIE expansion
+
+- [x] Migrate simulation workflow to `src/inference/simulation.py`
+- [x] `src/inference/aerf.py` — stage-0 dry-run stub
+- [x] `tests/inference/` simulation + aerf tests
+
+---
+
 ## AERF — AI Engineering Reasoning Framework
 
 **Goal:** Establish staged engineering reasoning as a foundational architectural pillar. See [ADP-008](../docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) and [ADR-0007](../docs/Architecture/ADRs/ADR-0007-AERF-Foundation.md).
@@ -415,12 +453,12 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 
 ### Next milestone — Reference circuit family KB
 
-- [ ] Blocking Oscillator as first circuit family (`docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/`)
-- [ ] Stage files 00–07 with family-specific content
+- [x] Blocking Oscillator as first circuit family (`docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/`)
+- [x] Stage files 00–07 with family-specific content
 
 ### Future implementation
 
-- [ ] `src/reasoning/` orchestrator module
+- [x] `src/reasoning/` orchestrator module (stage registry + KB loader; full LLM orchestration deferred)
 - [ ] Circuit family classifier
 - [ ] Per-stage prompt templates (ADP-007)
 - [ ] EKM stage-output mapping and write-back (ADP-007)

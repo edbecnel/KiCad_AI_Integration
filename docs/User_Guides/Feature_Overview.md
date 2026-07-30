@@ -156,9 +156,9 @@ Conversations are **input**; EKM is **distilled output** after user approval.
 
 | Framework | How it works | Status |
 |-----------|--------------|--------|
-| **AERF** | Defines *what* to reason about — eight stages (0–7), circuit-family overlays, methodology | Documented; `src/reasoning/` stub — [ADP-008](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) |
-| **EIE** | Defines *how* reasoning runs — orchestration, prompt assembly, provider calls, approval gating | Chat in `src/inference/`; simulation migration pending — [ADP-010](../Architecture/ADP-010-Engineering-Inference-Engine.md) |
-| **EKM** | Persistent per-project engineering notebook (sections, typed fields, links) | Schema ratified; `src/ekm/` stub — [ADP-002](../Architecture/ADP-002-EKM-Schema-and-Persistence.md) |
+| **AERF** | Defines *what* to reason about — eight stages (0–7), circuit-family overlays, methodology | Stage registry + KB loader in `src/reasoning/` — [ADP-008](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) |
+| **EIE** | Defines *how* reasoning runs — orchestration, prompt assembly, provider calls, approval gating | Chat + simulation in `src/inference/`; AERF stage-0 dry-run stub — [ADP-010](../Architecture/ADP-010-Engineering-Inference-Engine.md) |
+| **EKM** | Persistent per-project engineering notebook (sections, typed fields, links) | Runtime + CLI in `src/ekm/`; Notebook UI deferred — [ADP-002](../Architecture/ADP-002-EKM-Schema-and-Persistence.md) |
 | **Prompt Architecture** | Turns `DesignSnapshot` into structured prompts; no KiCad API imports | Implemented — [Prompt Architecture](../Architecture/Prompt_Architecture.md) |
 | **AI Provider Layer** | Abstract LLM interface (Claude today) | Implemented — [ADR-0002](../Architecture/ADRs/ADR-0002-Provider-Abstraction-Layer.md) |
 | **Engineering Notebook UI** | Human-facing EKM editor in KiCad | Spec only — [ADP-003](../Architecture/ADP-003-Engineering-Notebook-User-Interface.md) |
@@ -187,7 +187,7 @@ Physical directories do not yet mirror logical layers. Known tensions:
 | `src/platform_core/contracts.py` | Platform | `DesignSnapshot` protocol |
 | `src/context/artifacts/` | Platform | Content-addressed store; path may move later |
 | `src/context/model.py` | Shared contract | `ProjectContext` implements `DesignSnapshot`; KiCad-shaped fields |
-| `src/context/*parse*`, `src/ui/` | KiCad host | Parsers, wx UI, `simulation_supply.py` (pending EIE migration) |
+| `src/context/*parse*`, `src/ui/` | KiCad host | Parsers, wx UI; `simulation_supply.py` re-exports from `inference/simulation.py` |
 | `kicad_ai/` on disk | KiCad host | Other hosts will use their own artifact root names |
 
 Physical `src/hosts/kicad/` reorganization is deferred until a second host is actively developed.
@@ -213,22 +213,22 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 
 | Framework | Status | Next step |
 |-----------|--------|-----------|
-| EKM runtime (`src/ekm/`) | Stub | Load/save `engineering_knowledge.json` |
-| AERF orchestrator (`src/reasoning/`) | Stub | Stage registry + KB excerpt loader |
-| EIE (`src/inference/`) | Chat workflow only | Migrate simulation from `simulation_supply.py`; add AERF stages |
-| Engineering Notebook UI | Spec only | After EKM runtime |
-| Conversation Manager | Deferred Phase 2 | Multi-turn transcripts; not project memory (EKM owns that) |
+| EKM runtime (`src/ekm/`) | Implemented | Engineering Notebook UI (ADP-003); View Model validation |
+| AERF orchestrator (`src/reasoning/`) | Stage registry + KB loader | Circuit family classifier; per-stage LLM prompts (ADP-007) |
+| EIE (`src/inference/`) | Chat + simulation + stage-0 stub | Full AERF multi-stage orchestration; EKM write-back gating |
+| Engineering Notebook UI | Spec only | After EKM View Model |
+| Conversation Manager | Deferred Phase 2 | Multi-turn transcripts |
 | Simulation abstraction | ADP-006 planned | Host-agnostic validation hooks |
-| Blocking Oscillator KB | Stages 00–01 only | Complete stages 02–07 in [Circuit Families](../Engineering_Knowledge/Circuit_Families/README.md) |
+| Blocking Oscillator KB | Complete (00–07) | Additional circuit families |
 
 ### Bottom line
 
 | | |
 |---|---|
-| **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library and missing-PDF workflow; opt-in AI datasheet discovery; simulation/SUBCKT panel (early) |
-| **Platform (foundation laid)** | Architecture ratified ([ADR-0009](../Architecture/ADRs/ADR-0009-Platform-Architecture-Foundation.md)); provider, prompt, and EIE-chat implemented; EKM/AERF full orchestration deferred |
-| **In progress** | Broader KiCad context (PCB, BOM, ERC/DRC), more prompt templates, SUBCKT Tier A/B/C pipeline, production-ready UX |
-| **Later** | Full AERF staged reasoning, Engineering Notebook, native plugin, additional host integrations |
+| **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library and missing-PDF workflow; simulation/SUBCKT panel (early) |
+| **Platform (foundation laid)** | EKM runtime + CLI; AERF registry/KB loader; EIE chat/simulation/AERF stub; Blocking Oscillator reference KB complete |
+| **In progress** | Full AERF staged LLM orchestration, Engineering Notebook, broader KiCad context (PCB, BOM, ERC/DRC) |
+| **Later** | Native plugin, additional hosts, conversation persistence via EKM |
 
 This is a **foundation**, not a finished product. The central idea — automatic context, structured engineering reasoning, and controlled AI review — works today for schematic-level questions in KiCad, while the platform architecture is defined to grow beyond any single editor.
 
