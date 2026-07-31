@@ -658,6 +658,9 @@ def _update_spice_in_content(
             for name in ("Spice_Lib", "Sim.Library", "Sim.Name"):
                 new_block, removed = _remove_all_properties(new_block, name)
                 changed = changed or removed
+            if not hookup.sim_type.strip():
+                new_block, removed = _remove_all_properties(new_block, "Sim.Type")
+                changed = changed or removed
         else:
             legacy_fields = (
                 ("Spice_Model", hookup.spice_model),
@@ -671,6 +674,8 @@ def _update_spice_in_content(
                 ("Sim.Pins", hookup.sim_pins),
             )
             new_block, removed = _remove_all_properties(new_block, "Sim.Params")
+            changed = changed or removed
+            new_block, removed = _remove_all_properties(new_block, "Sim.Type")
             changed = changed or removed
         for name, val in legacy_fields:
             new_block, block_changed = _set_property_on_block(

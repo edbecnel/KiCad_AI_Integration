@@ -58,9 +58,17 @@ def _uses_subckt_hookup(symbol: SymbolInstance) -> bool:
     return False
 
 
+_INVALID_PASSIVE_SIM_TYPES = frozenset({"RESISTOR", "CAPACITOR", "INDUCTOR"})
 _VALID_SIM_DEVICES = frozenset(
     {"R", "C", "L", "D", "NPN", "PNP", "NJF", "PJF", "NMOS", "PMOS", "V", "I", "SUBCKT", "SPICE"}
 )
+
+
+def _invalid_passive_sim_type(symbol: SymbolInstance) -> bool:
+    """KiCad 10 rejects legacy RESISTOR/CAPACITOR/INDUCTOR Sim.Type values."""
+    device = symbol.sim_device.strip().upper()
+    sim_type = symbol.sim_type.strip().upper()
+    return device in ("R", "C", "L") and sim_type in _INVALID_PASSIVE_SIM_TYPES
 
 
 def kicad_simulation_model_incomplete(symbol: SymbolInstance) -> bool:
@@ -75,7 +83,7 @@ def kicad_simulation_model_incomplete(symbol: SymbolInstance) -> bool:
             sim_name=symbol.sim_name,
             sim_params=symbol.sim_params,
             sim_pins=symbol.sim_pins,
-        )
+        ) or bool(symbol.sim_type.strip())
 
     device = symbol.sim_device.strip().upper()
     if device and device not in _VALID_SIM_DEVICES:
@@ -83,14 +91,20 @@ def kicad_simulation_model_incomplete(symbol: SymbolInstance) -> bool:
     if device == "SUBCKT":
         return True
     if device == "R":
+        if _invalid_passive_sim_type(symbol):
+            return True
         return not symbol.sim_type.strip() and not (
             symbol.spice_model.strip() or symbol.sim_params.strip()
         )
     if device == "C":
+        if _invalid_passive_sim_type(symbol):
+            return True
         return not symbol.sim_type.strip() and not (
             symbol.spice_model.strip() or symbol.sim_params.strip()
         )
     if device == "L":
+        if _invalid_passive_sim_type(symbol):
+            return True
         return not symbol.sim_type.strip() and not (
             symbol.spice_model.strip() or symbol.sim_params.strip()
         )
@@ -189,7 +203,7 @@ def resolve_builtin_simulation_hookup(
         return None
     if _uses_subckt_hookup(symbol):
         return None
-    if not kicad_simulation_model_incomplete(symbol):
+    if not kicad_simulation_model_incomplete(symbol) and not _invalid_passive_sim_type(symbol):
         return None
 
     lib_id = (symbol.lib_id or "").lower()
@@ -211,7 +225,6 @@ def resolve_builtin_simulation_hookup(
         token = _normalize_value_token(value)
         return BuiltinSimHookup(
             sim_device="R",
-            sim_type="RESISTOR",
             sim_pins=symbol.sim_pins.strip() or "1=1 2=2",
             spice_primitive="R",
             spice_model=token or value,
@@ -222,7 +235,6 @@ def resolve_builtin_simulation_hookup(
         token = _normalize_value_token(value)
         return BuiltinSimHookup(
             sim_device="C",
-            sim_type="CAPACITOR",
             sim_pins=symbol.sim_pins.strip() or "1=1 2=2",
             spice_primitive="C",
             spice_model=token or value,
@@ -233,7 +245,6 @@ def resolve_builtin_simulation_hookup(
         token = _normalize_value_token(value)
         return BuiltinSimHookup(
             sim_device="L",
-            sim_type="INDUCTOR",
             sim_pins=symbol.sim_pins.strip() or "1=1 2=2",
             spice_primitive="L",
             spice_model=token or value,

@@ -51,8 +51,25 @@ def test_resistor_without_sim_fields_gets_builtin() -> None:
     hookup = resolve_builtin_simulation_hookup(sym, "")
     assert hookup is not None
     assert hookup.sim_device == "R"
-    assert hookup.sim_type == "RESISTOR"
+    assert hookup.sim_type == ""
     assert "10k" in hookup.sim_params
+
+
+def test_resistor_with_legacy_sim_type_is_repaired() -> None:
+    sym = SymbolInstance(
+        reference="R1",
+        value="10K",
+        lib_id="Device:R_US",
+        sim_device="R",
+        sim_type="RESISTOR",
+        sim_params="r=10k",
+        spice_model="10k",
+        sheet_path="p.kicad_sch",
+    )
+    assert kicad_simulation_model_incomplete(sym)
+    hookup = resolve_builtin_simulation_hookup(sym, "")
+    assert hookup is not None
+    assert hookup.sim_type == ""
 
 
 def test_apply_builtin_simulation_models_writes_diode(tmp_path: Path) -> None:

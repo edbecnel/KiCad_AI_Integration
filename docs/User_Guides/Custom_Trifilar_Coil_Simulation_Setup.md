@@ -89,6 +89,20 @@ The library symbol must have **numbered, named pins** before simulation works.
 
 **Note:** Pin 3 is named `T1` (trigger node) while the component reference is also `T1` — confusing in conversation but fine for simulation.
 
+### 1.2a R7 (trigger sensitivity pot) — do not leave pin 1 open
+
+**R7** is a **1 kΩ pot** between the **Q1 base bias node** (same net as **R3**, pin 3) and the **trigger winding** (wiper → coil pin `T1`, pin 2).
+
+| R7 pin | Role | Connects to |
+|--------|------|-------------|
+| 1 (`r0`) | Track end | **Same net as pin 3** (rheostat: tie 1 ↔ 3 on the base side) |
+| 2 (wiper) | Wiper | Trigger coil pin `T1` |
+| 3 (`r1`) | Track end | Q1 base / R3 junction |
+
+An earlier revision had **pin 1 wired to a short stub with no other connection** (`unconnected-_R7-Pad1_` in the netlist). That is an **incomplete schematic**, not normal Bedini practice — it confuses SPICE and ERC. **Pin 1 must join pin 3’s net** so the pot acts as a variable resistor between base bias and trigger feedback.
+
+If you inherit an old copy of the schematic, verify in the netlist that R7 has **no `unconnected-*` net**.
+
 ### 1.3 Pin position vs coil graphics (Bedini_Coil_1)
 
 Pin **electrical roles** are defined by number and name, not by which drawn coil bump they sit on.
@@ -261,15 +275,15 @@ The assistant **Apply simulation model** looks up the `.lib` in `catalog.json` b
 **Register the lib** (one-time, from KiCad AI Integration repo):
 
 ```bash
-cd /path/to/KiCad_AI_Integration
+cd /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
 
 PYTHONPATH=src python3 <<'PY'
 from pathlib import Path
 from context.artifacts.store import ArtifactStore, ProjectContextInfo, ComponentRef
 
-LIB = Path.home() / "Development/Local/kicad_ai_library/libs/Bedini_Trifilar.lib"
-PROJECT = Path.home() / "Development/Local/Bedini_Self_Oscillator/Bedini_SSG_Radiant_Oscillator.kicad_pro"
-LIBRARY = Path.home() / "Development/Local/kicad_ai_library"
+LIB = Path("/Users/edbecnel/Development/Local/kicad_ai_library/libs/Bedini_Trifilar.lib")
+PROJECT = Path("/Users/edbecnel/Development/Local/Bedini_Self_Oscillator/Bedini_SSG_Radiant_Oscillator.kicad_pro")
+LIBRARY = Path("/Users/edbecnel/Development/Local/kicad_ai_library")
 
 store = ArtifactStore(LIBRARY)
 entry = store.register_lib(
@@ -287,6 +301,8 @@ print("Registered:", entry.id)
 print("Catalog file:", entry.file)
 PY
 ```
+
+Replace paths if your library or project live elsewhere. You **must** `cd` to the integration repo so `PYTHONPATH=src` finds the `context` package — do not use a placeholder like `/path/to/...`.
 
 Confirm:
 
@@ -342,29 +358,144 @@ Spice_Lib        = .../Bedini_Trifilar.lib
 
 ## Step 5 — Verify netlist export
 
+### macOS: `kicad-cli` is not on PATH by default
+
+KiCad installs the CLI inside the app bundle. Use the **full path** or set config / alias:
+
 ```bash
-kicad-cli sch export netlist --format spice \
-  -o /tmp/bedini.net \
-  /path/to/Bedini_SSG_Radiant_Oscillator.kicad_sch
+/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli version
 ```
 
-Check:
+**Option 1 — full path (copy/paste):**
 
-- T1 appears as `X` / `BEDINI_TRIFILAR`
-- `.include` references the `.lib`
-- No `No simulation model definition found` for **T1**
+```bash
+/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli sch export netlist \
+  --format spice \
+  -o /tmp/bedini.net \
+  "/Users/edbecnel/Development/Local/Bedini_Self_Oscillator/Bedini_SSG_Radiant_Oscillator.kicad_sch"
+```
 
-**KiCad AI Assistant:** Refresh context → Simulation panel — `Multi-Strand SSG` should leave the missing-models list.
+Use the **`.kicad_sch`** file (not `.kicad_pro`).
 
-Other parts (e.g. BD243C) may still need their own SUBCKT paths verified. Standard passives and diodes like `1N4007` are separate from this coil setup.
+**Option 2 — shell alias** (add to `~/.zshrc`):
+
+```bash
+alias kicad-cli='"/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"'
+```
+
+**Option 3 — KiCad AI Assistant config** (`~/kicad_ai_config.json`):
+
+```json
+"kicad_cli": "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
+```
+
+Then **Refresh context** uses the CLI for netlist export automatically.
+
+### What to check in the netlist
+
+The `-o` flag in the export command above writes the netlist to a file **you choose**. In that example the output file is:
+
+```text
+/tmp/bedini.net
+```
+
+That is an absolute path in macOS’s temporary folder — not relative to your project. Run `grep` on **that same file**:
+
+```bash
+grep -E 'BEDINI_TRIFILAR|\.include' /tmp/bedini.net
+```
+
+The pattern `\.include` matches **lines inside the netlist** that pull in `.lib` files (not a path on disk to search).
+
+**Example good output** (your paths may differ):
+
+```text
+.include "/Users/edbecnel/Development/Local/kicad_ai_library/libs/BD243C.lib"
+.include "/Users/edbecnel/Development/Local/kicad_ai_library/libs/Multi-Strand_SSG.lib"
+XT1 Net-_ChargeBT1--_ Net-_D1-A_ ... BEDINI_TRIFILAR
+```
+
+You want:
+
+- At least one `.include` line pointing at your coil `.lib` (`Multi-Strand_SSG.lib` or `Bedini_Trifilar.lib`)
+- One device line ending in `BEDINI_TRIFILAR` (prefix `X` + reference, e.g. `XT1`)
+
+**Optional — write next to your project instead of `/tmp`:**
+
+```bash
+NETLIST="/Users/edbecnel/Development/Local/Bedini_Self_Oscillator/kicad_ai/exports/bedini.net"
+mkdir -p "$(dirname "$NETLIST")"
+/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli sch export netlist \
+  --format spice \
+  -o "$NETLIST" \
+  "/Users/edbecnel/Development/Local/Bedini_Self_Oscillator/Bedini_SSG_Radiant_Oscillator.kicad_sch"
+grep -E 'BEDINI_TRIFILAR|\.include' "$NETLIST"
+```
+
+### Interpreting exit codes and stderr
+
+| Output | Meaning |
+|--------|---------|
+| `Fontconfig warning: ...` | Harmless on macOS — ignore |
+| `No simulation model definition found` (×6 on Bedini) | Usually **R1–R6** with `Sim.Type=RESISTOR` — KiCad 10 rejects that type; remove `Sim.Type` and keep `Sim.Device=R` + `Sim.Params=r=…` |
+| `No simulation model definition found` (other) | Some symbol(s) still lack models — check which refs KiCad names |
+| Exit code **2** with a non-empty netlist | **Partial export** — netlist may still be usable; read the file |
+| Exit code **0** | Clean export |
+
+T1 can be correct in the netlist while other parts still trigger warnings.
+
+### Assistant check
+
+**KiCad AI Assistant** → **Refresh context** → **Simulation** panel — `Multi-Strand SSG` should leave the missing-models list when hookup is complete.
+
+Remaining issues may be other parts (e.g. BD243C paths), not standard passives or diodes like `1N4007`.
 
 ---
 
 ## Step 6 — First simulation run
 
-1. KiCad **Simulator** → transient analysis.  
-2. Observe Q1 switching, collector voltage, secondary behaviour.  
-3. If no oscillation: tune **Lt** and **Lp** first in the `.lib`.
+The SPICE simulator is **inside the Schematic Editor**, not the KiCad project manager home screen.
+
+### Before simulating (if the assistant edited the schematic)
+
+KiCad does **not** have **File → Reload**. If the schematic was already open while the assistant (or an external tool) changed `Bedini_SSG_Radiant_Oscillator.kicad_sch` on disk:
+
+1. In the **Schematic Editor**: **File → Revert** (discards unsaved editor changes and reloads from disk), **or**
+2. Close the schematic tab and reopen it from the project.
+
+Then run the simulator.
+
+1. Open your project in KiCad.
+2. Open the **Schematic Editor** (edit `Bedini_SSG_Radiant_Oscillator.kicad_sch`).
+3. Menu: **Inspect → Simulator** (some versions label it **Simulator…**).
+
+A separate **Simulator** window opens (ngspice behind the scenes).
+
+### Configure transient analysis
+
+1. In the Simulator window: **New analysis tab** (toolbar icon or **Ctrl+N** / **⌘N** on Mac).
+2. **Analysis type:** `tran` (transient).
+3. Set **Time step** and **Final time** (start small, e.g. step `1u`, final `10m` — tune for your oscillator).
+4. Click **Run** (play/arrow button in the Simulator toolbar).
+
+### Probe waveforms
+
+- Use the **probe** tool in the Simulator window to click nets (voltage) or pins (current).
+- Useful signals: Q1 collector (`C` net), base (`T` net), primary supply.
+
+### If simulation fails to start
+
+- Confirm Step 5 netlist includes `BEDINI_TRIFILAR` and `.include` lines.
+- Check Simulator output panel for missing models or convergence errors.
+- **`unconnected-_R7-Pad1_` in netlist or log** — tie **R7 pin 1** to **pin 3** (base bias net); see §1.2a.
+- **`Timestep too small` / `trouble with xq1`** — stiff BJT + coil; try TRAN step `10u`, final `5m`, max step `10u`, and add schematic directive `.options method=gear maxord=2 gmin=1e-10`.
+- Save the schematic before simulating if KiCad prompts you.
+
+### What to look for
+
+1. Does Q1 switch (collector voltage oscillating)?
+2. Any absurd currents (model values unrealistic)?
+3. If no oscillation: tune **Lt** and **Lp** first in `Bedini_Trifilar.lib` / `Multi-Strand_SSG.lib`.
 
 Document trials in `assumptions.md` or the Engineering Notebook.
 
