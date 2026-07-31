@@ -32,6 +32,7 @@ class AiDiscoveryEntry:
     outcome: AiDiscoveryOutcome = "no_url_found"
     error: str | None = None
     artifact_id: str | None = None
+    fetch_attempts: list[dict[str, str | None]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         data: dict[str, Any] = {
@@ -48,10 +49,19 @@ class AiDiscoveryEntry:
             data["error"] = self.error
         if self.artifact_id is not None:
             data["artifact_id"] = self.artifact_id
+        if self.fetch_attempts:
+            data["fetch_attempts"] = list(self.fetch_attempts)
         return data
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AiDiscoveryEntry:
+        raw_attempts = data.get("fetch_attempts") or []
+        attempts: list[dict[str, str | None]] = []
+        for item in raw_attempts:
+            if isinstance(item, dict) and item.get("url"):
+                attempts.append(
+                    {"url": str(item["url"]), "error": item.get("error")}
+                )
         return cls(
             part=data["part"],
             attempted_at=data.get("attempted_at", ""),
@@ -61,6 +71,7 @@ class AiDiscoveryEntry:
             outcome=data.get("outcome", "no_url_found"),
             error=data.get("error"),
             artifact_id=data.get("artifact_id"),
+            fetch_attempts=attempts,
         )
 
 
@@ -109,9 +120,14 @@ class AiDiscoveryLog:
         outcome: AiDiscoveryOutcome,
         error: str | None = None,
         artifact_id: str | None = None,
+        fetch_attempts: list[tuple[str, str | None]] | None = None,
     ) -> AiDiscoveryEntry:
         part_norm = part.strip()
         now = _utc_now()
+        attempt_dicts: list[dict[str, str | None]] = []
+        if fetch_attempts:
+            for url, err in fetch_attempts:
+                attempt_dicts.append({"url": url, "error": err})
         entry = AiDiscoveryEntry(
             part=part_norm,
             attempted_at=now,
@@ -121,6 +137,7 @@ class AiDiscoveryLog:
             outcome=outcome,
             error=error,
             artifact_id=artifact_id,
+            fetch_attempts=attempt_dicts,
         )
         self.entries.append(entry)
         self._dirty = True

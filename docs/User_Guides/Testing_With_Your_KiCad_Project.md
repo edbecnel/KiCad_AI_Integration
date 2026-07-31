@@ -25,7 +25,7 @@ For contributor checklists and QA steps, see [E2E Full Flow](../Developer_Handbo
 
 | Tool | Purpose |
 |------|---------|
-| `kicad-cli` on `PATH` | Netlist export for richer context |
+| `kicad-cli` | Set `kicad_cli` in `~/kicad_ai_config.json` (see [example](../Developer_Handbook/kicad_ai_config.example.json)) or on `PATH` — netlist export |
 | Poppler `pdftoppm` | Schematic image export (`--image`) — see [ADR-0004](../Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Context.md) |
 
 ---
@@ -77,7 +77,42 @@ On Linux/Windows, use the same command if `import wx` fails when launching a UI 
 
 ---
 
-## Quick smoke (no personal project)
+## Launch the assistant (recommended — no path on command line)
+
+After setup, open the **launcher** — pick your project, refresh context in the UI, then open Chat, Simulation, AERF, etc.:
+
+```bash
+python scripts/run_ai_assistant.py --ui
+```
+
+Optional: pre-fill a project path:
+
+```bash
+python scripts/run_ai_assistant.py "/path/to/project.kicad_pro" --ui
+```
+
+In the launcher:
+
+1. Click **Browse…** (`.kicad_pro`) or **Folder…** (project directory).
+2. Click **Refresh context** — the summary shows symbols, datasheets, **SPICE netlist status**, PCB counts, and simulation gaps.
+3. Click **Chat**, **Datasheets**, **Simulation**, **AERF**, or another panel button.
+
+You do **not** need shell commands to verify netlist export — look for a line like `SPICE netlist: 22 lines (partial — …)` in the context summary.
+
+### Known UX limitation (until unified shell ships)
+
+The launcher and Chat panel both use the window title **"KiCad AI Assistant"**. If you only see Chat (API key, question field, **Approve & Send**), the launcher may be hidden behind it — use the window menu or click **Datasheets** on the launcher to open datasheet attach/find.
+
+**Datasheet attach and AI discovery are not in Chat.** Use either:
+
+- Launcher → **Datasheets** button (window titled **"Datasheets"**), or
+- `--ui-datasheets` directly (see below).
+
+A single tabbed window is planned — [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md).
+
+---
+
+## Quick smoke (no personal project, no UI)
 
 Use the built-in test fixture to confirm context collection **without** an API call:
 
@@ -105,7 +140,9 @@ You do **not** need KiCad running for this workflow. Context is collected by par
 
 ---
 
-## Launching UI panels (Terminal — recommended)
+## Launching individual panels (optional)
+
+If you already know your project path, you can open a panel directly. The **launcher** (`--ui`) is still the recommended entry point.
 
 Replace `/path/to/project.kicad_pro` with your project path.
 
@@ -116,7 +153,7 @@ python scripts/run_ai_assistant.py "/path/to/project.kicad_pro" --ui-chat
 ```
 
 1. Dialog opens; API key field pre-filled from config if set.
-2. Click **Refresh context** — preview shows project name, symbol count, datasheet stats.
+2. Click **Refresh context** — preview shows project name, symbol count, datasheet stats, **SPICE netlist status**, and PCB summary.
 3. Enter a question (e.g. *"What are the main active parts on this schematic?"*).
 4. Review the prompt preview and estimated tokens.
 5. Click **Approve & Send** — confirm in the dialog. **Cancel** must not call the API.
@@ -323,6 +360,7 @@ Other panels: `main_ui_aerf(...)`, `main_ui_notebook(...)`, `main_ui_datasheets(
 ## Related documents
 
 - [Feature Overview](Feature_Overview.md) — what works today
+- [ADP-011: Assistant Shell UI](../Architecture/ADP-011-Assistant-Shell-UI.md) — planned unified tabbed window
 - [First-Time Setup](../Developer_Handbook/00_First_Time_Setup.md) — contributor environment
 - [E2E Chat UI](../Developer_Handbook/06_E2E_Chat_UI.md) — chat-specific checklist
 - [E2E Full Flow](../Developer_Handbook/07_E2E_Full_Flow.md) — contributor QA checklists

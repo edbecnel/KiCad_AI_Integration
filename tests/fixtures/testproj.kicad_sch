@@ -17,6 +17,24 @@
     (property "Value" "10k"
       (at 100 110 0)
     )
+    (property "Sim.Params" "r=10k"
+      (at 0 0 0)
+    )
+    (property "Sim.Pins" "1=1 2=2"
+      (at 0 0 0)
+    )
+    (property "Sim.Type" "RESISTOR"
+      (at 0 0 0)
+    )
+    (property "Sim.Device" "R"
+      (at 0 0 0)
+    )
+    (property "Spice_Primitive" "R"
+      (at 0 0 0)
+    )
+    (property "Spice_Model" "10k"
+      (at 0 0 0)
+    )
     (property "Footprint" "Resistor_SMD:R_0805"
       (at 100 120 0)
     )

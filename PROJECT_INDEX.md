@@ -39,6 +39,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [Software Architecture (KiCad Host)](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 - [ADP-009: Host Integration Layer](docs/Architecture/ADP-009-Host-Integration-Layer.md)
 - [ADP-010: Engineering Inference Engine](docs/Architecture/ADP-010-Engineering-Inference-Engine.md)
+- [ADP-011: Assistant Shell User Interface](docs/Architecture/ADP-011-Assistant-Shell-UI.md) (proposed)
 - [Prompt Architecture](docs/Architecture/Prompt_Architecture.md)
 - [AI Provider Interface](docs/Architecture/AI_Provider_Interface.md)
 - [Roadmap](docs/Architecture/Roadmap.md)

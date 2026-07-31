@@ -54,6 +54,7 @@ class SimulationDialog(wx.Dialog if wx else object):  # type: ignore[misc]
             self,
             label=(
                 "Detect missing ngspice SUBCKT models and KiCad 9 simulation hookup gaps. "
+                "Built-in models for R/C/L/diodes are applied automatically on Refresh context. "
                 "Parts already hooked up (Sim.Device=SUBCKT) appear on the All required tab only."
             ),
         )

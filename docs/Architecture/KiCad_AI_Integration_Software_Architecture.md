@@ -234,7 +234,7 @@ Python dialog.
 
 Eventually
 
-Dockable chat window.
+Unified tabbed Assistant shell (dockable in KiCad) — [ADP-011](ADP-011-Assistant-Shell-UI.md).
 
 Future
 

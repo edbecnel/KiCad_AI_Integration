@@ -151,3 +151,13 @@ def show_notebook_panel(
     ensure_wx_app()
     pro = resolve_project_pro_path(project_path)
     _show(pro)
+
+
+def show_launcher_dialog(
+    project_path: Path | str | None = None,
+) -> None:
+    """Open the KiCad AI Assistant launcher (project picker + panel shortcuts)."""
+    from ui.launcher_dialog import show_launcher_dialog as _show
+
+    ensure_wx_app()
+    _show(project_path)

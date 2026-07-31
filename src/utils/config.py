@@ -48,7 +48,7 @@ class AppConfig:
     datasheet_ai_discovery_max_urls: int = 3
     datasheet_reset_quarantine_local_pdf: bool = True
     datasheet_write_symbol_url: bool = False
-    spice_write_symbol_fields: bool = False
+    spice_write_symbol_fields: bool = True
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AppConfig:
@@ -99,7 +99,7 @@ class AppConfig:
                 data.get("datasheet_reset_quarantine_local_pdf", True)
             ),
             datasheet_write_symbol_url=bool(data.get("datasheet_write_symbol_url", False)),
-            spice_write_symbol_fields=bool(data.get("spice_write_symbol_fields", False)),
+            spice_write_symbol_fields=bool(data.get("spice_write_symbol_fields", True)),
         )
 
 

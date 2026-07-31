@@ -37,6 +37,9 @@ def collect_stretch_context(
     datasheet_ai_discovery_auto_fetch: bool | None = None,
     approve_ai_datasheet_url: Callable[[str, list[str]], str | None] | None = None,
     on_datasheet_status: Callable[[str], None] | None = None,
+    on_fetch_attempt: Callable[[str, str, str | None], None] | None = None,
+    ai_discovery_only_parts: set[str] | None = None,
+    ai_discovery_should_cancel: Callable[[], bool] | None = None,
     verbose: bool = True,
 ) -> ProjectContext:
     """
@@ -97,6 +100,9 @@ def collect_stretch_context(
                 if on_datasheet_status
                 else None
             ),
+            on_fetch_attempt=on_fetch_attempt,
+            only_parts=ai_discovery_only_parts,
+            should_cancel=ai_discovery_should_cancel,
             verbose=verbose,
         )
         if any(r.outcome == "downloaded" for r in ai_discovery_results.values()):
@@ -110,6 +116,17 @@ def collect_stretch_context(
         store.ai_discovery_log.save()
 
     _sync_catalog_references(store, pro_path, resolutions, symbols)
+
+    if cfg.spice_write_symbol_fields:
+        from context.schematic_write import apply_builtin_simulation_models
+
+        builtin_result = apply_builtin_simulation_models(pro_path, symbols)
+        if builtin_result.changed_count:
+            symbols = parse_project_schematics(
+                project_root,
+                schematic_paths,
+                root_schematic=schematic_paths[0] if schematic_paths else None,
+            )
 
     manifest = Manifest.load(pro_path)
     manifest_path = manifest.save()

@@ -50,6 +50,7 @@ class MissingDatasheetRow:
     field_issue_detail: str = ""
     symbol_fields: list[str] = field(default_factory=list)
     resolved_url: str | None = None
+    fetch_attempts: list[tuple[str, str | None]] = field(default_factory=list)
 
     @classmethod
     def from_field_issue_entry(
@@ -87,6 +88,14 @@ class MissingDatasheetRow:
         discovery_outcome = entry.get("discovery_outcome")
         discovery_error = entry.get("discovery_error")
         selected_url = entry.get("selected_url")
+        fetch_attempts_raw = entry.get("fetch_attempts")
+        fetch_attempts: list[tuple[str, str | None]] = []
+        if isinstance(fetch_attempts_raw, list):
+            for item in fetch_attempts_raw:
+                if isinstance(item, (list, tuple)) and len(item) >= 2:
+                    fetch_attempts.append((str(item[0]), item[1]))
+                elif isinstance(item, dict) and item.get("url"):
+                    fetch_attempts.append((str(item["url"]), item.get("error")))
         status = str(entry.get("status") or "missing")
         discovery_status = _discovery_status_label(
             status,
@@ -111,6 +120,7 @@ class MissingDatasheetRow:
             local_path=str(entry["local_path"]) if entry.get("local_path") else None,
             is_resolved=bool(entry.get("is_resolved")),
             sources_tried=list(sources) if isinstance(sources, list) else [],
+            fetch_attempts=fetch_attempts,
         )
 
 
@@ -126,6 +136,132 @@ def _discovery_status_label(
     return resolver_status
 
 
+def _is_stale_fetch_not_attempted_error(error: str | None) -> bool:
+    return bool(error and "fetch not attempted" in error)
+
+
+def enrich_rows_from_discovery_log(
+    rows: list[MissingDatasheetRow],
+    store: ArtifactStore,
+    *,
+    current_results: dict[str, object] | None = None,
+) -> None:
+    """Fill row discovery fields from the latest log entry when not in the current run."""
+    current = current_results or {}
+    for row in rows:
+        if row.part in current:
+            continue
+        entry = store.ai_discovery_log.get_latest(row.part)
+        if entry is None:
+            continue
+        if not row.suggested_urls and entry.suggested_urls:
+            row.suggested_urls = list(entry.suggested_urls)
+        if not row.discovery_outcome:
+            row.discovery_outcome = entry.outcome
+        if not row.selected_url and entry.selected_url:
+            row.selected_url = entry.selected_url
+        if not row.discovery_error and entry.error:
+            row.discovery_error = entry.error
+        if not row.fetch_attempts and entry.fetch_attempts:
+            row.fetch_attempts = [
+                (str(a["url"]), a.get("error")) for a in entry.fetch_attempts
+            ]
+        if _is_stale_fetch_not_attempted_error(row.discovery_error) and row.suggested_urls:
+            row.discovery_status = "AI URL ready"
+        elif row.discovery_outcome:
+            row.discovery_status = _discovery_status_label(
+                row.status,
+                discovery_outcome=row.discovery_outcome,
+            )
+
+
+def build_missing_rows_from_context(
+    ctx: ProjectContext,
+    *,
+    config: AppConfig | None = None,
+) -> list[MissingDatasheetRow]:
+    """Build missing-datasheet rows from an existing ProjectContext (no re-collection)."""
+    cfg = config or load_config()
+    summary = summarize_required_missing_datasheets(
+        ctx.symbols,
+        ctx.datasheet_resolutions,
+        ai_discovery_results=ctx.ai_discovery_results,
+    )
+    rows = [MissingDatasheetRow.from_summary_entry(entry, ctx.symbols) for entry in summary]
+    store = ArtifactStore(cfg.artifact_library_path)
+    enrich_rows_from_discovery_log(rows, store, current_results=ctx.ai_discovery_results)
+    return rows
+
+
+def build_required_rows_from_context(
+    ctx: ProjectContext,
+    *,
+    config: AppConfig | None = None,
+) -> list[MissingDatasheetRow]:
+    """Build all required-datasheet rows from an existing ProjectContext."""
+    cfg = config or load_config()
+    summary = summarize_required_datasheets(
+        ctx.symbols,
+        ctx.datasheet_resolutions,
+        ai_discovery_results=ctx.ai_discovery_results,
+    )
+    rows = [MissingDatasheetRow.from_summary_entry(entry, ctx.symbols) for entry in summary]
+    store = ArtifactStore(cfg.artifact_library_path)
+    enrich_rows_from_discovery_log(rows, store, current_results=ctx.ai_discovery_results)
+    return rows
+
+
+def build_field_issue_rows_from_context(
+    ctx: ProjectContext,
+    *,
+    config: AppConfig | None = None,
+) -> list[MissingDatasheetRow]:
+    """Build symbol-field issue rows from an existing ProjectContext."""
+    cfg = config or load_config()
+    store = ArtifactStore(cfg.artifact_library_path)
+    summary = summarize_symbol_field_issues(
+        ctx.symbols,
+        ctx.datasheet_resolutions,
+        store,
+        ctx.ai_discovery_results,
+    )
+    return [
+        MissingDatasheetRow.from_field_issue_entry(entry, ctx.symbols) for entry in summary
+    ]
+
+
+def format_row_detail_text(row: MissingDatasheetRow, *, max_length: int | None = None) -> str:
+    """Human-readable detail for a datasheet row (full text unless max_length set)."""
+    from context.ai_datasheet_discovery import format_fetch_attempts_summary
+
+    detail_parts: list[str] = []
+    if row.fetch_attempts:
+        detail_parts.append(
+            format_fetch_attempts_summary(
+                row.fetch_attempts,
+                suggested_urls=row.suggested_urls or None,
+            )
+        )
+    elif row.discovery_error and not _is_stale_fetch_not_attempted_error(row.discovery_error):
+        detail_parts.append(row.discovery_error)
+    elif row.errors:
+        detail_parts.append(row.errors[0])
+    if row.sources_tried:
+        detail_parts.append("via: " + ", ".join(row.sources_tried[-4:]))
+    if row.symbol_datasheet_url:
+        detail_parts.append(f"Symbol: {row.symbol_datasheet_url}")
+    if not row.fetch_attempts:
+        for url in row.suggested_urls[:3]:
+            if url != row.symbol_datasheet_url:
+                detail_parts.append(f"Suggested: {url}")
+        if row.selected_url and row.selected_url not in row.suggested_urls:
+            detail_parts.append(f"Selected: {row.selected_url}")
+    text = "\n".join(detail_parts) if row.fetch_attempts else " | ".join(detail_parts)
+    if max_length is not None and len(text) > max_length:
+        return text[: max_length - 1] + "…"
+    return text
+
+
 def collect_project_context(
     project_path: Path,
     *,
@@ -137,6 +273,9 @@ def collect_project_context(
     datasheet_ai_discovery_auto_fetch: bool | None = None,
     approve_ai_datasheet_url: Callable[[str, list[str]], str | None] | None = None,
     on_datasheet_status: Callable[[str], None] | None = None,
+    on_fetch_attempt: Callable[[str, str, str | None], None] | None = None,
+    ai_discovery_only_parts: set[str] | None = None,
+    ai_discovery_should_cancel: Callable[[], bool] | None = None,
     verbose: bool = False,
 ) -> ProjectContext:
     """Run stretch context collection (symbols + datasheet resolutions)."""
@@ -150,6 +289,9 @@ def collect_project_context(
         datasheet_ai_discovery_auto_fetch=datasheet_ai_discovery_auto_fetch,
         approve_ai_datasheet_url=approve_ai_datasheet_url,
         on_datasheet_status=on_datasheet_status,
+        on_fetch_attempt=on_fetch_attempt,
+        ai_discovery_only_parts=ai_discovery_only_parts,
+        ai_discovery_should_cancel=ai_discovery_should_cancel,
         verbose=verbose,
     )
 
@@ -160,12 +302,17 @@ def get_missing_datasheet_rows(
     config: AppConfig | None = None,
     retry_failed_urls: bool = False,
     force_refresh_urls: bool = False,
-    datasheet_ai_discovery: bool | None = None,
+    datasheet_ai_discovery: bool | None = False,
     datasheet_ai_discovery_auto_fetch: bool | None = None,
     approve_ai_datasheet_url: Callable[[str, list[str]], str | None] | None = None,
     verbose: bool = False,
 ) -> tuple[ProjectContext, list[MissingDatasheetRow]]:
-    """Collect context and return grouped missing required datasheet rows."""
+    """Collect context and return grouped missing required datasheet rows.
+
+    AI discovery runs only when ``datasheet_ai_discovery`` is True. Default False
+    so refresh/list loads do not trigger headless discovery without URL approval.
+    Pass ``datasheet_ai_discovery=None`` to honor ``datasheet_ai_discovery`` in config.
+    """
     ctx = collect_project_context(
         project_path,
         config=config,
@@ -176,12 +323,7 @@ def get_missing_datasheet_rows(
         approve_ai_datasheet_url=approve_ai_datasheet_url,
         verbose=verbose,
     )
-    summary = summarize_required_missing_datasheets(
-        ctx.symbols,
-        ctx.datasheet_resolutions,
-        ai_discovery_results=ctx.ai_discovery_results,
-    )
-    rows = [MissingDatasheetRow.from_summary_entry(entry, ctx.symbols) for entry in summary]
+    rows = build_missing_rows_from_context(ctx, config=config)
     return ctx, rows
 
 
@@ -192,13 +334,13 @@ def get_required_datasheet_rows(
     verbose: bool = False,
 ) -> tuple[ProjectContext, list[MissingDatasheetRow]]:
     """Collect context and return all datasheet-required parts (resolved and missing)."""
-    ctx = collect_project_context(project_path, config=config, verbose=verbose)
-    summary = summarize_required_datasheets(
-        ctx.symbols,
-        ctx.datasheet_resolutions,
-        ai_discovery_results=ctx.ai_discovery_results,
+    ctx = collect_project_context(
+        project_path,
+        config=config,
+        verbose=verbose,
+        datasheet_ai_discovery=False,
     )
-    rows = [MissingDatasheetRow.from_summary_entry(entry, ctx.symbols) for entry in summary]
+    rows = build_required_rows_from_context(ctx, config=config)
     return ctx, rows
 
 
@@ -209,18 +351,13 @@ def get_symbol_field_issue_rows(
     verbose: bool = False,
 ) -> tuple[ProjectContext, list[MissingDatasheetRow]]:
     """Required parts whose schematic Datasheet property is empty or incorrect."""
-    ctx = collect_project_context(project_path, config=config, verbose=verbose)
-    cfg = config or load_config()
-    store = ArtifactStore(cfg.artifact_library_path)
-    summary = summarize_symbol_field_issues(
-        ctx.symbols,
-        ctx.datasheet_resolutions,
-        store,
-        ctx.ai_discovery_results,
+    ctx = collect_project_context(
+        project_path,
+        config=config,
+        verbose=verbose,
+        datasheet_ai_discovery=False,
     )
-    rows = [
-        MissingDatasheetRow.from_field_issue_entry(entry, ctx.symbols) for entry in summary
-    ]
+    rows = build_field_issue_rows_from_context(ctx, config=config)
     return ctx, rows
 
 
@@ -336,9 +473,10 @@ def reset_datasheet_for_part(
         config=cfg,
         retry_failed_urls=True,
         force_refresh_parts={part_norm},
-        datasheet_ai_discovery=run_ai or None,
+        datasheet_ai_discovery=bool(run_ai),
         approve_ai_datasheet_url=approve_ai_datasheet_url,
         on_datasheet_status=on_status,
+        ai_discovery_only_parts={part_norm} if run_ai else None,
         verbose=verbose,
     )
     if cfg.datasheet_write_symbol_url:
@@ -356,26 +494,36 @@ def run_ai_discovery_for_rows(
     project_path: Path,
     *,
     config: AppConfig | None = None,
+    only_parts: set[str] | None = None,
+    should_cancel: Callable[[], bool] | None = None,
     approve_ai_datasheet_url: Callable[[str, list[str]], str | None] | None = None,
     on_part_status: Callable[[str, str], None] | None = None,
+    on_fetch_attempt: Callable[[str, str, str | None], None] | None = None,
     verbose: bool = False,
 ) -> ProjectContext:
-    """Run AI discovery with optional per-part status callback (UI progress)."""
+    """Run AI discovery with URL approval (UI) or auto-fetch when configured."""
     cfg = config or load_config()
-    cfg.datasheet_ai_discovery = True
 
     approve: Callable[[str, list[str]], str | None] | None = None
-    if not cfg.datasheet_ai_discovery_auto_fetch and approve_ai_datasheet_url:
+    auto_fetch = cfg.datasheet_ai_discovery_auto_fetch
+    if auto_fetch:
+        approve = None
+    elif approve_ai_datasheet_url is not None:
 
         def _approve(part: str, urls: list[str]) -> str | None:
             if on_part_status:
-                on_part_status(part, "Searching…")
+                on_part_status(part, "Choose AI URL…")
             chosen = approve_ai_datasheet_url(part, urls)
             if chosen and on_part_status:
                 on_part_status(part, "Downloading…")
             return chosen
 
         approve = _approve
+    else:
+        raise ValueError(
+            "AI datasheet discovery requires approve_ai_datasheet_url or "
+            "datasheet_ai_discovery_auto_fetch in config"
+        )
 
     def _bridge_status(message: str) -> None:
         if on_part_status and ": " in message:
@@ -386,9 +534,12 @@ def run_ai_discovery_for_rows(
         project_path,
         config=cfg,
         datasheet_ai_discovery=True,
-        datasheet_ai_discovery_auto_fetch=cfg.datasheet_ai_discovery_auto_fetch,
+        datasheet_ai_discovery_auto_fetch=auto_fetch,
         approve_ai_datasheet_url=approve,
         on_datasheet_status=_bridge_status if on_part_status else None,
+        on_fetch_attempt=on_fetch_attempt,
+        ai_discovery_only_parts=only_parts,
+        ai_discovery_should_cancel=should_cancel,
         verbose=verbose,
     )
 

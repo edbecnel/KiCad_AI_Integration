@@ -17,6 +17,7 @@ class SymbolInstance:
     spice_lib: str = ""
     spice_primitive: str = ""
     sim_device: str = ""
+    sim_type: str = ""
     sim_library: str = ""
     sim_name: str = ""
     sim_pins: str = ""
@@ -150,6 +151,7 @@ def parse_schematic_symbols(
             "Spice_Lib",
             "Spice_Primitive",
             "Sim.Device",
+            "Sim.Type",
             "Sim.Library",
             "Sim.Name",
             "Sim.Pins",
@@ -166,6 +168,7 @@ def parse_schematic_symbols(
                 spice_lib=props.get("Spice_Lib", ""),
                 spice_primitive=props.get("Spice_Primitive", ""),
                 sim_device=props.get("Sim.Device", ""),
+                sim_type=props.get("Sim.Type", ""),
                 sim_library=props.get("Sim.Library", ""),
                 sim_name=props.get("Sim.Name", ""),
                 sim_pins=props.get("Sim.Pins", ""),

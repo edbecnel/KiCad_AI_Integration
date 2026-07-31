@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from context.model import ProjectContext
+from context.netlist_export import format_netlist_status_line
 from platform_core.contracts import DesignSnapshot
 from prompts.templates.general_review import (
     GENERAL_REVIEW_SYSTEM,
@@ -53,6 +54,14 @@ def build_prompt_summary(ctx: ProjectContext, *, include_image: bool = False) ->
         unique = labels.get("unique_net_names") or []
         if unique:
             lines.append(f"Net labels: {len(unique)} unique names")
+    lines.append(format_netlist_status_line(getattr(ctx, "netlist_summary", None)))
+    pcb = getattr(ctx, "pcb_summary", None)
+    if pcb and isinstance(pcb, dict):
+        pcb_file = pcb.get("pcb_file")
+        footprints = pcb.get("footprint_count")
+        nets = pcb.get("net_count")
+        if pcb_file is not None:
+            lines.append(f"PCB ({pcb_file}): {footprints} footprints, {nets} nets")
     if include_image and ctx.schematic_image:
         lines.append(f"Schematic image: {len(ctx.schematic_image):,} bytes (attached separately)")
     elif include_image:

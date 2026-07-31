@@ -1,15 +1,21 @@
 """Tests for datasheet supply UI helpers (headless)."""
 
 from pathlib import Path
+from unittest.mock import patch
 
+from context.artifacts.ai_discovery_log import AiDiscoveryLog
+from context.artifacts.store import ArtifactStore
 from context.schematic_parse import SymbolInstance
 from context.schematic_write import DatasheetFieldUpdate, DatasheetFieldWriteResult
 from ui.datasheet_supply import (
     MissingDatasheetRow,
     attach_datasheet_pdf,
+    enrich_rows_from_discovery_log,
+    format_row_detail_text,
     format_write_url_success_message,
     get_missing_datasheet_rows,
     manual_pdf_path_for_part,
+    run_ai_discovery_for_rows,
 )
 from utils.config import AppConfig
 
@@ -70,6 +76,86 @@ def test_get_missing_datasheet_rows_empty_when_resolved(tmp_path: Path) -> None:
     ctx, rows = get_missing_datasheet_rows(pro, config=config, verbose=False)
     assert ctx.project_name == "testproj"
     assert isinstance(rows, list)
+
+
+def test_get_missing_skips_ai_discovery_when_config_enabled(tmp_path: Path) -> None:
+    pro = FIXTURES / "testproj.kicad_pro"
+    config = AppConfig(
+        artifact_library_path=tmp_path / "lib",
+        datasheet_url_fetch="never",
+        datasheet_ai_discovery=True,
+    )
+    with patch("context.ai_datasheet_discovery.run_ai_datasheet_discovery") as mock_ai:
+        get_missing_datasheet_rows(pro, config=config, verbose=False)
+    mock_ai.assert_not_called()
+
+
+def test_enrich_rows_from_stale_fetch_not_attempted_log(tmp_path: Path) -> None:
+    store = ArtifactStore(tmp_path / "lib")
+    store.ai_discovery_log.record_attempt(
+        "BD243C",
+        suggested_urls=["https://www.onsemi.com/download/data-sheet/pdf/bd243c-d.pdf"],
+        outcome="no_url_found",
+        error="AI suggested URLs (fetch not attempted — enable --ai-datasheets-auto-fetch)",
+    )
+    row = MissingDatasheetRow(
+        part="BD243C",
+        references=["Q1"],
+        reference_count=1,
+        status="fetch_failed",
+        errors=[],
+    )
+    enrich_rows_from_discovery_log([row], store)
+    assert row.suggested_urls[0].endswith("bd243c-d.pdf")
+    assert row.discovery_status == "AI URL ready"
+
+
+def test_format_row_detail_text_includes_full_suggested_url() -> None:
+    row = MissingDatasheetRow(
+        part="BD243C",
+        references=["Q1"],
+        reference_count=1,
+        status="fetch_failed",
+        errors=[],
+        suggested_urls=["https://www.onsemi.com/download/data-sheet/pdf/bd243c-d.pdf"],
+    )
+    text = format_row_detail_text(row)
+    assert "bd243c-d.pdf" in text
+    assert "Suggested:" in text or "bd243c-d.pdf" in text
+
+
+def test_format_row_detail_text_includes_fetch_attempts() -> None:
+    row = MissingDatasheetRow(
+        part="BD243C",
+        references=["Q1"],
+        reference_count=1,
+        status="fetch_failed",
+        errors=[],
+        suggested_urls=[
+            "https://www.onsemi.com/a.pdf",
+            "https://www.onsemi.com/b.pdf",
+        ],
+        fetch_attempts=[
+            ("https://www.onsemi.com/a.pdf", "bot protection"),
+        ],
+    )
+    text = format_row_detail_text(row)
+    assert "FAIL" in text
+    assert "b.pdf" in text
+
+
+def test_run_ai_discovery_requires_approval_or_auto_fetch(tmp_path: Path) -> None:
+    pro = FIXTURES / "testproj.kicad_pro"
+    config = AppConfig(
+        artifact_library_path=tmp_path / "lib",
+        datasheet_ai_discovery_auto_fetch=False,
+    )
+    try:
+        run_ai_discovery_for_rows(pro, config=config, verbose=False)
+    except ValueError as exc:
+        assert "approve" in str(exc).lower()
+    else:
+        raise AssertionError("expected ValueError when no approval path")
 
 
 def test_attach_datasheet_pdf_registers_part(tmp_path: Path) -> None:

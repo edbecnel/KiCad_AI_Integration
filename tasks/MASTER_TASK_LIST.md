@@ -259,9 +259,10 @@ response without manual export/copy-paste.
 - [ ] Document install path (`plugins/` directory) and update workflow
 - [ ] Plugin metadata (name, description, icon, version)
 
-### Dockable chat window
+### Dockable Assistant shell
 
-- [ ] Persistent wx panel dockable alongside schematic/PCB editor
+- [ ] **Unified Assistant shell (tabbed UI, dual host)** — one window with shared header + Chat / Datasheets / Simulation / AERF / Notebook tabs; same component in Terminal `--ui` and KiCad dock — [ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md)
+- [ ] Persistent wx panel dockable alongside schematic/PCB editor (hosts `AssistantShell`)
 - [ ] Non-blocking UI (API calls on background thread)
 - [ ] Resize-friendly layout
 
@@ -290,7 +291,7 @@ response without manual export/copy-paste.
 - [ ] Implement at least one additional provider (e.g. OpenAI or Ollama) via abstraction layer
 - [ ] Model selection per provider
 
-**Phase 2 exit criteria:** Dockable in-editor chat with conversation history, template
+**Phase 2 exit criteria:** Dockable in-editor Assistant shell with conversation history, template
 library, token/cost visibility, and provider profile switching.
 
 ---
@@ -489,7 +490,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 | Project Context Model | Phase 1 | `src/context/model.py` (or equivalent) |
 | Prompt Builder | Phase 1 | `src/prompts/` templates + builder |
 | AI Provider Layer | Phase 1 | `src/providers/` abstraction + Claude impl |
-| KiCad User Interface | Phase 1 → 2 | `src/ui/` dialog → dockable plugin |
+| KiCad User Interface | Phase 1 → 2 | `src/ui/` dialogs → unified Assistant shell ([ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md)) + dockable plugin |
 | Conversation Manager | Phase 2 | `src/` session/history module |
 | AERF Orchestrator | Phase 3 | `src/reasoning/` staged analysis pipeline |
 

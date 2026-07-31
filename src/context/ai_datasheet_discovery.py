@@ -2,8 +2,9 @@
 AI datasheet discovery — Phase 1 (opt-in step 8).
 
 Uses Claude Messages API with structured JSON URL suggestions from part number
-and symbol context. No live web search (Option A MVP). Hallucinated URLs are
-filtered by validate_url and fetch failure handling; users get manual fallback.
+and symbol context. No live web search (Option A MVP). Manufacturer heuristics
+and URL quality filters run before AI suggestions; hallucinated portal URLs are
+dropped; users get manual fallback when fetch fails.
 """
 
 from __future__ import annotations
@@ -13,13 +14,18 @@ import re
 import sys
 import tempfile
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from context.artifacts.ai_discovery_log import AiDiscoveryOutcome
 from context.artifacts.catalog import ComponentRef
 from context.artifacts.store import ArtifactStore, ProjectContextInfo
+from context.datasheet_url_candidates import (
+    heuristic_datasheet_urls,
+    merge_url_candidates,
+    reject_datasheet_url,
+)
 from context.datasheet_requirements import classify_datasheet_requirement
 from context.datasheet_resolver import (
     DatasheetResolution,
@@ -43,6 +49,7 @@ class DiscoveryResult:
     selected_url: str | None
     error: str | None
     artifact_id: str | None = None
+    fetch_attempts: list[tuple[str, str | None]] = field(default_factory=list)
 
 
 def _log(message: str, *, verbose: bool) -> None:
@@ -79,6 +86,8 @@ def _validate_suggested_urls(urls: list[str]) -> list[str]:
         if url in seen:
             continue
         seen.add(url)
+        if reject_datasheet_url(url):
+            continue
         try:
             validate_url(url)
         except UrlFetchError:
@@ -145,6 +154,8 @@ def _is_eligible(
 def _group_eligible_parts(
     symbols: list[SymbolInstance],
     resolutions: dict[str, DatasheetResolution],
+    *,
+    only_parts: set[str] | None = None,
 ) -> dict[str, tuple[SymbolInstance, list[str], DatasheetResolution]]:
     grouped: dict[str, tuple[SymbolInstance, list[str], DatasheetResolution]] = {}
     for sym in symbols:
@@ -152,6 +163,8 @@ def _group_eligible_parts(
         if res is None or not _is_eligible(sym, res):
             continue
         part = (sym.value or sym.reference).strip()
+        if only_parts is not None and part not in only_parts:
+            continue
         if part in grouped:
             grouped[part][1].append(sym.reference)
             continue
@@ -177,6 +190,39 @@ def _suggest_urls(
     return urls, None
 
 
+def format_fetch_attempts_summary(
+    attempts: list[tuple[str, str | None]],
+    *,
+    suggested_urls: list[str] | None = None,
+) -> str:
+    """Human-readable report of automated download attempts."""
+    lines: list[str] = []
+    if attempts:
+        lines.append("Automated download attempts:")
+        for url, err in attempts:
+            if err is None:
+                lines.append(f"  OK: {url}")
+            else:
+                lines.append(f"  FAIL: {url}")
+                lines.append(f"        {err}")
+    not_tried = []
+    if suggested_urls:
+        tried = {u for u, _ in attempts}
+        not_tried = [u for u in suggested_urls if u not in tried]
+    if not_tried:
+        lines.append("Not attempted (open in browser manually):")
+        for url in not_tried:
+            lines.append(f"  {url}")
+    if not lines:
+        return "No download attempts recorded."
+    lines.append("")
+    lines.append(
+        "Tip: select a URL below (or use Open URL), download in your browser, "
+        "then Attach PDF… for this part Value."
+    )
+    return "\n".join(lines)
+
+
 def _try_fetch_and_register(
     url: str,
     part: str,
@@ -192,11 +238,12 @@ def _try_fetch_and_register(
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp_path = Path(tmp.name)
     try:
+        read_timeout = min(config.url_fetch_read_timeout_sec, 25)
         fetch_fn(
             url,
             tmp_path,
             timeout_sec=config.url_fetch_timeout_sec,
-            read_timeout_sec=config.url_fetch_read_timeout_sec,
+            read_timeout_sec=read_timeout,
             warmup=config.url_fetch_warmup,
         )
         artifact_id, _ = resolver._register_and_link(  # noqa: SLF001
@@ -217,6 +264,58 @@ def _try_fetch_and_register(
             tmp_path.unlink(missing_ok=True)
 
 
+def _download_url_list(
+    urls: list[str],
+    *,
+    part: str,
+    symbol: SymbolInstance,
+    project: ProjectContextInfo,
+    store: ArtifactStore,
+    config: AppConfig,
+    resolver: DatasheetResolver,
+    fetch: Callable[..., object],
+    should_cancel: Callable[[], bool] | None,
+    on_part_status: Callable[[str, str], None] | None,
+    on_fetch_attempt: Callable[[str, str, str | None], None] | None,
+) -> tuple[bool, str | None, str | None, list[tuple[str, str | None]]]:
+    """Try each URL in order. Returns (downloaded, artifact_id, last_error, attempts)."""
+    fetch_attempts: list[tuple[str, str | None]] = []
+    last_error: str | None = None
+    artifact_id: str | None = None
+    selected: str | None = None
+    total = len(urls)
+
+    for index, url in enumerate(urls, start=1):
+        if should_cancel and should_cancel():
+            break
+        selected = url
+        status = f"Downloading URL {index}/{total}…"
+        if on_part_status:
+            on_part_status(part, status)
+        _log(f"  Downloading {url}", verbose=True)
+        artifact_id, last_error = _try_fetch_and_register(
+            url,
+            part,
+            symbol,
+            project,
+            store,
+            config,
+            resolver,
+            fetch,
+        )
+        if artifact_id is not None:
+            fetch_attempts.append((url, None))
+            if on_fetch_attempt:
+                on_fetch_attempt(part, url, None)
+            return True, artifact_id, url, fetch_attempts
+        fetch_attempts.append((url, last_error))
+        if on_fetch_attempt:
+            on_fetch_attempt(part, url, last_error)
+        _log(f"  Fetch failed: {last_error}", verbose=True)
+
+    return False, None, selected, fetch_attempts
+
+
 def run_ai_datasheet_discovery(
     symbols: list[SymbolInstance],
     resolutions: dict[str, DatasheetResolution],
@@ -228,6 +327,9 @@ def run_ai_datasheet_discovery(
     fetch_fn: Callable[..., object] | None = None,
     approve_url: Callable[[str, list[str]], str | None] | None = None,
     on_part_status: Callable[[str, str], None] | None = None,
+    on_fetch_attempt: Callable[[str, str, str | None], None] | None = None,
+    only_parts: set[str] | None = None,
+    should_cancel: Callable[[], bool] | None = None,
     verbose: bool = True,
 ) -> dict[str, DiscoveryResult]:
     """
@@ -243,11 +345,13 @@ def run_ai_datasheet_discovery(
 
     fetch = fetch_fn or fetch_url_to_file
     resolver = DatasheetResolver(config, store, fetch_fn=fetch, verbose=False)
-    grouped = _group_eligible_parts(symbols, resolutions)
+    grouped = _group_eligible_parts(symbols, resolutions, only_parts=only_parts)
     results: dict[str, DiscoveryResult] = {}
     attempted: set[str] = set()
 
     for part, (symbol, refs, _res) in grouped.items():
+        if should_cancel and should_cancel():
+            break
         if part in attempted:
             continue
         attempted.add(part)
@@ -266,51 +370,75 @@ def run_ai_datasheet_discovery(
 
         _log(f"AI datasheet discovery: {part} ({len(refs)} ref(s))", verbose=verbose)
         raw_urls, provider_error = _suggest_urls(context, config, provider)
-        if provider_error:
-            store.ai_discovery_log.record_attempt(
-                part,
-                symbol_datasheet_url=symbol_url,
-                suggested_urls=[],
-                outcome="no_url_found",
-                error=provider_error,
-            )
-            results[part] = DiscoveryResult(
-                part=part,
-                outcome="no_url_found",
-                suggested_urls=[],
-                selected_url=None,
-                error=provider_error,
-            )
-            continue
+        heuristic_urls = heuristic_datasheet_urls(part, context)
+        if heuristic_urls:
+            _log(f"  Heuristic URL candidates: {heuristic_urls}", verbose=verbose)
+        merged_urls = merge_url_candidates(heuristic_urls, raw_urls)
 
-        valid_urls = _validate_suggested_urls(raw_urls)[
+        valid_urls = _validate_suggested_urls(merged_urls)[
             : config.datasheet_ai_discovery_max_urls
         ]
         if not valid_urls:
+            error = provider_error or "No valid direct PDF URLs (heuristic or AI)"
             store.ai_discovery_log.record_attempt(
                 part,
                 symbol_datasheet_url=symbol_url,
-                suggested_urls=raw_urls,
+                suggested_urls=merged_urls,
                 outcome="no_url_found",
-                error="AI returned no valid HTTPS URLs",
+                error=error,
             )
             results[part] = DiscoveryResult(
                 part=part,
                 outcome="no_url_found",
-                suggested_urls=raw_urls,
+                suggested_urls=merged_urls,
                 selected_url=None,
-                error="AI returned no valid HTTPS URLs",
+                error=error,
             )
             continue
 
-        urls_to_try: list[str]
+        last_error: str | None = None
+        downloaded = False
+        selected: str | None = None
+        artifact_id: str | None = None
+        user_rejected = False
+        fetch_attempts: list[tuple[str, str | None]] = []
+
         if config.datasheet_ai_discovery_auto_fetch:
-            urls_to_try = valid_urls
+            downloaded, artifact_id, selected, fetch_attempts = _download_url_list(
+                valid_urls,
+                part=part,
+                symbol=symbol,
+                project=project,
+                store=store,
+                config=config,
+                resolver=resolver,
+                fetch=fetch,
+                should_cancel=should_cancel,
+                on_part_status=on_part_status,
+                on_fetch_attempt=on_fetch_attempt,
+            )
         elif approve_url is not None:
             if on_part_status:
                 on_part_status(part, "Waiting for URL approval…")
             chosen = approve_url(part, valid_urls)
             if chosen is None:
+                user_rejected = True
+            else:
+                urls_to_try = [chosen] + [u for u in valid_urls if u != chosen]
+                downloaded, artifact_id, selected, fetch_attempts = _download_url_list(
+                    urls_to_try,
+                    part=part,
+                    symbol=symbol,
+                    project=project,
+                    store=store,
+                    config=config,
+                    resolver=resolver,
+                    fetch=fetch,
+                    should_cancel=should_cancel,
+                    on_part_status=on_part_status,
+                    on_fetch_attempt=on_fetch_attempt,
+                )
+            if user_rejected and not downloaded:
                 store.ai_discovery_log.record_attempt(
                     part,
                     symbol_datasheet_url=symbol_url,
@@ -322,11 +450,10 @@ def run_ai_datasheet_discovery(
                     part=part,
                     outcome="user_rejected",
                     suggested_urls=valid_urls,
-                    selected_url=None,
+                    selected_url=selected,
                     error="User declined download",
                 )
                 continue
-            urls_to_try = [chosen]
         else:
             store.ai_discovery_log.record_attempt(
                 part,
@@ -350,48 +477,31 @@ def run_ai_datasheet_discovery(
             )
             continue
 
-        last_error: str | None = None
-        downloaded = False
-        selected: str | None = None
-        artifact_id: str | None = None
-
-        for url in urls_to_try:
-            selected = url
-            if on_part_status:
-                on_part_status(part, f"Downloading {url[:60]}…")
-            _log(f"  Downloading {url}", verbose=verbose)
-            artifact_id, last_error = _try_fetch_and_register(
-                url,
+        if downloaded:
+            store.ai_discovery_log.record_attempt(
                 part,
-                symbol,
-                project,
-                store,
-                config,
-                resolver,
-                fetch,
+                symbol_datasheet_url=symbol_url,
+                suggested_urls=valid_urls,
+                selected_url=selected,
+                outcome="downloaded",
+                artifact_id=artifact_id,
+                fetch_attempts=fetch_attempts,
             )
-            if artifact_id is not None:
-                store.ai_discovery_log.record_attempt(
-                    part,
-                    symbol_datasheet_url=symbol_url,
-                    suggested_urls=valid_urls,
-                    selected_url=url,
-                    outcome="downloaded",
-                    artifact_id=artifact_id,
-                )
-                results[part] = DiscoveryResult(
-                    part=part,
-                    outcome="downloaded",
-                    suggested_urls=valid_urls,
-                    selected_url=url,
-                    error=None,
-                    artifact_id=artifact_id,
-                )
-                downloaded = True
-                break
-            _log(f"  Fetch failed: {last_error}", verbose=verbose)
-
-        if not downloaded:
+            results[part] = DiscoveryResult(
+                part=part,
+                outcome="downloaded",
+                suggested_urls=valid_urls,
+                selected_url=selected,
+                error=None,
+                artifact_id=artifact_id,
+                fetch_attempts=fetch_attempts,
+            )
+        elif not user_rejected:
+            last_error = fetch_attempts[-1][1] if fetch_attempts else "Download failed"
+            summary_error = format_fetch_attempts_summary(
+                fetch_attempts,
+                suggested_urls=valid_urls,
+            )
             store.ai_discovery_log.record_attempt(
                 part,
                 symbol_datasheet_url=symbol_url,
@@ -399,13 +509,15 @@ def run_ai_datasheet_discovery(
                 selected_url=selected,
                 outcome="fetch_failed",
                 error=last_error or "Download failed",
+                fetch_attempts=fetch_attempts,
             )
             results[part] = DiscoveryResult(
                 part=part,
                 outcome="fetch_failed",
                 suggested_urls=valid_urls,
                 selected_url=selected,
-                error=last_error or "Download failed",
+                error=summary_error,
+                fetch_attempts=fetch_attempts,
             )
 
     return results

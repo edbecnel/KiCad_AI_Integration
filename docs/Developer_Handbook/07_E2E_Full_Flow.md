@@ -7,6 +7,8 @@
 
 End-user walkthrough: [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md).
 
+> **Future UI:** A unified tabbed Assistant shell will replace the launcher + separate modal panels. Until then, validate each feature via its `--ui-*` flag or launcher button. See [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md).
+
 ## Prerequisites
 
 - Repository cloned; `~/kicad_ai_config.json` or `ANTHROPIC_API_KEY` set (see [kicad_ai_config.example.json](kicad_ai_config.example.json))
@@ -213,6 +215,7 @@ See [05_Testing.md](05_Testing.md) for philosophy and coverage expectations.
 ## Related Documents
 
 - [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md)
+- [ADP-011: Assistant Shell UI](../Architecture/ADP-011-Assistant-Shell-UI.md) — planned unified tabbed window
 - [E2E Chat UI](06_E2E_Chat_UI.md)
 - [Testing](05_Testing.md)
 - [Feature Overview](../User_Guides/Feature_Overview.md)

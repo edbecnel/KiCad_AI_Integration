@@ -21,6 +21,8 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 
 ``--retry-failed`` re-attempts HTTPS URLs that were previously logged as failed (after fetch improvements).
 
+``--ui`` opens the KiCad AI Assistant launcher (project picker, context refresh, panel shortcuts).
+
 ``--ui-datasheets`` opens the Missing Required Datasheets wxPython panel (requires wx; use inside KiCad or a wx-enabled Python).
 
 ``--ui-chat`` opens the KiCad AI chat panel with context preview and Approve & Send (requires wx).
@@ -114,6 +116,7 @@ def _parse_cli_args(
     bool,
     bool,
     bool,
+    bool,
     int | None,
     str | None,
     bool,
@@ -136,6 +139,7 @@ def _parse_cli_args(
     ui_aerf = False
     ui_notebook = False
     ui_notebook_panel = False
+    ui_launcher = False
     aerf_plan = False
     aerf_stage: int | None = None
     aerf_family: str | None = None
@@ -173,6 +177,8 @@ def _parse_cli_args(
             ui_notebook = True
         elif arg == "--ui-notebook-panel":
             ui_notebook_panel = True
+        elif arg == "--ui":
+            ui_launcher = True
         elif arg == "--aerf-plan":
             aerf_plan = True
         elif arg == "--aerf-stage":
@@ -230,6 +236,7 @@ def _parse_cli_args(
         ui_aerf,
         ui_notebook,
         ui_notebook_panel,
+        ui_launcher,
         aerf_plan,
         aerf_stage,
         aerf_family,
@@ -620,6 +627,19 @@ def main_ui_aerf(
     )
 
 
+def main_ui_launcher(project_path: str | Path | None = None) -> None:
+    """Open the KiCad AI Assistant launcher (project picker + panels)."""
+    try:
+        import wx  # noqa: F401
+    except ImportError:
+        print("Launcher UI requires wxPython (run inside KiCad or install wx).")
+        return
+
+    from ui.launcher import show_launcher_dialog
+
+    show_launcher_dialog(project_path)
+
+
 def _collect_ctx_for_aerf(
     project_path: str | Path | None,
     *,
@@ -771,6 +791,7 @@ if __name__ == "__main__":
         ui_aerf,
         ui_notebook,
         ui_notebook_panel,
+        ui_launcher,
         aerf_plan,
         aerf_stage,
         aerf_family,
@@ -784,7 +805,9 @@ if __name__ == "__main__":
         reset_datasheets,
         ask,
     ) = _parse_cli_args(sys.argv[1:])
-    if ui_datasheets:
+    if ui_launcher:
+        main_ui_launcher(arg_path)
+    elif ui_datasheets:
         main_ui_datasheets(arg_path, retry_failed_urls=retry_failed, ai_datasheets=ai_datasheets)
     elif ui_chat:
         main_ui_chat(arg_path, retry_failed_urls=retry_failed)

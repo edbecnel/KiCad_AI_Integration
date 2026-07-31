@@ -158,6 +158,22 @@ def apply_simulation_model_for_part(
     return refreshed, result
 
 
+def apply_builtin_simulation_models_for_project(
+    project_path: Path,
+    *,
+    config: AppConfig | None = None,
+    verbose: bool = False,
+) -> ProjectContext:
+    """Collect context and auto-write built-in simulation models to the schematic."""
+    cfg = config or load_config()
+    prev = cfg.spice_write_symbol_fields
+    cfg.spice_write_symbol_fields = True
+    try:
+        return collect_stretch_context(project_path, config=cfg, verbose=verbose)
+    finally:
+        cfg.spice_write_symbol_fields = prev
+
+
 def apply_spice_fields_from_catalog(
     project_path: Path,
     part: str,

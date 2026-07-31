@@ -9,6 +9,7 @@ from context.ai_datasheet_discovery import (
     DiscoveryResult,
     _parse_urls_from_response,
     _validate_suggested_urls,
+    format_fetch_attempts_summary,
     run_ai_datasheet_discovery,
 )
 from context.artifacts.store import ArtifactStore, ProjectContextInfo
@@ -190,7 +191,9 @@ def test_failure_records_both_logs(tmp_path: Path) -> None:
     provider = _MockProvider(f'{{"urls": ["{ai_url}"]}}')
     fetch_fn = MagicMock(side_effect=UrlFetchError("bot protection"))
 
-    with patch("context.ai_datasheet_discovery.validate_url"):
+    with patch("context.ai_datasheet_discovery.validate_url"), patch(
+        "context.ai_datasheet_discovery.heuristic_datasheet_urls", return_value=[]
+    ):
         results = run_ai_datasheet_discovery(
             [sym],
             resolutions,
@@ -203,6 +206,8 @@ def test_failure_records_both_logs(tmp_path: Path) -> None:
         )
     assert results["FOD3180"].outcome == "fetch_failed"
     assert "bot protection" in (results["FOD3180"].error or "")
+    assert len(results["FOD3180"].fetch_attempts) == 1
+    assert results["FOD3180"].fetch_attempts[0][0] == ai_url
     url_log = store.url_fetch_log.get("FOD3180", ai_url)
     assert url_log is not None
     assert url_log.status == "failed"
@@ -321,6 +326,198 @@ def test_fod3180_scenario_handoff_message(tmp_path: Path) -> None:
     )
     assert notice is not None
     assert "Suggested URL" in notice
+
+
+def test_only_parts_skips_other_values(tmp_path: Path) -> None:
+    config = AppConfig(
+        artifact_library_path=tmp_path / "lib",
+        datasheet_ai_discovery=True,
+        datasheet_ai_discovery_auto_fetch=True,
+        anthropic_api_key="key",
+    )
+    store = ArtifactStore(config.artifact_library_path)
+    sym_fod = _fod3180_symbol("U1")
+    sym_other = SymbolInstance(
+        reference="Q1",
+        value="BD243C",
+        datasheet="https://example.invalid/bd243c.pdf",
+        lib_id="Device:Q_NPN",
+        sheet_path="p.kicad_sch",
+    )
+    resolutions = {
+        sym_fod.reference: _fetch_failed_resolution(sym_fod),
+        sym_other.reference: _fetch_failed_resolution(sym_other),
+    }
+    provider = _MockProvider('{"urls": ["https://example.com/fod3180.pdf"]}')
+
+    def ok_fetch(url: str, dest: Path, **kwargs: object) -> FetchResult:
+        dest.write_bytes(b"%PDF-1.4 test")
+        return FetchResult(path=dest, content_type="application/pdf", byte_size=12)
+
+    with patch("context.ai_datasheet_discovery.validate_url"):
+        results = run_ai_datasheet_discovery(
+            [sym_fod, sym_other],
+            resolutions,
+            _project(tmp_path),
+            store,
+            config,
+            provider=provider,
+            fetch_fn=ok_fetch,
+            only_parts={"FOD3180"},
+            verbose=False,
+        )
+    assert "FOD3180" in results
+    assert "BD243C" not in results
+    assert len(provider.calls) == 1
+
+
+def test_approve_auto_tries_remaining_urls_after_fetch_fail(tmp_path: Path) -> None:
+    config = AppConfig(
+        artifact_library_path=tmp_path / "lib",
+        datasheet_ai_discovery=True,
+        datasheet_ai_discovery_auto_fetch=False,
+        anthropic_api_key="key",
+    )
+    store = ArtifactStore(config.artifact_library_path)
+    sym = _fod3180_symbol()
+    resolutions = {sym.reference: _fetch_failed_resolution(sym)}
+    provider = _MockProvider(
+        '{"urls": ["https://example.com/bad.pdf", "https://example.com/good.pdf"]}'
+    )
+    approvals: list[list[str]] = []
+
+    def approve(_part: str, urls: list[str]) -> str | None:
+        approvals.append(list(urls))
+        return urls[0]
+
+    def fetch(url: str, dest: Path, **kwargs: object) -> FetchResult:
+        if url.endswith("bad.pdf"):
+            raise UrlFetchError("Site blocked automated download (bot protection)")
+        dest.write_bytes(b"%PDF-1.4 good")
+        return FetchResult(path=dest, content_type="application/pdf", byte_size=12)
+
+    with patch("context.ai_datasheet_discovery.validate_url"), patch(
+        "context.ai_datasheet_discovery.heuristic_datasheet_urls", return_value=[]
+    ):
+        results = run_ai_datasheet_discovery(
+            [sym],
+            resolutions,
+            _project(tmp_path),
+            store,
+            config,
+            provider=provider,
+            fetch_fn=fetch,
+            approve_url=approve,
+            verbose=False,
+        )
+    assert results["FOD3180"].outcome == "downloaded"
+    assert len(approvals) == 1
+    assert len(approvals[0]) == 2
+    assert len(results["FOD3180"].fetch_attempts) == 2
+    assert results["FOD3180"].fetch_attempts[0][1] is not None
+    assert results["FOD3180"].fetch_attempts[1][1] is None
+
+
+def test_on_fetch_attempt_callback(tmp_path: Path) -> None:
+    config = AppConfig(
+        artifact_library_path=tmp_path / "lib",
+        datasheet_ai_discovery=True,
+        datasheet_ai_discovery_auto_fetch=True,
+        anthropic_api_key="key",
+    )
+    store = ArtifactStore(config.artifact_library_path)
+    sym = _fod3180_symbol()
+    resolutions = {sym.reference: _fetch_failed_resolution(sym)}
+    provider = _MockProvider(
+        '{"urls": ["https://example.com/bad.pdf", "https://example.com/good.pdf"]}'
+    )
+    events: list[tuple[str, str, str | None]] = []
+
+    def fetch(url: str, dest: Path, **kwargs: object) -> FetchResult:
+        if url.endswith("bad.pdf"):
+            raise UrlFetchError("blocked")
+        dest.write_bytes(b"%PDF-1.4")
+        return FetchResult(path=dest, content_type="application/pdf", byte_size=8)
+
+    with patch("context.ai_datasheet_discovery.validate_url"), patch(
+        "context.ai_datasheet_discovery.heuristic_datasheet_urls", return_value=[]
+    ):
+        run_ai_datasheet_discovery(
+            [sym],
+            resolutions,
+            _project(tmp_path),
+            store,
+            config,
+            provider=provider,
+            fetch_fn=fetch,
+            on_fetch_attempt=lambda part, url, err: events.append((part, url, err)),
+            verbose=False,
+        )
+    assert len(events) == 2
+    assert events[0][2] == "blocked"
+    assert events[1][2] is None
+
+
+def test_format_fetch_attempts_summary_lists_untried() -> None:
+    summary = format_fetch_attempts_summary(
+        [("https://example.com/a.pdf", "bot protection")],
+        suggested_urls=[
+            "https://example.com/a.pdf",
+            "https://example.com/b.pdf",
+        ],
+    )
+    assert "FAIL" in summary
+    assert "a.pdf" in summary
+    assert "Not attempted" in summary
+    assert "b.pdf" in summary
+    assert "Attach PDF" in summary
+
+
+def test_heuristics_preferred_over_ai_portal_url(tmp_path: Path) -> None:
+    config = AppConfig(
+        artifact_library_path=tmp_path / "lib",
+        datasheet_ai_discovery=True,
+        datasheet_ai_discovery_auto_fetch=False,
+        anthropic_api_key="key",
+    )
+    store = ArtifactStore(config.artifact_library_path)
+    sym = SymbolInstance(
+        reference="Q1",
+        value="BD243C",
+        datasheet="https://example.invalid/bd243c.pdf",
+        lib_id="Device:Q_NPN",
+        sheet_path="p.kicad_sch",
+    )
+    resolutions = {sym.reference: _fetch_failed_resolution(sym)}
+    portal = "https://www.onsemi.com/design/technical-documentation?notFound=bd243-d.pdf"
+    provider = _MockProvider(f'{{"urls": ["{portal}"]}}')
+    approved: list[str] = []
+
+    def approve(_part: str, urls: list[str]) -> str | None:
+        approved.append(urls[0])
+        return urls[0]
+
+    def fetch(url: str, dest: Path, **kwargs: object) -> FetchResult:
+        if "bd243b-d.pdf" in url:
+            dest.write_bytes(b"%PDF-1.4")
+            return FetchResult(path=dest, content_type="application/pdf", byte_size=8)
+        raise UrlFetchError("404")
+
+    with patch("context.ai_datasheet_discovery.validate_url"):
+        results = run_ai_datasheet_discovery(
+            [sym],
+            resolutions,
+            _project(tmp_path),
+            store,
+            config,
+            provider=provider,
+            fetch_fn=fetch,
+            approve_url=approve,
+            verbose=False,
+        )
+    assert approved[0].endswith("bd243c-d.pdf")
+    assert portal not in results["BD243C"].suggested_urls
+    assert any("bd243" in u for u in results["BD243C"].suggested_urls)
 
 
 def test_user_approval_rejected(tmp_path: Path) -> None:

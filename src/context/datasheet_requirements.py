@@ -166,6 +166,9 @@ def summarize_required_missing_datasheets(
             entry["discovery_outcome"] = getattr(discovery, "outcome", None)
             entry["discovery_error"] = getattr(discovery, "error", None)
             entry["selected_url"] = getattr(discovery, "selected_url", None)
+            attempts = getattr(discovery, "fetch_attempts", None)
+            if attempts:
+                entry["fetch_attempts"] = list(attempts)
         out.append(entry)
     return out
 
@@ -241,6 +244,9 @@ def summarize_required_datasheets(
             entry["discovery_outcome"] = getattr(discovery, "outcome", None)
             entry["discovery_error"] = getattr(discovery, "error", None)
             entry["selected_url"] = getattr(discovery, "selected_url", None)
+            attempts = getattr(discovery, "fetch_attempts", None)
+            if attempts:
+                entry["fetch_attempts"] = list(attempts)
         out.append(entry)
     return out
 

@@ -41,10 +41,9 @@ def test_summarize_simulation_gaps_flags_missing_spice_model(tmp_path: Path) -> 
         resolutions=resolutions,
         missing_only=True,
     )
-    assert len(rows) == 1
-    assert rows[0].part == "F0D3180"
-    assert rows[0].gap_kind == "missing_spice_model"
-    assert rows[0].tier_hint == "A"
+    fod = next(r for r in rows if r.part == "F0D3180")
+    assert fod.gap_kind == "missing_spice_model"
+    assert fod.tier_hint == "A"
 
 
 def test_summarize_simulation_gaps_has_lib_no_hookup(tmp_path: Path) -> None:
@@ -72,6 +71,7 @@ def test_summarize_simulation_gaps_has_lib_no_hookup(tmp_path: Path) -> None:
         store=store,
         missing_only=True,
     )
-    assert rows[0].gap_kind == "kicad9_sim_incomplete"
-    assert "KiCad 9" in rows[0].gap_detail
-    assert rows[0].catalog_lib_path is not None
+    fod = next(r for r in rows if r.part == "F0D3180")
+    assert fod.gap_kind == "kicad9_sim_incomplete"
+    assert "KiCad 9" in fod.gap_detail
+    assert fod.catalog_lib_path is not None

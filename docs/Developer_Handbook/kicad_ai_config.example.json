@@ -4,6 +4,7 @@
   "ai_provider": "claude",
   "claude_model": "claude-3-5-sonnet-20241022",
   "artifact_library_path": "~/kicad_ai_library",
+  "kicad_cli": "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli",
   "datasheet_url_fetch": "if_missing",
   "schematic_image_dpi": 600,
   "provider_max_tokens": 4096

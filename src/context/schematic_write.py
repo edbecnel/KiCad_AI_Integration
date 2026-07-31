@@ -11,6 +11,7 @@ from context.datasheet_requirements import classify_datasheet_requirement
 from context.datasheet_resolver import normalize_datasheet_url
 from context.model import ProjectContext
 from context.schematic_parse import SymbolInstance, _extract_symbol_blocks, _read_properties
+from context.builtin_sim_models import BuiltinSimHookup, resolve_builtin_simulation_hookup
 from context.schematic_sim_write import (
     build_sim_pins_mapping,
     kicad9_sim_hookup_incomplete,
@@ -386,12 +387,52 @@ class SpiceFieldUpdate:
 class SimulationHookupSpec:
     """Resolved simulation model hookup for one part Value."""
 
-    spice_model: str
-    spice_lib: str
-    spice_primitive: str
-    sim_name: str
-    sim_pins: str
-    lib_path: Path
+    hookup_kind: str = "subckt"
+    spice_model: str = ""
+    spice_lib: str = ""
+    spice_primitive: str = ""
+    sim_device: str = ""
+    sim_type: str = ""
+    sim_name: str = ""
+    sim_pins: str = ""
+    sim_params: str = ""
+    sim_library: str = ""
+    lib_path: Path | None = None
+
+    @classmethod
+    def from_builtin(cls, hookup: BuiltinSimHookup) -> SimulationHookupSpec:
+        return cls(
+            hookup_kind="builtin",
+            spice_model=hookup.spice_model,
+            spice_primitive=hookup.spice_primitive,
+            sim_device=hookup.sim_device,
+            sim_type=hookup.sim_type,
+            sim_pins=hookup.sim_pins,
+            sim_params=hookup.sim_params,
+        )
+
+    @classmethod
+    def from_subckt(
+        cls,
+        *,
+        spice_model: str,
+        spice_lib: str,
+        spice_primitive: str,
+        sim_name: str,
+        sim_pins: str,
+        lib_path: Path,
+    ) -> SimulationHookupSpec:
+        return cls(
+            hookup_kind="subckt",
+            spice_model=spice_model,
+            spice_lib=spice_lib,
+            spice_primitive=spice_primitive,
+            sim_device="SUBCKT",
+            sim_name=sim_name,
+            sim_pins=sim_pins,
+            sim_library=spice_lib,
+            lib_path=lib_path,
+        )
 
 
 @dataclass
@@ -559,7 +600,7 @@ def resolve_simulation_hookup_for_symbol(
     pin_names = parse_lib_symbol_pin_names(schematic_content, sym.lib_id)
     sim_pins = build_sim_pins_mapping(pin_names, subckt_pins)
     lib_str = str(lib_file)
-    return SimulationHookupSpec(
+    return SimulationHookupSpec.from_subckt(
         spice_model=subckt_name,
         spice_lib=lib_str,
         spice_primitive="X",
@@ -603,17 +644,34 @@ def _update_spice_in_content(
             last = end
             continue
         new_block = block
-        legacy_fields = (
-            ("Spice_Model", hookup.spice_model),
-            ("Spice_Lib", hookup.spice_lib),
-            ("Spice_Primitive", hookup.spice_primitive),
-        )
-        kicad9_fields = (
-            ("Sim.Device", "SUBCKT"),
-            ("Sim.Library", hookup.spice_lib),
-            ("Sim.Name", hookup.sim_name),
-            ("Sim.Pins", hookup.sim_pins),
-        )
+        if hookup.hookup_kind == "builtin":
+            legacy_fields = (
+                ("Spice_Model", hookup.spice_model),
+                ("Spice_Primitive", hookup.spice_primitive),
+            )
+            kicad9_fields = (
+                ("Sim.Device", hookup.sim_device),
+                ("Sim.Type", hookup.sim_type),
+                ("Sim.Pins", hookup.sim_pins),
+                ("Sim.Params", hookup.sim_params),
+            )
+            for name in ("Spice_Lib", "Sim.Library", "Sim.Name"):
+                new_block, removed = _remove_all_properties(new_block, name)
+                changed = changed or removed
+        else:
+            legacy_fields = (
+                ("Spice_Model", hookup.spice_model),
+                ("Spice_Lib", hookup.spice_lib),
+                ("Spice_Primitive", hookup.spice_primitive),
+            )
+            kicad9_fields = (
+                ("Sim.Device", "SUBCKT"),
+                ("Sim.Library", hookup.spice_lib),
+                ("Sim.Name", hookup.sim_name),
+                ("Sim.Pins", hookup.sim_pins),
+            )
+            new_block, removed = _remove_all_properties(new_block, "Sim.Params")
+            changed = changed or removed
         for name, val in legacy_fields:
             new_block, block_changed = _set_property_on_block(
                 new_block,
@@ -623,7 +681,9 @@ def _update_spice_in_content(
             )
             changed = changed or block_changed
         for name, val in kicad9_fields:
-            if not val and name == "Sim.Pins":
+            if not val:
+                if name == "Sim.Pins" and hookup.hookup_kind == "subckt":
+                    continue
                 continue
             new_block, block_changed = _set_property_on_block(
                 new_block,
@@ -632,8 +692,6 @@ def _update_spice_in_content(
                 insert_before_pins=True,
             )
             changed = changed or block_changed
-        new_block, removed = _remove_all_properties(new_block, "Sim.Params")
-        changed = changed or removed
         parts.append(content[last:start])
         parts.append(new_block)
         last = end
@@ -700,6 +758,58 @@ def write_spice_fields_for_part(
                 sheet_path=sym.sheet_path,
                 reference=sym.reference,
                 part=sym_part,
+                spice_model=spec.spice_model,
+                spice_lib=spec.spice_lib,
+                spice_primitive=spec.spice_primitive,
+                sim_name=spec.sim_name,
+                sim_pins=spec.sim_pins,
+            )
+        )
+
+    for path in dirty_files:
+        path.write_text(file_cache[path], encoding="utf-8")
+
+    return SpiceFieldWriteResult(updated=updated, skipped=skipped)
+
+
+def apply_builtin_simulation_models(
+    project_pro_path: Path,
+    symbols: list[SymbolInstance],
+) -> SpiceFieldWriteResult:
+    """Write built-in KiCad simulation models for standard passives, diodes, etc."""
+    pro_path = project_pro_path.expanduser().resolve()
+    project_root = pro_path.parent
+    updated: list[SpiceFieldUpdate] = []
+    skipped: list[str] = []
+    file_cache: dict[Path, str] = {}
+    dirty_files: set[Path] = set()
+
+    for sym in symbols:
+        sch_path = (project_root / sym.sheet_path).resolve()
+        if not sch_path.is_file():
+            skipped.append(f"{sym.reference}: schematic missing ({sym.sheet_path})")
+            continue
+        if sch_path not in file_cache:
+            file_cache[sch_path] = sch_path.read_text(encoding="utf-8")
+        builtin = resolve_builtin_simulation_hookup(sym, file_cache[sch_path])
+        if builtin is None:
+            continue
+        spec = SimulationHookupSpec.from_builtin(builtin)
+        new_content, changed = _update_spice_in_content(
+            file_cache[sch_path],
+            sym.reference,
+            hookup=spec,
+        )
+        if not changed:
+            skipped.append(f"{sym.reference}: built-in model already set")
+            continue
+        file_cache[sch_path] = new_content
+        dirty_files.add(sch_path)
+        updated.append(
+            SpiceFieldUpdate(
+                sheet_path=sym.sheet_path,
+                reference=sym.reference,
+                part=(sym.value or sym.reference).strip(),
                 spice_model=spec.spice_model,
                 spice_lib=spec.spice_lib,
                 spice_primitive=spec.spice_primitive,

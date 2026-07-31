@@ -29,7 +29,7 @@ This repository implements an **AI-assisted Electrical Engineering Reasoning Pla
 
 ## Part 2 — KiCad Host: What Works Today
 
-Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant.py) (see [First-Time Setup](../Developer_Handbook/00_First_Time_Setup.md) and [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md)).
+Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant.py) — recommended: `python scripts/run_ai_assistant.py --ui` (project picker and context refresh). See [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md).
 
 ### Working now
 
@@ -51,12 +51,23 @@ Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant
 - Large schematics are summarized automatically so requests stay manageable
 - Chat workflow runs through the platform **Engineering Inference Engine (EIE)** (`src/inference/`)
 
-#### User interface
-- **Chat panel** (`--ui-chat`): ask questions, see what will be sent, **approve before sending**, read Claude's answer and token usage
-- **AERF panel** (`--ui-aerf`): staged circuit analysis with per-stage Approve & Send and optional EKM write-back
-- **Engineering Notebook** (`--ui-notebook`, `--ui-notebook-panel`): view/edit all EKM primitive fields; search; collapsible sections; Advanced JSON tab
-- Runs from a terminal or KiCad Scripting Console (no native KiCad menu plugin yet)
-- Optional **schematic image** for visual questions (`--image`; large designs are slow and costly — text Q&A is the reliable path today)
+#### User interface (today)
+
+`--ui` opens a **launcher** (project picker + **Refresh context**), then separate windows per feature:
+
+- **Chat** (`--ui-chat` or launcher **Chat** button): ask questions, **approve before sending**, read Claude's answer and token usage
+- **Datasheets** (`--ui-datasheets` or launcher **Datasheets** button): attach PDFs, AI discovery, reset links — **not available inside Chat**
+- **Simulation** (`--ui-simulation`): gap scan, SUBCKT generation, spice write-back
+- **AERF** (`--ui-aerf`): staged circuit analysis with per-stage Approve & Send and optional EKM write-back
+- **Engineering Notebook** (`--ui-notebook`, `--ui-notebook-panel`): view/edit EKM fields; search; Advanced JSON tab
+
+**Known limitation:** Launcher and Chat both use the window title **"KiCad AI Assistant"**, so the launcher is easy to miss when Chat is open. For datasheet attach, use **Datasheets** or `--ui-datasheets` directly — see [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md).
+
+Runs from a terminal or KiCad Scripting Console (no native KiCad menu plugin yet). Optional **schematic image** for visual questions (`--image`; large designs are slow and costly — text Q&A is the reliable path today).
+
+#### Planned UX (not built)
+
+A **unified tabbed Assistant shell** will replace the launcher + modal dialogs: one window with a shared project header (path, refresh, context summary) and tabs for Chat, Datasheets, Simulation, AERF, and Notebook. The same shell will run standalone (`--ui` in Terminal) and as a KiCad dockable panel. See [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md).
 
 #### Security / control
 - Context **preview** before any cloud send (chat UI)
@@ -90,6 +101,7 @@ Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant
 - Project-wide **force refresh datasheets** UI (retry-all with full catalog bypass)
 
 #### Product polish (KiCad host)
+- **Unified Assistant shell** (tabbed UI, dual host) — [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md)
 - **Native KiCad plugin** (menu/toolbar entry, no separate terminal)
 - Context preview **thumbnail** for schematic images
 - **Multi-turn** conversation (history across questions)

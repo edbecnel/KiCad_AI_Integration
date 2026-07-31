@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
+import threading
 import webbrowser
 from pathlib import Path
 
 from context.datasheet_resolver import DatasheetResolution
 from context.model import ProjectContext
+from context.ai_datasheet_discovery import DiscoveryResult, format_fetch_attempts_summary
 from ui.datasheet_supply import (
     MissingDatasheetRow,
     attach_datasheet_pdf,
+    build_field_issue_rows_from_context,
+    build_missing_rows_from_context,
+    build_required_rows_from_context,
+    format_row_detail_text,
     get_missing_datasheet_rows,
     get_required_datasheet_rows,
     get_symbol_field_issue_rows,
@@ -70,7 +76,11 @@ if wx is not None:
             vbox.Add(
                 wx.StaticText(
                     panel,
-                    label="AI suggested these HTTPS URLs. Select one to download:",
+                    label=(
+                        "AI suggested these HTTPS URLs. Select one to try downloading.\n"
+                        "If automated download fails (e.g. bot protection), you can open "
+                        "a URL in your browser and use Attach PDF…"
+                    ),
                 ),
                 flag=wx.ALL,
                 border=10,
@@ -80,6 +90,8 @@ if wx is not None:
                 choices=urls,
                 style=wx.RA_SPECIFY_ROWS,
             )
+            if urls:
+                self._radio.SetSelection(0)
             vbox.Add(self._radio, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=10)
             btn_row = wx.BoxSizer(wx.HORIZONTAL)
             btn_download = wx.Button(panel, wx.ID_OK, "Download")
@@ -108,6 +120,106 @@ if wx is not None:
         @property
         def selected_url(self) -> str | None:
             return self._selected
+
+
+    class _FetchReportDialog(wx.Dialog):
+        """Show per-URL download results and let the user open a URL manually."""
+
+        def __init__(
+            self,
+            parent: wx.Window,
+            results: list[DiscoveryResult],
+        ) -> None:
+            super().__init__(
+                parent,
+                title="Datasheet download report",
+                style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+                size=(720, 420),
+            )
+            panel = wx.Panel(self)
+            vbox = wx.BoxSizer(wx.VERTICAL)
+            intro = wx.StaticText(
+                panel,
+                label=(
+                    "Automated download did not succeed for the part(s) below. "
+                    "Sites often block scripted downloads — select a URL and open it "
+                    "in your browser, save the PDF, then use Attach PDF… in the "
+                    "Datasheets panel."
+                ),
+            )
+            intro.Wrap(680)
+            vbox.Add(intro, flag=wx.ALL, border=10)
+
+            self._list = wx.ListCtrl(
+                panel,
+                style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.BORDER_SUNKEN,
+            )
+            self._list.InsertColumn(0, "Part", width=90)
+            self._list.InsertColumn(1, "URL", width=360)
+            self._list.InsertColumn(2, "Result", width=220)
+            self._rows: list[tuple[str, str, str]] = []
+            row_idx = 0
+            for result in results:
+                tried = {url: err for url, err in result.fetch_attempts}
+                urls = list(result.suggested_urls) or list(tried.keys())
+                if not urls and result.selected_url:
+                    urls = [result.selected_url]
+                seen: set[str] = set()
+                for url in urls:
+                    if url in seen:
+                        continue
+                    seen.add(url)
+                    if url in tried:
+                        err = tried[url]
+                        status = "Downloaded" if err is None else f"Failed: {err}"
+                    else:
+                        status = "Not attempted"
+                    self._rows.append((result.part, url, status))
+                    self._list.InsertItem(row_idx, result.part)
+                    self._list.SetItem(row_idx, 1, url[:120])
+                    self._list.SetItem(row_idx, 2, status[:100])
+                    row_idx += 1
+            vbox.Add(self._list, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=10)
+
+            btn_row = wx.BoxSizer(wx.HORIZONTAL)
+            btn_open = wx.Button(panel, label="Open URL in browser")
+            btn_copy = wx.Button(panel, label="Copy URL")
+            btn_close = wx.Button(panel, wx.ID_CLOSE, label="Close")
+            btn_row.Add(btn_open, flag=wx.RIGHT, border=6)
+            btn_row.Add(btn_copy, flag=wx.RIGHT, border=6)
+            btn_row.AddStretchSpacer()
+            btn_row.Add(btn_close)
+            vbox.Add(btn_row, flag=wx.ALL | wx.ALIGN_RIGHT, border=10)
+            panel.SetSizer(vbox)
+            outer = wx.BoxSizer(wx.VERTICAL)
+            outer.Add(panel, proportion=1, flag=wx.EXPAND)
+            self.SetSizer(outer)
+            self.Bind(wx.EVT_BUTTON, self._on_open, btn_open)
+            self.Bind(wx.EVT_BUTTON, self._on_copy, btn_copy)
+            self.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE), btn_close)
+            if self._rows:
+                self._list.Select(0)
+            self.CentreOnParent()
+
+        def _selected(self) -> tuple[str, str, str] | None:
+            idx = self._list.GetFirstSelected()
+            if idx < 0 or idx >= len(self._rows):
+                return None
+            return self._rows[idx]
+
+        def _on_open(self, _event: wx.CommandEvent) -> None:
+            row = self._selected()
+            if row is None:
+                return
+            webbrowser.open(row[1])
+
+        def _on_copy(self, _event: wx.CommandEvent) -> None:
+            row = self._selected()
+            if row is None:
+                return
+            if wx.TheClipboard.Open():
+                wx.TheClipboard.SetData(wx.TextDataObject(row[1]))
+                wx.TheClipboard.Close()
 
 
     class _ResetConfirmDialog(wx.Dialog):
@@ -181,8 +293,6 @@ class MissingDatasheetsDialog:
         self._retry_failed_urls = retry_failed_urls
         self._force_refresh_urls = force_refresh_urls
         self._cfg = load_config()
-        if ai_datasheets:
-            self._cfg.datasheet_ai_discovery = True
         self._rows_missing: list[MissingDatasheetRow] = []
         self._rows_all: list[MissingDatasheetRow] = []
         self._rows_field: list[MissingDatasheetRow] = []
@@ -190,11 +300,14 @@ class MissingDatasheetsDialog:
         self._ai_cost_warned = ai_datasheets
         self._row_status: dict[str, str] = {}
         self._busy = False
+        self._cancel_requested = threading.Event()
+        self._worker: threading.Thread | None = None
+        self._discovery_detail_lines: list[str] = []
 
         self._dialog = wx.Dialog(
             parent,
             title="Datasheets",
-            size=(840, 580),
+            size=(840, 680),
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
         self._panel = wx.Panel(self._dialog)
@@ -252,6 +365,9 @@ class MissingDatasheetsDialog:
         self._list_missing.SetDropTarget(_PdfDropTarget(self))
         self._list_all.SetDropTarget(_PdfDropTarget(self))
         self._list_field.SetDropTarget(_PdfDropTarget(self))
+        for lst in (self._list_missing, self._list_all, self._list_field):
+            lst.Bind(wx.EVT_LIST_ITEM_SELECTED, self._on_row_selected)
+            lst.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self._on_row_context_menu)
         root.Add(self._notebook, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=10)
 
         self._footer = wx.Panel(self._panel, style=wx.BORDER_NONE)
@@ -263,13 +379,22 @@ class MissingDatasheetsDialog:
             self._footer,
             label="Loading datasheet list…",
         )
-        self._status_detail = wx.StaticText(
+        self._status_detail = wx.TextCtrl(
             self._footer,
-            label="Progress and results appear here during reset, fetch, and AI discovery.",
+            value="Progress and results appear here during reset, fetch, and AI discovery.",
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_WORDWRAP | wx.BORDER_NONE,
+            size=(-1, 64),
         )
+        self._status_detail.SetBackgroundColour(self._footer.GetBackgroundColour())
         self._status_detail.SetForegroundColour(wx.Colour(80, 80, 80))
+        self._status_detail.SetMaxSize((-1, 88))
         status_inner.Add(self._status, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=6)
-        status_inner.Add(self._status_detail, flag=wx.EXPAND | wx.ALL, border=6)
+        status_inner.Add(
+            self._status_detail,
+            proportion=0,
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            border=6,
+        )
         footer_sizer.Add(status_inner, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=8)
 
         self._gauge = wx.Gauge(self._footer, range=100, style=wx.GA_HORIZONTAL)
@@ -296,15 +421,17 @@ class MissingDatasheetsDialog:
         btn_row2 = wx.BoxSizer(wx.HORIZONTAL)
         self._btn_refresh = wx.Button(self._footer, label="Refresh")
         self._btn_force = wx.Button(self._footer, label="Force refresh URLs")
+        self._btn_cancel = wx.Button(self._footer, label="Cancel")
+        self._btn_cancel.Hide()
         self._btn_close = wx.Button(self._footer, wx.ID_CLOSE, label="Close")
         btn_row2.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
         btn_row2.Add(self._btn_force, flag=wx.RIGHT, border=6)
+        btn_row2.Add(self._btn_cancel, flag=wx.RIGHT, border=6)
         btn_row2.AddStretchSpacer()
         btn_row2.Add(self._btn_close)
         footer_sizer.Add(btn_row2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
 
         self._footer.SetSizer(footer_sizer)
-        self._footer.SetMinSize((760, 170))
         root.Add(self._footer, proportion=0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=4)
 
         self._panel.SetSizer(root)
@@ -312,7 +439,7 @@ class MissingDatasheetsDialog:
         dialog_sizer = wx.BoxSizer(wx.VERTICAL)
         dialog_sizer.Add(self._panel, proportion=1, flag=wx.EXPAND)
         self._dialog.SetSizer(dialog_sizer)
-        self._dialog.SetMinSize((840, 580))
+        self._dialog.SetMinSize((840, 640))
 
         self._btn_attach.Bind(wx.EVT_BUTTON, self._on_attach)
         self._btn_reset.Bind(wx.EVT_BUTTON, self._on_reset)
@@ -322,6 +449,7 @@ class MissingDatasheetsDialog:
         self._btn_write_url.Bind(wx.EVT_BUTTON, self._on_write_url)
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_force.Bind(wx.EVT_BUTTON, self._on_force_refresh)
+        self._btn_cancel.Bind(wx.EVT_BUTTON, self._on_cancel)
         self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._chk_ai.Bind(wx.EVT_CHECKBOX, self._on_ai_toggle)
         self._chk_write_url.Bind(wx.EVT_CHECKBOX, self._on_write_url_toggle)
@@ -342,23 +470,35 @@ class MissingDatasheetsDialog:
             self._btn_write_url,
             self._btn_refresh,
             self._btn_force,
+            self._btn_cancel,
             self._btn_close,
         ]
 
     def _set_busy(self, busy: bool) -> None:
         self._busy = busy
         for btn in self._action_buttons():
+            if btn in (self._btn_close, self._btn_cancel):
+                continue
             btn.Enable(not busy)
+        self._btn_cancel.Show() if busy else self._btn_cancel.Hide()
+        self._btn_cancel.Enable(busy)
         if busy:
             self._gauge.Show()
             self._gauge.Pulse()
         else:
             self._gauge.Hide()
+            self._cancel_requested.clear()
         if not busy:
             self._update_ai_button_state()
             if not self._rows_missing:
                 self._btn_attach.Enable(False)
         self._layout_panel()
+
+    def _on_cancel(self, _event: wx.CommandEvent) -> None:
+        if not self._busy:
+            return
+        self._cancel_requested.set()
+        self._set_status("Cancelling…", "Finishing the current step, then stopping.")
 
     def _layout_panel(self) -> None:
         self._footer.Layout()
@@ -371,13 +511,34 @@ class MissingDatasheetsDialog:
     def _set_status(self, main: str, detail: str = "") -> None:
         self._status.SetLabel(main)
         detail_text = detail if detail else " "
-        self._status_detail.SetLabel(detail_text)
-        self._status_detail.Wrap(760)
+        self._status_detail.SetValue(detail_text)
         self._layout_panel()
         try:
             wx.YieldIfNeeded()
         except AttributeError:
             wx.SafeYield()
+
+    def _append_discovery_detail(self, line: str) -> None:
+        self._discovery_detail_lines.append(line)
+        # Keep last ~40 lines visible in the status panel during long runs.
+        text = "\n".join(self._discovery_detail_lines[-40:])
+        self._status_detail.SetValue(text)
+        self._layout_panel()
+        try:
+            wx.YieldIfNeeded()
+        except AttributeError:
+            wx.SafeYield()
+
+    def _on_fetch_attempt(self, part: str, url: str, error: str | None) -> None:
+        if error is None:
+            line = f"{part}: OK — {url}"
+            self._row_status[part] = "Downloaded"
+        else:
+            short = error if len(error) <= 80 else error[:77] + "…"
+            line = f"{part}: FAIL — {url}\n         {short}"
+            self._row_status[part] = f"Failed ({short[:30]})"
+        self._append_discovery_detail(line)
+        self._repaint_list_status()
 
     def _resolution_for_part(self, ctx: ProjectContext, part: str) -> DatasheetResolution | None:
         part_norm = part.strip()
@@ -409,11 +570,17 @@ class MissingDatasheetsDialog:
             self._row_status[part] = "resolved"
         elif discovery is not None:
             err = discovery.error or ""
-            detail = f"AI outcome: {discovery.outcome}"
-            if err:
-                detail += f" — {err}"
-            if discovery.suggested_urls:
-                detail += f" | Suggested: {discovery.suggested_urls[0][:80]}"
+            if discovery.fetch_attempts:
+                detail = format_fetch_attempts_summary(
+                    discovery.fetch_attempts,
+                    suggested_urls=discovery.suggested_urls,
+                )
+            else:
+                detail = f"AI outcome: {discovery.outcome}"
+                if err:
+                    detail += f" — {err}"
+                if discovery.suggested_urls:
+                    detail += f" | Suggested: {discovery.suggested_urls[0][:80]}"
             self._set_status(f"{part}: not resolved after reset.", detail)
             self._row_status[part] = str(discovery.outcome)
         elif res is not None:
@@ -476,13 +643,14 @@ class MissingDatasheetsDialog:
     def _on_close(self, event: wx.CommandEvent | wx.CloseEvent) -> None:
         if self._busy:
             if wx.MessageBox(
-                "A datasheet operation is still running.\n\nClose anyway?",
+                "A datasheet operation is still running.\n\nCancel it and close?",
                 "Datasheets",
                 wx.YES_NO | wx.ICON_WARNING,
             ) != wx.YES:
                 if hasattr(event, "Veto"):
                     event.Veto()  # type: ignore[attr-defined]
                 return
+            self._cancel_requested.set()
         self._dialog.EndModal(wx.ID_OK)
         if hasattr(event, "Skip"):
             event.Skip(False)
@@ -500,8 +668,61 @@ class MissingDatasheetsDialog:
                 return
             self._ai_cost_warned = True
         self._ai_enabled = self._chk_ai.GetValue()
-        self._cfg.datasheet_ai_discovery = self._ai_enabled
         self._update_ai_button_state()
+
+    def _on_row_selected(self, event: wx.ListEvent) -> None:
+        rows = self._active_rows()
+        idx = event.GetIndex()
+        if 0 <= idx < len(rows):
+            self._show_row_detail(rows[idx])
+        event.Skip()
+
+    def _on_row_context_menu(self, event: wx.ListEvent) -> None:
+        lst = event.GetEventObject()
+        if not isinstance(lst, wx.ListCtrl):
+            return
+        idx = event.GetIndex()
+        rows = self._active_rows()
+        if idx < 0 or idx >= len(rows):
+            return
+        row = rows[idx]
+        lst.Select(idx)
+        self._show_row_detail(row)
+        menu = wx.Menu()
+        copy_detail = menu.Append(wx.ID_COPY, "Copy detail text")
+        copy_url = menu.Append(wx.ID_ANY, "Copy suggested URL")
+        copy_url_id = copy_url.GetId()
+        copy_url.Enable(bool(row.suggested_urls or row.selected_url or row.symbol_datasheet_url))
+        lst.PopupMenu(menu)
+        selected = menu.GetPopupMenuSelection()
+        if selected == copy_detail.GetId():
+            self._copy_text_to_clipboard(format_row_detail_text(row))
+        elif selected == copy_url_id:
+            url = row.selected_url or (row.suggested_urls[0] if row.suggested_urls else None)
+            if url is None:
+                url = row.symbol_datasheet_url
+            if url:
+                self._copy_text_to_clipboard(url)
+        menu.Destroy()
+
+    def _copy_text_to_clipboard(self, text: str) -> None:
+        if not text:
+            return
+        if wx.TheClipboard.Open():
+            wx.TheClipboard.SetData(wx.TextDataObject(text))
+            wx.TheClipboard.Close()
+            preview = text[:120] + ("…" if len(text) > 120 else "")
+            self._set_status("Copied to clipboard.", preview)
+
+    def _show_row_detail(self, row: MissingDatasheetRow) -> None:
+        detail = format_row_detail_text(row)
+        if detail:
+            self._set_status(f"{row.part} — {row.discovery_status or row.status}", detail)
+        else:
+            self._set_status(
+                f"{row.part} — {row.discovery_status or row.status}",
+                "No extra detail for this row.",
+            )
 
     def _on_write_url_toggle(self, _event: wx.CommandEvent) -> None:
         self._cfg.datasheet_write_symbol_url = self._chk_write_url.GetValue()
@@ -550,6 +771,23 @@ class MissingDatasheetsDialog:
             dlg.Destroy()
         return None
 
+    def _approve_url_thread_safe(self, part: str, urls: list[str]) -> str | None:
+        """Run URL approval on the wx main thread from a worker thread."""
+        holder: list[str | None] = []
+        done = threading.Event()
+
+        def on_main() -> None:
+            try:
+                holder.append(self._approve_url_dialog(part, urls))
+            finally:
+                done.set()
+
+        wx.CallAfter(on_main)
+        while not done.wait(timeout=0.05):
+            if self._cancel_requested.is_set():
+                return None
+        return holder[0] if holder else None
+
     def _set_row_status(self, part: str, status: str) -> None:
         self._row_status[part] = status
         self._repaint_list_status()
@@ -586,17 +824,22 @@ class MissingDatasheetsDialog:
         rerun_ai = self._ai_enabled
 
         self._set_busy(True)
+        self._set_status(f"Resetting {part}…", "Clearing cache and re-resolving.")
         self._row_status[part] = "Resetting…"
         self._repaint_list_status()
-        self._set_status(f"Resetting {part}…", "Clearing cache and re-resolving.")
-        wx.CallAfter(self._run_reset, part, delete_orphan, rerun_ai)
+        self._cancel_requested.clear()
+        self._worker = threading.Thread(
+            target=self._run_reset_worker,
+            args=(part, delete_orphan, rerun_ai),
+            daemon=True,
+        )
+        self._worker.start()
 
-    def _run_reset(self, part: str, delete_orphan: bool, rerun_ai: bool) -> None:
+    def _run_reset_worker(self, part: str, delete_orphan: bool, rerun_ai: bool) -> None:
         def on_status(message: str) -> None:
-            self._set_status(f"Resetting {part}…", message)
+            wx.CallAfter(self._set_status, f"Resetting {part}…", message)
             if "AI" in message or "Download" in message or "approval" in message.lower():
-                self._row_status[part] = message[:40]
-                self._repaint_list_status()
+                wx.CallAfter(self._set_row_status, part, message[:40])
 
         try:
             ctx = reset_datasheet_for_part(
@@ -605,54 +848,156 @@ class MissingDatasheetsDialog:
                 config=self._cfg,
                 delete_orphan_artifact=delete_orphan,
                 rerun_ai_discovery=rerun_ai,
-                approve_ai_datasheet_url=self._approve_url_dialog if rerun_ai else None,
+                approve_ai_datasheet_url=(
+                    self._approve_url_thread_safe if rerun_ai else None
+                ),
                 on_status=on_status,
                 verbose=False,
             )
-            self._show_reset_outcome(ctx, part)
-            self._refresh_rows(preserve_status=True)
+            wx.CallAfter(self._on_reset_finished, ctx, part, None)
         except Exception as exc:  # noqa: BLE001
-            self._set_status(f"Reset failed for {part}.", str(exc))
-            self._row_status[part] = "reset failed"
-            self._repaint_list_status()
-            wx.MessageBox(
-                f"Reset failed:\n{exc}",
-                "Reset datasheet",
-                wx.OK | wx.ICON_ERROR,
-            )
-        finally:
-            self._set_busy(False)
+            wx.CallAfter(self._on_reset_finished, None, part, exc)
 
+    def _on_reset_finished(
+        self,
+        ctx: ProjectContext | None,
+        part: str,
+        exc: Exception | None,
+    ) -> None:
+        try:
+            if exc is not None:
+                self._set_status(f"Reset failed for {part}.", str(exc))
+                self._row_status[part] = "reset failed"
+                self._repaint_list_status()
+                wx.MessageBox(
+                    f"Reset failed:\n{exc}",
+                    "Reset datasheet",
+                    wx.OK | wx.ICON_ERROR,
+                )
+            elif ctx is not None:
+                self._show_reset_outcome(ctx, part)
+                self._refresh_rows(preserve_status=True)
+        finally:
+            self._worker = None
+            self._set_busy(False)
     def _on_find_ai(self, _event: wx.CommandEvent) -> None:
         if not self._ai_enabled or self._busy:
             return
+        row = self._selected_row()
+        only_parts: set[str] | None = {row.part} if row else None
+        if only_parts:
+            scope = f"selected part ({row.part})"
+        else:
+            scope = "all missing parts"
+            if wx.MessageBox(
+                "No row selected — Find with AI will run for every missing part.\n\n"
+                "Select a row first to search only that Value.\n\nContinue for all?",
+                "AI datasheet discovery",
+                wx.YES_NO | wx.ICON_QUESTION,
+            ) != wx.YES:
+                return
+        if not self._cfg.datasheet_ai_discovery_auto_fetch:
+            if wx.MessageBox(
+                f"Find with AI will suggest datasheet URLs for {scope} "
+                "and ask you to approve each download.\n\nContinue?",
+                "AI datasheet discovery",
+                wx.YES_NO | wx.ICON_QUESTION,
+            ) != wx.YES:
+                return
         self._set_busy(True)
-        self._set_status("Running AI datasheet discovery…", "Searching unresolved required parts.")
-        for row in self._rows_missing:
-            self._row_status[row.part] = "Searching…"
+        self._discovery_detail_lines = []
+        self._set_status(
+            "Running AI datasheet discovery…",
+            f"Working on {scope} — each URL attempt is logged below.",
+        )
+        if only_parts:
+            for part in only_parts:
+                self._row_status[part] = "Searching…"
+        else:
+            for missing_row in self._rows_missing:
+                self._row_status[missing_row.part] = "Searching…"
         self._repaint_list_status()
-        wx.CallAfter(self._run_ai_discovery)
+        self._cancel_requested.clear()
+        self._worker = threading.Thread(
+            target=self._run_ai_discovery_worker,
+            args=(only_parts,),
+            daemon=True,
+        )
+        self._worker.start()
 
-    def _run_ai_discovery(self) -> None:
+    def _run_ai_discovery_worker(self, only_parts: set[str] | None) -> None:
         try:
-            run_ai_discovery_for_rows(
+            ctx = run_ai_discovery_for_rows(
                 self._project_path,
                 config=self._cfg,
-                approve_ai_datasheet_url=self._approve_url_dialog,
-                on_part_status=lambda part, st: self._set_row_status(part, st),
+                only_parts=only_parts,
+                should_cancel=self._cancel_requested.is_set,
+                approve_ai_datasheet_url=self._approve_url_thread_safe,
+                on_part_status=lambda part, st: wx.CallAfter(self._set_row_status, part, st),
+                on_fetch_attempt=lambda part, url, err: wx.CallAfter(
+                    self._on_fetch_attempt, part, url, err
+                ),
                 verbose=False,
             )
-            self._set_status("AI discovery finished.", "Refresh the list for updated status.")
+            wx.CallAfter(self._on_ai_discovery_finished, ctx, None)
         except Exception as exc:  # noqa: BLE001
-            self._set_status("AI discovery failed.", str(exc))
-            wx.MessageBox(
-                f"AI discovery failed:\n{exc}",
-                "AI discovery",
-                wx.OK | wx.ICON_ERROR,
-            )
+            wx.CallAfter(self._on_ai_discovery_finished, None, exc)
+
+    def _on_ai_discovery_finished(
+        self,
+        ctx: ProjectContext | None,
+        exc: Exception | None,
+    ) -> None:
+        try:
+            if exc is not None:
+                self._set_status("AI discovery failed.", str(exc))
+                wx.MessageBox(
+                    f"AI discovery failed:\n{exc}",
+                    "AI discovery",
+                    wx.OK | wx.ICON_ERROR,
+                )
+            elif ctx is not None:
+                self._apply_context_rows(ctx)
+                downloaded = sum(
+                    1
+                    for r in ctx.ai_discovery_results.values()
+                    if getattr(r, "outcome", None) == "downloaded"
+                )
+                failed_results = [
+                    r
+                    for r in ctx.ai_discovery_results.values()
+                    if getattr(r, "outcome", None) == "fetch_failed"
+                ]
+                cancelled = self._cancel_requested.is_set()
+                detail_lines = list(self._discovery_detail_lines)
+                if not detail_lines and failed_results:
+                    for result in failed_results:
+                        detail_lines.append(
+                            format_fetch_attempts_summary(
+                                result.fetch_attempts,
+                                suggested_urls=result.suggested_urls,
+                            )
+                        )
+                detail = f"{downloaded} part(s) downloaded."
+                if cancelled:
+                    detail += " Cancelled before completion."
+                if failed_results:
+                    detail += (
+                        f" {len(failed_results)} part(s) failed automated download — "
+                        "see report dialog."
+                    )
+                self._set_status("AI discovery finished.", detail)
+                if detail_lines:
+                    self._status_detail.SetValue("\n".join(detail_lines[-40:]))
+                if failed_results:
+                    dlg = _FetchReportDialog(self._dialog, failed_results)
+                    try:
+                        dlg.ShowModal()
+                    finally:
+                        dlg.Destroy()
         finally:
             self._row_status.clear()
-            self._refresh_rows()
+            self._worker = None
             self._set_busy(False)
 
     def _on_open_url(self, _event: wx.CommandEvent) -> None:
@@ -810,19 +1155,51 @@ class MissingDatasheetsDialog:
         self._refresh_rows(preserve_status=True)
 
     def _detail_text(self, row: MissingDatasheetRow) -> str:
-        detail_parts: list[str] = []
-        if row.discovery_error:
-            detail_parts.append(row.discovery_error)
-        elif row.errors:
-            detail_parts.append(row.errors[0])
-        if row.sources_tried:
-            detail_parts.append("via: " + ", ".join(row.sources_tried[-4:]))
-        if row.symbol_datasheet_url:
-            detail_parts.append(f"Symbol: {row.symbol_datasheet_url}")
-        for url in row.suggested_urls[:2]:
-            if url != row.symbol_datasheet_url:
-                detail_parts.append(f"Suggested: {url}")
-        return " | ".join(detail_parts)[:240]
+        return format_row_detail_text(row, max_length=200)
+
+    def _apply_context_rows(self, ctx: ProjectContext) -> None:
+        """Update all tabs from a collected context without re-running AI discovery."""
+        self._rows_missing = build_missing_rows_from_context(ctx, config=self._cfg)
+        self._rows_all = build_required_rows_from_context(ctx, config=self._cfg)
+        self._rows_field = build_field_issue_rows_from_context(ctx, config=self._cfg)
+        self._populate_list(self._list_missing, self._rows_missing, include_pdf_column=False)
+        self._populate_list(self._list_all, self._rows_all, include_pdf_column=True)
+        self._populate_list(
+            self._list_field,
+            self._rows_field,
+            include_field_columns=True,
+        )
+        self._update_ai_button_state()
+        if not self._rows_missing:
+            self._btn_attach.Enable(False)
+            self._btn_ai.Enable(False)
+        else:
+            self._btn_attach.Enable(True)
+        missing_count = len(self._rows_missing)
+        all_count = len(self._rows_all)
+        resolved_count = sum(1 for r in self._rows_all if r.is_resolved)
+        field_count = len(self._rows_field)
+        if missing_count == 0 and field_count == 0:
+            self._set_status(
+                f"All required datasheets resolved ({resolved_count}/{all_count} parts).",
+                "Symbol Datasheet fields look OK.",
+            )
+        elif missing_count == 0:
+            self._set_status(
+                f"All required PDFs resolved ({resolved_count}/{all_count} parts).",
+                f"{field_count} part(s) need symbol Datasheet field cleanup — see Symbol field tab.",
+            )
+        else:
+            self._set_status(
+                f"{missing_count} part(s) need PDFs — "
+                f"{resolved_count}/{all_count} required parts resolved.",
+                (
+                    f"{field_count} symbol field issue(s) — Symbol field tab."
+                    if field_count
+                    else "Select a row for full detail (right-click to copy)."
+                ),
+            )
+        self._layout_panel()
 
     def _pdf_source_text(self, row: MissingDatasheetRow) -> str:
         if row.local_path:
@@ -866,24 +1243,16 @@ class MissingDatasheetsDialog:
 
     def _refresh_rows(self, *, preserve_status: bool = False) -> None:
         saved_status = dict(self._row_status) if preserve_status else {}
-        _, self._rows_missing = get_missing_datasheet_rows(
+        ctx, self._rows_missing = get_missing_datasheet_rows(
             self._project_path,
             config=self._cfg,
             retry_failed_urls=self._retry_failed_urls,
             force_refresh_urls=self._force_refresh_urls,
-            datasheet_ai_discovery=self._ai_enabled if self._force_refresh_urls else None,
+            datasheet_ai_discovery=False,
             verbose=False,
         )
-        _, self._rows_all = get_required_datasheet_rows(
-            self._project_path,
-            config=self._cfg,
-            verbose=False,
-        )
-        _, self._rows_field = get_symbol_field_issue_rows(
-            self._project_path,
-            config=self._cfg,
-            verbose=False,
-        )
+        self._rows_all = build_required_rows_from_context(ctx, config=self._cfg)
+        self._rows_field = build_field_issue_rows_from_context(ctx, config=self._cfg)
         self._populate_list(self._list_missing, self._rows_missing, include_pdf_column=False)
         self._populate_list(self._list_all, self._rows_all, include_pdf_column=True)
         self._populate_list(

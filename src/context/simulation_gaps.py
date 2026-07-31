@@ -8,8 +8,14 @@ from pathlib import Path
 from typing import Literal
 
 from context.artifacts.store import ArtifactStore
+from context.builtin_sim_models import (
+    kicad_simulation_model_incomplete,
+    participates_in_simulation,
+    resolve_builtin_simulation_hookup,
+)
 from context.datasheet_requirements import classify_datasheet_requirement
 from context.datasheet_resolver import DatasheetResolution
+from context.schematic_parse import SymbolInstance
 from context.schematic_sim_write import kicad9_sim_hookup_incomplete
 
 SimulationGapKind = Literal[
@@ -54,6 +60,20 @@ class SimulationGapRow:
 def needs_subckt_model(symbol: SymbolInstance) -> bool:
     """True when the symbol typically needs a custom SUBCKT rather than a built-in."""
     return classify_datasheet_requirement(symbol) == "required"
+
+
+def _classify_builtin_gap(sym: SymbolInstance) -> tuple[SimulationGapKind, str] | None:
+    if not kicad_simulation_model_incomplete(sym):
+        return ("ok", "")
+    if resolve_builtin_simulation_hookup(sym, "") is not None:
+        return (
+            "missing_spice_model",
+            "Built-in KiCad simulation model not configured (auto-apply on refresh)",
+        )
+    return (
+        "missing_spice_model",
+        "Simulation model not configured",
+    )
 
 
 def parse_spice_netlist_includes(netlist_text: str) -> list[str]:
@@ -140,6 +160,10 @@ def _classify_symbol_gap(
                 return "netlist_missing_include", f"Netlist references missing file: {inc}"
         return "ok", ""
 
+    builtin_gap = _classify_builtin_gap(sym)
+    if builtin_gap is not None:
+        return builtin_gap
+
     if unresolved_includes:
         for inc in unresolved_includes:
             if part.lower() in inc.lower():
@@ -169,7 +193,7 @@ def summarize_simulation_gaps(
 
     grouped: dict[str, dict[str, object]] = {}
     for sym in symbols:
-        if not needs_subckt_model(sym):
+        if not participates_in_simulation(sym):
             continue
         part = (sym.value or sym.reference).strip()
         res = (resolutions or {}).get(sym.reference)
