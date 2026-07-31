@@ -28,17 +28,17 @@ A future AI “custom component builder” may automate this; for now the workfl
 
 These are typical starting values; adjust to your build.
 
-| Property | Example value | Meaning |
-|----------|---------------|---------|
-| `N_Primary` | `450` | Primary turn count |
-| `N_Trigger` | `50` | Trigger / feedback turns |
-| `N_Secondary` | `450` | Secondary turns |
-| `Wire_Gauge` | `22 AWG` | Wire size → resistance |
-| `Coil_ID` | `6 in` | Inner diameter (bobbin ID) |
-| `Coil_OD` | `7 in` | Outer diameter after winding |
-| `Coil_Width` | `1 in` | Winding length along bobbin axis |
-| `Coil_Depth` | `0.5 in` | Radial build; should match `(OD − ID) / 2` |
-| `Coupling_k` | `0.98` | Mutual coupling (trifilar on same bobbin) |
+| Property      | Example value | Meaning                                    |
+| ------------- | ------------- | ------------------------------------------ |
+| `N_primary`   | `450`         | Primary turn count                         |
+| `N_trigger`   | `50`          | Trigger / feedback turns                   |
+| `N_secondary` | `450`         | Secondary turns                            |
+| `Wire_Gauge`  | `22 AWG`      | Wire size → resistance                     |
+| `Coil_ID`     | `6 in`        | Inner diameter (bobbin ID)                 |
+| `Coil_OD`     | `7 in`        | Outer diameter after winding               |
+| `Coil_Width`  | `1 in`        | Winding length along bobbin axis           |
+| `Coil_Depth`  | `0.5 in`      | Radial build; should match `(OD − ID) / 2` |
+| `Coupling_k`  | `0.98`        | Mutual coupling (trifilar on same bobbin)  |
 
 **Units:** Inches on the symbol are fine. KiCad stores them as text. Convert to metres (or mm) only when computing L/R for the `.lib` file (e.g. `6 in = 0.1524 m`).
 
