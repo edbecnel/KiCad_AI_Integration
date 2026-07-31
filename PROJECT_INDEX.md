@@ -126,7 +126,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 1. ~~Circuit family classifier from `DesignSnapshot`~~ (done — `src/reasoning/classifier.py`)
 2. ~~Per-stage prompt templates (ADP-007)~~ (done — `src/prompts/templates/aerf_stage.py`)
-3. Full AERF multi-stage orchestration with approval gating
+3. ~~Full AERF multi-stage orchestration with approval gating~~ (done — `run_aerf_pipeline`, `--approve-send`, `--ui-aerf`)
 4. EKM write-back from approved stage outputs (ADP-007)
 
 **Track B (complete):** EKM runtime, AERF registry/KB loader, Blocking Oscillator KB 00–07, EIE simulation + stage-0 stub.

@@ -1,14 +1,21 @@
 """Engineering Inference Engine (EIE) — platform inference orchestration."""
 
 from inference.aerf import (
+    AERFPipelineResult,
     AERFStage0Bundle,
     AERFStageBundle,
     AERFStagePlan,
+    AERFStageRunResult,
+    AERFSendResult,
     build_aerf_stage_prompt_bundle,
     build_stage0_bundle,
     build_stage_bundle,
     classify_and_plan,
+    parse_stage_output,
     plan_stage,
+    run_aerf_pipeline,
+    run_aerf_stage,
+    send_aerf_stage_prompt,
 )
 from inference.chat import (
     ChatSendResult,
@@ -27,9 +34,12 @@ from inference.simulation import (
 )
 
 __all__ = [
+    "AERFPipelineResult",
     "AERFStage0Bundle",
     "AERFStageBundle",
     "AERFStagePlan",
+    "AERFStageRunResult",
+    "AERFSendResult",
     "ChatSendResult",
     "GAP_LABELS",
     "SimulationPanelContext",
@@ -43,7 +53,11 @@ __all__ = [
     "classify_and_plan",
     "collect_chat_context",
     "get_simulation_panel_context",
+    "parse_stage_output",
     "plan_stage",
+    "run_aerf_pipeline",
+    "run_aerf_stage",
     "run_subckt_generation",
+    "send_aerf_stage_prompt",
     "send_chat_prompt",
 ]

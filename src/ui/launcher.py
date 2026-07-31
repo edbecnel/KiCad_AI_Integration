@@ -111,3 +111,21 @@ def show_simulation_dialog(
     ensure_wx_app()
     pro = resolve_project_pro_path(project_path)
     _show(pro)
+
+
+def show_aerf_dialog(
+    project_path: Path | str | None = None,
+    *,
+    retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
+) -> None:
+    """Open the AERF staged analysis panel (modal)."""
+    from ui.aerf_dialog import show_aerf_dialog as _show
+
+    ensure_wx_app()
+    pro = resolve_project_pro_path(project_path)
+    _show(
+        pro,
+        retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
+    )

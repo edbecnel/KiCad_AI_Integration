@@ -461,9 +461,10 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] `src/reasoning/` orchestrator module (stage registry + KB loader; full LLM orchestration deferred)
 - [x] Circuit family classifier
 - [x] Per-stage prompt templates (ADP-007)
-- [ ] EKM stage-output mapping and write-back (ADP-007)
+- [ ] EKM stage-output mapping and write-back (ADP-007) — **Track C4 next**
 - [ ] Simulation closed loop — validate/refine stages (ADP-006)
-- [ ] AERF UI mode in chat or dedicated analysis panel
+- [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
+- [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
 
 **AERF exit criteria (future):** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM.
 

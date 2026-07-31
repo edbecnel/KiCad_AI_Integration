@@ -108,7 +108,7 @@ src/
   platform_core/      → AERP: shared contracts (DesignSnapshot)
   ekm/                → AERP: EKM runtime
   reasoning/          → AERP: AERF stage registry and KB loaders
-  inference/          → AERP: EIE orchestrator (chat, simulation, AERF dry-run)
+  inference/          → AERP: EIE orchestrator (chat, simulation, AERF pipeline)
   context/artifacts/  → AERP: Artifact Library
   context/model.py    → Shared: DesignSnapshot (KiCad-shaped today)
   context/*parse*     → Host (KiCad): collection and write-back

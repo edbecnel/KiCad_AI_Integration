@@ -27,6 +27,16 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 
 ``--ui-simulation`` opens the Simulation models (SUBCKT) wxPython panel.
 
+``--ui-aerf`` opens the AERF staged analysis panel (per-stage Approve & Send).
+
+``--aerf-plan`` prints stage-0 AERF dry-run bundle and token estimate (no cloud send).
+
+``--aerf-stage N`` builds the AERF prompt for stage N; requires ``--approve-send`` to call the provider.
+
+``--aerf-family ID`` circuit family for AERF (default: classify or blocking_oscillator).
+
+``--approve-send`` explicitly allow cloud transmission (AERF stages only; ``--ask`` bypasses UI separately).
+
 ``--ask "question"`` sends a prompt to Claude via the prompt builder (requires API key in config). Dev smoke path — bypasses Approve & Send UI.
 
 ``--reset-datasheet VALUE`` clears cached PDF links for one part Value and re-resolves.
@@ -88,10 +98,14 @@ def _parse_cli_args(
     bool,
     bool,
     bool,
+    int | None,
+    str | None,
+    bool,
+    bool,
+    bool,
     list[str],
     str | None,
 ]:
-    """Return (project_path, include_image, url_fetch, quiet, retry_failed, ui_datasheets, ui_chat, ui_simulation, ai_datasheets, ai_datasheets_auto_fetch, reset_datasheets, ask)."""
     project_path: str | None = None
     include_image = False
     url_fetch: DatasheetUrlFetchPolicy | None = None
@@ -100,6 +114,11 @@ def _parse_cli_args(
     ui_datasheets = False
     ui_chat = False
     ui_simulation = False
+    ui_aerf = False
+    aerf_plan = False
+    aerf_stage: int | None = None
+    aerf_family: str | None = None
+    approve_send = False
     ai_datasheets = False
     ai_datasheets_auto_fetch = False
     reset_datasheets: list[str] = []
@@ -123,6 +142,22 @@ def _parse_cli_args(
             ui_chat = True
         elif arg == "--ui-simulation":
             ui_simulation = True
+        elif arg == "--ui-aerf":
+            ui_aerf = True
+        elif arg == "--aerf-plan":
+            aerf_plan = True
+        elif arg == "--aerf-stage":
+            if i + 1 >= len(argv):
+                raise SystemExit("--aerf-stage requires a stage number 0–7")
+            aerf_stage = int(argv[i + 1])
+            i += 1
+        elif arg == "--aerf-family":
+            if i + 1 >= len(argv):
+                raise SystemExit("--aerf-family requires a family_id")
+            aerf_family = argv[i + 1]
+            i += 1
+        elif arg == "--approve-send":
+            approve_send = True
         elif arg == "--ai-datasheets":
             ai_datasheets = True
         elif arg == "--ai-datasheets-auto-fetch":
@@ -152,6 +187,11 @@ def _parse_cli_args(
         ui_datasheets,
         ui_chat,
         ui_simulation,
+        ui_aerf,
+        aerf_plan,
+        aerf_stage,
+        aerf_family,
+        approve_send,
         ai_datasheets,
         ai_datasheets_auto_fetch,
         reset_datasheets,
@@ -366,6 +406,171 @@ def main_ui_simulation(project_path: str | Path | None = None) -> None:
     show_simulation_dialog(path)
 
 
+def main_ui_aerf(
+    project_path: str | Path | None = None,
+    *,
+    retry_failed_urls: bool = False,
+    force_refresh_urls: bool = False,
+) -> None:
+    """Open the AERF staged analysis panel."""
+    try:
+        import wx  # noqa: F401
+    except ImportError:
+        print("AERF UI requires wxPython (run inside KiCad or install wx).")
+        return
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
+        return
+
+    from ui.launcher import show_aerf_dialog
+
+    show_aerf_dialog(
+        path,
+        retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
+    )
+
+
+def _collect_ctx_for_aerf(
+    project_path: str | Path | None,
+    *,
+    include_image: bool = False,
+    datasheet_url_fetch: DatasheetUrlFetchPolicy | None = None,
+    retry_failed_urls: bool = False,
+    verbose: bool = True,
+):
+    from context.model import ProjectContext
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("KiCad AI Assistant: no project path.")
+        return None
+    cfg = load_config()
+    ctx = collect_stretch_context(
+        path,
+        config=cfg,
+        include_image=include_image,
+        datasheet_url_fetch=datasheet_url_fetch,
+        retry_failed_urls=retry_failed_urls,
+        verbose=verbose,
+    )
+    return ctx
+
+
+def main_aerf_plan(
+    project_path: str | Path | None,
+    *,
+    family_id: str | None = None,
+    include_image: bool = False,
+    datasheet_url_fetch: DatasheetUrlFetchPolicy | None = None,
+    retry_failed_urls: bool = False,
+    verbose: bool = True,
+) -> None:
+    """Print AERF stage-0 dry-run bundle (no cloud send)."""
+    from inference.aerf import build_stage0_bundle, build_aerf_stage_prompt_bundle
+
+    ctx = _collect_ctx_for_aerf(
+        project_path,
+        include_image=include_image,
+        datasheet_url_fetch=datasheet_url_fetch,
+        retry_failed_urls=retry_failed_urls,
+        verbose=verbose,
+    )
+    if ctx is None:
+        return
+
+    bundle = build_stage0_bundle(ctx, family_id, preview_chars=300)
+    _plan, built = build_aerf_stage_prompt_bundle(
+        ctx,
+        bundle.family_id,
+        0,
+        include_image=include_image,
+    )
+    print(f"--- AERF plan (stage 0) ---")
+    print(f"Project: {bundle.design_summary['project_name']}")
+    print(f"Family: {bundle.family_id}")
+    if bundle.classification:
+        print(
+            f"Classification: {bundle.classification.confidence} "
+            f"({', '.join(bundle.classification.recognition_basis)})"
+        )
+    print(f"KB excerpt ({bundle.stage_plan.kb_excerpt_chars} chars):")
+    print(bundle.kb_excerpt_preview)
+    print(f"\nPrompt template: {built.template}")
+    print(f"Estimated tokens: ~{built.estimated_text_tokens}")
+    print(f"\n{built.preview_summary}")
+
+
+def main_aerf_stage(
+    project_path: str | Path | None,
+    stage_id: int,
+    *,
+    family_id: str | None = None,
+    approve_send: bool = False,
+    include_image: bool = False,
+    datasheet_url_fetch: DatasheetUrlFetchPolicy | None = None,
+    retry_failed_urls: bool = False,
+    verbose: bool = True,
+) -> None:
+    """Build or send one AERF stage prompt."""
+    from inference.aerf import build_aerf_stage_prompt_bundle, run_aerf_stage
+
+    ctx = _collect_ctx_for_aerf(
+        project_path,
+        include_image=include_image,
+        datasheet_url_fetch=datasheet_url_fetch,
+        retry_failed_urls=retry_failed_urls,
+        verbose=verbose,
+    )
+    if ctx is None:
+        return
+
+    resolved_family = family_id
+    if resolved_family is None:
+        from inference.aerf import build_stage0_bundle
+
+        bundle = build_stage0_bundle(ctx)
+        resolved_family = bundle.family_id
+
+    if not approve_send:
+        plan, built = build_aerf_stage_prompt_bundle(
+            ctx,
+            resolved_family,
+            stage_id,
+            include_image=include_image,
+        )
+        print(f"--- AERF stage {stage_id} (dry-run, no cloud send) ---")
+        print(f"Family: {resolved_family}")
+        print(f"KB: {plan.kb_excerpt_path}")
+        print(f"Template: {built.template}")
+        print(f"Estimated tokens: ~{built.estimated_text_tokens}")
+        print(f"\n{built.preview_summary}")
+        print("\nUse --approve-send to transmit to the provider.")
+        return
+
+    run = run_aerf_stage(
+        ctx,
+        resolved_family,
+        stage_id,
+        include_image=include_image,
+        approve_send=True,
+    )
+    if run.send is None:
+        print("No send result (internal error).")
+        return
+    print(f"--- AERF stage {stage_id} response ---")
+    print(run.send.response.text)
+    if run.send.parse_error:
+        print(f"\nParse error: {run.send.parse_error}")
+    print(
+        f"\nTokens: {run.send.response.usage.input_tokens} in, "
+        f"{run.send.response.usage.output_tokens} out "
+        f"({run.send.response.model})"
+    )
+
+
 if __name__ == "__main__":
     (
         arg_path,
@@ -376,6 +581,11 @@ if __name__ == "__main__":
         ui_datasheets,
         ui_chat,
         ui_simulation,
+        ui_aerf,
+        aerf_plan,
+        aerf_stage,
+        aerf_family,
+        approve_send,
         ai_datasheets,
         ai_datasheets_auto_fetch,
         reset_datasheets,
@@ -387,6 +597,28 @@ if __name__ == "__main__":
         main_ui_chat(arg_path, retry_failed_urls=retry_failed)
     elif ui_simulation:
         main_ui_simulation(arg_path)
+    elif ui_aerf:
+        main_ui_aerf(arg_path, retry_failed_urls=retry_failed)
+    elif aerf_plan:
+        main_aerf_plan(
+            arg_path,
+            family_id=aerf_family,
+            include_image=include,
+            datasheet_url_fetch=url_fetch,
+            retry_failed_urls=retry_failed,
+            verbose=not quiet,
+        )
+    elif aerf_stage is not None:
+        main_aerf_stage(
+            arg_path,
+            aerf_stage,
+            family_id=aerf_family,
+            approve_send=approve_send,
+            include_image=include,
+            datasheet_url_fetch=url_fetch,
+            retry_failed_urls=retry_failed,
+            verbose=not quiet,
+        )
     elif ask:
         main_ask(
             arg_path,

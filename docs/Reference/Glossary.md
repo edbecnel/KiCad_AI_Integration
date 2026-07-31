@@ -158,6 +158,8 @@ AERP packages **must not** import KiCad parsers, `pcbnew`, or wxPython. See [Pla
 | **general_review** | Ad-hoc schematic Q&A prompt template (`src/prompts/templates/general_review.py`). Not a substitute for full AERF analysis. |
 | **Circuit family** | Reusable domain KB (e.g. `blocking_oscillator`) with AERF stages 00–07. Registry: `docs/Engineering_Knowledge/Circuit_Families/families.json`. |
 | **Stage 0–7** | Canonical AERF reasoning stages from circuit identification through engineering analysis. See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md). |
+| **run_aerf_pipeline** | EIE function — sequential stages 0–7 with in-memory `prior_stages`; cloud send only when `approve_send=True`. |
+| **send_aerf_stage_prompt** | EIE function — provider call after explicit approval (CLI `--approve-send`, UI `--ui-aerf`). |
 
 ---
 
