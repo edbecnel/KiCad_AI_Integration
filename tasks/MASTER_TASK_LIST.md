@@ -461,12 +461,21 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] `src/reasoning/` orchestrator module (stage registry + KB loader; full LLM orchestration deferred)
 - [x] Circuit family classifier
 - [x] Per-stage prompt templates (ADP-007)
-- [ ] EKM stage-output mapping and write-back (ADP-007) — **Track C4 next**
+- [x] EKM stage-output mapping and write-back (ADP-007) — `src/ekm/aerf_writeback.py`
 - [ ] Simulation closed loop — validate/refine stages (ADP-006)
 - [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
 - [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
 
-**AERF exit criteria (future):** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM.
+**AERF exit criteria:** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM (`write_aerf_stages_to_ekm`, `--approve-ekm-writeback`, AERF UI).
+
+### Track D — Engineering Notebook (ADP-003)
+
+- [x] EKM View Model (`src/ekm/view_model.py`) — load, validate, edit, save, search
+- [x] Field-type registry (`src/ekm/field_registry.py`) — all six EKM primitives
+- [x] Notebook renderer (`src/ui/notebook_renderer.py`) — collapsible sections, registry-driven editors
+- [x] Engineering Notebook UI — modal (`--ui-notebook`) and non-modal (`--ui-notebook-panel`)
+- [x] Advanced JSON view tab (debug)
+- [ ] Dockable KiCad action plugin shell (Phase 2; widget ready in `src/ui/notebook_panel.py`)
 
 ---
 

@@ -127,9 +127,16 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 1. ~~Circuit family classifier from `DesignSnapshot`~~ (done — `src/reasoning/classifier.py`)
 2. ~~Per-stage prompt templates (ADP-007)~~ (done — `src/prompts/templates/aerf_stage.py`)
 3. ~~Full AERF multi-stage orchestration with approval gating~~ (done — `run_aerf_pipeline`, `--approve-send`, `--ui-aerf`)
-4. EKM write-back from approved stage outputs (ADP-007)
+4. ~~EKM write-back from approved stage outputs (ADP-007)~~ (done — `src/ekm/aerf_writeback.py`, `--approve-ekm-writeback`, `--ui-aerf` Write to EKM)
 
-**Track B (complete):** EKM runtime, AERF registry/KB loader, Blocking Oscillator KB 00–07, EIE simulation + stage-0 stub.
+**Track C (complete):** classifier, prompts, pipeline, EKM write-back.
+
+**Track D — Engineering Notebook (ADP-003)** (complete):
+
+1. ~~EKM View Model (`src/ekm/view_model.py`)~~ (done)
+2. ~~Field-type registry (`src/ekm/field_registry.py`) + all primitive editors~~ (done)
+3. ~~Search, collapsible sections, renderer split (`src/ui/notebook_renderer.py`)~~ (done)
+4. ~~Non-modal panel + Advanced JSON view (`--ui-notebook-panel`)~~ (done)
 
 Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
 

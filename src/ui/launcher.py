@@ -129,3 +129,25 @@ def show_aerf_dialog(
         retry_failed_urls=retry_failed_urls,
         force_refresh_urls=force_refresh_urls,
     )
+
+
+def show_notebook_dialog(
+    project_path: Path | str | None = None,
+) -> None:
+    """Open the Engineering Notebook panel (modal)."""
+    from ui.notebook_dialog import show_notebook_dialog as _show
+
+    ensure_wx_app()
+    pro = resolve_project_pro_path(project_path)
+    _show(pro)
+
+
+def show_notebook_panel(
+    project_path: Path | str | None = None,
+) -> None:
+    """Open the Engineering Notebook as a non-modal frame (KiCad embedding path)."""
+    from ui.notebook_panel import show_notebook_panel as _show
+
+    ensure_wx_app()
+    pro = resolve_project_pro_path(project_path)
+    _show(pro)

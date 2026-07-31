@@ -5,7 +5,10 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Sequence
+
+from ekm.aerf_writeback import AERFWritebackPlan, plan_aerf_writeback, write_aerf_stages_to_ekm
 
 from platform_core.contracts import DesignSnapshot
 from prompts import BuiltPrompt, build_aerf_stage_prompt
@@ -389,4 +392,66 @@ def run_aerf_pipeline(
         completed_stages=completed,
         failed_at_stage=failed_at,
         parse_error=parse_error,
+    )
+
+
+@dataclass
+class AERFPipelineWritebackResult:
+    """AERF pipeline run with optional EKM write-back."""
+
+    pipeline: AERFPipelineResult
+    writeback_plan: AERFWritebackPlan
+    ekm_path: Path | None = None
+
+
+def build_ekm_writeback_plan(pipeline_result: AERFPipelineResult) -> AERFWritebackPlan:
+    """Build an EKM write-back plan from completed AERF stage envelopes."""
+    return plan_aerf_writeback(pipeline_result.completed_stages)
+
+
+def run_aerf_pipeline_and_writeback(
+    snapshot: DesignSnapshot,
+    project_path: Path | str,
+    *,
+    family_id: str | None = None,
+    stages: Sequence[int] | None = None,
+    prior_stages: list[dict[str, Any]] | None = None,
+    user_hint: str | None = None,
+    ekm_family_id: str | None = None,
+    ekm_sections: dict[str, Any] | None = None,
+    include_image: bool = False,
+    approve_send: bool = False,
+    approve_ekm_writeback: bool = False,
+    stop_on_parse_error: bool = True,
+    stop_after_stage: int | None = None,
+    config: AppConfig | None = None,
+    api_key_override: str | None = None,
+    provider: Any | None = None,
+) -> AERFPipelineWritebackResult:
+    """Run the AERF pipeline; persist to EKM only when ``approve_ekm_writeback`` is True."""
+    pipeline = run_aerf_pipeline(
+        snapshot,
+        family_id=family_id,
+        stages=stages,
+        prior_stages=prior_stages,
+        user_hint=user_hint,
+        ekm_family_id=ekm_family_id,
+        ekm_sections=ekm_sections,
+        include_image=include_image,
+        approve_send=approve_send,
+        stop_on_parse_error=stop_on_parse_error,
+        stop_after_stage=stop_after_stage,
+        config=config,
+        api_key_override=api_key_override,
+        provider=provider,
+    )
+    writeback_plan, ekm_path = write_aerf_stages_to_ekm(
+        project_path,
+        pipeline.completed_stages,
+        approve=approve_ekm_writeback,
+    )
+    return AERFPipelineWritebackResult(
+        pipeline=pipeline,
+        writeback_plan=writeback_plan,
+        ekm_path=ekm_path,
     )

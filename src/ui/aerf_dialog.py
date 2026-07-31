@@ -11,7 +11,9 @@ from providers.errors import ProviderError
 from ui.aerf_supply import (
     build_aerf_stage_prompt_bundle,
     collect_aerf_context,
+    plan_aerf_writeback,
     send_aerf_stage_prompt,
+    write_aerf_stages_to_ekm,
 )
 from utils.config import load_config
 
@@ -86,10 +88,13 @@ class AERFDialog:
         self._btn_refresh = wx.Button(panel, label="Refresh context")
         self._btn_preview = wx.Button(panel, label="Preview stage prompt")
         self._btn_send = wx.Button(panel, label="Approve && Send stage")
+        self._btn_writeback = wx.Button(panel, label="Write to EKM…")
+        self._btn_writeback.Enable(False)
         self._btn_close = wx.Button(panel, label="Close")
         btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_preview, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_send, flag=wx.RIGHT, border=6)
+        btn_row.Add(self._btn_writeback, flag=wx.RIGHT, border=6)
         btn_row.AddStretchSpacer()
         btn_row.Add(self._btn_close)
         vbox.Add(btn_row, flag=wx.EXPAND | wx.ALL, border=8)
@@ -109,6 +114,7 @@ class AERFDialog:
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_preview.Bind(wx.EVT_BUTTON, self._on_preview)
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
+        self._btn_writeback.Bind(wx.EVT_BUTTON, self._on_writeback)
         self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._spin_stage.Bind(wx.EVT_SPINCTRL, self._on_stage_change)
 
@@ -174,6 +180,51 @@ class AERFDialog:
             preview_text += "\n…"
         self._preview.SetValue(preview_text)
         self._status.SetLabel(f"Stage {self._current_stage} prompt ready — review, then Approve & Send.")
+
+    def _update_writeback_button(self) -> None:
+        has_stage_7 = any(
+            isinstance(stage.get("stage_id"), int) and stage["stage_id"] == 7
+            for stage in self._completed_stages
+        )
+        self._btn_writeback.Enable(has_stage_7)
+
+    def _on_writeback(self, _event: wx.CommandEvent) -> None:
+        if not self._completed_stages:
+            return
+
+        plan = plan_aerf_writeback(self._completed_stages)
+        preview_lines = [plan.summary]
+        for field_plan in plan.field_plans[:12]:
+            preview_lines.append(
+                f"• {field_plan.section_id}/{field_plan.field_id}: {field_plan.value_preview}"
+            )
+        if len(plan.field_plans) > 12:
+            preview_lines.append(f"… and {len(plan.field_plans) - 12} more field(s)")
+
+        if not wx.MessageBox(
+            "Write approved AERF conclusions to Engineering Knowledge?\n\n"
+            + "\n".join(preview_lines),
+            "Approve EKM write-back",
+            wx.YES_NO | wx.ICON_QUESTION,
+        ) == wx.YES:
+            return
+
+        try:
+            _plan, saved = write_aerf_stages_to_ekm(
+                self._project_path,
+                self._completed_stages,
+                approve=True,
+            )
+        except OSError as exc:
+            wx.MessageBox(str(exc), "EKM write-back error", wx.OK | wx.ICON_ERROR)
+            return
+
+        self._status.SetLabel(f"EKM updated — {saved}")
+        wx.MessageBox(
+            f"Engineering knowledge saved to:\n{saved}",
+            "EKM write-back",
+            wx.OK | wx.ICON_INFORMATION,
+        )
 
     def _on_send(self, _event: wx.CommandEvent) -> None:
         if self._approved:
@@ -253,6 +304,7 @@ class AERFDialog:
             f"{result.response.usage.output_tokens} out tokens. "
             f"Completed stages: {len(self._completed_stages)}."
         )
+        self._update_writeback_button()
 
 
 def show_aerf_dialog(

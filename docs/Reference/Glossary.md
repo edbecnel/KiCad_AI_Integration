@@ -103,7 +103,7 @@ These frameworks are components of **AERP** — the host-agnostic stack. See [AE
 | **ADP-004** | Natural-language / EKM conversion (planned) |
 | **ADP-005** | EKM provenance and metadata semantics (planned) |
 | **ADP-006** | Simulation abstraction — host-agnostic validation hooks (planned) |
-| **ADP-007** | Prompt integration and EKM stage-output write-back mapping (partially implemented: AERF stage prompts in `src/prompts/templates/aerf_stage.py`; write-back still deferred) |
+| **ADP-007** | Prompt integration and EKM stage-output write-back mapping (`src/prompts/templates/aerf_stage.py`, `src/ekm/aerf_writeback.py`) |
 
 ### ADRs (0001–0010)
 
@@ -159,6 +159,11 @@ AERP packages **must not** import KiCad parsers, `pcbnew`, or wxPython. See [Pla
 | **Circuit family** | Reusable domain KB (e.g. `blocking_oscillator`) with AERF stages 00–07. Registry: `docs/Engineering_Knowledge/Circuit_Families/families.json`. |
 | **Stage 0–7** | Canonical AERF reasoning stages from circuit identification through engineering analysis. See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md). |
 | **run_aerf_pipeline** | EIE function — sequential stages 0–7 with in-memory `prior_stages`; cloud send only when `approve_send=True`. |
+| **write_aerf_stages_to_ekm** | EKM function — map approved stage envelopes to sections; persist only when `approve=True` (CLI `--approve-ekm-writeback`, AERF UI). |
+| **EKMViewModel** | View Model layer (`src/ekm/view_model.py`) — validates edits, search/filter, before persistence; used by Engineering Notebook UI. |
+| **FieldEditorSpec** | Field-type registry entry (`src/ekm/field_registry.py`) mapping EKM primitives to notebook editors (ADP-003 §9.1). |
+| **NotebookRenderer** | wx presentation layer (`src/ui/notebook_renderer.py`) — registry-driven field widgets and collapsible sections. |
+| **Engineering Notebook** | Primary human interface to the EKM (ADP-003). CLI: `--ui-notebook` (modal), `--ui-notebook-panel` (non-modal). |
 | **send_aerf_stage_prompt** | EIE function — provider call after explicit approval (CLI `--approve-send`, UI `--ui-aerf`). |
 
 ---

@@ -69,7 +69,7 @@ DesignSnapshot ──┐
 EKM (optional) ─┼──► EIE ──► Prompt Builder ──► AI Provider Layer
 AERF stages ─────┤         │
 Circuit Family KB┘         ├──► Stage artifacts (transient)
-                           └──► EKM write-back (user-approved, future)
+                           └──► EKM write-back (user-approved, `write_aerf_stages_to_ekm`)
 ```
 
 ### Component placement
@@ -138,7 +138,7 @@ EIE will:
 | `src/prompts/templates/aerf_stage.py` — per-stage AERF prompts (ADP-007) | Implemented |
 | `src/reasoning/` — AERF stage registry + KB loader | Implemented |
 | `src/ekm/` — EKM runtime + validation CLI | Implemented |
-| EKM write-back from approved AERF stage outputs | Deferred (Track C4) |
+| EKM write-back from approved AERF stage outputs | Implemented (`src/ekm/aerf_writeback.py`, `write_aerf_stages_to_ekm`) |
 
 ---
 

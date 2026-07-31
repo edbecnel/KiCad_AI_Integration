@@ -439,7 +439,7 @@ This proposal is considered complete when:
 
 ## 18. Implementation
 
-Platform runtime: [`src/ekm/`](../../src/ekm/) (load/save/validate) and [`scripts/ekm_tool.py`](../../scripts/ekm_tool.py) (headless CLI). View Model and Notebook UI remain deferred.
+Platform runtime: [`src/ekm/`](../../src/ekm/) (load/save/validate, View Model, field registry, AERF write-back) and [`scripts/ekm_tool.py`](../../scripts/ekm_tool.py) (headless CLI). Engineering Notebook UI: [`src/ui/notebook_shell.py`](../../src/ui/notebook_shell.py), [`src/ui/notebook_renderer.py`](../../src/ui/notebook_renderer.py) (`--ui-notebook`, `--ui-notebook-panel`).
 
 | Component | Assigned to |
 |-----------|-------------|

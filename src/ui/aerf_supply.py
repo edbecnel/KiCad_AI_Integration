@@ -5,6 +5,7 @@ Re-exports from ``inference.aerf`` for backward compatibility.
 
 from __future__ import annotations
 
+from ekm import plan_aerf_writeback, write_aerf_stages_to_ekm
 from inference.aerf import (
     AERFPipelineResult,
     AERFStageRunResult,
@@ -26,7 +27,9 @@ __all__ = [
     "build_stage0_bundle",
     "collect_aerf_context",
     "parse_stage_output",
+    "plan_aerf_writeback",
     "run_aerf_pipeline",
     "run_aerf_stage",
     "send_aerf_stage_prompt",
+    "write_aerf_stages_to_ekm",
 ]

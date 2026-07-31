@@ -29,6 +29,10 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 
 ``--ui-aerf`` opens the AERF staged analysis panel (per-stage Approve & Send).
 
+``--ui-notebook`` opens the Engineering Notebook panel (view/edit EKM sections).
+
+``--ui-notebook-panel`` opens the Engineering Notebook as a non-modal frame (KiCad embedding path).
+
 ``--aerf-plan`` prints stage-0 AERF dry-run bundle and token estimate (no cloud send).
 
 ``--aerf-stage N`` builds the AERF prompt for stage N; requires ``--approve-send`` to call the provider.
@@ -36,6 +40,14 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 ``--aerf-family ID`` circuit family for AERF (default: classify or blocking_oscillator).
 
 ``--approve-send`` explicitly allow cloud transmission (AERF stages only; ``--ask`` bypasses UI separately).
+
+``--aerf-pipeline`` runs AERF stages 0–7 sequentially; combine with ``--approve-send`` for cloud calls.
+
+``--aerf-writeback-plan`` prints the planned EKM diff from stage outputs (no disk write).
+
+``--aerf-stages-json PATH`` JSON file of parsed AERF stage envelopes for write-back planning.
+
+``--approve-ekm-writeback`` persist approved stage outputs to EKM (separate gate from ``--approve-send``).
 
 ``--ask "question"`` sends a prompt to Claude via the prompt builder (requires API key in config). Dev smoke path — bypasses Approve & Send UI.
 
@@ -98,9 +110,16 @@ def _parse_cli_args(
     bool,
     bool,
     bool,
+    bool,
+    bool,
+    bool,
+    bool,
     int | None,
     str | None,
     bool,
+    bool,
+    bool,
+    str | None,
     bool,
     bool,
     list[str],
@@ -115,10 +134,16 @@ def _parse_cli_args(
     ui_chat = False
     ui_simulation = False
     ui_aerf = False
+    ui_notebook = False
+    ui_notebook_panel = False
     aerf_plan = False
     aerf_stage: int | None = None
     aerf_family: str | None = None
     approve_send = False
+    aerf_pipeline = False
+    aerf_writeback_plan = False
+    aerf_stages_json: str | None = None
+    approve_ekm_writeback = False
     ai_datasheets = False
     ai_datasheets_auto_fetch = False
     reset_datasheets: list[str] = []
@@ -144,6 +169,10 @@ def _parse_cli_args(
             ui_simulation = True
         elif arg == "--ui-aerf":
             ui_aerf = True
+        elif arg == "--ui-notebook":
+            ui_notebook = True
+        elif arg == "--ui-notebook-panel":
+            ui_notebook_panel = True
         elif arg == "--aerf-plan":
             aerf_plan = True
         elif arg == "--aerf-stage":
@@ -158,6 +187,17 @@ def _parse_cli_args(
             i += 1
         elif arg == "--approve-send":
             approve_send = True
+        elif arg == "--aerf-pipeline":
+            aerf_pipeline = True
+        elif arg == "--aerf-writeback-plan":
+            aerf_writeback_plan = True
+        elif arg == "--aerf-stages-json":
+            if i + 1 >= len(argv):
+                raise SystemExit("--aerf-stages-json requires a JSON file path")
+            aerf_stages_json = argv[i + 1]
+            i += 1
+        elif arg == "--approve-ekm-writeback":
+            approve_ekm_writeback = True
         elif arg == "--ai-datasheets":
             ai_datasheets = True
         elif arg == "--ai-datasheets-auto-fetch":
@@ -188,10 +228,16 @@ def _parse_cli_args(
         ui_chat,
         ui_simulation,
         ui_aerf,
+        ui_notebook,
+        ui_notebook_panel,
         aerf_plan,
         aerf_stage,
         aerf_family,
         approve_send,
+        aerf_pipeline,
+        aerf_writeback_plan,
+        aerf_stages_json,
+        approve_ekm_writeback,
         ai_datasheets,
         ai_datasheets_auto_fetch,
         reset_datasheets,
@@ -406,6 +452,147 @@ def main_ui_simulation(project_path: str | Path | None = None) -> None:
     show_simulation_dialog(path)
 
 
+def _print_writeback_plan(plan) -> None:
+    print(f"--- AERF EKM write-back plan ---")
+    print(plan.summary)
+    for field_plan in plan.field_plans:
+        print(
+            f"  [{field_plan.action}] {field_plan.section_id}/{field_plan.field_id} "
+            f"({field_plan.field_type}): {field_plan.value_preview}"
+        )
+
+
+def main_aerf_writeback_plan(
+    project_path: str | Path | None,
+    *,
+    stages_json: str | None = None,
+    approve_ekm_writeback: bool = False,
+) -> None:
+    """Print or apply EKM write-back from AERF stage JSON envelopes."""
+    import json
+
+    from ekm import plan_aerf_writeback, write_aerf_stages_to_ekm
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("KiCad AI Assistant: no project path.")
+        return
+    if not stages_json:
+        print("Provide --aerf-stages-json PATH with parsed AERF stage envelopes.")
+        return
+
+    stage_outputs = json.loads(Path(stages_json).read_text(encoding="utf-8"))
+    if not isinstance(stage_outputs, list):
+        raise SystemExit("--aerf-stages-json must contain a JSON array of stage envelopes")
+
+    if approve_ekm_writeback:
+        plan, saved = write_aerf_stages_to_ekm(path, stage_outputs, approve=True)
+        _print_writeback_plan(plan)
+        print(f"\nEKM saved: {saved}")
+        return
+
+    plan = plan_aerf_writeback(stage_outputs)
+    _print_writeback_plan(plan)
+    print("\nUse --approve-ekm-writeback to persist to engineering_knowledge.json.")
+
+
+def main_aerf_pipeline(
+    project_path: str | Path | None,
+    *,
+    family_id: str | None = None,
+    approve_send: bool = False,
+    approve_ekm_writeback: bool = False,
+    aerf_writeback_plan: bool = False,
+    include_image: bool = False,
+    datasheet_url_fetch: DatasheetUrlFetchPolicy | None = None,
+    retry_failed_urls: bool = False,
+    verbose: bool = True,
+) -> None:
+    """Run AERF stages 0–7; optional EKM write-back after completion."""
+    from inference.aerf import run_aerf_pipeline, run_aerf_pipeline_and_writeback
+
+    ctx = _collect_ctx_for_aerf(
+        project_path,
+        include_image=include_image,
+        datasheet_url_fetch=datasheet_url_fetch,
+        retry_failed_urls=retry_failed_urls,
+        verbose=verbose,
+    )
+    if ctx is None:
+        return
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("KiCad AI Assistant: no project path.")
+        return
+
+    if approve_ekm_writeback or aerf_writeback_plan:
+        result = run_aerf_pipeline_and_writeback(
+            ctx,
+            path,
+            family_id=family_id,
+            approve_send=approve_send,
+            approve_ekm_writeback=approve_ekm_writeback,
+        )
+        pipeline = result.pipeline
+        if aerf_writeback_plan or approve_ekm_writeback:
+            _print_writeback_plan(result.writeback_plan)
+        if result.ekm_path is not None:
+            print(f"\nEKM saved: {result.ekm_path}")
+    else:
+        pipeline = run_aerf_pipeline(
+            ctx,
+            family_id=family_id,
+            approve_send=approve_send,
+        )
+
+    print(f"--- AERF pipeline ---")
+    print(f"Family: {pipeline.family_id}")
+    print(f"Completed stages: {len(pipeline.completed_stages)}")
+    if pipeline.failed_at_stage is not None:
+        print(f"Failed at stage {pipeline.failed_at_stage}: {pipeline.parse_error}")
+    if not approve_send:
+        print("\nDry-run only (no cloud send). Use --approve-send to call the provider.")
+    elif not aerf_writeback_plan and not approve_ekm_writeback:
+        print("\nUse --aerf-writeback-plan to preview EKM write-back from completed stages.")
+
+
+def main_ui_notebook(project_path: str | Path | None = None) -> None:
+    """Open the Engineering Notebook panel."""
+    try:
+        import wx  # noqa: F401
+    except ImportError:
+        print("Engineering Notebook UI requires wxPython (run inside KiCad or install wx).")
+        return
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
+        return
+
+    from ui.launcher import show_notebook_dialog
+
+    show_notebook_dialog(path)
+
+
+def main_ui_notebook_panel(project_path: str | Path | None = None) -> None:
+    """Open the Engineering Notebook as a non-modal frame."""
+    try:
+        import wx  # noqa: F401
+    except ImportError:
+        print("Engineering Notebook UI requires wxPython (run inside KiCad or install wx).")
+        return
+
+    path = Path(project_path) if project_path else _default_project_path()
+    if path is None:
+        print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
+        return
+
+    from ui.launcher import show_notebook_panel
+
+    show_notebook_panel(path)
+
+
 def main_ui_aerf(
     project_path: str | Path | None = None,
     *,
@@ -582,10 +769,16 @@ if __name__ == "__main__":
         ui_chat,
         ui_simulation,
         ui_aerf,
+        ui_notebook,
+        ui_notebook_panel,
         aerf_plan,
         aerf_stage,
         aerf_family,
         approve_send,
+        aerf_pipeline,
+        aerf_writeback_plan,
+        aerf_stages_json,
+        approve_ekm_writeback,
         ai_datasheets,
         ai_datasheets_auto_fetch,
         reset_datasheets,
@@ -599,6 +792,10 @@ if __name__ == "__main__":
         main_ui_simulation(arg_path)
     elif ui_aerf:
         main_ui_aerf(arg_path, retry_failed_urls=retry_failed)
+    elif ui_notebook:
+        main_ui_notebook(arg_path)
+    elif ui_notebook_panel:
+        main_ui_notebook_panel(arg_path)
     elif aerf_plan:
         main_aerf_plan(
             arg_path,
@@ -607,6 +804,24 @@ if __name__ == "__main__":
             datasheet_url_fetch=url_fetch,
             retry_failed_urls=retry_failed,
             verbose=not quiet,
+        )
+    elif aerf_pipeline:
+        main_aerf_pipeline(
+            arg_path,
+            family_id=aerf_family,
+            approve_send=approve_send,
+            approve_ekm_writeback=approve_ekm_writeback,
+            aerf_writeback_plan=aerf_writeback_plan,
+            include_image=include,
+            datasheet_url_fetch=url_fetch,
+            retry_failed_urls=retry_failed,
+            verbose=not quiet,
+        )
+    elif aerf_writeback_plan:
+        main_aerf_writeback_plan(
+            arg_path,
+            stages_json=aerf_stages_json,
+            approve_ekm_writeback=approve_ekm_writeback,
         )
     elif aerf_stage is not None:
         main_aerf_stage(

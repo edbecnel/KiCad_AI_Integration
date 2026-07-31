@@ -45,7 +45,7 @@ Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant
 - Catalog picks up manually added PDFs in the library folder
 - CLI: `--reset-datasheet VALUE` for per-part hard refresh
 
-#### AI integration (`--ui-chat`, `--ask` dev only)
+#### AI integration (`--ui-chat`, `--ui-aerf`, `--ui-notebook`, `--ask` dev only)
 - **Claude API** integration (model configurable, e.g. Sonnet 4.5)
 - **Prompt builder** for general schematic design review (first template)
 - Large schematics are summarized automatically so requests stay manageable
@@ -53,6 +53,8 @@ Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant
 
 #### User interface
 - **Chat panel** (`--ui-chat`): ask questions, see what will be sent, **approve before sending**, read Claude's answer and token usage
+- **AERF panel** (`--ui-aerf`): staged circuit analysis with per-stage Approve & Send and optional EKM write-back
+- **Engineering Notebook** (`--ui-notebook`, `--ui-notebook-panel`): view/edit all EKM primitive fields; search; collapsible sections; Advanced JSON tab
 - Runs from a terminal or KiCad Scripting Console (no native KiCad menu plugin yet)
 - Optional **schematic image** for visual questions (`--image`; large designs are slow and costly — text Q&A is the reliable path today)
 
@@ -161,7 +163,7 @@ Conversations are **input**; EKM is **distilled output** after user approval.
 | **EKM** | Persistent per-project engineering notebook (sections, typed fields, links) | Runtime + CLI in `src/ekm/`; Notebook UI deferred — [ADP-002](../Architecture/ADP-002-EKM-Schema-and-Persistence.md) |
 | **Prompt Architecture** | Turns `DesignSnapshot` into structured prompts; no KiCad API imports | Implemented — [Prompt Architecture](../Architecture/Prompt_Architecture.md) |
 | **AI Provider Layer** | Abstract LLM interface (Claude today) | Implemented — [ADR-0002](../Architecture/ADRs/ADR-0002-Provider-Abstraction-Layer.md) |
-| **Engineering Notebook UI** | Human-facing EKM editor in KiCad | Spec only — [ADP-003](../Architecture/ADP-003-Engineering-Notebook-User-Interface.md) |
+| **Engineering Notebook UI** | Human-facing EKM editor in KiCad | Implemented — [ADP-003](../Architecture/ADP-003-Engineering-Notebook-User-Interface.md) |
 
 **AERF is a framework within the platform, not the platform itself.**
 
@@ -213,10 +215,10 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 
 | Framework | Status | Next step |
 |-----------|--------|-----------|
-| EKM runtime (`src/ekm/`) | Implemented | Engineering Notebook UI (ADP-003); View Model validation |
+| EKM runtime (`src/ekm/`) | View Model + field registry + write-back | Phase 2 dockable plugin shell |
 | AERF orchestrator (`src/reasoning/`) | Stage registry + KB loader + classifier | Additional circuit families |
-| EIE (`src/inference/`) | Chat + simulation + AERF pipeline (`run_aerf_pipeline`) | EKM write-back gating |
-| Engineering Notebook UI | Spec only | After EKM View Model |
+| EIE (`src/inference/`) | Chat + simulation + AERF pipeline + EKM write-back | Notebook AI edit proposals |
+| Engineering Notebook UI | Full primitive editors, search, JSON view (`--ui-notebook`) | Dockable KiCad plugin (Phase 2) |
 | Conversation Manager | Deferred Phase 2 | Multi-turn transcripts |
 | Simulation abstraction | ADP-006 planned | Host-agnostic validation hooks |
 | Blocking Oscillator KB | Complete (00–07) | Additional circuit families |
@@ -226,8 +228,8 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | | |
 |---|---|
 | **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library and missing-PDF workflow; simulation/SUBCKT panel (early) |
-| **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline; EIE chat/simulation/AERF UI; Blocking Oscillator reference KB complete |
-| **In progress** | EKM write-back from approved AERF stages, Engineering Notebook, broader KiCad context (PCB, BOM, ERC/DRC) |
+| **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back; EIE chat/simulation/AERF UI; Blocking Oscillator reference KB complete |
+| **In progress** | Phase 2 dockable plugin, broader KiCad context (PCB, BOM, ERC/DRC) |
 | **Later** | Native plugin, additional hosts, conversation persistence via EKM |
 
 This is a **foundation**, not a finished product. The central idea — automatic context, structured engineering reasoning, and controlled AI review — works today for schematic-level questions in KiCad, while the platform architecture is defined to grow beyond any single editor.

@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "sections": [
+    {
+      "id": "primitives",
+      "title": "Primitive Fields",
+      "order": 0,
+      "fields": [
+        {
+          "id": "notes",
+          "type": "text",
+          "label": "Notes",
+          "value": "Sample text"
+        },
+        {
+          "id": "status",
+          "type": "enum",
+          "label": "Status",
+          "value": "Draft",
+          "options": ["Draft", "Review", "Approved"]
+        },
+        {
+          "id": "turns",
+          "type": "number",
+          "label": "Turn count",
+          "value": 12,
+          "unit": "turns"
+        },
+        {
+          "id": "v_peak",
+          "type": "measurement",
+          "label": "Peak voltage",
+          "value": {
+            "value": 3.3,
+            "unit": "V",
+            "conditions": "no load"
+          }
+        },
+        {
+          "id": "primary_switch",
+          "type": "reference",
+          "label": "Primary switch",
+          "value": {
+            "kind": "component",
+            "ref": "Q1"
+          }
+        },
+        {
+          "id": "scope_capture",
+          "type": "attachment",
+          "label": "Scope capture",
+          "value": {
+            "artifact_id": "ds-abc123"
+          }
+        }
+      ]
+    }
+  ]
+}

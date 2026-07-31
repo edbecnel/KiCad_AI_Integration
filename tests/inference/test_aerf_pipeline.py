@@ -5,6 +5,7 @@ from __future__ import annotations
 from context.model import ProjectContext
 from inference.aerf import (
     build_aerf_stage_prompt_bundle,
+    build_ekm_writeback_plan,
     parse_stage_output,
     run_aerf_pipeline,
     run_aerf_stage,
@@ -148,3 +149,18 @@ def test_pipeline_stops_on_parse_error() -> None:
     assert result.parse_error is not None
     assert len(result.stage_runs) == 1
     assert result.completed_stages == []
+
+
+def test_build_ekm_writeback_plan_from_pipeline() -> None:
+    provider = _MockAERFProvider()
+    result = run_aerf_pipeline(
+        _ctx(),
+        family_id="blocking_oscillator",
+        stages=[0, 1],
+        approve_send=True,
+        provider=provider,
+    )
+    plan = build_ekm_writeback_plan(result)
+    assert plan.stage_count == 2
+    assert "circuit_overview" in plan.section_ids
+    assert "operation_and_principles" in plan.section_ids
