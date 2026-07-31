@@ -8,8 +8,10 @@ from pathlib import Path
 from context.artifacts.store import ArtifactStore
 from context.collector import _resolve_project_file, collect_stretch_context
 from context.model import ProjectContext
+from context.schematic_parse import discover_schematic_paths, parse_project_schematics
 from context.schematic_write import (
     SpiceFieldWriteResult,
+    apply_builtin_simulation_models,
     write_spice_fields_for_part,
 )
 from context.schematic_sim_write import load_subckt_metadata
@@ -155,6 +157,27 @@ def apply_simulation_model_for_part(
         spice_lib=str(lib_path),
     )
     refreshed = get_simulation_panel_context(project_path, config=cfg, verbose=False)
+    return refreshed, result
+
+
+def apply_builtin_simulation_models_panel(
+    project_path: Path,
+    *,
+    config: AppConfig | None = None,
+    verbose: bool = False,
+) -> tuple[SimulationPanelContext, SpiceFieldWriteResult]:
+    """Write built-in KiCad simulation models for all eligible schematic symbols."""
+    cfg = config or load_config()
+    pro_path = _resolve_project_file(project_path)
+    project_root = pro_path.parent
+    schematic_paths = discover_schematic_paths(pro_path)
+    symbols = parse_project_schematics(
+        project_root,
+        schematic_paths,
+        root_schematic=schematic_paths[0] if schematic_paths else None,
+    )
+    result = apply_builtin_simulation_models(pro_path, symbols)
+    refreshed = get_simulation_panel_context(pro_path, config=cfg, verbose=verbose)
     return refreshed, result
 
 

@@ -824,6 +824,20 @@ def apply_builtin_simulation_models(
     return SpiceFieldWriteResult(updated=updated, skipped=skipped)
 
 
+def format_builtin_sim_write_message(result: SpiceFieldWriteResult) -> str:
+    """User-facing alert after Apply built-in models."""
+    refs = ", ".join(u.reference for u in result.updated)
+    sheets = sorted({u.sheet_path for u in result.updated})
+    sheet_lines = "\n".join(f"  • {name}" for name in sheets)
+    return (
+        f"Applied built-in simulation models for: {refs}\n\n"
+        f"{result.changed_count} symbol(s) updated.\n\n"
+        f"Schematic file(s):\n{sheet_lines}\n\n"
+        "If a sheet is open in KiCad's Schematic Editor, use File → Revert on "
+        "the sheet(s) above to see updated Symbol Properties."
+    )
+
+
 def format_spice_write_success_message(result: SpiceFieldWriteResult) -> str:
     """User-facing alert after successful Apply Spice fields action."""
     refs = ", ".join(u.reference for u in result.updated)

@@ -7,12 +7,16 @@ from pathlib import Path
 from ui.simulation_supply import (
     GAP_LABELS,
     SimulationPanelContext,
+    apply_builtin_simulation_models_panel,
     apply_simulation_model_for_part,
     apply_spice_fields_for_part,
     get_simulation_panel_context,
     run_subckt_generation,
 )
-from context.schematic_write import format_spice_write_success_message
+from context.schematic_write import (
+    format_builtin_sim_write_message,
+    format_spice_write_success_message,
+)
 from context.subckt_generation import SubcktGenerationResult
 from utils.config import load_config
 
@@ -54,7 +58,8 @@ class SimulationDialog(wx.Dialog if wx else object):  # type: ignore[misc]
             self,
             label=(
                 "Detect missing ngspice SUBCKT models and KiCad 9 simulation hookup gaps. "
-                "Built-in models for R/C/L/diodes are applied automatically on Refresh context. "
+                "Use Apply built-in models for R/C/L/diodes and batteries, or refresh "
+                "project context to apply them automatically. "
                 "Parts already hooked up (Sim.Device=SUBCKT) appear on the All required tab only."
             ),
         )
@@ -77,10 +82,12 @@ class SimulationDialog(wx.Dialog if wx else object):  # type: ignore[misc]
         )
         footer_sizer.Add(self._status, flag=wx.EXPAND | wx.BOTTOM, border=6)
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
+        self._btn_apply_builtin = wx.Button(self._footer, label="Apply built-in models…")
         self._btn_generate = wx.Button(self._footer, label="Generate SUBCKT…")
         self._btn_apply_spice = wx.Button(self._footer, label="Apply simulation model…")
         self._btn_refresh = wx.Button(self._footer, label="Refresh")
         self._btn_close = wx.Button(self._footer, wx.ID_CLOSE, label="Close")
+        btn_row.Add(self._btn_apply_builtin, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_generate, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_apply_spice, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
@@ -91,6 +98,7 @@ class SimulationDialog(wx.Dialog if wx else object):  # type: ignore[misc]
         outer.Add(self._footer, flag=wx.EXPAND | wx.ALL, border=10)
         self.SetSizer(outer)
 
+        self._btn_apply_builtin.Bind(wx.EVT_BUTTON, self._on_apply_builtin)
         self._btn_generate.Bind(wx.EVT_BUTTON, self._on_generate)
         self._btn_apply_spice.Bind(wx.EVT_BUTTON, self._on_apply_spice)
         self._btn_refresh.Bind(wx.EVT_BUTTON, lambda _e: self._refresh_rows())
@@ -138,7 +146,12 @@ class SimulationDialog(wx.Dialog if wx else object):  # type: ignore[misc]
 
     def _set_busy(self, busy: bool) -> None:
         self._busy = busy
-        for btn in (self._btn_generate, self._btn_apply_spice, self._btn_refresh):
+        for btn in (
+            self._btn_apply_builtin,
+            self._btn_generate,
+            self._btn_apply_spice,
+            self._btn_refresh,
+        ):
             btn.Enable(not busy)
 
     def _refresh_rows(self) -> None:
@@ -241,6 +254,70 @@ class SimulationDialog(wx.Dialog if wx else object):  # type: ignore[misc]
             f"{notes[:1200]}",
             "Generate SUBCKT",
             wx.OK | wx.ICON_INFORMATION,
+        )
+
+    def _on_apply_builtin(self, _event: wx.CommandEvent) -> None:
+        if self._busy:
+            return
+        msg = (
+            "Write KiCad simulation fields for standard passives, diodes, "
+            "and batteries across the schematic?\n\n"
+            "This updates Sim.* and Spice_* properties on disk. Custom parts "
+            "still need Generate SUBCKT and Apply simulation model."
+        )
+        if wx.MessageBox(msg, "Apply built-in models", wx.OK | wx.CANCEL | wx.ICON_QUESTION) != wx.OK:
+            return
+        self._set_busy(True)
+        self._set_status("Applying built-in simulation models…")
+
+        def work() -> None:
+            try:
+                panel, result = apply_builtin_simulation_models_panel(
+                    self._project_path,
+                    config=self._cfg,
+                    verbose=False,
+                )
+                wx.CallAfter(self._on_apply_builtin_done, panel, result)
+            except Exception as exc:
+                wx.CallAfter(self._on_apply_builtin_done, None, None, str(exc))
+
+        import threading
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _on_apply_builtin_done(
+        self,
+        panel: SimulationPanelContext | None,
+        result,
+        error: str | None = None,
+    ) -> None:
+        self._set_busy(False)
+        if error:
+            self._set_status("Apply built-in models failed.", error)
+            wx.MessageBox(error, "Apply built-in models", wx.OK | wx.ICON_ERROR)
+            return
+        if panel is None or result is None:
+            return
+        self._panel_ctx = panel
+        self._populate(self._list_missing, panel.rows_missing)
+        self._populate(self._list_all, panel.rows_all)
+        if result.changed_count == 0:
+            detail = (
+                result.skipped[0]
+                if result.skipped
+                else "All eligible symbols already have built-in simulation models."
+            )
+            self._set_status("No built-in model changes.", detail)
+            wx.MessageBox(detail, "Apply built-in models", wx.OK | wx.ICON_INFORMATION)
+            return
+        wx.MessageBox(
+            format_builtin_sim_write_message(result),
+            "Apply built-in models",
+            wx.OK | wx.ICON_INFORMATION,
+        )
+        self._set_status(
+            f"Applied built-in models to {result.changed_count} symbol(s).",
+            "File → Revert in KiCad to refresh Symbol Properties.",
         )
 
     def _on_apply_spice(self, _event: wx.CommandEvent) -> None:
