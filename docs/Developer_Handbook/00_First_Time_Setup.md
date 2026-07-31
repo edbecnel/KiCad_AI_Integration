@@ -35,6 +35,7 @@ See [ADR-0004](../Architecture/ADRs/ADR-0004-Optional-Multimodal-Schematic-Conte
 7. **AI development rules** → [AI Development](./02_AI_Development.md) · [[02_AI_Development|AI Development]]
 8. **Testing strategy** → [Testing](./05_Testing.md) · [[05_Testing|Testing]]
 9. **IDE and AI tooling** → [IDE configuration](./01_Development_Environment.md#ide-configuration) · [[01_Development_Environment#IDE configuration|IDE configuration]]
+10. **Test with your KiCad project** → [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md) · [E2E Full Flow](./07_E2E_Full_Flow.md)
 
 ## Integration guides
 

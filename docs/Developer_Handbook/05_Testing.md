@@ -47,13 +47,19 @@ Planned coverage:
 
 **Fixtures:** Sample `.kicad_sch`, `.kicad_pcb`, and netlist files.
 
-### End-to-end — manual in KiCad
+### End-to-end — manual (external scripts)
 
-**Scope:** Open KiCad PCB Editor, run script, ask engineering question, receive Claude response.
+**Scope:** Run `scripts/run_ai_assistant.py` against a saved `.kicad_pro` from Terminal; exercise chat, AERF, and Notebook UIs with Approve & Send gates.
 
 **When:** Phase 1 MVP validation; document steps in PR test plan.
 
-**Entry point:** KiCad Scripting Console — **Tools > Scripting Console**
+**Entry points:**
+
+- [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md) — end-user walkthrough
+- [07_E2E_Full_Flow.md](07_E2E_Full_Flow.md) — contributor checklists
+- [06_E2E_Chat_UI.md](06_E2E_Chat_UI.md) — chat-specific checklist
+
+KiCad Scripting Console is an alternative launch path; file-based context does not require `pcbnew`.
 
 ### Mocking pcbnew
 
@@ -75,6 +81,8 @@ Store expected prompt output for fixture projects to catch regressions in prompt
 
 - [02_AI_Development.md](02_AI_Development.md)
 - [Development Environment](01_Development_Environment.md)
+- [E2E Full Flow](07_E2E_Full_Flow.md)
+- [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md) § Testing and CI
 - [Verification](../AI/Verification.md)
 

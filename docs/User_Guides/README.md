@@ -12,6 +12,7 @@ End-user instructions, tutorials, walkthroughs, and troubleshooting guidance.
 
 - [Project Overview](../../PROJECT_OVERVIEW.md) — project philosophy, evolution, and long-term vision
 - [Feature Overview](Feature_Overview.md) — KiCad host capabilities, platform/framework scope, how the system works, and gaps (start here for "what works" and "what's next")
+- [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md) — step-by-step validation with your own schematic (external scripts, no native plugin)
 - [Platform Architecture](../Architecture/Platform_Architecture.md) — full platform layering (contributors)
 
 ## What Belongs Here

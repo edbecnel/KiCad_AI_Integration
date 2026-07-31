@@ -96,6 +96,8 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [Development Environment](docs/Developer_Handbook/01_Development_Environment.md)
 - [AI Development](docs/Developer_Handbook/02_AI_Development.md)
 - [Testing](docs/Developer_Handbook/05_Testing.md)
+- [E2E Chat UI](docs/Developer_Handbook/06_E2E_Chat_UI.md)
+- [E2E Full Flow](docs/Developer_Handbook/07_E2E_Full_Flow.md)
 - [KiCad Python API Scripting Guide](docs/Developer_Handbook/Guide-KiCad_Python_API_Custom_AI_Scripting.md)
 - [Programmatic AI Analysis Guide](docs/Developer_Handbook/Guide-Programmatic_AI_Analysis.md)
 - [In-KiCad Claude Chat Integration Guide](docs/Developer_Handbook/Guide-In_KiCad_Claude_Chat_Integration.md)
@@ -104,6 +106,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 - [User Guides](docs/User_Guides/README.md)
 - [Feature Overview](docs/User_Guides/Feature_Overview.md) — KiCad capabilities, platform scope, and how the system works
+- [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — validate chat, AERF, and Notebook with your own schematic
 
 ### Reference
 
@@ -141,6 +144,8 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
 
 Also open: resolve project license; KiCad Phase 1 host gaps (PCB context, templates) — **Track A**, defer unless prioritized.
+
+**Testing:** [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — external-script E2E validation (no native plugin required).
 
 ## AI Context
 

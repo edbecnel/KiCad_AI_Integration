@@ -29,7 +29,7 @@ This repository implements an **AI-assisted Electrical Engineering Reasoning Pla
 
 ## Part 2 — KiCad Host: What Works Today
 
-Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant.py) (see [First-Time Setup](../Developer_Handbook/00_First_Time_Setup.md)).
+Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant.py) (see [First-Time Setup](../Developer_Handbook/00_First_Time_Setup.md) and [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md)).
 
 ### Working now
 
@@ -131,7 +131,7 @@ KiCad project files (.kicad_sch, .kicad_pcb, …)
   → Host: wx UI displays response (Approve & Send gate)
 ```
 
-**Planned staged reasoning path (not implemented end-to-end):**
+**Planned staged reasoning path (implemented — see [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md)):**
 
 ```
 DesignSnapshot + EKM + Circuit Family KB

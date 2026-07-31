@@ -46,8 +46,8 @@ baseline before feature work begins.
 
 - [x] Target KiCad 8+; document minimum supported version in README — see [ADR-0001](../docs/Architecture/ADRs/ADR-0001-KiCad-8-Minimum-Version.md)
 - [ ] Confirm availability of `pcbnew`, schematic access, and `wxPython` inside KiCad
-- [ ] Document how to run code inside KiCad (Scripting Console vs external plugin action)
-- [ ] Define strategy for testing outside KiCad (mock `pcbnew` objects, file-based fixtures)
+- [x] Document how to run code inside KiCad (Scripting Console vs external Terminal) — [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [07_E2E_Full_Flow](../docs/Developer_Handbook/07_E2E_Full_Flow.md)
+- [x] Define strategy for testing outside KiCad (mock `pcbnew` objects, file-based fixtures) — [05_Testing](../docs/Developer_Handbook/05_Testing.md), `tests/fixtures/`, [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
 - [x] File-based schematic fixtures under `tests/fixtures/` for integration testing
 
 ### Configuration
@@ -232,6 +232,8 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 
 #### Manual E2E validation
 
+Full-flow checklists: [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [07_E2E_Full_Flow](../docs/Developer_Handbook/07_E2E_Full_Flow.md).
+
 - [ ] Open KiCad PCB Editor → run script → ask engineering question → receive Claude response
 - [ ] Verify no manual export or browser copy-paste required
 
@@ -239,7 +241,7 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 
 - [ ] Add `examples/bedini_babcock/` sample project (or equivalent test project)
 - [ ] Include pre-built prompt template for flyback recovery audit
-- [ ] Document expected inputs and sample questions for manual validation
+- [ ] Document expected inputs and sample questions for manual validation — see [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
 
 **Phase 1 exit criteria:** Engineer opens KiCad, runs one script, asks a design question,
 reviews the context preview, approves transmission, and receives a context-aware Claude

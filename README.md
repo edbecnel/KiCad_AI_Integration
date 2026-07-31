@@ -4,7 +4,7 @@
 
 **New here?** Read [What is the KiCad AI Integration Project?](PROJECT_OVERVIEW.md) for the project's philosophy, evolution, and long-term vision.
 
-**Documentation:** Start at the [Project Index](PROJECT_INDEX.md) for the full documentation map. Acronyms and terminology: [Glossary](docs/Reference/Glossary.md).
+**Documentation:** Start at the [Project Index](PROJECT_INDEX.md) for the full documentation map. **Try it with your schematic:** [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md). Acronyms and terminology: [Glossary](docs/Reference/Glossary.md).
 
 ## Overview
 
@@ -206,7 +206,7 @@ Guiding principles include:
 
 **Platform:** EKM runtime + CLI (`src/ekm/`); AERF stage registry + KB loader (`src/reasoning/`); EIE chat, simulation orchestration, and AERF stage-0 stub (`src/inference/`). Blocking Oscillator reference KB complete (stages 00–07).
 
-See [Feature Overview](docs/User_Guides/Feature_Overview.md) for capability status, platform/host separation, and gaps.
+See [Feature Overview](docs/User_Guides/Feature_Overview.md) for capability status, platform/host separation, and gaps. To validate against your own project, follow [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md).
 
 ---
 

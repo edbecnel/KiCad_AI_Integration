@@ -50,24 +50,47 @@ Set in your shell profile or export before running scripts inside KiCad:
 export ANTHROPIC_API_KEY="your-key-here"
 ```
 
+### Local config file
+
+Copy [kicad_ai_config.example.json](kicad_ai_config.example.json) to `~/kicad_ai_config.json` and set `anthropic_api_key` (and optional preferences). Loaded by [`src/utils/config.py`](../../src/utils/config.py). Override path with `KICAD_AI_CONFIG` if needed.
+
 ### Secrets handling
 
 - Never commit API keys to the repository
-- Use environment variables as the primary credential source
-- Optional local config file support is planned (see [Master Task List](../../tasks/MASTER_TASK_LIST.md))
+- Use environment variables or `~/kicad_ai_config.json` (gitignored)
 - Add any local config files containing secrets to `.gitignore`
 
-## Running code inside KiCad
+## Running the assistant
 
-### Scripting Console
+### External Terminal (recommended)
+
+The primary workflow for UI testing uses **external Python** with `scripts/run_ai_assistant.py`. Context is collected by **parsing project files on disk** (`.kicad_pro`, `.kicad_sch`) — KiCad does **not** need to be open and `pcbnew` is **not** required for this path.
+
+```bash
+pip install wxPython   # macOS Terminal; skip if using KiCad Scripting Console
+python scripts/run_ai_assistant.py "/path/to/project.kicad_pro" --ui-chat
+```
+
+Full walkthrough: [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md).
+
+### KiCad Scripting Console
+
+Alternative when you want KiCad's bundled wxPython:
 
 1. Open your project in **KiCad PCB Editor** (`pcbnew`)
 2. Select **Tools > Scripting Console**
-3. Run project scripts from `scripts/` (once implemented)
+3. Run:
 
-### External execution
+```python
+exec(open("/absolute/path/to/KiCad_AI_Integration/scripts/run_ai_assistant.py").read())
+main_ui_chat("/absolute/path/to/project.kicad_pro")
+```
 
-Some unit tests can run outside KiCad using mocked `pcbnew` objects and file-based fixtures. See [Master Task List](../../tasks/MASTER_TASK_LIST.md) for the testing strategy.
+On macOS, Terminal launch is often more reliable than Scripting Console paste/focus.
+
+### Unit tests (no KiCad)
+
+Unit and integration tests run outside KiCad using file-based fixtures and mocked providers. See [05_Testing.md](05_Testing.md) and [Master Task List](../../tasks/MASTER_TASK_LIST.md).
 
 ## IDE configuration
 
@@ -93,3 +116,4 @@ Some unit tests can run outside KiCad using mocked `pcbnew` objects and file-bas
 - [KiCad Python API Scripting Guide](Guide-KiCad_Python_API_Custom_AI_Scripting.md)
 - [Programmatic AI Analysis Guide](Guide-Programmatic_AI_Analysis.md)
 - [In-KiCad Claude Chat Integration Guide](Guide-In_KiCad_Claude_Chat_Integration.md)
+- [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md)

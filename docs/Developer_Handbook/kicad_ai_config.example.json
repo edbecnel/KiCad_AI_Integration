@@ -1,0 +1,10 @@
+{
+  "_comment": "Copy to ~/kicad_ai_config.json and replace placeholder values. Never commit real API keys.",
+  "anthropic_api_key": "sk-ant-REPLACE_ME",
+  "ai_provider": "claude",
+  "claude_model": "claude-3-5-sonnet-20241022",
+  "artifact_library_path": "~/kicad_ai_library",
+  "datasheet_url_fetch": "if_missing",
+  "schematic_image_dpi": 600,
+  "provider_max_tokens": 4096
+}
