@@ -126,14 +126,12 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 ## Current Priorities
 
-**Track C — AERF + EIE depth** (see [Feature Overview](docs/User_Guides/Feature_Overview.md) Part 4):
+**Track C — AERF + EIE depth** (complete; see [Feature Overview](docs/User_Guides/Feature_Overview.md) Part 4):
 
 1. ~~Circuit family classifier from `DesignSnapshot`~~ (done — `src/reasoning/classifier.py`)
 2. ~~Per-stage prompt templates (ADP-007)~~ (done — `src/prompts/templates/aerf_stage.py`)
 3. ~~Full AERF multi-stage orchestration with approval gating~~ (done — `run_aerf_pipeline`, `--approve-send`, `--ui-aerf`)
 4. ~~EKM write-back from approved stage outputs (ADP-007)~~ (done — `src/ekm/aerf_writeback.py`, `--approve-ekm-writeback`, `--ui-aerf` Write to EKM)
-
-**Track C (complete):** classifier, prompts, pipeline, EKM write-back.
 
 **Track D — Engineering Notebook (ADP-003)** (complete):
 
@@ -142,9 +140,9 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 3. ~~Search, collapsible sections, renderer split (`src/ui/notebook_renderer.py`)~~ (done)
 4. ~~Non-modal panel + Advanced JSON view (`--ui-notebook-panel`)~~ (done)
 
-Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
+**Recommended next:** resolve project license; KiCad Phase 1 host gaps (PCB context, templates, unified Assistant shell) — **Track A**, defer unless prioritized.
 
-Also open: resolve project license; KiCad Phase 1 host gaps (PCB context, templates) — **Track A**, defer unless prioritized.
+Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
 
 **Testing:** [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — external-script E2E validation (no native plugin required).
 

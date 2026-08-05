@@ -200,11 +200,11 @@ Guiding principles include:
 
 # Current Status
 
-**Phase:** Post Track B — platform frameworks complete; **Track C** (AERF + EIE depth) is the recommended next milestone.
+**Phase:** Post Track C — platform frameworks (Tracks B–D) complete. **Track A** (KiCad Phase 1 host gaps: full PCB context, BOM/ERC/DRC, additional templates) is the recommended next milestone unless prioritized otherwise.
 
-**KiCad host (working):** Schematic context, datasheet library and panels (`--ui-datasheets`), chat UI with Approve & Send (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`, early), Claude provider, general-review prompts.
+**KiCad host (working):** Launcher (`--ui`), schematic context, datasheet library and panels (`--ui-datasheets`), chat UI with Approve & Send (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`), built-in sim model auto-apply, AERF staged analysis (`--ui-aerf`), Engineering Notebook (`--ui-notebook`), Claude provider, general-review prompts.
 
-**Platform:** EKM runtime + CLI (`src/ekm/`); AERF stage registry + KB loader (`src/reasoning/`); EIE chat, simulation orchestration, and AERF stage-0 stub (`src/inference/`). Blocking Oscillator reference KB complete (stages 00–07).
+**Platform:** EKM runtime + CLI (`src/ekm/`); AERF stage registry, classifier, KB loader, and full pipeline (`src/reasoning/`, `src/inference/aerf.py`); EIE chat and simulation orchestration (`src/inference/`); EKM write-back from approved AERF stages. Blocking Oscillator reference KB complete (stages 00–07).
 
 See [Feature Overview](docs/User_Guides/Feature_Overview.md) for capability status, platform/host separation, and gaps. To validate against your own project, follow [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md).
 

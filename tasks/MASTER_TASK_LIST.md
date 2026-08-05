@@ -5,14 +5,14 @@
 > **Status:** Maintained
 > **Owner:** Project maintainers
 > **Applies To:** KiCad AI Integration implementation tracking
-> **Last Reviewed:** 2026-07-14
+> **Last Reviewed:** 2026-08-05
 > **Review Frequency:** Monthly
 
 > Phased implementation backlog for the Python-scripting API integration with AI,
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 stretch slice + Tier 1 MVP path — artifact library, datasheet resolver, schematic image export, `ProjectContext`, Missing Datasheets wx panel, Claude provider, general-review prompt builder, and chat UI with Approve & Send (`--ui-chat`). PCB extractor and full template library not yet started.
+**Current repository status:** Phase 1 stretch slice + platform Tracks B–D complete. **Working:** launcher (`--ui`), schematic context + datasheet library, chat UI with Approve & Send (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`), built-in sim model auto-apply, AERF staged analysis (`--ui-aerf`), Engineering Notebook (`--ui-notebook`), EKM runtime + AERF write-back. **Still open:** full PCB extraction (tracks/vias/zones/net classes), BOM/ERC/DRC in context, additional prompt templates, native KiCad plugin, unified Assistant shell (ADP-011).
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -107,7 +107,7 @@ S-expression file parsing.
 
 #### Netlist
 
-- [ ] Export or parse netlist (SPICE or OrcadPCB2 format)
+- [x] Export or parse netlist (SPICE via `kicad-cli`; summary in `ProjectContext.netlist_summary`) — `src/context/netlist_export.py` (OrcadPCB2 format TBD)
 - [ ] Build connectivity graph / critical-node map — [kicad_ai_prep pattern](../docs/Developer_Handbook/Guide-Programmatic_AI_Analysis.md)
 
 #### BOM
@@ -136,7 +136,7 @@ S-expression file parsing.
 
 - [ ] Detect symbols with incomplete netlist connectivity — see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md)
 - [ ] Flag auto-generated net names (`Net-(…)`) and unconnected pins in context model
-- [ ] Detect symbols missing `Spice_Model` or unresolved `.include`/`.lib` references in exported SPICE netlist
+- [x] Detect symbols missing `Spice_Model` or unresolved `.include`/`.lib` references in exported SPICE netlist — `src/context/simulation_gaps.py`
 - [x] **Shared artifact library:** create `artifact_library_path` with `catalog.json`, `datasheets/`, `libs/`; dedupe by `sha256`
 - [x] **Per-project registry:** `kicad_ai/project_manifest.json` beside `.kicad_pro`; link to catalog entries
 - [x] **Reference tracking:** update `referenced_by` in catalog (project, schematic path, sheet, component ref) on each scan
@@ -150,10 +150,10 @@ S-expression file parsing.
 - [ ] **Project-wide force refresh datasheets (UI):** re-fetch all symbol HTTPS URLs with full catalog/`url_fetch_log` bypass — **Force refresh URLs** today only retries failed URL fetches
 - [x] **Catalog scan:** pick up new files in shared `datasheets/` — `ArtifactStore.scan_datasheets_folder()`
 - [x] **CLI user notice:** print **Manual datasheets required** when auto-fetch fails for datasheet-required parts (`context/datasheet_requirements.py`)
-- [x] SUBCKT routing: Tier A/B/C tier hints via `DatasheetResolution.tier_hint` (AI prompts not yet implemented)
-- [ ] Tier A: extract structured component facts from resolved PDF before `.SUBCKT` synthesis
-- [ ] Tier B: include symbol pin list, fields, footprint, schematic JSON, optional 600 DPI image in prompt
-- [ ] Emit `provenance.json` with datasheet path or `sources_used[]` per generated model
+- [x] SUBCKT routing: Tier A/B/C tier hints via `DatasheetResolution.tier_hint`; prompts in `src/prompts/templates/subckt.py`
+- [x] Tier A: extract structured component facts from resolved PDF before `.SUBCKT` synthesis — `src/context/pdf_text.py`, `build_subckt_facts_prompt` (requires optional `pypdf`)
+- [x] Tier B: include symbol pin list, fields, footprint, schematic context in prompt — `build_subckt_tier_b_prompt` (optional 600 DPI image in Tier B prompt TBD)
+- [x] Emit `provenance.json` with datasheet path or `sources_used[]` per generated model — `src/context/subckt_generation.py`
 
 #### Optional (Phase 1 stretch)
 
@@ -162,8 +162,12 @@ S-expression file parsing.
 
 ### 1.2 Project Context Model
 
-- [x] Define `ProjectContext` schema (dataclass or typed dict) — stretch slice in `src/context/model.py`
-- [ ] Include: metadata, components, nets, footprints, board_stats, constraints, bom, erc_results, drc_results
+- [x] Define `ProjectContext` schema (dataclass or typed dict) — stretch slice in `src/context/model.py`; implements `platform_core.DesignSnapshot`
+- [x] Include project metadata and components — `project_name`, `schematics`, `symbols`
+- [x] Include schematic connectivity (net labels) — `schematic_connectivity`
+- [x] Include PCB summary (footprint/net counts) — `pcb_summary` via `src/context/pcb_summary.py`
+- [x] Include SPICE netlist summary — `netlist_summary`
+- [ ] Include: full nets, footprints, board_stats, constraints, bom, erc_results, drc_results
 - [ ] Support optional `user_description` (design intent text) and `selection` context
 - [x] Serialize to JSON for prompt assembly and debugging
 - [ ] Support partial context flags (e.g. PCB-only, schematic-only, critical-nets-only)
@@ -177,13 +181,13 @@ S-expression file parsing.
 - [ ] PCB layout / trace audit template
 - [ ] Isolation and clearance audit template
 - [ ] Netlist-vs-visual cross-reference template — [AI Tools guide](../docs/Reference/AI_Tools_for_Advanced_Circuit_Analysis.md)
-- [ ] Netlist gap-fill template — connectivity inference and SUBCKT `.lib` generation — [Netlist Gap Fill spec](../docs/Specifications/Netlist_Gap_Fill.md)
-- [ ] SUBCKT Tier A two-stage prompts (PDF fact extraction, then model synthesis matched to KiCad pin order)
-- [ ] SUBCKT Tier B multi-source context prompt (symbol pins, fields, footprint, schematic context — no part-number-only)
-- [ ] SUBCKT Tier C last-resort prompt with mandatory `needs-manual-review` labeling
+- [ ] Netlist gap-fill template — connectivity inference and SUBCKT `.lib` generation — [Netlist Gap Fill spec](../docs/Specifications/Netlist_Gap_Fill.md) (SUBCKT templates exist; connectivity-inference template TBD)
+- [x] SUBCKT Tier A two-stage prompts (PDF fact extraction, then model synthesis matched to KiCad pin order) — `src/prompts/templates/subckt.py`, `src/context/subckt_generation.py`
+- [x] SUBCKT Tier B multi-source context prompt (symbol pins, fields, footprint, schematic context — no part-number-only)
+- [x] SUBCKT Tier C last-resort prompt with mandatory `needs-manual-review` labeling
 - [x] Use structured XML-style sections: `<functional_description>`, `<kicad_python_extracted_data>`, `<kicad_netlist>`, etc. — general review template
 - [x] Append user natural-language question to structured context
-- [ ] Token optimization: summarize large nets, omit S-expression noise, chunk oversized payloads
+- [x] Token optimization: compact symbol table for large schematics (>50 symbols) — `src/prompts/compact.py` (net/S-expression chunking TBD)
 - [ ] Configurable system-role persona per template (power electronics, embedded, general)
 
 ### 1.4 AI Provider Layer
@@ -197,6 +201,12 @@ S-expression file parsing.
 - [x] Attach schematic image as multimodal `image` content block when `ProjectContext.schematic_image` is present
 - [x] Return token usage metadata (input/output counts) for future Phase 2 display
 - [x] Design provider enum and config for future providers (OpenAI, Gemini, Ollama, etc.) — `ProviderKind`, `ai_provider` config
+
+### 1.4b Engineering Inference Engine (EIE)
+
+- [x] EIE chat workflow — `src/inference/chat.py` (context → prompt → provider → response)
+- [x] EIE simulation orchestration — `src/inference/simulation.py`
+- [x] EIE AERF pipeline orchestration — `src/inference/aerf.py` (see Track C)
 
 ### 1.5 KiCad User Interface (wxPython)
 
@@ -214,7 +224,11 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 - [x] Explicit Approve & Send step (security requirement) — chat dialog confirmation
 - [x] Read-only response display area — chat dialog
 - [x] Status bar or inline messages for errors and connection status — chat dialog status line
-- [x] Entry-point script runnable from KiCad Scripting Console (`scripts/run_ai_assistant.py`) — `--ui-chat`, `--ui-datasheets`, `--ask`
+- [x] **Launcher dialog** — project picker, context summary, panel shortcuts — `src/ui/launcher_dialog.py`, `--ui`
+- [x] **Simulation panel** — gap scan, SUBCKT generation, spice write-back — `--ui-simulation`, `src/ui/simulation_dialog.py`
+- [x] **AERF staged analysis panel** — per-stage Approve & Send — `--ui-aerf`, `src/ui/aerf_dialog.py`
+- [x] **Engineering Notebook UI** — modal and non-modal panel — `--ui-notebook`, `--ui-notebook-panel` (see Track D)
+- [x] Entry-point script runnable from KiCad Scripting Console (`scripts/run_ai_assistant.py`) — `--ui`, `--ui-chat`, `--ui-datasheets`, `--ui-simulation`, `--ui-aerf`, `--ui-notebook`, `--ask`
 
 ### 1.6 Integration, Tests & Examples
 
@@ -242,6 +256,16 @@ Full-flow checklists: [Testing With Your KiCad Project](../docs/User_Guides/Test
 - [ ] Add `examples/bedini_babcock/` sample project (or equivalent test project)
 - [ ] Include pre-built prompt template for flyback recovery audit
 - [ ] Document expected inputs and sample questions for manual validation — see [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
+
+### 1.7 Simulation & SUBCKT pipeline
+
+- [x] Simulation panel UI — `--ui-simulation`, gap scan, generate SUBCKT, write spice fields — `src/ui/simulation_dialog.py`
+- [x] SUBCKT generation orchestration — tier routing, validation, artifact registration — `src/context/subckt_generation.py`
+- [x] Spice field / KiCad 9+ sim write-back — `src/context/schematic_sim_write.py`, `src/context/schematic_write.py`
+- [x] Built-in simulation model resolver — R/C/L/diodes, KiCad 10 passive fix — `src/context/builtin_sim_models.py`
+- [x] Auto-apply built-in sim models on context refresh + Simulation panel **Apply built-in models** — `collector.py`, `simulation_dialog.py`
+- [x] Datasheet discovery prompt template — `src/prompts/templates/datasheet_discovery.py`
+- [x] Simulation gap summary in launcher — `summarize_simulation_gaps` in `launcher_dialog.py`
 
 **Phase 1 exit criteria:** Engineer opens KiCad, runs one script, asks a design question,
 reviews the context preview, approves transmission, and receives a context-aware Claude
@@ -317,17 +341,17 @@ beyond free-form chat.
 ### Component & datasheet intelligence
 
 - [ ] Component comparison from BOM parametric data
-- [ ] Datasheet resolver for gap-fill — symbol `Datasheet` field, local paths, user registration, controlled URL fetch, `url_fetch_log.json` (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md))
-- [ ] AI-assisted datasheet discovery mode — web search, auto-download, failure URLs + manual fallback — [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
+- [x] Datasheet resolver for gap-fill — symbol `Datasheet` field, local paths, user registration, controlled URL fetch, `url_fetch_log.json` (see Phase 1 stretch; [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md))
+- [x] AI-assisted datasheet discovery mode — web search, auto-download, failure URLs + manual fallback — [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md) (see Phase 1 stretch)
 - [x] Per-part datasheet reset — selective hard refresh by Value; Datasheets panel + `--reset-datasheet` CLI (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#per-part-datasheet-reset))
 - [ ] Project-wide force refresh datasheets — re-download all HTTPS URLs with full catalog + failed-log bypass (partial: **Force refresh URLs** retries failed fetches only)
-- [ ] Datasheet text extraction from resolved PDFs for SUBCKT Tier A
+- [x] Datasheet text extraction from resolved PDFs for SUBCKT Tier A — `src/context/pdf_text.py` (see Phase 1 stretch Tier A)
 - [ ] Circuit explanation mode (topology walkthrough from schematic context)
 
 ### Code & simulation generation
 
 - [ ] KiCad Python script generation from AI responses (with validation sandbox)
-- [ ] SPICE simulation assistance (netlist export + template prompts)
+- [x] SPICE simulation assistance (netlist export + SUBCKT generation + spice write-back) — partial: functional `--ui-simulation` panel; closed-loop sim validation TBD (ADP-006)
 - [ ] Suggest alternative circuits or component substitutions
 
 ### Interactive engineering
@@ -345,11 +369,13 @@ not only free-form chat.
 
 ### Documentation
 
-- [ ] User install and setup guide (API key, KiCad version, first run)
-- [ ] Developer guide (repo layout, running tests, adding extractors/providers)
+- [x] User install and setup guide (API key, KiCad version, first run) — partial: [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [00_First_Time_Setup](../docs/Developer_Handbook/00_First_Time_Setup.md)
+- [x] Developer guide (repo layout, running tests, adding extractors/providers) — partial: [Developer Handbook](../docs/Developer_Handbook/README.md); contribution workflow TBD
 - [x] Architecture docs: Prompt Architecture, AI Provider Interface, Roadmap
 - [x] Feature Overview: KiCad host capabilities, platform scope, how-it-works, and gap summary — [Feature Overview](../docs/User_Guides/Feature_Overview.md) (authoritative scope reference)
-- [ ] Keep README current status section updated per phase completion
+- [x] [Custom Trifilar Coil Simulation Setup](../docs/User_Guides/Custom_Trifilar_Coil_Simulation_Setup.md) user guide
+- [x] ADR-0010: AERP Platform Umbrella acronym — [ADR-0010](../docs/Architecture/ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md)
+- [x] Keep README current status section updated per phase completion
 
 ### Security
 
@@ -362,7 +388,7 @@ not only free-form chat.
 
 - [x] pytest suite runnable without KiCad installed
 - [ ] Mock `pcbnew` for unit tests
-- [ ] Golden-file prompt snapshots to catch regressions
+- [x] Golden-file prompt snapshots to catch regressions — `tests/prompts/golden/`, `tests/context/golden/`
 - [ ] CI pipeline: lint + unit tests (optional KiCad-in-Docker for integration)
 
 ### Project housekeeping
@@ -442,6 +468,39 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 
 ---
 
+## Track C — AERF + EIE depth (complete)
+
+**Goal:** Full staged AERF orchestration with circuit-family classification, per-stage prompts, approval-gated pipeline, and EKM write-back. See [Feature Overview](../docs/User_Guides/Feature_Overview.md) Part 4.
+
+### Standing documentation checklist (each milestone)
+
+- [x] Update [Feature Overview](../docs/User_Guides/Feature_Overview.md) platform gaps table
+- [x] Check off items in this section
+- [x] Update [ADP-010](../docs/Architecture/ADP-010-Engineering-Inference-Engine.md) §8 when EIE changes
+- [x] Run `pytest` (platform tests must not require KiCad/wx)
+
+### Phase C1 — Circuit family classifier
+
+- [x] `src/reasoning/classifier.py` — classify `DesignSnapshot` against circuit-family KB
+
+### Phase C2 — AERF stage prompts
+
+- [x] Per-stage prompt templates — `src/prompts/templates/aerf_stage.py`
+
+### Phase C3 — AERF pipeline
+
+- [x] Multi-stage orchestration with approval gating — `run_aerf_pipeline`, `--approve-send`, `--ui-aerf`
+
+### Phase C4 — EKM write-back
+
+- [x] Map approved stage outputs to EKM sections — `src/ekm/aerf_writeback.py`, `--approve-ekm-writeback`, AERF UI **Write to EKM**
+
+### Platform contracts
+
+- [x] `platform_core.DesignSnapshot` protocol — `src/platform_core/contracts.py`
+
+---
+
 ## AERF — AI Engineering Reasoning Framework
 
 **Goal:** Establish staged engineering reasoning as a foundational architectural pillar. See [ADP-008](../docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) and [ADR-0007](../docs/Architecture/ADRs/ADR-0007-AERF-Foundation.md).
@@ -492,7 +551,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 | AI Provider Layer | Phase 1 | `src/providers/` abstraction + Claude impl |
 | KiCad User Interface | Phase 1 → 2 | `src/ui/` dialogs → unified Assistant shell ([ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md)) + dockable plugin |
 | Conversation Manager | Phase 2 | `src/` session/history module |
-| AERF Orchestrator | Phase 3 | `src/reasoning/` staged analysis pipeline |
+| AERF Orchestrator | Track C (complete) | `src/reasoning/`, `src/inference/aerf.py` staged analysis pipeline |
 
 ---
 
