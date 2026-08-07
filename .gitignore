@@ -50,3 +50,4 @@ htmlcov/
 # Per-project assistant exports (machine-local)
 kicad_ai/exports/
 tests/fixtures/kicad_ai/
+reports/handover/*
