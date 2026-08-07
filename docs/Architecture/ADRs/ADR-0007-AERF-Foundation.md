@@ -35,7 +35,7 @@ Adopt the **AI Engineering Reasoning Framework (AERF)** as a foundational archit
 - **Coexistence:** `general_review` remains valid for ad-hoc questions; AERF is the structured path for deep circuit analysis
 - **Approval:** Cloud transmission per stage (or batch) and EKM write-back require explicit user approval
 
-Implementation is deferred. Subsequent work defines orchestrator code, per-stage prompt templates (ADP-007), circuit family classifier, and simulation closed loop (ADP-006).
+Phase 1 implementation complete: `src/reasoning/` stage registry and KB loader, circuit family classifier (`src/reasoning/classifier.py`), AERF orchestration (`src/inference/aerf.py`), per-stage prompts and EKM write-back ([ADP-007](../ADP-007-AERF-Prompt-Integration.md)), and `--ui-aerf` UI. Simulation closed loop ([ADP-006](../ADP-006-Simulation-Abstraction.md)) remains open.
 
 ## Alternatives Considered
 
@@ -82,9 +82,8 @@ Implementation is deferred. Subsequent work defines orchestrator code, per-stage
 ## Implementation Notes
 
 - No code changes in this ADR; architecture only
+- **Implementation status:** Tracks B–C complete; Blocking Oscillator KB in `docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/`; orchestrator in `src/reasoning/` and `src/inference/aerf.py`
 - EDF domain scaffold: `docs/Engineering_Knowledge/`
-- First circuit family KB content (Blocking Oscillator) deferred to next milestone
-- Orchestrator target: `src/reasoning/` (future)
 
 ## References
 

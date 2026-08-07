@@ -33,7 +33,7 @@ Adopt the **Engineering Knowledge Model (EKM)** as the canonical representation 
 - **Minimum metamodel:** Versioned document with sections, typed fields, stable IDs, optional links, and metadata extension points (formalized in [ADP-002](../ADP-002-EKM-Schema-and-Persistence.md)).
 - **Security:** EKM cloud transmission and AI write-back require explicit user approval.
 
-Implementation is deferred. Subsequent ADPs define schema, UI, NL conversion, provenance, simulation integration, and prompt integration per [ADP-001 Appendix A](../ADP-001-Engineering-Knowledge-Model-Foundation.md#appendix-a-deferred-decisions).
+Phased implementation (Tracks B–D): EKM runtime (`src/ekm/`), schema validation, View Model, Engineering Notebook UI (`--ui-notebook`), and AERF write-back are implemented. Still deferred per [ADP-001 Appendix A](../ADP-001-Engineering-Knowledge-Model-Foundation.md#appendix-a-deferred-decisions): NL conversion (ADP-004), provenance semantics (ADP-005), simulation closed loop ([ADP-006](../ADP-006-Simulation-Abstraction.md)).
 
 ## Alternatives Considered
 
@@ -78,8 +78,8 @@ Implementation is deferred. Subsequent ADPs define schema, UI, NL conversion, pr
 ## Implementation Notes
 
 - No code changes in this ADR; architecture only
+- **Implementation status:** EKM load/save/validate in `src/ekm/`; persistence at `kicad_ai/engineering_knowledge.json` per [ADP-002](../ADP-002-EKM-Schema-and-Persistence.md); prompt integration and write-back per [ADP-007](../ADP-007-AERF-Prompt-Integration.md)
 - Ephemeral `functional_description` in chat migrates to EKM over time
-- Suggested persistence path: `kicad_ai/engineering_knowledge.json` (defined in [ADP-002](docs/Architecture/ADP-002-EKM-Schema-and-Persistence.md))
 - Schema home: [`docs/Database/`](../../Database/README.md)
 
 ## References

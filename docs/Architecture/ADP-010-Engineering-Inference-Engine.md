@@ -96,21 +96,21 @@ Circuit Family KB┘         ├──► Stage artifacts (transient)
 
 `src/ui/chat_supply.py` re-exports these functions for backward compatibility.
 
-### 6.2 Simulation / SUBCKT gap-fill (partial)
+### 6.2 Simulation / SUBCKT gap-fill (implemented)
 
-`src/ui/simulation_supply.py` remains host-adjacent until simulation workflow is refactored into `src/inference/simulation.py` (future milestone).
+`src/inference/simulation.py` orchestrates SUBCKT gap scan and generation. `src/ui/simulation_supply.py` re-exports for backward compatibility. Closed-loop sim validation remains under [ADP-006](ADP-006-Simulation-Abstraction.md).
 
-### 6.3 AERF staged analysis (planned)
+### 6.3 AERF staged analysis (implemented)
 
-EIE will:
+EIE:
 
-1. Load circuit family KB excerpts via `src/reasoning/`
-2. Execute stages 0–7 sequentially with accumulated context
-3. Build per-stage prompts (ADP-007) — implemented in `src/prompts/templates/aerf_stage.py`
-4. Execute stages sequentially via `run_aerf_pipeline()` / `run_aerf_stage()` with `approve_send` gate
-5. Require user approval per stage or batch before cloud transmission (`--approve-send`, `--ui-aerf`)
-6. Route simulation hooks to simulation abstraction (ADP-006, future)
-7. Gate EKM write-back (ADP-007, Track C4)
+1. Loads circuit family KB excerpts via `src/reasoning/`
+2. Executes stages 0–7 sequentially with accumulated context
+3. Builds per-stage prompts — [ADP-007](ADP-007-AERF-Prompt-Integration.md), `src/prompts/templates/aerf_stage.py`
+4. Executes stages via `run_aerf_pipeline()` / `run_aerf_stage()` with `approve_send` gate
+5. Requires user approval per stage or batch before cloud transmission (`--approve-send`, `--ui-aerf`)
+6. Routes simulation hooks to simulation abstraction ([ADP-006](ADP-006-Simulation-Abstraction.md), closed loop deferred)
+7. Gates EKM write-back — [ADP-007](ADP-007-AERF-Prompt-Integration.md), Track C4
 
 ---
 
@@ -144,10 +144,12 @@ EIE will:
 
 ## 9. Acceptance Criteria
 
-- EIE package exists at `src/inference/` with no KiCad UI imports
-- Chat workflow migrated from `chat_supply.py` with backward-compatible re-exports
-- AERF and EKM packages exist as documented stubs for future implementation
-- Platform import boundaries documented in [Platform Architecture](Platform_Architecture.md)
+- [x] EIE package exists at `src/inference/` with no KiCad UI imports
+- [x] Chat workflow migrated from `chat_supply.py` with backward-compatible re-exports
+- [x] AERF pipeline implemented (`src/inference/aerf.py`, `src/reasoning/`)
+- [x] EKM runtime implemented (`src/ekm/`) with AERF write-back ([ADP-007](ADP-007-AERF-Prompt-Integration.md))
+- [x] Platform import boundaries documented in [Platform Architecture](Platform_Architecture.md)
+- [ ] Simulation closed loop ([ADP-006](ADP-006-Simulation-Abstraction.md))
 
 ---
 

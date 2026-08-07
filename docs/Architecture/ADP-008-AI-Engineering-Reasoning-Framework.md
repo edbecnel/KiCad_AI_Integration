@@ -26,7 +26,7 @@ This Architectural Design Proposal (ADP) defines the **AI Engineering Reasoning 
 
 AERF is a **reasoning process and ontology**, not a replacement for KiCad, simulation engines, or the Engineering Knowledge Model (EKM). It defines *how* the plugin progressively builds engineering understanding rather than immediately sending a schematic to a large language model for a single-shot answer.
 
-This document establishes the architecture only. Runtime orchestration, prompt templates, and circuit family classifiers are deferred to future ADPs and implementation work.
+Runtime orchestration, per-stage prompt templates, and circuit family classification are implemented per [ADP-007](ADP-007-AERF-Prompt-Integration.md) and `src/reasoning/classifier.py`. Simulation closed loop remains under [ADP-006](ADP-006-Simulation-Abstraction.md).
 
 ---
 
@@ -134,7 +134,7 @@ See [ADP-001 §6](ADP-001-Engineering-Knowledge-Model-Foundation.md#6-architectu
 | Circuit Family KB | Reusable domain reference knowledge | Repository lifetime |
 | AERF stage outputs | Per-analysis reasoning artifacts | Session / optional archive |
 | EKM | Curated engineering knowledge (intent, rationale, assumptions, decisions) | Project lifetime |
-| Simulation results | Validated measurements and waveforms | Project lifetime (via future ADP-006) |
+| Simulation results | Validated measurements and waveforms | Project lifetime (via [ADP-006](ADP-006-Simulation-Abstraction.md), closed loop deferred) |
 | Conversation Manager | Raw multi-turn chat transcripts | Session / optional archive |
 
 Per [ADP-001 §18](ADP-001-Engineering-Knowledge-Model-Foundation.md#18-relationship-to-conversation-manager), conversations are **input**; the EKM is **distilled output** after user approval. AERF stage outputs are intermediate reasoning — not automatically persisted to the EKM.
@@ -234,7 +234,7 @@ Every stage produces a JSON artifact with this minimum structure:
 }
 ```
 
-- `determinations` — stage-specific structured content (schema defined per stage in the Stage Index); significant determinations should carry knowledge classification and evidence chains per [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md) (formal JSON schema extension deferred to ADP-007)
+- `determinations` — stage-specific structured content (schema defined per stage in the Stage Index); significant determinations should carry knowledge classification and evidence chains per [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md) (prompt/write-back contract in [ADP-007](ADP-007-AERF-Prompt-Integration.md))
 - `open_questions` — items requiring user input, measurement, or further analysis
 - `confidence` — overall confidence for this stage's conclusions
 - `unknowns` — explicitly flagged gaps; the AI must not fabricate information to fill these (see [Integrity Principle](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md#8-integrity-principle))
@@ -289,7 +289,7 @@ See [`docs/Engineering_Knowledge/Circuit_Families/README.md`](../Engineering_Kno
 
 ## 11. Circuit Family Recognition
 
-Circuit family recognition is a **conceptual first step** before loading family-specific KB content. Implementation is deferred to a future ADP.
+Circuit family recognition selects family-specific KB content before staged analysis. Heuristic classifier implemented in `src/reasoning/classifier.py`; user hints and EKM context remain supported inputs.
 
 ### Inputs
 
@@ -362,7 +362,7 @@ Simulation supports AERF; it does not replace it.
 2. **Validate and refine** — Simulation results from Stage 7 (or earlier `simulation_hooks`) confirm, challenge, or refine prior determinations.
 3. **Never substitute** — The AI must not defer Stage 3 (Physical Principles) or Stage 4 (Component Roles) to "run a simulation and see."
 4. **Explicit hooks** — Each stage may emit `simulation_hooks` describing what to simulate, expected outcomes, and which prior determination would be validated.
-5. **Closed loop (future)** — Per ADP-006, simulation results feed back into stage refinement; implementation is deferred.
+5. **Closed loop (future)** — Per [ADP-006](ADP-006-Simulation-Abstraction.md), simulation results feed back into stage refinement; implementation is deferred.
 
 ### Relationship to existing SUBCKT workflow
 
@@ -372,7 +372,7 @@ The two-stage SUBCKT generation pipeline (`facts` → `synthesis` in `subckt_gen
 
 ## 14. Relationship to Prompt Architecture
 
-Each AERF stage maps to a named prompt template (future work under ADP-007). Prompts use structured XML-style sections per [Prompt Architecture](Prompt_Architecture.md):
+Each AERF stage maps to a named prompt template ([ADP-007](ADP-007-AERF-Prompt-Integration.md)). Prompts use structured XML-style sections per [Prompt Architecture](Prompt_Architecture.md):
 
 - `<aerf_stage>` — current stage metadata (id, key, title, question)
 - `<aerf_prior_stages>` — accumulated JSON from stages 0 through N−1
@@ -381,7 +381,7 @@ Each AERF stage maps to a named prompt template (future work under ADP-007). Pro
 - `<engineering_knowledge>` — relevant EKM sections (when present)
 - `<user_question>` — optional user focus for this stage
 
-Stage prompt templates are **not implemented** in this milestone.
+Stage prompt templates are implemented in [`src/prompts/templates/aerf_stage.py`](../../src/prompts/templates/aerf_stage.py) per [ADP-007](ADP-007-AERF-Prompt-Integration.md).
 
 ---
 
@@ -389,7 +389,7 @@ Stage prompt templates are **not implemented** in this milestone.
 
 AERF produces transient reasoning artifacts. The EKM stores curated conclusions.
 
-### Mapping (conceptual; schema in [ADP-002](ADP-002-EKM-Schema-and-Persistence.md); full write-back mapping deferred to ADP-007)
+### Mapping (implemented; see [ADP-007](ADP-007-AERF-Prompt-Integration.md) §6)
 
 | AERF output | EKM destination |
 |-------------|-----------------|
@@ -439,16 +439,15 @@ See [Security](../AI/Security.md).
 
 ## 19. Implementation
 
-Implementation is intentionally deferred.
-
-| Component | Assigned to |
-|-----------|-------------|
-| AERF orchestrator (`src/reasoning/`) | Future implementation |
-| Per-stage prompt templates | ADP-007 |
-| Circuit family classifier | Future ADP |
-| EKM stage-output mapping | ADP-007 |
-| Simulation closed loop | ADP-006 |
-| First circuit family KB content | Next milestone (Blocking Oscillator) |
+| Component | Status | Location / ADP |
+|-----------|--------|----------------|
+| AERF stage registry + KB loader | Implemented | `src/reasoning/` |
+| AERF orchestration + approval gating | Implemented | `src/inference/aerf.py` |
+| Per-stage prompt templates | Implemented | [ADP-007](ADP-007-AERF-Prompt-Integration.md), `src/prompts/templates/aerf_stage.py` |
+| Circuit family classifier | Implemented | `src/reasoning/classifier.py` |
+| EKM stage-output mapping / write-back | Implemented | [ADP-007](ADP-007-AERF-Prompt-Integration.md), `src/ekm/aerf_writeback.py` |
+| Simulation closed loop | Deferred | [ADP-006](ADP-006-Simulation-Abstraction.md) |
+| First circuit family KB (Blocking Oscillator) | Implemented | `docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/` |
 
 ---
 

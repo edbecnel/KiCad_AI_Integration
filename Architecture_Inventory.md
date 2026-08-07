@@ -17,9 +17,12 @@ docs/Architecture/
 ├── ADP-001-Engineering-Knowledge-Model-Foundation.md
 ├── ADP-002-EKM-Schema-and-Persistence.md
 ├── ADP-003-Engineering-Notebook-User-Interface.md
+├── ADP-006-Simulation-Abstraction.md
+├── ADP-007-AERF-Prompt-Integration.md
 ├── ADP-008-AI-Engineering-Reasoning-Framework.md
 ├── ADP-009-Host-Integration-Layer.md
 ├── ADP-010-Engineering-Inference-Engine.md
+├── ADP-011-Assistant-Shell-UI.md
 └── ADRs/
     ├── README.md
     ├── ADR-0001-KiCad-8-Minimum-Version.md
@@ -30,7 +33,8 @@ docs/Architecture/
     ├── ADR-0006-Engineering-Notebook-UI.md
     ├── ADR-0007-AERF-Foundation.md
     ├── ADR-0008-EKM-Schema-and-Persistence.md
-    └── ADR-0009-Platform-Architecture-Foundation.md
+    ├── ADR-0009-Platform-Architecture-Foundation.md
+    └── ADR-0010-AERP-Platform-Umbrella-Acronym.md
 ```
 
 Note: A `.DS_Store` file exists in `docs/Architecture/` but is not part of the documentation set.
@@ -332,7 +336,7 @@ Phase 1 supports optional multimodal schematic context via an external export pi
 
 **Status:** Accepted (2026-07-28)
 
-The project adopts the Engineering Knowledge Model (EKM) as the canonical representation of project engineering knowledge, layered as User → Engineering Notebook UI → View Model → EKM → JSON persistence. EKM owns authored knowledge (intent, rationale, assumptions, curated decisions); KiCad owns connectivity; `ProjectContext` owns extracted facts; Conversation Manager owns raw chat transcripts. JSON persists under per-project `kicad_ai/` with required `schema_version`. Implementation is deferred; full schema and related concerns are assigned to future ADPs per ADP-001 Appendix A.
+The project adopts the Engineering Knowledge Model (EKM) as the canonical representation of project engineering knowledge. EKM runtime, schema validation, Notebook UI, and AERF write-back are implemented (Tracks B–D). NL conversion (ADP-004), provenance (ADP-005), and simulation closed loop (ADP-006) remain deferred per ADP-001 Appendix A.
 
 ---
 
@@ -340,7 +344,7 @@ The project adopts the Engineering Knowledge Model (EKM) as the canonical repres
 
 **Status:** Accepted (2026-07-28)
 
-The Engineering Notebook is adopted as the primary user-facing interface to the EKM, with dynamic rendering from EKM sections and fields, a View Model for validation and presentation state, a field-type registry mapping EKM primitives to presentation components, and dockable KiCad panel integration as a sibling surface to chat. Binary content renders via artifact library references. Hard-coded discipline-specific pages, direct JSON editing as primary surface, and merging notebook into chat were all rejected. Implementation is deferred; schema contract defined in ADP-002 / ADR-0008.
+The Engineering Notebook is adopted as the primary user-facing interface to the EKM. Phase 1 notebook UI is implemented (`--ui-notebook`); dockable KiCad plugin shell remains Phase 2.
 
 ---
 
@@ -348,7 +352,7 @@ The Engineering Notebook is adopted as the primary user-facing interface to the 
 
 **Status:** Accepted (2026-07-28)
 
-The project adopts the AI Engineering Reasoning Framework (AERF) as a foundational pillar alongside the EKM, defining eight canonical reasoning stages (0–7) with circuit-family-specific knowledge overlays, transient stage outputs, and curated EKM conclusions after user approval. Circuit family content lives in `docs/Engineering_Knowledge/Circuit_Families/` as documentation, not plugin code. Simulation validates prior reasoning rather than substituting for it. `general_review` remains valid for ad-hoc questions. Single-shot prompts, embedded domain logic, and EKM-only models were rejected. Implementation is deferred.
+The project adopts AERF as a foundational pillar alongside the EKM. Orchestration, classifier, per-stage prompts (ADP-007), Blocking Oscillator KB, and EKM write-back are implemented. Simulation closed loop (ADP-006) remains open.
 
 ---
 
@@ -374,7 +378,7 @@ The project adopts a three-layer platform architecture (Platform / Frameworks / 
 
 **Status:** Accepted (v1.1, 2026-07-28), ratified by ADR-0005
 
-ADP-001 defines the Engineering Knowledge Model as the canonical representation of engineering knowledge associated with a KiCad project, extending schematics by capturing design rationale, assumptions, constraints, measurements, and curated decisions. It establishes the layering architecture (User → Notebook UI → View Model → EKM → JSON persistence), authority boundaries separating KiCad connectivity from authored knowledge, a versioned minimum metamodel with sections and typed fields, domain independence at the primitive level, and security/approval requirements for cloud transmission and AI write-back. Implementation is deferred; subsequent ADPs (002–008) address schema, UI, NL conversion, provenance, simulation, prompt integration, and AERF.
+ADP-001 defines the Engineering Knowledge Model as canonical project engineering knowledge. Tracks B–D implemented EKM runtime, Notebook UI, AERF, and prompt/write-back integration (ADP-007). ADP-004, ADP-005, and ADP-006 closed loop remain deferred.
 
 ---
 
@@ -382,7 +386,7 @@ ADP-001 defines the Engineering Knowledge Model as the canonical representation 
 
 **Status:** Accepted (v1.0, 2026-07-29), ratified by ADR-0008, builds on ADP-001
 
-ADP-002 formalizes the EKM minimum metamodel into a canonical JSON Schema (`docs/Database/ekm_schema_v1.json`), defines persistence at `kicad_ai/engineering_knowledge.json`, semver migration policy, KiCadLink and ArtifactReference formats, metadata extension shell for ADP-005, staleness detection contract, and Git policy. Empty documents are valid. Implementation of View Model validation and migration tooling is deferred.
+ADP-002 formalizes the EKM minimum metamodel into a canonical JSON Schema (`docs/Database/ekm_schema_v1.json`), defines persistence at `kicad_ai/engineering_knowledge.json`, semver migration policy, KiCadLink and ArtifactReference formats, metadata extension shell for ADP-005, staleness detection contract, and Git policy. EKM runtime and View Model are implemented in `src/ekm/`; migration tooling remains future work.
 
 ---
 
@@ -390,7 +394,7 @@ ADP-002 formalizes the EKM minimum metamodel into a canonical JSON Schema (`docs
 
 **Status:** Accepted (v1.0, 2026-07-28), ratified by ADR-0006, builds on ADP-001
 
-ADP-003 defines the Engineering Notebook as the primary human interface to the EKM, dynamically generated from EKM content with no hard-coded engineering pages. It specifies the View Model and Notebook Renderer separation, primitive field type mapping (`text`, `number`, `enum`, `reference`, `measurement`, `attachment`), artifact library references for binary content, editing pathway (UI → View Model → EKM → persist), navigation features, and KiCad dockable panel integration as a sibling to chat. The notebook displays authored EKM knowledge only, not editable `ProjectContext` facts. Implementation is deferred; schema upstream dependency satisfied by ADP-002.
+ADP-003 defines the Engineering Notebook as the primary human interface to the EKM, dynamically generated from EKM content with no hard-coded engineering pages. Track D implementation is complete except dockable KiCad action plugin shell (Phase 2). Widget ready in `src/ui/notebook_panel.py`.
 
 ---
 
@@ -398,7 +402,7 @@ ADP-003 defines the Engineering Notebook as the primary human interface to the E
 
 **Status:** Accepted (v1.1, 2026-07-29), ratified by ADR-0007, builds on ADP-001
 
-ADP-008 defines AERF as a standardized eight-stage engineering reasoning process (circuit identification through engineering analysis) that sits between context collection and EKM population. It specifies stage execution with accumulated context, per-stage JSON output contracts, internal engineering reasoning methodology (v1.1), knowledge classification and evidence chains, circuit family overlay model with title overrides, knowledge loading from `docs/Engineering_Knowledge/Circuit_Families/`, simulation philosophy (reason first, validate second), coexistence with `general_review` for ad-hoc questions, and EKM write-back mapping. The how-layer is defined in `Engineering_Reasoning_Methodology.md`. Circuit family recognition, orchestrator code, per-stage prompt templates, and simulation closed loop are deferred to future ADPs and implementation work.
+ADP-008 defines AERF as a standardized eight-stage engineering reasoning process. Orchestration, per-stage prompts (ADP-007), classifier, Blocking Oscillator KB, and EKM write-back are implemented. Simulation closed loop remains under ADP-006.
 
 ---
 
@@ -406,7 +410,7 @@ ADP-008 defines AERF as a standardized eight-stage engineering reasoning process
 
 **Status:** Accepted (v1.0, 2026-07-29), ratified by ADR-0009, builds on Platform Architecture and ADP-001
 
-ADP-009 defines the Host Integration Layer contract: `DesignSnapshot` protocol, host responsibilities (collect, UI shell, artifact root, object linking, write-back), and KiCad as the reference implementation. Physical `src/hosts/` reorganization and `HostLink` generalization are deferred until a second host is actively developed.
+ADP-009 defines the Host Integration Layer contract: `DesignSnapshot` protocol (implemented), host responsibilities, and KiCad as reference implementation. `HostLink` generalization deferred until a second host is actively developed.
 
 ---
 
@@ -414,7 +418,31 @@ ADP-009 defines the Host Integration Layer contract: `DesignSnapshot` protocol, 
 
 **Status:** Accepted (v1.0, 2026-07-29), ratified by ADR-0009, builds on ADP-008 and ADP-009
 
-ADP-010 defines EIE as the platform runtime orchestrator distinct from AERF methodology. It specifies ad-hoc chat workflow in `src/inference/`, future AERF staged orchestration, and migration from `*_supply.py` modules. EKM and full AERF orchestration remain deferred.
+ADP-010 defines EIE as the platform runtime orchestrator. Chat, simulation/SUBCKT, AERF pipeline, and EKM write-back are implemented in `src/inference/` and `src/ekm/`. Simulation closed loop remains under ADP-006.
+
+---
+
+## ADP-006: Simulation Abstraction
+
+**Status:** Proposed (v1.0, 2026-08-07), builds on ADP-008, ADP-009, ADP-010
+
+Defines host-agnostic simulation abstraction and closed-loop stage refinement. SPICE netlist export and SUBCKT pipeline are implemented; closed-loop validation/refinement is deferred.
+
+---
+
+## ADP-007: AERF Prompt Integration and EKM Write-Back
+
+**Status:** Accepted (v1.0, 2026-08-07), builds on ADP-002, ADP-008, ADP-010
+
+Documents per-stage AERF prompts (`src/prompts/templates/aerf_stage.py`) and EKM write-back mapping (`src/ekm/aerf_writeback.py`). Implementation complete.
+
+---
+
+## ADP-011: Assistant Shell User Interface
+
+**Status:** Proposed (v1.0, 2026-07-31), not implemented
+
+Defines unified tabbed Assistant shell replacing launcher + separate modals. Target for Phase 2 dockable plugin and `--ui` consolidation.
 
 ---
 
@@ -423,7 +451,7 @@ ADP-010 defines EIE as the platform runtime orchestrator distinct from AERF meth
 ## Hub and index documents
 
 - `docs/Architecture/README.md` is the central index linking to all major architecture documents, ADRs, ADPs, and `ARCHITECTURE_DECISIONS.md` at the repository root.
-- `docs/Architecture/ADRs/README.md` indexes all nine ADRs with status and date.
+- `docs/Architecture/ADRs/README.md` indexes all ten ADRs with status and date.
 - `docs/Architecture/Platform_Architecture.md` is the authoritative platform overview above KiCad-specific documents.
 
 ## ADP ↔ ADR ratification pairs
@@ -433,9 +461,12 @@ ADP-010 defines EIE as the platform runtime orchestrator distinct from AERF meth
 | ADP-001 (EKM Foundation) | ADR-0005 |
 | ADP-002 (EKM Schema and Persistence) | ADR-0008 |
 | ADP-003 (Engineering Notebook UI) | ADR-0006 |
+| ADP-006 (Simulation Abstraction) | — (proposed) |
+| ADP-007 (AERF Prompt Integration) | — (retrospective ADP) |
 | ADP-008 (AERF) | ADR-0007 |
 | ADP-009 (Host Integration Layer) | ADR-0009 |
 | ADP-010 (EIE) | ADR-0009 |
+| ADP-011 (Assistant Shell UI) | — (proposed) |
 
 Each ADR summarizes and records acceptance of its corresponding ADP; the ADPs contain full architectural rationale.
 
@@ -450,7 +481,7 @@ ADP-005 → ADP-007
 ADP-008 → ADP-007, ADP-006
 ```
 
-ADP-003 depends on ADP-001 and ADP-002 (ratified). ADP-008 builds on ADP-001 and relates to ADP-007 (prompt integration, proposed).
+ADP-003 depends on ADP-001 and ADP-002 (ratified). ADP-008 builds on ADP-001; ADP-007 documents prompt integration (implemented). ADP-006 covers simulation closed loop (deferred).
 
 ## Software Architecture as component hub
 
@@ -471,7 +502,7 @@ ADR-0005, ADR-0006, ADR-0007 and ADP-001, ADP-003, ADP-008 form a second archite
 - ADP-001 defines EKM authority boundaries with `ProjectContext` and Conversation Manager
 - ADP-003 defines Notebook UI as EKM presentation layer
 - ADP-008 defines AERF as reasoning layer feeding EKM after approval
-- All three ADPs reference `Prompt_Architecture.md` for prompt integration (future ADP-007)
+- All three ADPs reference `Prompt_Architecture.md` for prompt integration ([ADP-007](docs/Architecture/ADP-007-AERF-Prompt-Integration.md))
 
 ## External domain references (outside docs/Architecture/)
 
@@ -548,7 +579,7 @@ The following architecture topics are documented under `docs/Architecture/`:
 - Named engineering audit templates (general review implemented; others planned)
 - Multimodal schematic image inclusion criteria and export pipeline
 - Netlist gap-fill prompt templates (connectivity inference, SUBCKT generation tiers A/B/C)
-- Future AERF stage prompt templates
+- Future AERF stage prompt templates — implemented ([ADP-007](docs/Architecture/ADP-007-AERF-Prompt-Integration.md))
 - Token budgeting strategies (planned)
 
 ## Platform architecture
@@ -583,7 +614,7 @@ The following architecture topics are documented under `docs/Architecture/`:
 - Domain independence and extensibility
 - JSON persistence under `kicad_ai/` with `schema_version`
 - Relationship to `ProjectContext` and Conversation Manager
-- Deferred topics: provenance (ADP-005), NL conversion (ADP-004), simulation (ADP-006), prompt integration (ADP-007)
+- Deferred topics: provenance (ADP-004), NL conversion (ADP-005), simulation closed loop (ADP-006); prompt integration (ADP-007) implemented
 
 ## Engineering Notebook UI
 
@@ -627,23 +658,23 @@ The following architecture topics are documented under `docs/Architecture/`:
 
 ## docs/Architecture/ADRs/README.md
 
-**Purpose:** Index for the Architecture Decision Records subdirectory. Contains a table of all nine ADRs with ID, decision title, status (all Accepted), and date. Provides navigation links back to the project index, Architecture README, and root `ARCHITECTURE_DECISIONS.md`.
+**Purpose:** Index for the Architecture Decision Records subdirectory. Contains a table of all ten ADRs with ID, decision title, status (all Accepted), and date. Provides navigation links back to the project index, Architecture README, and root `ARCHITECTURE_DECISIONS.md`.
 
 ---
 
 # 8. Executive Summary
 
-The `docs/Architecture/` directory contains **20 Markdown files** organized into a root-level index, six topical architecture documents, five Architectural Design Proposals (ADPs), and nine Architecture Decision Records (ADRs) plus an ADR index.
+The `docs/Architecture/` directory contains **24 Markdown files** organized into a root-level index, six topical architecture documents, nine Architectural Design Proposals (ADPs), and ten Architecture Decision Records (ADRs) plus an ADR index.
 
 **Document types and status:**
 
 - **Index documents (2):** `README.md` files at the Architecture root and in `ADRs/` serve as navigation hubs.
 - **Top-level architecture (6):** Platform Architecture is Canonical; Software Architecture (KiCad host) and Roadmap are Draft; Prompt Architecture and AI Provider Interface document implemented Phase 1 behavior.
-- **ADPs (5):** ADP-001 (EKM), ADP-002 (schema), ADP-003 (Notebook UI), ADP-008 (AERF), ADP-009 (Host Layer), ADP-010 (EIE) are Accepted and ratified by corresponding ADRs.
-- **ADRs (9):** All Accepted. ADR-0001 through ADR-0004 establish Phase 1 foundation. ADR-0005 through ADR-0008 ratify EKM, Notebook, AERF, and EKM schema. ADR-0009 ratifies platform architecture foundation.
+- **ADPs (9):** ADP-001 through ADP-003, ADP-008 through ADP-011 are Accepted or Proposed; ADP-006 (simulation abstraction) and ADP-007 (prompt integration) added 2026-08-07.
+- **ADRs (10):** All Accepted. ADR-0001 through ADR-0004 establish Phase 1 foundation. ADR-0005 through ADR-0008 ratify EKM, Notebook, AERF, and EKM schema. ADR-0009 ratifies platform architecture foundation. ADR-0010 ratifies AERP umbrella acronym.
 
 **Architectural themes documented:** In-KiCad AI assistant with phased delivery; context collection from KiCad projects; structured prompt construction with optional multimodal schematic images; provider abstraction starting with Claude; persistent engineering knowledge via EKM and Engineering Notebook UI; staged circuit analysis via AERF with circuit-family knowledge overlays; explicit security and user-approval boundaries for cloud transmission.
 
 **Cross-referencing:** Documents are heavily interlinked. `README.md` is the central hub. ADPs and ADRs form ratification pairs. ADP-001 Appendix A documents a dependency graph for future ADPs. Multiple documents reference external domains (`docs/AI/`, `docs/Engineering_Knowledge/`, `docs/Database/`, `docs/Specifications/`, `tasks/MASTER_TASK_LIST.md`, and source code paths).
 
-**Implementation state as documented:** Phase 1 components (provider layer, prompt templates, multimodal export) are described as implemented or in progress in some documents; EKM, Engineering Notebook, AERF orchestrator, and Conversation Manager are documented as architectural proposals with implementation explicitly deferred.
+**Implementation state as documented:** Phase 1 components and Tracks B–D (EKM runtime, Notebook UI, AERF orchestration, EIE, ADP-007 write-back) are implemented. Simulation closed loop (ADP-006), unified Assistant shell (ADP-011), and Conversation Manager remain open.

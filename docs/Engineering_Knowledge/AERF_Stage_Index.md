@@ -288,7 +288,7 @@ Every stage output includes this envelope in addition to `determinations`:
 }
 ```
 
-Significant determinations should carry knowledge classification and evidence chains per [Engineering Reasoning Methodology](Engineering_Reasoning_Methodology.md). Formal JSON schema extension for evidence chains is deferred to ADP-007.
+Significant determinations should carry knowledge classification and evidence chains per [Engineering Reasoning Methodology](Engineering_Reasoning_Methodology.md). Prompt and write-back contract: [ADP-007](../Architecture/ADP-007-AERF-Prompt-Integration.md).
 
 ---
 

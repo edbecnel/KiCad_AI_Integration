@@ -79,8 +79,8 @@ This proposal is not intended to:
 - Define provenance semantics (`source`, `confidence`, `status`, revision history) — deferred to ADP-005.
 - Define natural language → EKM conversion — deferred to ADP-004.
 - Define notebook rendering or View Model implementation — deferred to ADP-003 implementation.
-- Define AERF stage → EKM write-back mapping — deferred to ADP-007 (conceptual mapping exists in [ADP-008 §15](ADP-008-AI-Engineering-Reasoning-Framework.md)).
-- Define simulation or measurement integration semantics — deferred to ADP-006.
+- Define AERF stage → EKM write-back mapping — implemented in [ADP-007](ADP-007-AERF-Prompt-Integration.md) (`src/ekm/aerf_writeback.py`).
+- Define simulation or measurement integration semantics — deferred to [ADP-006](ADP-006-Simulation-Abstraction.md).
 - Ship plugin-shipped default engineering sections — empty documents are valid.
 - Implement migration tooling or validation code — deferred to implementation.
 
@@ -444,10 +444,10 @@ Platform runtime: [`src/ekm/`](../../src/ekm/) (load/save/validate, View Model, 
 | Component | Assigned to |
 |-----------|-------------|
 | EKM load/save/validate runtime | `src/ekm/` (implemented) |
-| View Model load/save/validate | ADP-003 implementation |
-| Migration functions per version | Implementation milestone |
+| View Model load/save/validate | `src/ekm/view_model.py` (implemented) |
+| Migration functions per version | Future milestone |
 | JSON Schema CI validation tests | `tests/ekm/` (structural validation implemented) |
-| Staleness detection against `ProjectContext` | ADP-003 / ADP-007 implementation |
+| Staleness detection against `ProjectContext` | Contract defined; UI/prompt-time handling partial ([ADP-007](ADP-007-AERF-Prompt-Integration.md)) |
 
 ---
 
@@ -539,8 +539,8 @@ Ratified as [ADR-0008: EKM Schema and Persistence](ADRs/ADR-0008-EKM-Schema-and-
 | Provenance `metadata` key semantics | ADP-005 |
 | Natural language → EKM conversion | ADP-004 |
 | Simulation/measurement field extensions | ADP-006 |
-| AERF stage → EKM write-back mapping | ADP-007 |
-| EKM summarization and token management | ADP-007 |
+| AERF stage → EKM write-back mapping | [ADP-007](ADP-007-AERF-Prompt-Integration.md) (implemented) |
+| EKM summarization and token management | [ADP-007](ADP-007-AERF-Prompt-Integration.md) (partial) |
 | Conflict resolution, undo/redo | ADP-004 / implementation |
 | Optimistic concurrency control | Implementation |
 

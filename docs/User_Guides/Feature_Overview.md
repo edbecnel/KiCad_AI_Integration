@@ -232,7 +232,7 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | EIE (`src/inference/`) | Chat + simulation + AERF pipeline + EKM write-back | Notebook AI edit proposals |
 | Engineering Notebook UI | Full primitive editors, search, JSON view (`--ui-notebook`) | Dockable KiCad plugin (Phase 2) |
 | Conversation Manager | Deferred Phase 2 | Multi-turn transcripts |
-| Simulation abstraction | ADP-006 planned | Host-agnostic validation hooks |
+| Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Host-agnostic validation hooks; closed loop deferred |
 | Blocking Oscillator KB | Complete (00–07) | Additional circuit families |
 
 ### Bottom line

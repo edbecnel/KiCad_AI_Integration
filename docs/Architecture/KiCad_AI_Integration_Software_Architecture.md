@@ -158,8 +158,8 @@ Responsibilities (planned)
 - Load Circuit Family KB excerpts from `docs/Engineering_Knowledge/`
 - Execute AERF stages 0–7 sequentially with accumulated context
 - Emit structured JSON per stage
-- Route simulation hooks to simulation subsystem (future ADP-006)
-- Distill approved conclusions to EKM (future ADP-007)
+- Route simulation hooks to simulation subsystem ([ADP-006](ADP-006-Simulation-Abstraction.md); closed loop deferred)
+- Distill approved conclusions to EKM ([ADP-007](ADP-007-AERF-Prompt-Integration.md); implemented)
 
 Target location: `src/reasoning/` (stub created; full implementation deferred)
 

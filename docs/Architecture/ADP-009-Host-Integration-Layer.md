@@ -116,10 +116,11 @@ A new host implements the same five responsibilities with host-specific collecto
 
 ## 9. Acceptance Criteria
 
-- `DesignSnapshot` protocol is defined in code
-- `ProjectContext` satisfies the protocol without rename
-- Platform modules do not import KiCad parsers or UI
-- KiCad host behavior is documented in [KiCad Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
+- [x] `DesignSnapshot` protocol is defined in code (`src/platform_core/contracts.py`)
+- [x] `ProjectContext` satisfies the protocol without rename
+- [x] Platform modules do not import KiCad parsers or UI (EIE, EKM, reasoning, prompts)
+- [x] KiCad host behavior is documented in [KiCad Software Architecture](KiCad_AI_Integration_Software_Architecture.md)
+- [ ] `HostLink` generalization beyond `KiCadLink` — deferred until a second host is actively developed ([§8](ADP-009-Host-Integration-Layer.md#8-future-hosts))
 
 ---
 

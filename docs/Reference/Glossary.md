@@ -92,9 +92,12 @@ These frameworks are components of **AERP** — the host-agnostic stack. See [AE
 | **ADP-001** | Engineering Knowledge Model Foundation |
 | **ADP-002** | EKM Schema and Persistence |
 | **ADP-003** | Engineering Notebook User Interface |
+| **ADP-006** | Simulation Abstraction (proposed — closed loop deferred) |
+| **ADP-007** | AERF Prompt Integration and EKM Write-Back (implemented) |
 | **ADP-008** | AI Engineering Reasoning Framework |
 | **ADP-009** | Host Integration Layer |
 | **ADP-010** | Engineering Inference Engine |
+| **ADP-011** | Assistant Shell User Interface (proposed — not implemented) |
 
 ### Planned ADPs (referenced, no standalone doc yet)
 
@@ -102,8 +105,6 @@ These frameworks are components of **AERP** — the host-agnostic stack. See [AE
 |----|---------------------------------------|
 | **ADP-004** | Natural-language / EKM conversion (planned) |
 | **ADP-005** | EKM provenance and metadata semantics (planned) |
-| **ADP-006** | Simulation abstraction — host-agnostic validation hooks (planned) |
-| **ADP-007** | Prompt integration and EKM stage-output write-back mapping (`src/prompts/templates/aerf_stage.py`, `src/ekm/aerf_writeback.py`) |
 
 ### ADRs (0001–0010)
 

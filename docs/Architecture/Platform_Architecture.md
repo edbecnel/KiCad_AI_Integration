@@ -55,7 +55,7 @@ AI-assisted Electrical Engineering Reasoning Platform
 | **Artifact Library** | Content-addressed datasheets, SPICE libs, exports | [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md) | `src/context/artifacts/` |
 | **Engineering Knowledge Libraries** | Circuit-family reference content | [Engineering Knowledge](../Engineering_Knowledge/README.md) | `docs/Engineering_Knowledge/` |
 | **Conversation Manager** | Raw multi-turn transcripts (input, not canonical knowledge) | Software Architecture Component 5 | Deferred Phase 2+ |
-| **Simulation Abstraction** | Validation hooks independent of ngspice/KiCad sim | ADP-006 (planned) | Deferred |
+| **Simulation Abstraction** | Validation hooks independent of ngspice/KiCad sim | [ADP-006](ADP-006-Simulation-Abstraction.md) | Closed loop deferred |
 
 ### AERF vs EIE
 

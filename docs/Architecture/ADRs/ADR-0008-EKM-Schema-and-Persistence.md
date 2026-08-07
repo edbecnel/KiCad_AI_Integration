@@ -37,7 +37,7 @@ Adopt the **EKM schema and persistence contract** defined in ADP-002 and [`ekm_s
 - **Git:** Commit `engineering_knowledge.json` to project VCS; reference-not-embed policy for binary content.
 - **Empty documents:** Valid (`sections: []`); no plugin-shipped default engineering sections.
 
-Implementation of load/save, migration tooling, and CI schema tests is deferred.
+EKM load/save/validate runtime is implemented in `src/ekm/` with structural validation tests in `tests/ekm/`. Migration tooling and full CI schema gate remain future milestones.
 
 ## Alternatives Considered
 
@@ -88,9 +88,9 @@ Implementation of load/save, migration tooling, and CI schema tests is deferred.
 ## Implementation Notes
 
 - No code changes in this ADR; architecture and schema only
+- **Implementation status:** See [ADP-002 §18](../ADP-002-EKM-Schema-and-Persistence.md#18-implementation) and Track B in [MASTER_TASK_LIST](../../../tasks/MASTER_TASK_LIST.md)
 - Canonical schema: [`docs/Database/ekm_schema_v1.json`](../../Database/ekm_schema_v1.json)
 - Example document: [ADP-002 Appendix A](../ADP-002-EKM-Schema-and-Persistence.md#appendix-a-example-engineering_knowledgejson)
-- Existing `*_supply.py` headless patterns should evolve into View Model validation layer
 
 ## References
 

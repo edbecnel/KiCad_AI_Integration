@@ -5,7 +5,7 @@
 > **Status:** Maintained
 > **Owner:** Project maintainers
 > **Applies To:** KiCad AI Integration implementation tracking
-> **Last Reviewed:** 2026-08-05
+> **Last Reviewed:** 2026-08-07
 > **Review Frequency:** Monthly
 
 > Phased implementation backlog for the Python-scripting API integration with AI,
@@ -375,6 +375,8 @@ not only free-form chat.
 - [x] Feature Overview: KiCad host capabilities, platform scope, how-it-works, and gap summary — [Feature Overview](../docs/User_Guides/Feature_Overview.md) (authoritative scope reference)
 - [x] [Custom Trifilar Coil Simulation Setup](../docs/User_Guides/Custom_Trifilar_Coil_Simulation_Setup.md) user guide
 - [x] ADR-0010: AERP Platform Umbrella acronym — [ADR-0010](../docs/Architecture/ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md)
+- [x] ADP-006: Simulation abstraction (architecture) — [ADP-006](../docs/Architecture/ADP-006-Simulation-Abstraction.md); closed-loop implementation open
+- [x] ADP-007: AERF prompt integration and EKM write-back — [ADP-007](../docs/Architecture/ADP-007-AERF-Prompt-Integration.md)
 - [x] Keep README current status section updated per phase completion
 
 ### Security
@@ -498,6 +500,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 ### Platform contracts
 
 - [x] `platform_core.DesignSnapshot` protocol — `src/platform_core/contracts.py`
+- [ ] `HostLink` generalization beyond `KiCadLink` — deferred until second host ([ADP-009](../docs/Architecture/ADP-009-Host-Integration-Layer.md) §8–9)
 
 ---
 

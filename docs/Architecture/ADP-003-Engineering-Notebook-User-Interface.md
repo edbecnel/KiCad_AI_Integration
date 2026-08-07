@@ -386,16 +386,20 @@ Optional future panels that show extracted design snapshots alongside EKM conten
 
 ## 18. Implementation
 
-Implementation is intentionally deferred.
+Track D (notebook UI) is implemented except dockable KiCad action plugin shell (Phase 2).
 
-Subsequent ADPs will define:
+| Component | Status | Location |
+|-----------|--------|----------|
+| View Model load/save/validate | Implemented | `src/ekm/view_model.py` |
+| Field-type registry | Implemented | `src/ekm/field_registry.py` |
+| Notebook renderer | Implemented | `src/ui/notebook_renderer.py` |
+| Modal / non-modal notebook UI | Implemented | `--ui-notebook`, `--ui-notebook-panel` |
+| Advanced JSON view (debug) | Implemented | notebook shell tab |
+| Dockable KiCad plugin shell | Deferred | Phase 2; `src/ui/notebook_panel.py` widget ready |
+| NL capture | Deferred | ADP-004 (not authored) |
+| Provenance visualization | Deferred | ADP-005 (not authored) |
 
-- Natural language capture ([ADP-004](ADP-001-Engineering-Knowledge-Model-Foundation.md#appendix-a-deferred-decisions)).
-- Dynamic renderer implementation details.
-- AI integration.
-- Provenance visualization ([ADP-005](ADP-001-Engineering-Knowledge-Model-Foundation.md#appendix-a-deferred-decisions)).
-
-Full EKM JSON Schema, persistence file naming, and migration policy are defined in [ADP-002](ADP-002-EKM-Schema-and-Persistence.md). ADP-003 implementation should validate against [`ekm_schema_v1.json`](../Database/ekm_schema_v1.json).
+Full EKM JSON Schema, persistence file naming, and migration policy are defined in [ADP-002](ADP-002-EKM-Schema-and-Persistence.md). Notebook implementation validates against [`ekm_schema_v1.json`](../Database/ekm_schema_v1.json).
 
 ---
 

@@ -34,7 +34,7 @@ Adopt the **Engineering Notebook** as the primary user-facing interface to the E
 - **Editing pathway:** UI → View Model (validate) → EKM → persist. AI mutations require explicit user approval.
 - **Authority:** Notebook displays authored EKM knowledge only; extracted `ProjectContext` facts are not editable EKM content.
 
-Implementation is deferred. ADP-002 (schema and persistence) should precede or run in parallel with implementation. Conflict resolution, undo/redo, and provenance visualization are deferred per ADP-001 Appendix A.
+Phase 1 implementation complete: notebook renderer (`src/ui/notebook_renderer.py`), View Model integration (`src/ekm/view_model.py`), modal and non-modal notebook UI (`--ui-notebook`, `--ui-notebook-panel`). Dockable KiCad action plugin shell remains Phase 2 (widget ready in `src/ui/notebook_panel.py`). Conflict resolution, undo/redo, and provenance visualization remain deferred per ADP-001 Appendix A.
 
 ## Alternatives Considered
 
@@ -79,9 +79,9 @@ Implementation is deferred. ADP-002 (schema and persistence) should precede or r
 ## Implementation Notes
 
 - No code changes in this ADR; architecture only
-- Existing `*_supply.py` headless pattern should evolve into the View Model layer
+- **Implementation status:** Track D complete except dockable KiCad plugin shell (Phase 2); see [MASTER_TASK_LIST](../../../tasks/MASTER_TASK_LIST.md) Track D and [ADP-003](../ADP-003-Engineering-Notebook-User-Interface.md) §18
 - Advanced JSON View is debugging-only, outside normal notebook editing
-- Staleness detection contract in [ADP-002 §13](ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links); UI indicators at ADP-003 implementation
+- Staleness detection contract in [ADP-002 §13](ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links); UI indicators deferred
 
 ## References
 

@@ -201,7 +201,7 @@ Evidence chains produce explainable engineering reasoning rather than opaque AI 
 }
 ```
 
-Formal JSON schema requirements for evidence chains in stage output envelopes are deferred to ADP-007 (prompt integration). This document defines the conceptual model.
+Formal JSON schema requirements for evidence chains in stage output envelopes are defined in [ADP-007](../Architecture/ADP-007-AERF-Prompt-Integration.md) (prompt integration). This document defines the conceptual model.
 
 ---
 

@@ -32,9 +32,12 @@ Individual ADRs belong in [docs/Architecture/ADRs/](docs/Architecture/ADRs/READM
 | [ADP-001](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) | Engineering Knowledge Model foundation | Accepted (v1.1) | 2026-07-28 |
 | [ADP-002](docs/Architecture/ADP-002-EKM-Schema-and-Persistence.md) | EKM schema and persistence | Accepted (v1.0) | 2026-07-29 |
 | [ADP-003](docs/Architecture/ADP-003-Engineering-Notebook-User-Interface.md) | Engineering Notebook user interface | Accepted (v1.0) | 2026-07-28 |
+| [ADP-006](docs/Architecture/ADP-006-Simulation-Abstraction.md) | Simulation abstraction | Proposed (v1.0) | 2026-08-07 |
+| [ADP-007](docs/Architecture/ADP-007-AERF-Prompt-Integration.md) | AERF prompt integration and EKM write-back | Accepted (v1.0) | 2026-08-07 |
 | [ADP-008](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) | AI Engineering Reasoning Framework | Accepted (v1.0) | 2026-07-28 |
 | [ADP-009](docs/Architecture/ADP-009-Host-Integration-Layer.md) | Host Integration Layer | Accepted (v1.0) | 2026-07-29 |
 | [ADP-010](docs/Architecture/ADP-010-Engineering-Inference-Engine.md) | Engineering Inference Engine | Accepted (v1.0) | 2026-07-29 |
+| [ADP-011](docs/Architecture/ADP-011-Assistant-Shell-UI.md) | Assistant Shell user interface | Proposed (v1.0) | 2026-07-31 |
 
 ## Related Documents
 
