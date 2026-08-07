@@ -3,6 +3,7 @@
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [Developer Handbook](README.md)
 
 > **Status:** Maintained  
+> **Owner:** Project maintainers  
 > **Applies To:** Manual validation of Phase 1 Tier 1 slices
 
 ## Prerequisites

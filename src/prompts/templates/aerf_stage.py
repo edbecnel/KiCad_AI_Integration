@@ -8,6 +8,12 @@ from typing import Any
 from platform_core.contracts import DesignSnapshot
 from prompts.compact import compact_snapshot_for_prompt
 from reasoning import get_stage, load_stage_excerpt
+from reasoning.stage_schemas import (
+    EVIDENCE_CHAIN_EXAMPLE_JSON,
+    ENVELOPE_SCHEMA_JSON,
+    KNOWLEDGE_CLASSIFICATION_KEYS,
+    STAGE_DETERMINATIONS_SCHEMA_JSON,
+)
 from reasoning.stages import AERFStage
 
 STAGE_QUESTIONS: dict[int, str] = {
@@ -21,20 +27,33 @@ STAGE_QUESTIONS: dict[int, str] = {
     7: "What conclusions can an experienced engineer draw?",
 }
 
-AERF_METHODOLOGY_EXCERPT = """\
+_CLASSIFICATION_LIST = ", ".join(KNOWLEDGE_CLASSIFICATION_KEYS)
+
+AERF_METHODOLOGY_EXCERPT = f"""\
 Follow the Engineering Reasoning Methodology for this stage:
-1. Classify observations (measured, extracted, inferred, assumed, theoretical).
-2. Generate hypotheses supported by evidence; note competing explanations.
-3. Trace topology, component roles, and energy/signal paths as applicable.
-4. Estimate confidence (high, medium, low) and flag unknowns explicitly.
-5. Produce determinations with traceable evidence chains — never present assumptions as established fact.
+
+1. Evidence collection — use project_context, circuit_family_kb, prior_stages, engineering_knowledge, user hints.
+2. Observation classification — assign knowledge_classification to significant statements using keys:
+   {_CLASSIFICATION_LIST}
+3. Hypothesis generation — form hypotheses supported by evidence; note competing explanations.
+4. Topology recognition, component roles, energy/signal path tracing as applicable to this stage.
+5. Confidence estimation — overall stage confidence: high, medium, or low.
+6. Unknown identification — list gaps in unknowns; do not fabricate data to fill them.
+7. Contradictory evidence — surface conflicts; lower confidence or add open_questions when unresolved.
+8. Integrity principle — never present assumptions, hypotheses, theoretical_framework, or
+   project_design_intent as established engineering knowledge without classification.
+9. Scientific neutrality — respect project_design_intent; do not dismiss unconventional designs;
+   classify theoretical_framework separately from mainstream_engineering_model when they differ.
+10. Traceable conclusions — significant determinations should include evidence chains (see aerf_evidence_model).
 """
 
 AERF_STAGE_SYSTEM = (
     "You are an expert electronics design engineer performing staged AERF circuit analysis. "
     "Answer the stage question using the structured context below. "
-    "Return JSON with keys: stage_id, stage_key, determinations, open_questions, unknowns, confidence. "
-    "Significant determinations must include knowledge classification and evidence chains."
+    "Return a single JSON object matching aerf_output_schema (envelope + determinations for this stage). "
+    "Required envelope keys: stage_id, stage_key, determinations, open_questions, unknowns, confidence. "
+    "Optional: simulation_hooks, sources. "
+    "Significant determinations must use knowledge_classification and evidence chains per aerf_methodology."
 )
 
 
@@ -60,6 +79,8 @@ def build_aerf_stage_sections(
     excerpt = load_stage_excerpt(family_id, stage_id)
     context_data = compact_snapshot_for_prompt(snapshot)
 
+    determinations_schema = STAGE_DETERMINATIONS_SCHEMA_JSON.get(stage_id, "{}")
+
     sections: dict[str, str] = {}
     sections["aerf_stage"] = json.dumps(_stage_metadata(stage), indent=2)
     sections["aerf_prior_stages"] = json.dumps(prior_stages or [], indent=2)
@@ -67,6 +88,11 @@ def build_aerf_stage_sections(
     sections["kicad_python_extracted_data"] = json.dumps(context_data, indent=2)
     sections["engineering_knowledge"] = json.dumps(ekm_sections or {}, indent=2)
     sections["aerf_methodology"] = AERF_METHODOLOGY_EXCERPT.strip()
+    sections["aerf_evidence_model"] = EVIDENCE_CHAIN_EXAMPLE_JSON.strip()
+    sections["aerf_output_schema"] = (
+        f"Envelope shape:\n{ENVELOPE_SCHEMA_JSON.strip()}\n\n"
+        f"determinations schema for stage {stage_id}:\n{determinations_schema.strip()}"
+    )
     return sections
 
 

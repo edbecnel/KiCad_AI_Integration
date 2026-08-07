@@ -1,7 +1,3 @@
-[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md) · Stage 04
-
-> **AERF stage:** 4 — Component Roles · **Authoritative stage defs:** [AERF Stage Index](../../AERF_Stage_Index.md)
-
 ---
 title: Component Roles
 level: 4
@@ -10,6 +6,8 @@ status: Draft
 ---
 
 # 04 - Component Roles
+
+[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md)
 
 **Previous:** [[03 - Physical Principles]] · **Next:** [[05 - Operating Modes]] · **Knowledge Base:** [[README]]
 

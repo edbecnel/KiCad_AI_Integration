@@ -16,6 +16,7 @@ For day-to-day project engineering (setup, Git, coding, testing), see [Developer
 
 ## Related Documents
 
+- [Reference Notes](Reference_Notes/How_the_Bedini_SSG_Oscillates_Without_a_Capacitor.md) — Bedini SSG blocking oscillator background
 - [Governance Checklist](../Governance/Governance_Checklist.md)
 - [Engineering Documentation Framework](../../ENGINEERING_DOCUMENTATION_FRAMEWORK.md)
 

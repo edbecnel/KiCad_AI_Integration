@@ -6,8 +6,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from context.collector import collect_stretch_context
+from context.context_flags import ContextIncludeFlags
 from context.model import ProjectContext
-from prompts import BuiltPrompt, build_general_review_prompt
+from prompts import BuiltPrompt, build_general_review_prompt, build_pcb_layout_prompt
 from providers import get_provider
 from providers.types import ProviderResponse
 from utils.config import AppConfig, load_config
@@ -44,13 +45,23 @@ def build_chat_prompt(
     *,
     functional_description: str | None = None,
     include_image: bool = False,
+    include: ContextIncludeFlags | None = None,
+    template: str = "general_review",
 ) -> BuiltPrompt:
-    """Build the general review prompt for chat."""
+    """Build the chat prompt (general review or PCB layout audit)."""
+    if template == "pcb_layout_audit":
+        return build_pcb_layout_prompt(
+            ctx,
+            question,
+            functional_description=functional_description,
+            include=include,
+        )
     return build_general_review_prompt(
         ctx,
         question,
         functional_description=functional_description,
         include_image=include_image,
+        include=include,
     )
 
 

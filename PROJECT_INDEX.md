@@ -15,7 +15,7 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 | Phase | Phase 1 — stretch slice + provider + chat UI (in progress) |
 | Code | Schematic context, datasheet resolver, Missing Datasheets UI, Claude provider, prompt builder (general review), chat UI (`--ui-chat`) |
 | Documentation framework | EDF Phase 3 — ADRs and architecture stubs complete |
-| License | To be determined |
+| License | MIT — see [LICENSE](LICENSE) |
 
 ## Core Documents
 
@@ -107,6 +107,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 - [User Guides](docs/User_Guides/README.md)
 - [Feature Overview](docs/User_Guides/Feature_Overview.md) — KiCad capabilities, platform scope, and how the system works
+- [How AERF Works](docs/User_Guides/How_AERF_Works.md) — staged analysis vs Chat and copy-paste workflows
 - [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — validate chat, AERF, and Notebook with your own schematic
 
 ### Reference
@@ -152,4 +153,4 @@ AI assistants should begin here, follow links to authoritative documents, and av
 
 ## Last Reviewed
 
-2026-07-31
+2026-08-07

@@ -1,0 +1,169 @@
+Engineering Documentation Framework Adoption Conformance Validation
+===================================================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Started: 2026-08-07 16:28:07 +0800
+
+Framework Advisor conformance analysis
+--------------------------------------
+Engineering Documentation Framework Advisor
+Ruleset: 2026-07-10-stage1
+===========================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Project name: KiCad_AI_Integration
+Repository mode: EDF adopting project
+Overall compliance: 67%
+Structure score: 100%
+AI score: 100%
+Navigation score: 0%
+Governance score: 70%
+
+This report is read-only.
+No files or folders were created, modified, moved, renamed, or deleted.
+
+Missing required directories
+----------------------------
+None.
+
+Missing recommended root files
+------------------------------
+None.
+
+Missing AI handbook files
+-------------------------
+None.
+
+Missing Governance files
+------------------------
+None.
+
+Broken links
+------------
+- .cursor/Handover.md -> docs/User_Guides/Feature_Overview.md
+- .cursor/Handover.md -> tasks/MASTER_TASK_LIST.md
+- .cursor/Handover.md -> docs/Architecture/Platform_Architecture.md
+- .cursor/Handover.md -> docs/Architecture/ADRs/ADR-0009-Platform-Architecture-Foundation.md
+- .cursor/Handover.md -> docs/User_Guides/Feature_Overview.md
+- .cursor/Handover.md -> tasks/MASTER_TASK_LIST.md
+- PROJECT_OVERVIEW.md -> [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- PROJECT_OVERVIEW.md -> [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- PROJECT_INDEX.md -> [Software Architecture (KiCad Host)](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- docs/Engineering_Knowledge/README.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 00%20-%20Circuit%20Identification.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 01%20-%20Basic%20Oscillation.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 02%20-%20Energy%20Flow.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 03%20-%20Physical%20Principles.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 04%20-%20Component%20Roles.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 05%20-%20Operating%20Modes.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 06%20-%20System%20Behavior.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 07%20-%20Engineering%20Analysis.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 00%20-%20Circuit%20Identification.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 01%20-%20Basic%20Oscillation.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 02%20-%20Energy%20Flow.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 03%20-%20Physical%20Principles.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 04%20-%20Component%20Roles.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 05%20-%20Operating%20Modes.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 06%20-%20System%20Behavior.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/README.md -> 07%20-%20Engineering%20Analysis.md
+- docs/Engineering_Knowledge/Engineering_Reasoning_Methodology.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/User_Guides/Feature_Overview.md -> [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- docs/Architecture/README.md -> [Software Architecture (KiCad Host)](KiCad_AI_Integration_Software_Architecture.md)
+- docs/Architecture/ADRs/ADR-0006-Engineering-Notebook-UI.md -> ADP-001-Engineering-Knowledge-Model-Foundation.md
+- docs/Architecture/ADRs/ADR-0006-Engineering-Notebook-UI.md -> ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links
+- docs/Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md -> ADP-001-Engineering-Knowledge-Model-Foundation.md
+- docs/Architecture/ADRs/ADR-0008-EKM-Schema-and-Persistence.md -> ADP-003-Engineering-Notebook-User-Interface.md
+- docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md -> [AI Engineering Reasoning Framework (ADP-008)](ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Developer_Handbook/README.md -> [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- README.md -> [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- README.md -> [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- examples/bedini_babcock/README.md -> ../docs/User_Guides/Testing_With_Your_KiCad_Project.md
+- examples/bedini_babcock/README.md -> ../docs/Developer_Handbook/06_E2E_Chat_UI.md
+- examples/bedini_babcock/README.md -> ../docs/Developer_Handbook/07_E2E_Full_Flow.md
+
+Orphan documents
+----------------
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/06 - System Behavior.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/00 - Circuit Identification.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/07 - Engineering Analysis.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/04 - Component Roles.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/02 - Energy Flow.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/01 - Basic Oscillation.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/03 - Physical Principles.md
+- docs/Engineering_Knowledge/Circuit_Families/Blocking_Oscillator/05 - Operating Modes.md
+- examples/bedini_babcock/README.md
+- Architecture_Inventory.md
+- HANDOVER.md
+- reports/handover/HANDOVER-20260801.md
+
+Navigation issues
+-----------------
+- docs/User_Guides/Custom_Trifilar_Coil_Simulation_Setup.md: missing breadcrumb navigation.
+- docs/User_Guides/Custom_Trifilar_Coil_Simulation_Setup.md: missing parent domain README link.
+
+Governance metadata and lifecycle issues
+----------------------------------------
+- docs/Specifications/AI_Datasheet_Discovery.md: missing or invalid Status.
+- docs/Specifications/AI_Datasheet_Discovery.md: missing Owner.
+- docs/Specifications/AI_Datasheet_Discovery.md: missing Applies To.
+- docs/User_Guides/Testing_With_Your_KiCad_Project.md: missing or invalid Status.
+- docs/Development/Reference_Notes/How_the_Bedini_SSG_Oscillates_Without_a_Capacitor.md: missing or invalid Status.
+- docs/Architecture/Platform_Architecture.md: missing or invalid Status.
+- docs/Architecture/AI_Provider_Interface.md: missing or invalid Status.
+- docs/Architecture/Prompt_Architecture.md: missing or invalid Status.
+- docs/Developer_Handbook/07_E2E_Full_Flow.md: missing or invalid Status.
+- docs/Developer_Handbook/06_E2E_Chat_UI.md: missing or invalid Status.
+
+Overdue reviews
+---------------
+None.
+
+Markdown outside canonical locations
+------------------------------------
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- examples/bedini_babcock/README.md
+- Architecture_Inventory.md
+- HANDOVER.md
+- reports/handover/HANDOVER-20260801.md
+
+Warnings
+--------
+None.
+
+Recommendations
+---------------
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+- Add required breadcrumb and parent navigation.
+- Correct governance metadata and lifecycle issues.
+
+
+Validation completed: 2026-08-07 16:28:33 +0800
+
+============================================================
+Conformance validation completed successfully.
+
+Report:
+reports/conformance/framework-advisor-20260807-162807.txt
+
+Compliance scores:
+- Overall: 67%
+- Structure: 100%
+- AI: 100%
+- Navigation: 0%
+- Governance: 70%
+
+Next recommended actions:
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+- Add required breadcrumb and parent navigation.
+- Correct governance metadata and lifecycle issues.
+============================================================

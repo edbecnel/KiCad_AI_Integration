@@ -17,6 +17,8 @@ tags:
 
 # 01 - Basic Oscillation
 
+[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md)
+
 **Previous:** [[00 - Circuit Identification]]
 
 **Next:** [[02 - Energy Flow]]

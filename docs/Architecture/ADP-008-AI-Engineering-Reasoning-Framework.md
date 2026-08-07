@@ -100,7 +100,7 @@ KiCad Project
 Context Collection Engine → ProjectContext
    │
    ▼
-Circuit Family Recognition (conceptual; implementation deferred)
+Circuit Family Recognition (heuristic classifier + user hint + EKM prior)
    │
    ▼
 Load Circuit Family Knowledge Base (reference content)

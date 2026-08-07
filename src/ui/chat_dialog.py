@@ -6,6 +6,7 @@ import threading
 from pathlib import Path
 
 from context.model import ProjectContext
+from context.context_flags import ContextIncludeFlags
 from prompts import BuiltPrompt
 from providers.errors import ProviderError
 from ui.chat_supply import (
@@ -63,6 +64,27 @@ class ChatDialog:
         self._chk_image = wx.CheckBox(panel, label="Include schematic image")
         vbox.Add(self._chk_image, flag=wx.LEFT | wx.RIGHT, border=8)
 
+        ctx_row = wx.BoxSizer(wx.HORIZONTAL)
+        self._chk_schematic = wx.CheckBox(panel, label="Schematic")
+        self._chk_schematic.SetValue(True)
+        self._chk_pcb = wx.CheckBox(panel, label="PCB")
+        self._chk_pcb.SetValue(True)
+        self._chk_bom = wx.CheckBox(panel, label="BOM")
+        self._chk_bom.SetValue(True)
+        self._chk_erc_drc = wx.CheckBox(panel, label="ERC/DRC")
+        self._chk_erc_drc.SetValue(True)
+        self._chk_netlist = wx.CheckBox(panel, label="Netlist")
+        self._chk_netlist.SetValue(True)
+        for chk in (
+            self._chk_schematic,
+            self._chk_pcb,
+            self._chk_bom,
+            self._chk_erc_drc,
+            self._chk_netlist,
+        ):
+            ctx_row.Add(chk, flag=wx.RIGHT, border=8)
+        vbox.Add(ctx_row, flag=wx.LEFT | wx.RIGHT, border=8)
+
         vbox.Add(wx.StaticText(panel, label="Design intent (optional):"), flag=wx.LEFT | wx.TOP, border=8)
         self._txt_intent = wx.TextCtrl(panel, style=wx.TE_MULTILINE)
         self._txt_intent.SetMinSize((-1, 48))
@@ -101,8 +123,25 @@ class ChatDialog:
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
         self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._chk_image.Bind(wx.EVT_CHECKBOX, self._on_preview_update)
+        for chk in (
+            self._chk_schematic,
+            self._chk_pcb,
+            self._chk_bom,
+            self._chk_erc_drc,
+            self._chk_netlist,
+        ):
+            chk.Bind(wx.EVT_CHECKBOX, self._on_preview_update)
 
         self._refresh_context()
+
+    def _context_flags(self) -> ContextIncludeFlags:
+        return ContextIncludeFlags(
+            schematic=self._chk_schematic.GetValue(),
+            pcb=self._chk_pcb.GetValue(),
+            bom=self._chk_bom.GetValue(),
+            erc_drc=self._chk_erc_drc.GetValue(),
+            netlist=self._chk_netlist.GetValue(),
+        )
 
     def show_modal(self) -> int:
         return self._dialog.ShowModal()
@@ -144,6 +183,7 @@ class ChatDialog:
             question,
             functional_description=self._txt_intent.GetValue().strip() or None,
             include_image=self._chk_image.GetValue(),
+            include=self._context_flags(),
         )
         self._built = built
         preview_text = (
@@ -186,6 +226,7 @@ class ChatDialog:
             question,
             functional_description=self._txt_intent.GetValue().strip() or None,
             include_image=self._chk_image.GetValue(),
+            include=self._context_flags(),
         )
         api_key = self._txt_key.GetValue().strip() or None
         approx_mb = (len(built.text) + built.image_byte_size) / (1024 * 1024)

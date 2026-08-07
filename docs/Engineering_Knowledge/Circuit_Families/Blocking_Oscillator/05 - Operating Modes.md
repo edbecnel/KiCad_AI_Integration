@@ -1,7 +1,3 @@
-[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md) · Stage 05
-
-> **AERF stage:** 5 — Operating Modes · **Authoritative stage defs:** [AERF Stage Index](../../AERF_Stage_Index.md)
-
 ---
 title: Operating Modes
 level: 5
@@ -10,6 +6,8 @@ status: Draft
 ---
 
 # 05 - Operating Modes
+
+[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md)
 
 **Previous:** [[04 - Component Roles]] · **Next:** [[06 - System Behavior]] · **Knowledge Base:** [[README]]
 

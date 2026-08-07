@@ -3,6 +3,7 @@
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [Developer Handbook](README.md)
 
 > **Status:** Maintained  
+> **Owner:** Project maintainers  
 > **Applies To:** Manual validation and QA of Phase 1 host features
 
 End-user walkthrough: [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md).
@@ -195,6 +196,12 @@ Broader platform tests:
 pytest tests/prompts/ tests/context/ tests/reasoning/ -q
 ```
 
+Bedini AERF exit (local `Bedini_SSG_Radiant_Oscillator.kicad_pro` when present):
+
+```bash
+pytest tests/integration/test_bedini_aerf_exit.py -q
+```
+
 See [05_Testing.md](05_Testing.md) for philosophy and coverage expectations.
 
 ---
@@ -215,7 +222,7 @@ See [05_Testing.md](05_Testing.md) for philosophy and coverage expectations.
 ## Related Documents
 
 - [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md)
-- [ADP-011: Assistant Shell UI](../Architecture/ADP-011-Assistant-Shell-UI.md) — planned unified tabbed window
+- [ADP-011: Assistant Shell UI](../Architecture/ADP-011-Assistant-Shell-UI.md) — Assistant shell scaffold (`--ui`)
 - [E2E Chat UI](06_E2E_Chat_UI.md)
 - [Testing](05_Testing.md)
 - [Feature Overview](../User_Guides/Feature_Overview.md)

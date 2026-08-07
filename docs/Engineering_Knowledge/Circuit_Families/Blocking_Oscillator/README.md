@@ -1,5 +1,7 @@
 # Oscillator Analysis Knowledge Base
 
+[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · Blocking Oscillator
+
 ## Purpose
 
 This collection of engineering documents provides a progressively deeper understanding of self-oscillating blocking oscillators such as the Bedini SSG Radiant Oscillator.
@@ -10,7 +12,7 @@ The documents are intended to serve both as engineering reference material and a
 
 # Document Roadmap
 
-## [00 - Circuit Identification](./00%20-%20Circuit%20Identification.md)
+## [00 - Circuit Identification](00%20-%20Circuit%20Identification.md)
 
 The AI first determines **what the circuit is**.
 
@@ -24,7 +26,7 @@ Topics include:
 
 ---
 
-## [[01 - Basic Oscillation]]
+## [01 - Basic Oscillation](01%20-%20Basic%20Oscillation.md)
 
 Explains **why the circuit oscillates**.
 
@@ -38,7 +40,7 @@ Topics include:
 
 ---
 
-## [[02 - Energy Flow]]
+## [02 - Energy Flow](02%20-%20Energy%20Flow.md)
 
 Explains **where the energy goes**.
 
@@ -52,9 +54,9 @@ Topics include:
 
 ---
 
-## [[03 - Magnetic Operation]]
+## [03 - Physical Principles](03%20-%20Physical%20Principles.md)
 
-Explains the magnetic behavior.
+Explains the magnetic and physical behavior.
 
 Topics include:
 
@@ -66,7 +68,7 @@ Topics include:
 
 ---
 
-## [[04 - Component Functions]]
+## [04 - Component Roles](04%20-%20Component%20Roles.md)
 
 Explains the engineering purpose of every component.
 
@@ -79,7 +81,7 @@ Topics include:
 
 ---
 
-## [[05 - Operating Modes]]
+## [05 - Operating Modes](05%20-%20Operating%20Modes.md)
 
 Explains how the circuit behaves under different conditions.
 
@@ -94,7 +96,7 @@ Topics include:
 
 ---
 
-## [[06 - System Behavior]]
+## [06 - System Behavior](06%20-%20System%20Behavior.md)
 
 Explains the complete electro-mechanical system.
 
@@ -108,7 +110,7 @@ Topics include:
 
 ---
 
-## [[07 - Engineering Analysis]]
+## [07 - Engineering Analysis](07%20-%20Engineering%20Analysis.md)
 
 Demonstrates how an experienced engineer evaluates the design.
 
@@ -125,14 +127,14 @@ Topics include:
 
 # Recommended Reading Order
 
-1. [[00 - Circuit Identification]]
-2. [[01 - Basic Oscillation]]
-3. [[02 - Energy Flow]]
-4. [[03 - Magnetic Operation]]
-5. [[04 - Component Functions]]
-6. [[05 - Operating Modes]]
-7. [[06 - System Behavior]]
-8. [[07 - Engineering Analysis]]
+1. [00 - Circuit Identification](00%20-%20Circuit%20Identification.md)
+2. [01 - Basic Oscillation](01%20-%20Basic%20Oscillation.md)
+3. [02 - Energy Flow](02%20-%20Energy%20Flow.md)
+4. [03 - Physical Principles](03%20-%20Physical%20Principles.md)
+5. [04 - Component Roles](04%20-%20Component%20Roles.md)
+6. [05 - Operating Modes](05%20-%20Operating%20Modes.md)
+7. [06 - System Behavior](06%20-%20System%20Behavior.md)
+8. [07 - Engineering Analysis](07%20-%20Engineering%20Analysis.md)
 
 Each level assumes familiarity with the preceding documents.
 
@@ -154,6 +156,8 @@ Rather than immediately interpreting simulation results, the AI should progressi
 8. What engineering conclusions can be drawn?
 
 This mirrors the reasoning process of an experienced electrical engineer.
+
+See also: [How the Bedini SSG Oscillates Without a Capacitor](../../../Development/Reference_Notes/How_the_Bedini_SSG_Oscillates_Without_a_Capacitor.md) (reference note).
 
 ---
 

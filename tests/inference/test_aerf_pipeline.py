@@ -14,6 +14,43 @@ from inference.aerf import (
 from providers.types import ProviderResponse, TokenUsage
 
 
+def _mock_determinations(stage_id: int) -> str:
+    from reasoning.stage_schemas import STAGE_DETERMINATION_KEYS
+
+    keys = STAGE_DETERMINATION_KEYS.get(stage_id, ())
+    if not keys:
+        return "{}"
+    samples: dict[str, str] = {
+        "family_id": '"blocking_oscillator"',
+        "family_label": '"Blocking Oscillator"',
+        "topology": '"test"',
+        "functional_blocks": "[]",
+        "inputs": "[]",
+        "outputs": "[]",
+        "operating_sequence": "[]",
+        "startup_behavior": '"unknown"',
+        "control_mechanism": '"unknown"',
+        "energy_source": '"unknown"',
+        "storage_elements": "[]",
+        "transfer_path": '"unknown"',
+        "governing_equations": "[]",
+        "components": "[]",
+        "modes": "[]",
+        "mechanical_interactions": "null",
+        "thermal_effects": "null",
+        "environmental_influences": "null",
+        "external_systems": "[]",
+        "performance_evaluation": '"pending"',
+        "failure_analysis": "[]",
+        "optimization_suggestions": "[]",
+        "measurement_recommendations": "[]",
+        "design_improvements": "[]",
+        "conclusions": "[]",
+    }
+    parts = [f'"{k}": {samples.get(k, "[]")}' for k in keys]
+    return "{" + ", ".join(parts) + "}"
+
+
 class _MockAERFProvider:
     def __init__(self, responses: dict[int, str] | None = None) -> None:
         self.calls: list[str] = []
@@ -33,8 +70,8 @@ class _MockAERFProvider:
             stage_id,
             (
                 f'{{"stage_id": {stage_id}, "stage_key": "test", "title": "T", '
-                f'"question": "Q", "determinations": {{}}, "open_questions": [], '
-                f'"confidence": "high", "unknowns": []}}'
+                f'"question": "Q", "determinations": {_mock_determinations(stage_id)}, '
+                f'"open_questions": [], "confidence": "high", "unknowns": []}}'
             ),
         )
         return ProviderResponse(text=text, model="mock", usage=TokenUsage(1, 1))
@@ -47,7 +84,14 @@ def _ctx() -> ProjectContext:
 def test_parse_stage_output_valid() -> None:
     text = """Here is the analysis:
 ```json
-{"stage_id": 0, "determinations": {"family_id": "blocking_oscillator"}, "open_questions": [], "unknowns": [], "confidence": "high"}
+{"stage_id": 0, "determinations": {
+  "family_id": "blocking_oscillator",
+  "family_label": "Blocking Oscillator",
+  "topology": "blocking",
+  "functional_blocks": [],
+  "inputs": [],
+  "outputs": []
+}, "open_questions": [], "unknowns": [], "confidence": "high"}
 ```"""
     parsed, err = parse_stage_output(text, expected_stage_id=0)
     assert err is None
@@ -79,7 +123,10 @@ def test_send_aerf_stage_prompt_parses_response() -> None:
     provider = _MockAERFProvider(
         {
             0: (
-                '{"stage_id": 0, "determinations": {"topology": "blocking"}, '
+                '{"stage_id": 0, "determinations": {'
+                '"family_id": "blocking_oscillator", "family_label": "BO", '
+                '"topology": "blocking", "functional_blocks": [], '
+                '"inputs": [], "outputs": []}, '
                 '"open_questions": [], "unknowns": [], "confidence": "medium"}'
             ),
         }

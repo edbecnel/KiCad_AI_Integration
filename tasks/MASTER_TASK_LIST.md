@@ -531,7 +531,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
 - [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
 
-**AERF exit criteria:** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM (`write_aerf_stages_to_ekm`, `--approve-ekm-writeback`, AERF UI).
+**AERF exit criteria:** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM (`write_aerf_stages_to_ekm`, `--approve-ekm-writeback`, AERF UI). **Signed off** Aug 2026 — Bedini `Bedini_SSG_Radiant_Oscillator` via `tests/integration/test_bedini_aerf_exit.py` (collect, dry-run pipeline, mock 0–7 + writeback plan, chat prompt smoke).
 
 ### Track D — Engineering Notebook (ADP-003)
 

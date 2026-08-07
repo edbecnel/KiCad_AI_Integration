@@ -1,5 +1,11 @@
 # How the Bedini SSG Oscillates Without a Capacitor
 
+[Home](../../../README.md) · [Project Index](../../../PROJECT_INDEX.md) · [Development Reference Notes](../README.md) · Bedini SSG oscillation
+
+> **Status:** Reference  
+> **Owner:** Project maintainers  
+> **Applies To:** Blocking oscillator / Bedini SSG background reading
+
 One of the most interesting aspects of the Bedini SSG is that it oscillates **without using a capacitor**. Unlike many transistor oscillator circuits that rely on an RC timing network, the Bedini SSG uses the **inductor (coil)** and **magnetic feedback** as the timing element.
 
 The oscillation is controlled by the interaction of four primary elements:

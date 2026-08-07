@@ -147,9 +147,13 @@ def collect_stretch_context(
 
     from context.pcb_summary import collect_pcb_summary
     from context.netlist_export import collect_netlist_summary
+    from context.bom_summary import build_bom_summary
+    from context.erc_drc_summary import collect_erc_drc_summary
 
     ctx.pcb_summary = collect_pcb_summary(pro_path)
     ctx.netlist_summary = collect_netlist_summary(pro_path, config=cfg)
+    ctx.bom_summary = build_bom_summary(symbols)
+    ctx.erc_drc_summary = collect_erc_drc_summary(pro_path)
 
     if include_image and schematic_paths:
         exports_dir = project_root / "kicad_ai" / "exports"

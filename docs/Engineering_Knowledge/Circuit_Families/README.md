@@ -88,7 +88,7 @@ Stage IDs and execution order are **never** overridden.
 
 ## Recognition signatures
 
-Each family `README.md` should document recognition signatures used by the circuit family classifier (implementation deferred):
+Each family `README.md` should document recognition signatures used by the circuit family classifier (`src/reasoning/classifier.py`):
 
 - Typical component patterns (switching devices, transformers, op-amps, logic gates)
 - Net naming conventions

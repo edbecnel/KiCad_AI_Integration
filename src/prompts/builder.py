@@ -13,6 +13,8 @@ from prompts.templates.general_review import (
     build_general_review_sections,
     wrap_xml_sections,
 )
+from prompts.templates.pcb_layout import PCB_LAYOUT_SYSTEM, build_pcb_layout_sections
+from context.context_flags import ContextIncludeFlags
 
 TemplateName = str
 
@@ -140,12 +142,14 @@ def build_general_review_prompt(
     *,
     functional_description: str | None = None,
     include_image: bool = False,
+    include: ContextIncludeFlags | None = None,
 ) -> BuiltPrompt:
     """Build the general schematic design review prompt."""
     sections = build_general_review_sections(
         ctx,
         question,
         functional_description=functional_description,
+        include=include,
     )
     text = wrap_xml_sections(sections)
     image_size = len(ctx.schematic_image) if include_image and ctx.schematic_image else 0
@@ -161,6 +165,32 @@ def build_general_review_prompt(
         estimated_text_tokens=est,
         include_image=include_image and ctx.schematic_image is not None,
         image_byte_size=image_size,
+    )
+
+
+def build_pcb_layout_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    """Build PCB layout / trace audit prompt."""
+    sections = build_pcb_layout_sections(
+        ctx,
+        question,
+        functional_description=functional_description,
+        include=include,
+    )
+    text = wrap_xml_sections(sections)
+    preview = build_prompt_summary(ctx, include_image=False)
+    est = estimate_tokens(text)
+    return BuiltPrompt(
+        text=text,
+        system=PCB_LAYOUT_SYSTEM,
+        template="pcb_layout_audit",
+        preview_summary=preview,
+        estimated_text_tokens=est,
     )
 
 

@@ -3,11 +3,26 @@
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [User Guides](README.md)
 
 > **Status:** Maintained  
+> **Owner:** Project maintainers  
 > **Applies To:** Engineers validating KiCad AI Integration against a real schematic
 
 This guide walks through testing chat, datasheet management, AERF staged analysis, and the Engineering Notebook using **external Python scripts** — no native KiCad plugin required. KiCad does **not** need to be open; the assistant reads your saved project files from disk.
 
-For contributor checklists and QA steps, see [E2E Full Flow](../Developer_Handbook/07_E2E_Full_Flow.md).
+For contributor checklists and QA steps, see [E2E Full Flow](../Developer_Handbook/07_E2E_Full_Flow.md). For how staged AERF analysis works, see [How AERF Works](How_AERF_Works.md).
+
+---
+
+## Authority boundaries (facts vs inference)
+
+| Store | Role in analysis |
+|-------|------------------|
+| KiCad files / `ProjectContext` | Extracted facts (symbols, nets, netlist summary) |
+| Circuit Family KB | Reference knowledge for the matched family |
+| EKM | Author-approved project knowledge and design intent |
+| AERF stage JSON | Per-run reasoning (transient until EKM write-back) |
+| LLM (Chat or AERF) | Engineering inference — classify statements; flag unknowns |
+
+**Chat** (`--ui-chat`) uses the `general_review` template (ad-hoc Q&A). **AERF** (`--ui-aerf`) runs eight staged LLM calls with structured JSON output.
 
 ---
 
@@ -357,10 +372,30 @@ Other panels: `main_ui_aerf(...)`, `main_ui_notebook(...)`, `main_ui_datasheets(
 
 ---
 
+## E2E sign-off checklist (automated + manual)
+
+Automated coverage (run `PYTHONPATH=src pytest`):
+
+- AERF stage prompts include methodology and output schema sections
+- Stage output JSON validation (`tests/reasoning/test_stage_schemas.py`)
+- AERF pipeline mock provider (`tests/inference/test_aerf_pipeline.py`)
+- Bedini local project when present (`tests/integration/test_bedini_aerf_exit.py`)
+- PCB extraction fixture (`tests/context/test_pcb_extract.py`)
+
+Manual sign-off (your schematic):
+
+1. `--ui` → Assistant shell → Refresh context
+2. `--ui-aerf` → stages 0–7 with Approve & Send → Write to EKM
+3. `--ui-notebook` → verify EKM sections
+4. Optional `--ui-chat` smoke test (ad-hoc Q&A, not AERF)
+
+---
+
 ## Related documents
 
 - [Feature Overview](Feature_Overview.md) — what works today
-- [ADP-011: Assistant Shell UI](../Architecture/ADP-011-Assistant-Shell-UI.md) — planned unified tabbed window
+- [How AERF Works](How_AERF_Works.md) — staged analysis vs Chat and copy-paste workflows
+- [ADP-011: Assistant Shell UI](../Architecture/ADP-011-Assistant-Shell-UI.md) — unified tabbed shell (`--ui`)
 - [First-Time Setup](../Developer_Handbook/00_First_Time_Setup.md) — contributor environment
 - [E2E Chat UI](../Developer_Handbook/06_E2E_Chat_UI.md) — chat-specific checklist
 - [E2E Full Flow](../Developer_Handbook/07_E2E_Full_Flow.md) — contributor QA checklists

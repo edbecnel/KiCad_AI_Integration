@@ -16,6 +16,7 @@ from providers import get_provider
 from providers.types import ProviderResponse
 from reasoning import AERF_STAGE_COUNT, classify_circuit_family, load_stage_excerpt
 from reasoning.classifier import FamilyClassification
+from reasoning.stage_schemas import validate_stage_envelope
 from reasoning.stages import AERFStage, get_stage
 from utils.config import AppConfig, load_config
 
@@ -133,7 +134,7 @@ def parse_stage_output(
         if key in payload and not isinstance(payload[key], list):
             return None, f"{key} must be a list when present"
 
-    return payload, None
+    return validate_stage_envelope(payload, expected_stage_id=expected_stage_id)
 
 
 def plan_stage(

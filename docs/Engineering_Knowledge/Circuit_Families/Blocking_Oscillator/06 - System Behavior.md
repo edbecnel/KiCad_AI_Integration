@@ -1,7 +1,3 @@
-[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md) · Stage 06
-
-> **AERF stage:** 6 — System Behavior · **Authoritative stage defs:** [AERF Stage Index](../../AERF_Stage_Index.md)
-
 ---
 title: System Behavior
 level: 6
@@ -10,6 +6,8 @@ status: Draft
 ---
 
 # 06 - System Behavior
+
+[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md)
 
 **Previous:** [[05 - Operating Modes]] · **Next:** [[07 - Engineering Analysis]] · **Knowledge Base:** [[README]]
 

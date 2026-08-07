@@ -76,28 +76,20 @@ This separation ensures that the AI never confuses verified information with inf
 
 ## The AI Engineering Reasoning Framework
 
-Rather than sending raw schematic data directly to an LLM, the project introduces an [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md).
+Rather than sending raw schematic data in a single ad-hoc prompt, the project introduces an [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md).
 
-The framework performs multiple stages of reasoning before the AI ever generates a response.
+**Before each AERF stage**, the system deterministically:
 
-Examples include:
+- collects KiCad facts into `ProjectContext`
+- classifies circuit family (heuristics, user hint, or prior EKM)
+- loads the matching Circuit Family KB excerpt for that stage
+- injects prior stage JSON and EKM sections into the prompt
 
-- circuit recognition
-- topology analysis
-- functional decomposition
-- circuit-family identification
-- engineering inference
-- evidence collection
-- confidence evaluation
-- simulation integration
-- knowledge-gap detection
-- prompt construction
+**Each AERF stage (0–7)** is then one LLM call with a scoped engineering question, structured output schema, and [Engineering Reasoning Methodology](docs/Engineering_Knowledge/Engineering_Reasoning_Methodology.md) rules (classification, unknowns, confidence, evidence chains).
 
-Only after these stages have established an engineering understanding is the resulting context presented to the LLM.
+The LLM remains the inference engine. AERF provides **process, knowledge injection, epistemic discipline, accumulation across stages, and human approval gates** — not a separate non-AI engineering brain.
 
-The AI therefore reasons from an engineering model instead of raw schematic data.
-
-See the [AERF Stage Index](docs/Engineering_Knowledge/AERF_Stage_Index.md) for canonical stage definitions.
+See [How AERF Works](docs/User_Guides/How_AERF_Works.md) for a newcomer-oriented explanation and [AERF Stage Index](docs/Engineering_Knowledge/AERF_Stage_Index.md) for canonical stage definitions.
 
 ---
 

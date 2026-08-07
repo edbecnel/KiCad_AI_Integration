@@ -24,6 +24,8 @@ def test_aerf_stage_prompt_xml_sections(stage_id: int) -> None:
         "kicad_python_extracted_data",
         "engineering_knowledge",
         "aerf_methodology",
+        "aerf_evidence_model",
+        "aerf_output_schema",
     ):
         assert f"<{tag}>" in built.text
         assert f"</{tag}>" in built.text

@@ -409,12 +409,12 @@ def main_ui_chat(
         print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
         return
 
-    from ui.launcher import show_chat_dialog
+    from ui.assistant_shell import show_assistant_shell
 
-    show_chat_dialog(
+    show_assistant_shell(
         path,
-        retry_failed_urls=retry_failed_urls,
-        force_refresh_urls=force_refresh_urls,
+        focus_tab="chat",
+        open_focus_panel=True,
     )
 
 
@@ -436,9 +436,9 @@ def main_ui_datasheets(
         print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
         return
 
-    from ui.launcher import show_missing_datasheets_dialog
+    from ui.assistant_shell import show_assistant_shell
 
-    show_missing_datasheets_dialog(path, retry_failed_urls=retry_failed_urls, ai_datasheets=ai_datasheets)
+    show_assistant_shell(path, focus_tab="datasheets", open_focus_panel=True)
 
 
 def main_ui_simulation(project_path: str | Path | None = None) -> None:
@@ -454,9 +454,9 @@ def main_ui_simulation(project_path: str | Path | None = None) -> None:
         print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
         return
 
-    from ui.launcher import show_simulation_dialog
+    from ui.assistant_shell import show_assistant_shell
 
-    show_simulation_dialog(path)
+    show_assistant_shell(path, focus_tab="simulation", open_focus_panel=True)
 
 
 def _print_writeback_plan(plan) -> None:
@@ -577,9 +577,9 @@ def main_ui_notebook(project_path: str | Path | None = None) -> None:
         print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
         return
 
-    from ui.launcher import show_notebook_dialog
+    from ui.assistant_shell import show_assistant_shell
 
-    show_notebook_dialog(path)
+    show_assistant_shell(path, focus_tab="notebook", open_focus_panel=True)
 
 
 def main_ui_notebook_panel(project_path: str | Path | None = None) -> None:
@@ -618,26 +618,22 @@ def main_ui_aerf(
         print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
         return
 
-    from ui.launcher import show_aerf_dialog
+    from ui.assistant_shell import show_assistant_shell
 
-    show_aerf_dialog(
-        path,
-        retry_failed_urls=retry_failed_urls,
-        force_refresh_urls=force_refresh_urls,
-    )
+    show_assistant_shell(path, focus_tab="aerf", open_focus_panel=True)
 
 
-def main_ui_launcher(project_path: str | Path | None = None) -> None:
-    """Open the KiCad AI Assistant launcher (project picker + panels)."""
+def main_ui_launcher(project_path: str | Path | None = None, *, focus_tab: str | None = None) -> None:
+    """Open the unified Assistant shell (ADP-011 scaffold)."""
     try:
         import wx  # noqa: F401
     except ImportError:
-        print("Launcher UI requires wxPython (run inside KiCad or install wx).")
+        print("Assistant shell requires wxPython (run inside KiCad or install wx).")
         return
 
-    from ui.launcher import show_launcher_dialog
+    from ui.assistant_shell import show_assistant_shell
 
-    show_launcher_dialog(project_path)
+    show_assistant_shell(project_path, focus_tab=focus_tab)
 
 
 def _collect_ctx_for_aerf(

@@ -90,29 +90,30 @@ Advanced engineering capabilities including:
 # High-Level Architecture
 
 ```
-                KiCad
-                  │
-                  ▼
-     Context Collection Engine
-                  │
-                  ▼
-       Project Context Model
-                  │
-                  ▼
-          Prompt Builder
-                  │
-                  ▼
-         AI Provider Interface
-                  │
-      ┌───────────┼───────────┐
-      ▼           ▼           ▼
-   Claude      OpenAI      Gemini
-      │           │           │
-      ▼           ▼           ▼
-   Groq       DeepSeek     Ollama
+KiCad project files
+        │
+        ▼
+Context Collection Engine  ──►  ProjectContext (DesignSnapshot)
+        │
+        ├──► Heuristic circuit-family classifier + Circuit Family KB
+        │
+        ▼
+Engineering Inference Engine (EIE)
+        │
+        ├──► AERF staged analysis (stages 0–7, one LLM call per stage)
+        ├──► Chat (general_review — ad-hoc Q&A)
+        └──► Simulation / SUBCKT workflows
+        │
+        ▼
+Prompt Builder  ──►  AI Provider Layer (Claude, …)
+        │
+        ▼
+User approval  ──►  EKM write-back (curated notebook)
 ```
 
-This architecture intentionally separates AI providers from the rest of the application to make future expansion straightforward. Platform and host architecture is documented in [`docs/Architecture/`](docs/Architecture/README.md), starting with [Platform Architecture](docs/Architecture/Platform_Architecture.md).
+Each AERF stage is an **LLM call** with deterministic prep (extract, classify, KB excerpts, prior stage JSON). See [How AERF Works](docs/User_Guides/How_AERF_Works.md).
+
+Platform and host detail: [`docs/Architecture/`](docs/Architecture/README.md), [Platform Architecture](docs/Architecture/Platform_Architecture.md).
 
 ---
 
@@ -226,7 +227,7 @@ Future contribution guidelines will include:
 
 # License
 
-License to be determined.
+MIT License — see [LICENSE](LICENSE).
 
 ---
 

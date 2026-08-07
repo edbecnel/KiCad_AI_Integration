@@ -6,6 +6,7 @@ import json
 from typing import Any
 
 from context.model import ProjectContext
+from context.context_flags import ContextIncludeFlags
 from prompts.compact import compact_context_for_prompt
 
 GENERAL_REVIEW_SYSTEM = (
@@ -20,9 +21,24 @@ def build_general_review_sections(
     question: str,
     *,
     functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
 ) -> dict[str, str]:
     """Return XML section name → body for the general review template."""
+    flags = include or ContextIncludeFlags()
     context_data = compact_context_for_prompt(ctx)
+    if not flags.schematic:
+        context_data.pop("symbols", None)
+        context_data.pop("symbol_count", None)
+        context_data.pop("schematic_connectivity", None)
+    if not flags.pcb:
+        context_data.pop("pcb_summary", None)
+    if not flags.bom:
+        context_data.pop("bom_summary", None)
+    if not flags.erc_drc:
+        context_data.pop("erc_drc_summary", None)
+    if not flags.netlist:
+        context_data.pop("netlist_summary", None)
+
     sections: dict[str, str] = {}
 
     if functional_description and functional_description.strip():
@@ -34,7 +50,7 @@ def build_general_review_sections(
     )
 
     netlist = context_data.get("schematic_connectivity")
-    if netlist:
+    if netlist and flags.netlist:
         sections["kicad_netlist"] = json.dumps(netlist, indent=2)
 
     sections["user_question"] = question.strip()

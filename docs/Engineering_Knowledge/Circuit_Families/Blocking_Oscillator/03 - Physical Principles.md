@@ -1,7 +1,3 @@
-[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md) · Stage 03
-
-> **AERF stage:** 3 — Physical Principles · **Authoritative stage defs:** [AERF Stage Index](../../AERF_Stage_Index.md)
-
 ---
 title: Physical Principles
 level: 3
@@ -10,6 +6,8 @@ status: Draft
 ---
 
 # 03 - Physical Principles
+
+[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md)
 
 **Previous:** [[02 - Energy Flow]] · **Next:** [[04 - Component Roles]] · **Knowledge Base:** [[README]]
 

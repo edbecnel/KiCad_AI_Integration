@@ -1,7 +1,3 @@
-[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md) · Stage 02
-
-> **AERF stage:** 2 — Energy Flow · **Authoritative stage defs:** [AERF Stage Index](../../AERF_Stage_Index.md)
-
 ---
 title: Energy Flow
 level: 2
@@ -10,6 +6,8 @@ status: Draft
 ---
 
 # 02 - Energy Flow
+
+[Home](../../../../README.md) · [Project Index](../../../../PROJECT_INDEX.md) · [Engineering Knowledge](../../README.md) · [Circuit Families](../README.md) · [Blocking Oscillator](README.md)
 
 **Previous:** [[01 - Basic Oscillation]] · **Next:** [[03 - Physical Principles]] · **Knowledge Base:** [[README]]
 
