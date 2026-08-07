@@ -1,5 +1,7 @@
 # Custom Trifilar Coil — KiCad Simulation Setup
 
+[Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [User Guides](README.md) · Custom Trifilar Coil Simulation
+
 Step-by-step reference for setting up a **custom wound inductor** (e.g. Bedini SSG trifilar air-core coil **T1**) for SPICE simulation in KiCad.
 
 This applies to components that have **no catalog simulation model**. Unlike parts such as `1N4007` (built-in `Sim.Device=D`), a custom coil needs:

@@ -1,0 +1,121 @@
+Engineering Documentation Framework Adoption Conformance Validation
+===================================================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Started: 2026-08-07 17:50:11 +0800
+
+Framework Advisor conformance analysis
+--------------------------------------
+Engineering Documentation Framework Advisor
+Ruleset: 2026-07-10-stage1
+===========================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Project name: KiCad_AI_Integration
+Repository mode: EDF adopting project
+Overall compliance: 83%
+Structure score: 100%
+AI score: 100%
+Navigation score: 34%
+Governance score: 100%
+
+This report is read-only.
+No files or folders were created, modified, moved, renamed, or deleted.
+
+Missing required directories
+----------------------------
+None.
+
+Missing recommended root files
+------------------------------
+None.
+
+Missing AI handbook files
+-------------------------
+None.
+
+Missing Governance files
+------------------------
+None.
+
+Broken links
+------------
+- .cursor/Handover.md -> docs/User_Guides/Feature_Overview.md
+- .cursor/Handover.md -> tasks/MASTER_TASK_LIST.md
+- .cursor/Handover.md -> docs/Architecture/Platform_Architecture.md
+- .cursor/Handover.md -> docs/Architecture/ADRs/ADR-0009-Platform-Architecture-Foundation.md
+- .cursor/Handover.md -> docs/User_Guides/Feature_Overview.md
+- .cursor/Handover.md -> tasks/MASTER_TASK_LIST.md
+- PROJECT_OVERVIEW.md -> [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- PROJECT_OVERVIEW.md -> [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- PROJECT_INDEX.md -> [Software Architecture (KiCad Host)](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- docs/Engineering_Knowledge/README.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Engineering_Reasoning_Methodology.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/User_Guides/Feature_Overview.md -> [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- docs/Architecture/README.md -> [Software Architecture (KiCad Host)](KiCad_AI_Integration_Software_Architecture.md)
+- docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md -> [AI Engineering Reasoning Framework (ADP-008)](ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Developer_Handbook/README.md -> [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- README.md -> [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- README.md -> [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+
+Orphan documents
+----------------
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- reports/handover/HANDOVER-20260801.md
+
+Navigation issues
+-----------------
+None.
+
+Governance metadata and lifecycle issues
+----------------------------------------
+None.
+
+Overdue reviews
+---------------
+None.
+
+Markdown outside canonical locations
+------------------------------------
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- examples/bedini_babcock/README.md
+- Architecture_Inventory.md
+- HANDOVER.md
+- reports/handover/HANDOVER-20260801.md
+
+Warnings
+--------
+None.
+
+Recommendations
+---------------
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+
+
+Validation completed: 2026-08-07 17:50:37 +0800
+
+============================================================
+Conformance validation completed successfully.
+
+Report:
+reports/conformance/framework-advisor-20260807-175011.txt
+
+Compliance scores:
+- Overall: 83%
+- Structure: 100%
+- AI: 100%
+- Navigation: 34%
+- Governance: 100%
+
+Next recommended actions:
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+============================================================

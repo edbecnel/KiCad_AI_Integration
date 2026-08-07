@@ -22,7 +22,9 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 - [Project Overview](PROJECT_OVERVIEW.md)
 - [Project Charter](PROJECT_CHARTER.md)
 - [Platform Architecture](docs/Architecture/Platform_Architecture.md)
-- [Architecture Decisions](ARCHITECTURE_DECISIONS.md)
+- [Architecture Inventory](Architecture_Inventory.md)
+- [Handover notes](HANDOVER.md) (session handover index)
+- [Example: Bedini Babcock workflow](examples/bedini_babcock/README.md)
 - [Master Task List](tasks/MASTER_TASK_LIST.md)
 - [Engineering Documentation Framework](ENGINEERING_DOCUMENTATION_FRAMEWORK.md)
 - [Glossary and Acronyms](docs/Reference/Glossary.md)
@@ -39,7 +41,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [Software Architecture (KiCad Host)](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 - [ADP-009: Host Integration Layer](docs/Architecture/ADP-009-Host-Integration-Layer.md)
 - [ADP-010: Engineering Inference Engine](docs/Architecture/ADP-010-Engineering-Inference-Engine.md)
-- [ADP-011: Assistant Shell User Interface](docs/Architecture/ADP-011-Assistant-Shell-UI.md) (proposed)
+- [ADP-011: Assistant Shell User Interface](docs/Architecture/ADP-011-Assistant-Shell-UI.md) (Phase 1 scaffold)
 - [Prompt Architecture](docs/Architecture/Prompt_Architecture.md)
 - [AI Provider Interface](docs/Architecture/AI_Provider_Interface.md)
 - [Roadmap](docs/Architecture/Roadmap.md)
@@ -141,7 +143,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 3. ~~Search, collapsible sections, renderer split (`src/ui/notebook_renderer.py`)~~ (done)
 4. ~~Non-modal panel + Advanced JSON view (`--ui-notebook-panel`)~~ (done)
 
-**Recommended next:** resolve project license; KiCad Phase 1 host gaps (PCB context, templates, unified Assistant shell) — **Track A**, defer unless prioritized.
+**Recommended next:** Phase 2 — embedded Assistant tabs, dockable KiCad plugin, multi-turn chat. Phase 1 polish: netlist graph, audit templates, EDF navigation — see [Master Task List](tasks/MASTER_TASK_LIST.md).
 
 Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
 

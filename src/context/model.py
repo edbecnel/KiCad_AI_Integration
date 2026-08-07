@@ -32,6 +32,7 @@ class ProjectContext:
     netlist_summary: dict[str, Any] | None = None
     bom_summary: list[dict[str, Any]] | None = None
     erc_drc_summary: dict[str, Any] | None = None
+    connectivity_graph: dict[str, Any] | None = None
     schematic_image_error: str | None = None
     ai_discovery_results: dict[str, Any] = field(default_factory=dict)
 
@@ -72,6 +73,7 @@ class ProjectContext:
             "netlist_summary": self.netlist_summary,
             "bom_summary": self.bom_summary,
             "erc_drc_summary": self.erc_drc_summary,
+            "connectivity_graph": self.connectivity_graph,
             "schematic_image_meta": (
                 self.schematic_image_meta.to_dict()
                 if self.schematic_image_meta

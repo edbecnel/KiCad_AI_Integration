@@ -8,6 +8,21 @@
 
 This document is the human-readable index of canonical AERF reasoning stages. Circuit families may override stage titles for stages 1–6; `stage_id` and dependency order are fixed.
 
+### Blocking Oscillator KB (reference family)
+
+Stage-aligned KB files for the first complete circuit family ([`blocking_oscillator`](Circuit_Families/Blocking_Oscillator/README.md)):
+
+| Stage | KB document |
+|-------|-------------|
+| 0 | [00 - Circuit Identification](Circuit_Families/Blocking_Oscillator/00 - Circuit Identification.md) |
+| 1 | [01 - Basic Oscillation](Circuit_Families/Blocking_Oscillator/01 - Basic Oscillation.md) |
+| 2 | [02 - Energy Flow](Circuit_Families/Blocking_Oscillator/02 - Energy Flow.md) |
+| 3 | [03 - Physical Principles](Circuit_Families/Blocking_Oscillator/03 - Physical Principles.md) |
+| 4 | [04 - Component Roles](Circuit_Families/Blocking_Oscillator/04 - Component Roles.md) |
+| 5 | [05 - Operating Modes](Circuit_Families/Blocking_Oscillator/05 - Operating Modes.md) |
+| 6 | [06 - System Behavior](Circuit_Families/Blocking_Oscillator/06 - System Behavior.md) |
+| 7 | [07 - Engineering Analysis](Circuit_Families/Blocking_Oscillator/07 - Engineering Analysis.md) |
+
 ---
 
 ## Stage 0 — Circuit Identification

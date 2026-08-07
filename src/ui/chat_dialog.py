@@ -61,6 +61,21 @@ class ChatDialog:
         key_row.Add(self._txt_key, proportion=1)
         vbox.Add(key_row, flag=wx.EXPAND | wx.ALL, border=8)
 
+        template_row = wx.BoxSizer(wx.HORIZONTAL)
+        template_row.Add(wx.StaticText(panel, label="Template:"), flag=wx.RIGHT, border=6)
+        self._template_choice = wx.Choice(
+            panel,
+            choices=[
+                "General review",
+                "PCB layout audit",
+                "Isolation / clearance",
+                "Netlist crosscheck",
+            ],
+        )
+        self._template_choice.SetSelection(0)
+        template_row.Add(self._template_choice, proportion=1)
+        vbox.Add(template_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+
         self._chk_image = wx.CheckBox(panel, label="Include schematic image")
         vbox.Add(self._chk_image, flag=wx.LEFT | wx.RIGHT, border=8)
 
@@ -123,6 +138,7 @@ class ChatDialog:
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
         self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._chk_image.Bind(wx.EVT_CHECKBOX, self._on_preview_update)
+        self._template_choice.Bind(wx.EVT_CHOICE, self._on_preview_update)
         for chk in (
             self._chk_schematic,
             self._chk_pcb,
@@ -133,6 +149,18 @@ class ChatDialog:
             chk.Bind(wx.EVT_CHECKBOX, self._on_preview_update)
 
         self._refresh_context()
+
+    def _selected_template(self) -> str:
+        labels = [
+            "general_review",
+            "pcb_layout_audit",
+            "isolation_clearance_audit",
+            "netlist_crosscheck",
+        ]
+        idx = self._template_choice.GetSelection()
+        if idx < 0 or idx >= len(labels):
+            return "general_review"
+        return labels[idx]
 
     def _context_flags(self) -> ContextIncludeFlags:
         return ContextIncludeFlags(
@@ -184,6 +212,7 @@ class ChatDialog:
             functional_description=self._txt_intent.GetValue().strip() or None,
             include_image=self._chk_image.GetValue(),
             include=self._context_flags(),
+            template=self._selected_template(),
         )
         self._built = built
         preview_text = (
@@ -227,6 +256,7 @@ class ChatDialog:
             functional_description=self._txt_intent.GetValue().strip() or None,
             include_image=self._chk_image.GetValue(),
             include=self._context_flags(),
+            template=self._selected_template(),
         )
         api_key = self._txt_key.GetValue().strip() or None
         approx_mb = (len(built.text) + built.image_byte_size) / (1024 * 1024)

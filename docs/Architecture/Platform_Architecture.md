@@ -2,9 +2,11 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › Platform Architecture
 
-> **Status:** Accepted
+> **Status:** Maintained
 > **Owner:** Project maintainers
-> **Applies To:** AI-assisted Electrical Engineering Reasoning Platform
+> **Applies To:** Platform architecture and layering
+> **Last Reviewed:** 2026-08-07
+> **Review Frequency:** Quarterly
 > **Authoritative:** Yes
 > **Ratified by:** [ADR-0009](ADRs/ADR-0009-Platform-Architecture-Foundation.md)
 

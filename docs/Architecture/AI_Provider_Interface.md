@@ -2,9 +2,11 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › AI Provider Interface
 
-> **Status:** Implemented (Phase 1.4)
+> **Status:** Maintained
 > **Owner:** Project maintainers
 > **Applies To:** KiCad AI Integration provider layer
+> **Last Reviewed:** 2026-08-07
+> **Review Frequency:** Quarterly
 > **Authoritative:** No
 
 ## Purpose

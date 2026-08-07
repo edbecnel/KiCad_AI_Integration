@@ -26,6 +26,8 @@ def build_general_review_sections(
     """Return XML section name → body for the general review template."""
     flags = include or ContextIncludeFlags()
     context_data = compact_context_for_prompt(ctx)
+    if ctx.connectivity_graph and flags.netlist:
+        context_data["connectivity_graph"] = ctx.connectivity_graph
     if not flags.schematic:
         context_data.pop("symbols", None)
         context_data.pop("symbol_count", None)
@@ -38,6 +40,7 @@ def build_general_review_sections(
         context_data.pop("erc_drc_summary", None)
     if not flags.netlist:
         context_data.pop("netlist_summary", None)
+        context_data.pop("connectivity_graph", None)
 
     sections: dict[str, str] = {}
 
@@ -50,8 +53,21 @@ def build_general_review_sections(
     )
 
     netlist = context_data.get("schematic_connectivity")
-    if netlist and flags.netlist:
-        sections["kicad_netlist"] = json.dumps(netlist, indent=2)
+    if netlist and flags.schematic:
+        sections["schematic_net_labels"] = json.dumps(netlist, indent=2)
+
+    if flags.netlist and ctx.netlist_summary:
+        sections["kicad_netlist"] = json.dumps(
+            {
+                "export_status": ctx.netlist_summary.get("export_status"),
+                "line_count": ctx.netlist_summary.get("line_count"),
+                "preview_lines": ctx.netlist_summary.get("preview_lines"),
+                "include_paths": ctx.netlist_summary.get("include_paths"),
+            },
+            indent=2,
+        )
+    if flags.netlist and ctx.connectivity_graph:
+        sections["connectivity_graph"] = json.dumps(ctx.connectivity_graph, indent=2)
 
     sections["user_question"] = question.strip()
     return sections

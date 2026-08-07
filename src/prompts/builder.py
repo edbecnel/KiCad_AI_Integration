@@ -14,6 +14,14 @@ from prompts.templates.general_review import (
     wrap_xml_sections,
 )
 from prompts.templates.pcb_layout import PCB_LAYOUT_SYSTEM, build_pcb_layout_sections
+from prompts.templates.isolation_clearance import (
+    ISOLATION_CLEARANCE_SYSTEM,
+    build_isolation_clearance_sections,
+)
+from prompts.templates.netlist_crosscheck import (
+    NETLIST_CROSSCHECK_SYSTEM,
+    build_netlist_crosscheck_sections,
+)
 from context.context_flags import ContextIncludeFlags
 
 TemplateName = str
@@ -189,6 +197,58 @@ def build_pcb_layout_prompt(
         text=text,
         system=PCB_LAYOUT_SYSTEM,
         template="pcb_layout_audit",
+        preview_summary=preview,
+        estimated_text_tokens=est,
+    )
+
+
+def build_isolation_clearance_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    """Build isolation and clearance audit prompt."""
+    sections = build_isolation_clearance_sections(
+        ctx,
+        question,
+        functional_description=functional_description,
+        include=include,
+    )
+    text = wrap_xml_sections(sections)
+    preview = build_prompt_summary(ctx, include_image=False)
+    est = estimate_tokens(text)
+    return BuiltPrompt(
+        text=text,
+        system=ISOLATION_CLEARANCE_SYSTEM,
+        template="isolation_clearance_audit",
+        preview_summary=preview,
+        estimated_text_tokens=est,
+    )
+
+
+def build_netlist_crosscheck_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    """Build netlist vs schematic cross-check prompt."""
+    sections = build_netlist_crosscheck_sections(
+        ctx,
+        question,
+        functional_description=functional_description,
+        include=include,
+    )
+    text = wrap_xml_sections(sections)
+    preview = build_prompt_summary(ctx, include_image=False)
+    est = estimate_tokens(text)
+    return BuiltPrompt(
+        text=text,
+        system=NETLIST_CROSSCHECK_SYSTEM,
+        template="netlist_crosscheck",
         preview_summary=preview,
         estimated_text_tokens=est,
     )

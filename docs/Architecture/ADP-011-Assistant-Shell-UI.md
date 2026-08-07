@@ -2,7 +2,7 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › ADP-011
 
-**Status:** Proposed (documentation only — not implemented)
+**Status:** Partial (Phase 1 scaffold — `src/ui/assistant_shell.py`, `--ui`; embedded tabs and KiCad dock Phase 2)
 
 **Author:** Ed Becnel
 
@@ -22,7 +22,7 @@
 
 This Architectural Design Proposal defines the **Assistant Shell** — a single, tabbed KiCad AI Assistant window that replaces the current launcher plus stack of separate modal feature dialogs.
 
-The shell is the planned primary host UI surface for Terminal launch (`--ui`) and the Phase 2 KiCad dockable plugin. **This document records target architecture only.** No shell code ships in the documentation phase.
+The shell is the planned primary host UI surface for Terminal launch (`--ui`) and the Phase 2 KiCad dockable plugin. **Phase 1 ships a scaffold:** shared project header, tab bar, and modal panel opens per tab (`assistant_shell.py`). Embedded tab content and dockable plugin hosting remain Phase 2.
 
 ---
 

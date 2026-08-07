@@ -4,7 +4,11 @@
 
 > **Documentation path:** [Project Index](../../PROJECT_INDEX.md) → [Specifications](README.md) → AI Datasheet Discovery  
 > **Related:** [Datasheet Requirements and User PDF Supply](Datasheet_Requirements_and_User_Supply.md) · [Netlist Gap Fill](Netlist_Gap_Fill.md) · [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md)  
-> **Status:** Phase 1 implemented (Claude JSON URL suggestion — no live web search)
+> **Status:** Maintained
+> **Owner:** Project maintainers
+> **Applies To:** Datasheet resolver and Missing Datasheets workflow
+> **Last Reviewed:** 2026-08-07
+> **Review Frequency:** Quarterly
 
 ## Purpose
 

@@ -152,6 +152,9 @@ def collect_stretch_context(
 
     ctx.pcb_summary = collect_pcb_summary(pro_path)
     ctx.netlist_summary = collect_netlist_summary(pro_path, config=cfg)
+    from context.netlist_graph import build_connectivity_graph_from_summary
+
+    ctx.connectivity_graph = build_connectivity_graph_from_summary(ctx.netlist_summary)
     ctx.bom_summary = build_bom_summary(symbols)
     ctx.erc_drc_summary = collect_erc_drc_summary(pro_path)
 

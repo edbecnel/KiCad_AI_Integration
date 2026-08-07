@@ -2,9 +2,11 @@
 
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [Developer Handbook](README.md)
 
-> **Status:** Maintained  
-> **Owner:** Project maintainers  
+> **Status:** Maintained
+> **Owner:** Project maintainers
 > **Applies To:** Manual validation and QA of Phase 1 host features
+> **Last Reviewed:** 2026-08-07
+> **Review Frequency:** Quarterly
 
 End-user walkthrough: [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md).
 

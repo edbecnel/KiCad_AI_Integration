@@ -84,6 +84,7 @@ The unified **Assistant shell** (`--ui`) provides a shared project header and ta
 | BOM summary | Value/footprint roll-up in `ProjectContext` |
 | ERC / DRC reports | Included when report files exist beside the project |
 | Chat context toggles | Include schematic, PCB, BOM, ERC/DRC, netlist per question |
+| Chat audit templates | General review, PCB layout, isolation/clearance, netlist crosscheck (template selector in `--ui-chat`) |
 | Netlist export | Via `kicad-cli` when available |
 | **Simulation / SUBCKT panel** (`--ui-simulation`) | Gap scan, AI SUBCKT generation, spice field write-back to schematic — functional but not production-complete |
 | **Netlist gap-fill / SUBCKT** | UI and generation exist; Tier A/B/C prompt pipeline and PDF fact extraction not finished — see [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md) |
@@ -92,11 +93,10 @@ The unified **Assistant shell** (`--ui`) provides a shared project header and ta
 ### Not built yet (KiCad host — Phase 1 still open)
 
 #### Richer project context
-- Full **netlist connectivity** graph for deep analysis
 - Live ERC/DRC from KiCad API (today: scan saved report files only)
 
 #### More AI capabilities (KiCad host)
-- Additional **prompt templates** beyond `general_review` and `pcb_layout_audit`
+- Netlist gap-fill connectivity-inference template (SUBCKT Tier A/B/C exist)
 - Complete SUBCKT Tier A/B/C prompt pipeline (datasheet-backed fact extraction before synthesis)
 - Project-wide **force refresh datasheets** UI (retry-all with full catalog bypass)
 

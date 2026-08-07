@@ -16,9 +16,9 @@ Accepted
 
 ## Context
 
-[ADP-001](ADP-001-Engineering-Knowledge-Model-Foundation.md) (v1.1) established the Engineering Knowledge Model (EKM) with a versioned minimum metamodel (§19) and deferred full JSON Schema, persistence naming, migration policy, and staleness detection to ADP-002.
+[ADP-001](../ADP-001-Engineering-Knowledge-Model-Foundation.md) (v1.1) established the Engineering Knowledge Model (EKM) with a versioned minimum metamodel (§19) and deferred full JSON Schema, persistence naming, migration policy, and staleness detection to ADP-002.
 
-[ADP-003](ADP-003-Engineering-Notebook-User-Interface.md) and downstream ADPs require a stable schema contract before implementation. Without formal schema guardrails, EKM documents risk incompatibility across plugin versions and collaborative Git workflows.
+[ADP-003](../ADP-003-Engineering-Notebook-User-Interface.md) and downstream ADPs require a stable schema contract before implementation. Without formal schema guardrails, EKM documents risk incompatibility across plugin versions and collaborative Git workflows.
 
 Full architectural rationale is documented in [ADP-002: EKM Schema and Persistence](../ADP-002-EKM-Schema-and-Persistence.md) (v1.0).
 

@@ -4,11 +4,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from context.collector import collect_stretch_context
 from context.context_flags import ContextIncludeFlags
 from context.model import ProjectContext
-from prompts import BuiltPrompt, build_general_review_prompt, build_pcb_layout_prompt
+from prompts import (
+    BuiltPrompt,
+    build_general_review_prompt,
+    build_isolation_clearance_prompt,
+    build_netlist_crosscheck_prompt,
+    build_pcb_layout_prompt,
+)
 from providers import get_provider
 from providers.types import ProviderResponse
 from utils.config import AppConfig, load_config
@@ -48,19 +55,26 @@ def build_chat_prompt(
     include: ContextIncludeFlags | None = None,
     template: str = "general_review",
 ) -> BuiltPrompt:
-    """Build the chat prompt (general review or PCB layout audit)."""
-    if template == "pcb_layout_audit":
-        return build_pcb_layout_prompt(
+    """Build the chat prompt for a named audit template."""
+    builders = {
+        "general_review": build_general_review_prompt,
+        "pcb_layout_audit": build_pcb_layout_prompt,
+        "isolation_clearance_audit": build_isolation_clearance_prompt,
+        "netlist_crosscheck": build_netlist_crosscheck_prompt,
+    }
+    builder = builders.get(template, build_general_review_prompt)
+    if template == "general_review":
+        return builder(
             ctx,
             question,
             functional_description=functional_description,
+            include_image=include_image,
             include=include,
         )
-    return build_general_review_prompt(
+    return builder(
         ctx,
         question,
         functional_description=functional_description,
-        include_image=include_image,
         include=include,
     )
 
@@ -71,6 +85,7 @@ def send_chat_prompt(
     *,
     config: AppConfig | None = None,
     api_key_override: str | None = None,
+    provider: Any | None = None,
 ) -> ChatSendResult:
     """Send a built prompt to the configured provider."""
     cfg = config or load_config()
@@ -91,8 +106,8 @@ def send_chat_prompt(
             provider_read_timeout_sec=cfg.provider_read_timeout_sec,
             provider_max_tokens=cfg.provider_max_tokens,
         )
-    provider = get_provider(cfg)
-    response = provider.send_message(
+    resolved_provider = provider or get_provider(cfg)
+    response = resolved_provider.send_message(
         built.text,
         system=built.system,
         image=ctx.schematic_image if built.include_image else None,

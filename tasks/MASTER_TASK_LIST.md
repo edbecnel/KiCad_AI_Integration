@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 stretch slice + platform Tracks B–D complete. **Working:** launcher (`--ui`), schematic context + datasheet library, chat UI with Approve & Send (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`), built-in sim model auto-apply, AERF staged analysis (`--ui-aerf`), Engineering Notebook (`--ui-notebook`), EKM runtime + AERF write-back. **Still open:** full PCB extraction (tracks/vias/zones/net classes), BOM/ERC/DRC in context, additional prompt templates, native KiCad plugin, unified Assistant shell (ADP-011).
+**Current repository status:** Phase 1 stretch slice + platform Tracks B–D complete. **Working:** Assistant shell scaffold (`--ui`), schematic context + datasheet library, chat UI with Approve & Send and context toggles (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`), built-in sim model auto-apply, AERF staged analysis (`--ui-aerf`), Engineering Notebook (`--ui-notebook`), EKM runtime + AERF write-back, PCB/BOM/ERC/DRC context extractors, `pcb_layout_audit` prompt template. **Still open:** netlist connectivity graph, isolation/clearance and netlist-crosscheck templates, native KiCad plugin, embedded Assistant tabs (ADP-011 Phase 2).
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -63,7 +63,7 @@ baseline before feature work begins.
 
 - [ ] Require explicit user approval before any cloud API transmission — done for `--ui-chat`; `--ask` is dev bypass
 - [x] Provide a context preview so users can see what will be sent — chat dialog
-- [ ] Support selective context inclusion (user toggles per data type)
+- [x] Support selective context inclusion (user toggles per data type) — schematic, PCB, BOM, ERC/DRC, netlist in chat UI (`context_flags.py`, `chat_dialog.py`); firmware toggle TBD
 - [ ] Document data-handling and credential-storage practices
 
 **Phase 0 exit criteria:** Repo scaffold exists, config schema defined, dev/test
@@ -91,14 +91,14 @@ S-expression file parsing.
 - [x] Extract schematic hierarchy (sheets, subsheets) — one-level subsheet walk
 - [x] Extract custom component fields (e.g. `Datasheet`, `Vds_max`)
 
-#### PCB (`pcbnew.GetBoard()`)
+#### PCB (`pcbnew.GetBoard()` or `.kicad_pcb` file parse)
 
-- [ ] Extract footprints (reference, value, position, layer)
-- [ ] Extract tracks per net (width, length, layer) — [Script A pattern](../docs/Developer_Handbook/Guide-KiCad_Python_API_Custom_AI_Scripting.md)
-- [ ] Extract vias and zones
-- [ ] Extract net classes (clearance, track width rules) — [Script B pattern](../docs/Developer_Handbook/Guide-KiCad_Python_API_Custom_AI_Scripting.md)
-- [ ] Extract board design settings and constraints
-- [ ] Compute board statistics (layer usage, trace totals, etc.)
+- [x] Extract footprints (reference, value, position, layer) — file-based summary in `pcb_summary.py` / `pcb_extract.py`
+- [x] Extract tracks per net (width, length, layer) — file-based via `pcb_extract.py` (not live `pcbnew` API)
+- [x] Extract vias and zones — `pcb_extract.py`
+- [x] Extract net classes (clearance, track width rules) — `pcb_extract.py`
+- [ ] Extract board design settings and constraints (live `pcbnew` API)
+- [x] Compute board statistics (layer usage, trace totals, etc.) — `pcb_summary` / `pcb_extract`
 
 #### Project metadata
 
@@ -108,17 +108,18 @@ S-expression file parsing.
 #### Netlist
 
 - [x] Export or parse netlist (SPICE via `kicad-cli`; summary in `ProjectContext.netlist_summary`) — `src/context/netlist_export.py` (OrcadPCB2 format TBD)
-- [ ] Build connectivity graph / critical-node map — [kicad_ai_prep pattern](../docs/Developer_Handbook/Guide-Programmatic_AI_Analysis.md)
+- [x] Build connectivity graph / critical-node map — `src/context/netlist_graph.py` (SPICE netlist parse)
 
 #### BOM
 
-- [ ] Extract bill of materials with component attributes
-- [ ] Include custom fields relevant to AI review (datasheet URLs, ratings)
+- [x] Extract bill of materials with component attributes — `src/context/bom_summary.py` (value/footprint roll-up from symbols)
+- [ ] Include custom fields relevant to AI review (datasheet URLs, ratings) beyond symbol fields
 
 #### ERC / DRC
 
-- [ ] Gather ERC violation results (run or read existing report)
-- [ ] Gather DRC violation results (run or read existing report)
+- [x] Gather ERC violation results (read existing report files when present) — `src/context/erc_drc_summary.py`
+- [x] Gather DRC violation results (read existing report files when present) — `src/context/erc_drc_summary.py`
+- [ ] Run ERC/DRC via KiCad API and ingest live results
 
 #### Optional schematic image (Phase 1 stretch)
 
@@ -167,10 +168,12 @@ S-expression file parsing.
 - [x] Include schematic connectivity (net labels) — `schematic_connectivity`
 - [x] Include PCB summary (footprint/net counts) — `pcb_summary` via `src/context/pcb_summary.py`
 - [x] Include SPICE netlist summary — `netlist_summary`
-- [ ] Include: full nets, footprints, board_stats, constraints, bom, erc_results, drc_results
+- [x] Include BOM roll-up — `bom_summary`
+- [x] Include ERC/DRC report summaries when files exist — `erc_drc_summary`
+- [ ] Include: full nets, footprints, board_stats, constraints (live pcbnew)
 - [ ] Support optional `user_description` (design intent text) and `selection` context
 - [x] Serialize to JSON for prompt assembly and debugging
-- [ ] Support partial context flags (e.g. PCB-only, schematic-only, critical-nets-only)
+- [x] Support partial context flags (schematic, PCB, BOM, ERC/DRC, netlist) — `ContextIncludeFlags`; firmware TBD
 - [ ] Design for token budgeting (summarization hooks, size estimation)
 - [x] Include optional `schematic_image` and `schematic_image_meta` fields when multimodal context is enabled
 
@@ -178,9 +181,9 @@ S-expression file parsing.
 
 - [x] Implement template system with named engineering audit templates — `src/prompts/builder.py`, `general_review`
 - [x] General design review template — `src/prompts/templates/general_review.py`
-- [ ] PCB layout / trace audit template
-- [ ] Isolation and clearance audit template
-- [ ] Netlist-vs-visual cross-reference template — [AI Tools guide](../docs/Reference/AI_Tools_for_Advanced_Circuit_Analysis.md)
+- [x] PCB layout / trace audit template — `src/prompts/templates/pcb_layout.py`, `build_pcb_layout_prompt`
+- [x] Isolation and clearance audit template — `src/prompts/templates/isolation_clearance.py`
+- [x] Netlist-vs-visual cross-reference template — `src/prompts/templates/netlist_crosscheck.py`
 - [ ] Netlist gap-fill template — connectivity inference and SUBCKT `.lib` generation — [Netlist Gap Fill spec](../docs/Specifications/Netlist_Gap_Fill.md) (SUBCKT templates exist; connectivity-inference template TBD)
 - [x] SUBCKT Tier A two-stage prompts (PDF fact extraction, then model synthesis matched to KiCad pin order) — `src/prompts/templates/subckt.py`, `src/context/subckt_generation.py`
 - [x] SUBCKT Tier B multi-source context prompt (symbol pins, fields, footprint, schematic context — no part-number-only)
@@ -213,7 +216,7 @@ S-expression file parsing.
 Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCad_Claude_Chat_Integration.md), extended for production use.
 
 - [x] wxPython dialog with password-masked API key field (load from env/config if set) — `src/ui/chat_dialog.py`
-- [ ] Context inclusion checkboxes: schematic, PCB, BOM, ERC, DRC, netlist, firmware
+- [x] Context inclusion checkboxes: schematic, PCB, BOM, ERC, DRC, netlist — `chat_dialog.py` (firmware TBD)
 - [x] "Include schematic image" checkbox (off by default; optional remember-last-choice) — chat dialog
 - [x] Optional design-intent / functional-description textarea — chat dialog
 - [x] User prompt input field and Send button — chat dialog (Approve & Send)
@@ -242,7 +245,7 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 
 - [x] File-based fixtures: sample `.kicad_sch`, `.kicad_pcb`, netlist files — `tests/fixtures/`
 - [x] Stretch pipeline: fixture → context → JSON summary — `tests/context/test_collector.py`
-- [ ] End-to-end pipeline: fixture → context → prompt → mocked provider response
+- [x] End-to-end pipeline: fixture → context → prompt → mocked provider response — `tests/integration/test_chat_pipeline_e2e.py`
 
 #### Manual E2E validation
 
@@ -285,7 +288,8 @@ response without manual export/copy-paste.
 
 ### Dockable Assistant shell
 
-- [ ] **Unified Assistant shell (tabbed UI, dual host)** — one window with shared header + Chat / Datasheets / Simulation / AERF / Notebook tabs; same component in Terminal `--ui` and KiCad dock — [ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md)
+- [x] **Assistant shell scaffold** — shared header + tab bar; tabs open existing modal panels (`src/ui/assistant_shell.py`, `--ui`) — [ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md) partial
+- [ ] **Embedded tab UIs + KiCad dock** — replace modal opens with in-shell panels; dockable plugin host
 - [ ] Persistent wx panel dockable alongside schematic/PCB editor (hosts `AssistantShell`)
 - [ ] Non-blocking UI (API calls on background thread)
 - [ ] Resize-friendly layout

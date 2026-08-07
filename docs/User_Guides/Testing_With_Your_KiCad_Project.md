@@ -2,9 +2,11 @@
 
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [User Guides](README.md)
 
-> **Status:** Maintained  
-> **Owner:** Project maintainers  
+> **Status:** Maintained
+> **Owner:** Project maintainers
 > **Applies To:** Engineers validating KiCad AI Integration against a real schematic
+> **Last Reviewed:** 2026-08-07
+> **Review Frequency:** Quarterly
 
 This guide walks through testing chat, datasheet management, AERF staged analysis, and the Engineering Notebook using **external Python scripts** — no native KiCad plugin required. KiCad does **not** need to be open; the assistant reads your saved project files from disk.
 

@@ -16,7 +16,7 @@ Accepted
 
 ## Context
 
-[ADP-001](ADP-001-Engineering-Knowledge-Model-Foundation.md) (v1.1) established the Engineering Knowledge Model (EKM) as canonical project engineering knowledge and named the Engineering Notebook as the primary user interface. Users must never edit raw JSON during normal operation.
+[ADP-001](../ADP-001-Engineering-Knowledge-Model-Foundation.md) (v1.1) established the Engineering Knowledge Model (EKM) as canonical project engineering knowledge and named the Engineering Notebook as the primary user interface. Users must never edit raw JSON during normal operation.
 
 An architecture review of the initial notebook UI proposal identified gaps: missing View Model layer, no mapping from EKM primitive field types to presentation components, undefined KiCad shell integration, and a numbering conflict (notebook UI belongs in ADP-003 per ADP-001 Appendix A, not ADP-002 which is reserved for schema and persistence).
 
@@ -81,7 +81,7 @@ Phase 1 implementation complete: notebook renderer (`src/ui/notebook_renderer.py
 - No code changes in this ADR; architecture only
 - **Implementation status:** Track D complete except dockable KiCad plugin shell (Phase 2); see [MASTER_TASK_LIST](../../../tasks/MASTER_TASK_LIST.md) Track D and [ADP-003](../ADP-003-Engineering-Notebook-User-Interface.md) §18
 - Advanced JSON View is debugging-only, outside normal notebook editing
-- Staleness detection contract in [ADP-002 §13](ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links); UI indicators deferred
+- Staleness detection contract in [ADP-002 §13](../ADP-002-EKM-Schema-and-Persistence.md#13-staleness-model-for-kicad-links); UI indicators deferred
 
 ## References
 

@@ -12,7 +12,7 @@ The documents are intended to serve both as engineering reference material and a
 
 # Document Roadmap
 
-## [00 - Circuit Identification](00%20-%20Circuit%20Identification.md)
+## [00 - Circuit Identification](00 - Circuit Identification.md)
 
 The AI first determines **what the circuit is**.
 
@@ -26,7 +26,7 @@ Topics include:
 
 ---
 
-## [01 - Basic Oscillation](01%20-%20Basic%20Oscillation.md)
+## [01 - Basic Oscillation](01 - Basic Oscillation.md)
 
 Explains **why the circuit oscillates**.
 
@@ -40,7 +40,7 @@ Topics include:
 
 ---
 
-## [02 - Energy Flow](02%20-%20Energy%20Flow.md)
+## [02 - Energy Flow](02 - Energy Flow.md)
 
 Explains **where the energy goes**.
 
@@ -54,7 +54,7 @@ Topics include:
 
 ---
 
-## [03 - Physical Principles](03%20-%20Physical%20Principles.md)
+## [03 - Physical Principles](03 - Physical Principles.md)
 
 Explains the magnetic and physical behavior.
 
@@ -68,7 +68,7 @@ Topics include:
 
 ---
 
-## [04 - Component Roles](04%20-%20Component%20Roles.md)
+## [04 - Component Roles](04 - Component Roles.md)
 
 Explains the engineering purpose of every component.
 
@@ -81,7 +81,7 @@ Topics include:
 
 ---
 
-## [05 - Operating Modes](05%20-%20Operating%20Modes.md)
+## [05 - Operating Modes](05 - Operating Modes.md)
 
 Explains how the circuit behaves under different conditions.
 
@@ -96,7 +96,7 @@ Topics include:
 
 ---
 
-## [06 - System Behavior](06%20-%20System%20Behavior.md)
+## [06 - System Behavior](06 - System Behavior.md)
 
 Explains the complete electro-mechanical system.
 
@@ -110,7 +110,7 @@ Topics include:
 
 ---
 
-## [07 - Engineering Analysis](07%20-%20Engineering%20Analysis.md)
+## [07 - Engineering Analysis](07 - Engineering Analysis.md)
 
 Demonstrates how an experienced engineer evaluates the design.
 
@@ -127,14 +127,14 @@ Topics include:
 
 # Recommended Reading Order
 
-1. [00 - Circuit Identification](00%20-%20Circuit%20Identification.md)
-2. [01 - Basic Oscillation](01%20-%20Basic%20Oscillation.md)
-3. [02 - Energy Flow](02%20-%20Energy%20Flow.md)
-4. [03 - Physical Principles](03%20-%20Physical%20Principles.md)
-5. [04 - Component Roles](04%20-%20Component%20Roles.md)
-6. [05 - Operating Modes](05%20-%20Operating%20Modes.md)
-7. [06 - System Behavior](06%20-%20System%20Behavior.md)
-8. [07 - Engineering Analysis](07%20-%20Engineering%20Analysis.md)
+1. [00 - Circuit Identification](00 - Circuit Identification.md)
+2. [01 - Basic Oscillation](01 - Basic Oscillation.md)
+3. [02 - Energy Flow](02 - Energy Flow.md)
+4. [03 - Physical Principles](03 - Physical Principles.md)
+5. [04 - Component Roles](04 - Component Roles.md)
+6. [05 - Operating Modes](05 - Operating Modes.md)
+7. [06 - System Behavior](06 - System Behavior.md)
+8. [07 - Engineering Analysis](07 - Engineering Analysis.md)
 
 Each level assumes familiarity with the preceding documents.
 

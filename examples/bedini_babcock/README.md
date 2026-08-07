@@ -4,7 +4,7 @@ Validation scenario for flyback recovery and patent-driver PCB analysis — not 
 
 A bundled sample project is not yet included in this directory. Use your own KiCad project or the repository fixture `tests/fixtures/testproj.kicad_pro` for smoke testing.
 
-**Full testing guide:** [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
+**Full testing guide:** [Testing With Your KiCad Project](../../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
 
 ## Sample questions
 
@@ -26,4 +26,4 @@ With the built-in fixture (no API key needed for context-only):
 python scripts/run_ai_assistant.py tests/fixtures/testproj.kicad_pro
 ```
 
-See [E2E Chat UI validation](../docs/Developer_Handbook/06_E2E_Chat_UI.md) and [E2E Full Flow](../docs/Developer_Handbook/07_E2E_Full_Flow.md).
+See [E2E Chat UI validation](../../docs/Developer_Handbook/06_E2E_Chat_UI.md) and [E2E Full Flow](../../docs/Developer_Handbook/07_E2E_Full_Flow.md).
