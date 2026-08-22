@@ -8,6 +8,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- [ADP-013: Routing Abstraction](docs/Architecture/ADP-013-Routing-Abstraction.md) (draft) — engine-neutral routing capability architecture
+- [Freerouting Integration](docs/Specifications/Freerouting_Integration.md) specification (draft) — first routing engine reference implementation
+- [ADP-013 Phase 1 Review](docs/Architecture/ADP-013-Phase1-Review.md) — investigation findings and gate checklist
+- Routing abstraction implementation: `src/routing/`, `src/inference/routing.py`, DSN/SES host adapters, checkpoint workflow
+- Routing policy helpers (`src/routing/policy.py`) and AI prompts (`routing_policy.py`, `post_route_review.py`)
+- Engineering Engine Provider pattern documented in Platform Architecture (watch item)
+- Freerouting config: `freerouting_jar`, `freerouting_cli`, `routing_enabled`, `routing_timeout_sec`
+
 - ADR-0004: Optional multimodal schematic context (600 DPI default via `kicad-cli` + `pdftoppm`)
 - [Prompt Architecture](docs/Architecture/Prompt_Architecture.md): multimodal context and netlist gap-fill prompt sections
 - [Netlist Gap Fill](docs/Specifications/Netlist_Gap_Fill.md) specification (Draft)

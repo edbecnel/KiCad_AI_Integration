@@ -19,6 +19,7 @@ DEFAULT_CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
 DEFAULT_PROVIDER_TIMEOUT_SEC = 120
 DEFAULT_PROVIDER_READ_TIMEOUT_SEC = 600
 DEFAULT_PROVIDER_MAX_TOKENS = 4096
+DEFAULT_ROUTING_TIMEOUT_SEC = 600
 
 DatasheetUrlFetchPolicy = Literal["if_missing", "always", "never"]
 DEFAULT_DATASHEET_URL_FETCH: DatasheetUrlFetchPolicy = "if_missing"
@@ -56,6 +57,10 @@ class AppConfig:
     learning_auto_promote: bool = True
     learning_min_confidence: LearningMinConfidence = DEFAULT_LEARNING_MIN_CONFIDENCE
     learning_library_subdir: str = DEFAULT_LEARNING_LIBRARY_SUBDIR
+    freerouting_jar: str | None = None
+    freerouting_cli: str | None = None
+    routing_enabled: bool = False
+    routing_timeout_sec: int = DEFAULT_ROUTING_TIMEOUT_SEC
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AppConfig:
@@ -111,6 +116,12 @@ class AppConfig:
             learning_min_confidence=_parse_learning_min_confidence(data),
             learning_library_subdir=str(
                 data.get("learning_library_subdir", DEFAULT_LEARNING_LIBRARY_SUBDIR)
+            ),
+            freerouting_jar=data.get("freerouting_jar") or os.environ.get("FREEROUTING_JAR"),
+            freerouting_cli=data.get("freerouting_cli") or os.environ.get("FREEROUTING_CLI"),
+            routing_enabled=bool(data.get("routing_enabled", False)),
+            routing_timeout_sec=int(
+                data.get("routing_timeout_sec", DEFAULT_ROUTING_TIMEOUT_SEC)
             ),
         )
 

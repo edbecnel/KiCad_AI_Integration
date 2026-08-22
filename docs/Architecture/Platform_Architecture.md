@@ -5,7 +5,7 @@
 > **Status:** Maintained
 > **Owner:** Project maintainers
 > **Applies To:** Platform architecture and layering
-> **Last Reviewed:** 2026-08-07
+> **Last Reviewed:** 2026-08-23
 > **Review Frequency:** Quarterly
 > **Authoritative:** Yes
 > **Ratified by:** [ADR-0009](ADRs/ADR-0009-Platform-Architecture-Foundation.md)
@@ -29,7 +29,8 @@ AI-assisted Electrical Engineering Reasoning Platform
     ├── AERP (host-agnostic framework stack)
     │       EKM, AERF, EIE, Prompt Architecture, AI Provider Layer,
     │       Artifact Library, Engineering Knowledge Libraries,
-    │       Conversation Manager (planned), Simulation Abstraction (planned)
+    │       Conversation Manager (planned), Simulation Abstraction (planned),
+    │       Routing Abstraction (planned)
     └── Host Integrations
             └── KiCad AI Integration (first reference host)
                     └── Existing KiCad-centric documentation and code
@@ -58,6 +59,7 @@ AI-assisted Electrical Engineering Reasoning Platform
 | **Engineering Knowledge Libraries** | Circuit-family reference content | [Engineering Knowledge](../Engineering_Knowledge/README.md) | `docs/Engineering_Knowledge/` |
 | **Conversation Manager** | Raw multi-turn transcripts (input, not canonical knowledge) | Software Architecture Component 5 | Deferred Phase 2+ |
 | **Simulation Abstraction** | Validation hooks independent of ngspice/KiCad sim | [ADP-006](ADP-006-Simulation-Abstraction.md) | Closed loop deferred |
+| **Routing Abstraction** | Intent-aware PCB routing via replaceable engines | [ADP-013](ADP-013-Routing-Abstraction.md) | Phase 2 POC (Freerouting reference) |
 
 ### AERF vs EIE
 
@@ -110,7 +112,8 @@ src/
   platform_core/      → AERP: shared contracts (DesignSnapshot)
   ekm/                → AERP: EKM runtime
   reasoning/          → AERP: AERF stage registry and KB loaders
-  inference/          → AERP: EIE orchestrator (chat, simulation, AERF pipeline)
+  inference/          → AERP: EIE orchestrator (chat, simulation, routing, AERF pipeline)
+  routing/            → AERP: Routing Abstraction (engine-independent contracts)
   context/artifacts/  → AERP: Artifact Library
   context/model.py    → Shared: DesignSnapshot (KiCad-shaped today)
   context/*parse*     → Host (KiCad): collection and write-back
@@ -137,6 +140,43 @@ Platform modules (AERP: `providers/`, `prompts/`, `platform_core/`, `ekm/`, `rea
 | **Other EDA tools** | New collector + host link type; reuse platform frameworks |
 
 Physical reorganization into `src/hosts/kicad/` is deferred until a second host integration is in active development.
+
+---
+
+## Engineering Engine Provider Pattern (Watch Item)
+
+KAI is developing capability-specific abstractions for externally orchestrated engineering tools. Two domains now exhibit a common pattern:
+
+- **Simulation Abstraction** ([ADP-006](ADP-006-Simulation-Abstraction.md))
+- **Routing Abstraction** ([ADP-013](ADP-013-Routing-Abstraction.md))
+
+The same pattern is likely to recur for thermal, signal integrity, EMI/EMC, manufacturing, and other specialized solvers.
+
+```text
+KAI Engineering Intelligence
+        ↓
+Engineering Intent
+        ↓
+Capability-Specific Abstraction
+        ↓
+Engineering Tool / Engineering Engine Provider (future)
+        ↓
+Tool-Specific Adapter
+        ↓
+Specialized External Engineering Engine
+        ↓
+Generated Artifact / Analysis Result
+        ↓
+KAI Validation / Interpretation
+        ↓
+Human Review / Approval
+```
+
+**Principle:** Recognize the common pattern now. Generalize only when stable common semantics are understood (likely after a third substantial capability).
+
+**Do NOT yet:** Refactor simulation and routing into a generalized `EngineeringEngineProvider` framework. Domain-specific contracts (`RoutingEngine`, simulation hooks) must be preserved.
+
+See [ADP-013 Appendix B](ADP-013-Routing-Abstraction.md#appendix-b--engineering-engine-provider-pattern-watch-item) for the Simulation vs Routing comparison.
 
 ---
 

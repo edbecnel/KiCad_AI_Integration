@@ -568,6 +568,58 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 
 ---
 
+
+## Track E — Routing Abstraction (ADP-013)
+
+**Goal:** Intent-aware, replaceable PCB routing via external engines. Freerouting is the first reference implementation.
+
+**Architecture:** [ADP-013](../docs/Architecture/ADP-013-Routing-Abstraction.md) · **Spec:** [Freerouting Integration](../docs/Specifications/Freerouting_Integration.md) · **Review:** [Phase 1 Review](../docs/Architecture/ADP-013-Phase1-Review.md)
+
+### Phase 1 — Investigation and architecture
+
+- [x] Migrate planning handover to ADP-013 (routing-engine-neutral)
+- [x] Create Freerouting Integration specification
+- [x] KiCad DSN/SES automation spikes (pcbnew confirmed; kicad-cli not supported)
+- [x] Engine-independent RoutingEngine contract (`src/routing/types.py`)
+- [x] Simulation vs Routing comparison (ADP-013 Appendix A)
+- [x] Engineering Engine Provider watch item (Platform Architecture)
+- [ ] Human architecture review approval
+
+### Phase 2 — Minimal POC
+
+- [x] `src/routing/` — base types, errors, FreeroutingRoutingEngine, factory
+- [x] `src/utils/freerouting_cli.py` — external tool resolution
+- [x] `src/context/dsn_export.py`, `ses_import.py`, `routing_checkpoint.py`
+- [x] `src/inference/routing.py` — EIE orchestration
+- [x] Config: `freerouting_jar`, `freerouting_cli`, `routing_enabled`, `routing_timeout_sec`
+- [x] Unit tests (mocked subprocess, checkpoint workflow)
+- [ ] E2E test with Freerouting + pcbnew installed
+- [ ] Routing UI tab in Assistant shell
+- [ ] Post-route DRC via `kicad-cli pcb drc`
+
+### Phase 3 — Routing policy
+
+- [x] Structured `RoutingPolicy` type (persistence TBD — not EKM)
+- [x] `build_exclusions_from_policy`, explainability helpers
+- [ ] User approval gate before routing execution (UI)
+- [ ] Routing policy persistence mechanism decision
+
+### Phase 4 — AI-assisted routing intelligence
+
+- [x] `routing_policy.py` prompt — critical-net classification
+- [x] `post_route_review.py` prompt — post-route quality review
+- [x] `RoutingQualityReport` type
+- [ ] Wire prompts into Assistant shell / chat templates
+- [ ] Parse AI policy JSON into `RoutingPolicy`
+
+### Phase 5 — Closed-loop optimization
+
+- [ ] Compare routing candidates
+- [ ] Re-route with revised policy (user approval)
+- [ ] Learning candidates via ADP-012 pipeline (not auto-canonical)
+
+---
+
 ## Architecture Component Mapping
 
 | Architecture component | Primary phase | Key deliverable |
@@ -579,6 +631,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 | KiCad User Interface | Phase 1 → 2 | `src/ui/` dialogs → unified Assistant shell ([ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md)) + dockable plugin |
 | Conversation Manager | Phase 2 | `src/` session/history module |
 | AERF Orchestrator | Track C (complete) | `src/reasoning/`, `src/inference/aerf.py` staged analysis pipeline |
+| Routing Abstraction | Track E (Phase 2 POC) | `src/routing/`, `src/inference/routing.py`, Freerouting reference |
 
 ---
 

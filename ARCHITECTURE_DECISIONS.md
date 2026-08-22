@@ -38,6 +38,7 @@ Individual ADRs belong in [docs/Architecture/ADRs/](docs/Architecture/ADRs/READM
 | [ADP-009](docs/Architecture/ADP-009-Host-Integration-Layer.md) | Host Integration Layer | Accepted (v1.0) | 2026-07-29 |
 | [ADP-010](docs/Architecture/ADP-010-Engineering-Inference-Engine.md) | Engineering Inference Engine | Accepted (v1.0) | 2026-07-29 |
 | [ADP-011](docs/Architecture/ADP-011-Assistant-Shell-UI.md) | Assistant Shell user interface | Proposed (v1.0) | 2026-07-31 |
+| [ADP-013](docs/Architecture/ADP-013-Routing-Abstraction.md) | Routing abstraction | Draft (v1.0) | 2026-08-23 |
 
 ## Related Documents
 

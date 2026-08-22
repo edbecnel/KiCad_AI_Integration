@@ -1,46 +1,43 @@
 ```
-HANDOVER — Phase 2 Sprint 4 (ADP-011 Phase D) — completed
+HANDOVER — Routing Abstraction (ADP-013) — Phase 1 complete
 ================================================================================
 Date: 2026-08-23
 Repo: KiCad_AI_Integration
 
 SUMMARY
 -------
-Legacy launcher dialog and modal `*_dialog.py` entry paths are removed. The unified
-Assistant shell (`--ui`, ActionPlugin, `--ui-*` deep links) is the sole UI entry.
-Conversation sessions persist to `<project>/kicad_ai/conversation.json` for replay/debug.
-Chat conversation log shows markdown-friendly formatting plus per-turn token/cost summary.
+Routing abstraction architecture (ADP-013) and Freerouting reference specification
+are in place. Phase 1 investigation confirmed DSN/SES automation via pcbnew (not
+kicad-cli). Phase 2 POC code implemented behind gate checklist; human architecture
+review pending.
 
 WHAT WAS DONE
 -------------
-1. **Phase D cleanup** — removed `launcher_dialog.py` and modal wrappers; helpers moved to
-   `src/ui/project_path.py`; `launcher.py` exports `show_assistant_shell` only
-2. **Shell integration tests** — CLI deep links, context propagation, tab badges, last-tab restore
-3. **Conversation persistence** — disk-backed `SessionStore` + `get_session_store()` singleton
-4. **Enhanced Chat UX** — markdown display formatting, token/cost per assistant turn, template hint
-5. **Plugin verification** — `tests/plugin/test_macos_plugin_path.py` (Documents/KiCad/10.0 path)
-6. **Docs** — ADP-011 Phase D complete, testing guide, MASTER_TASK_LIST updated
-
-ENTRY POINTS
-------------
-- Terminal: `python scripts/run_ai_assistant.py /path/to/project.kicad_pro --ui`
-- Deep links: `--ui-chat`, `--ui-datasheets`, `--ui-simulation`, `--ui-aerf`, `--ui-notebook`
-- KiCad: Tools → External Plugins → KiCad AI Assistant
-- macOS plugin symlink: `~/Documents/KiCad/10.0/scripting/plugins/kicad_ai_assistant.py`
-  → repo `src/plugin/kicad_ai_assistant_plugin.py`
+1. **ADP-013** — engine-neutral routing abstraction at docs/Architecture/ADP-013-Routing-Abstraction.md
+2. **Freerouting spec** — docs/Specifications/Freerouting_Integration.md
+3. **Phase 1 spikes** — KiCad 10.0.4: no kicad-cli DSN/SES; pcbnew required
+4. **Routing contracts** — src/routing/ (engine-independent RoutingRequest/Result)
+5. **Freerouting POC** — src/routing/freerouting.py, context adapters, inference/routing.py
+6. **Routing policy** — src/routing/policy.py (structured; persistence TBD)
+7. **AI prompts** — routing_policy.py, post_route_review.py (Phase 4)
+8. **EEP watch item** — Platform_Architecture.md + ADP-013 Appendix B
+9. **Tests** — tests/routing/, checkpoint, DSN export, inference routing
+10. **Phase 1 review** — docs/Architecture/ADP-013-Phase1-Review.md
 
 RECOMMENDED NEXT
 ----------------
-- Incremental context refresh between chat turns (reduce API cost)
-- Multi-provider settings UI (OpenAI / Ollama)
-- True wxAUI docking inside KiCad editor (deferred)
+- Human architecture review (ADP-013-Phase1-Review.md gate checklist)
+- E2E test with Freerouting + pcbnew installed
+- Routing UI tab in Assistant shell
+- kicad-cli pcb drc for post-route validation
 
-PRIOR — Phase 2 Sprint 3 (ADP-011 Phase C)
-------------------------------------------
-KiCad ActionPlugin, Conversation Manager (in-memory), multi-turn Chat, shell polish.
+PRIOR — Phase 2 Sprint 5–6
+--------------------------
+Incremental context refresh, context cache, multi-provider (Claude + Ollama).
 
 AUTHORITATIVE STATUS
 --------------------
-- `tasks/MASTER_TASK_LIST.md` (Last Reviewed: 2026-08-23)
-- `docs/Architecture/ADP-011-Assistant-Shell-UI.md`
+- tasks/MASTER_TASK_LIST.md (Routing workstream)
+- docs/Architecture/ADP-013-Routing-Abstraction.md
+- docs/Specifications/Freerouting_Integration.md
 ```
