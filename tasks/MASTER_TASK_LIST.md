@@ -5,14 +5,14 @@
 > **Status:** Maintained
 > **Owner:** Project maintainers
 > **Applies To:** KiCad AI Integration implementation tracking
-> **Last Reviewed:** 2026-08-07
+> **Last Reviewed:** 2026-08-22
 > **Review Frequency:** Monthly
 
 > Phased implementation backlog for the Python-scripting API integration with AI,
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 stretch slice + platform Tracks B–D complete. **Working:** Assistant shell scaffold (`--ui`), schematic context + datasheet library, chat UI with Approve & Send and context toggles (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`), built-in sim model auto-apply, AERF staged analysis (`--ui-aerf`), Engineering Notebook (`--ui-notebook`), EKM runtime + AERF write-back, PCB/BOM/ERC/DRC context extractors, `pcb_layout_audit` prompt template. **Still open:** netlist connectivity graph, isolation/clearance and netlist-crosscheck templates, native KiCad plugin, embedded Assistant tabs (ADP-011 Phase 2).
+**Current repository status:** Phase 1 stretch slice + platform Tracks B–D complete. **Working:** Assistant shell scaffold (`--ui`), schematic context + datasheet library, chat UI with Approve & Send and context toggles (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`), built-in sim model auto-apply, AERF staged analysis (`--ui-aerf`), Engineering Notebook (`--ui-notebook`), EKM runtime + AERF write-back, PCB/BOM/ERC/DRC context extractors, netlist connectivity graph, audit templates (`isolation_clearance`, `netlist_crosscheck`), `pcb_layout_audit` prompt template. **Still open:** native KiCad plugin, embedded Assistant tabs (ADP-011 Phase 2).
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -535,7 +535,10 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
 - [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
 
-**AERF exit criteria:** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM (`write_aerf_stages_to_ekm`, `--approve-ekm-writeback`, AERF UI). **Signed off** Aug 2026 — Bedini `Bedini_SSG_Radiant_Oscillator` via `tests/integration/test_bedini_aerf_exit.py` (collect, dry-run pipeline, mock 0–7 + writeback plan, chat prompt smoke).
+**AERF exit criteria:** Engineer runs staged analysis on a sample schematic; each stage produces reviewable JSON; approved Stage 7 conclusions write to EKM (`write_aerf_stages_to_ekm`, `--approve-ekm-writeback`, AERF UI).
+
+- **Pipeline sign-off (mock)** — Aug 2026 — Bedini via `tests/integration/test_bedini_aerf_exit.py` (collect, dry-run, mock 0–7 + writeback plan, chat smoke).
+- **Live Bedini sign-off** — Aug 2026 — Bedini `Bedini_SSG_Radiant_Oscillator` stages 0–7 with real API; fixtures in `tests/fixtures/bedini_aerf_live/stages_0-7.json`; regression in `tests/integration/test_bedini_aerf_live.py`; EKM validated via `ekm_tool validate`. See [AERF Validation Rubric](../docs/User_Guides/AERF_Validation_Rubric.md).
 
 ### Track D — Engineering Notebook (ADP-003)
 

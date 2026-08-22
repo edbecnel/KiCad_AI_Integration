@@ -120,6 +120,7 @@ AERF uses the **same class of LLM** as a browser chatbot. The difference is **wo
 
 ## Related documents
 
+- [AERF Validation Rubric](AERF_Validation_Rubric.md) — live-run quality checklist (Bedini reference)
 - [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md) — run `--ui-aerf` step by step
 - [Feature Overview](Feature_Overview.md) — capability status
 - [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md)

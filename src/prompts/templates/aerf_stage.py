@@ -44,7 +44,17 @@ Follow the Engineering Reasoning Methodology for this stage:
    project_design_intent as established engineering knowledge without classification.
 9. Scientific neutrality — respect project_design_intent; do not dismiss unconventional designs;
    classify theoretical_framework separately from mainstream_engineering_model when they differ.
-10. Traceable conclusions — significant determinations should include evidence chains (see aerf_evidence_model).
+10. Traceable conclusions — cite evidence briefly in strings; use open_questions/unknowns for gaps.
+"""
+
+AERF_OUTPUT_DISCIPLINE = """\
+CRITICAL output rules:
+- Return ONE complete, valid JSON object matching aerf_output_schema (envelope + determinations for this stage).
+- determinations MUST contain ONLY the keys listed in aerf_output_schema for this stage — no extra keys.
+- Use concise strings (1–3 sentences). Limit arrays to 6 items unless the schema requires more.
+- Do NOT add nested evidence-chain objects inside determinations unless the schema explicitly shows that shape.
+- Use family_id "blocking_oscillator" when the circuit matches the Blocking Oscillator / Bedini SSG family.
+- Ensure JSON is complete and parseable — never truncate mid-object.
 """
 
 AERF_STAGE_SYSTEM = (
@@ -53,7 +63,7 @@ AERF_STAGE_SYSTEM = (
     "Return a single JSON object matching aerf_output_schema (envelope + determinations for this stage). "
     "Required envelope keys: stage_id, stage_key, determinations, open_questions, unknowns, confidence. "
     "Optional: simulation_hooks, sources. "
-    "Significant determinations must use knowledge_classification and evidence chains per aerf_methodology."
+    "Follow aerf_output_discipline — concise schema-only JSON."
 )
 
 
@@ -88,6 +98,7 @@ def build_aerf_stage_sections(
     sections["kicad_python_extracted_data"] = json.dumps(context_data, indent=2)
     sections["engineering_knowledge"] = json.dumps(ekm_sections or {}, indent=2)
     sections["aerf_methodology"] = AERF_METHODOLOGY_EXCERPT.strip()
+    sections["aerf_output_discipline"] = AERF_OUTPUT_DISCIPLINE.strip()
     sections["aerf_evidence_model"] = EVIDENCE_CHAIN_EXAMPLE_JSON.strip()
     sections["aerf_output_schema"] = (
         f"Envelope shape:\n{ENVELOPE_SCHEMA_JSON.strip()}\n\n"

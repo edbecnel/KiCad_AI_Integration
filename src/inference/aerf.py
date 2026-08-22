@@ -22,6 +22,12 @@ from utils.config import AppConfig, load_config
 
 _JSON_FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)\s*```", re.IGNORECASE)
 _REQUIRED_ENVELOPE_KEYS = ("stage_id", "determinations")
+AERF_PROVIDER_MAX_TOKENS = 8192
+_AERF_TRUNCATION_RETRY_SUFFIX = (
+    "\n\nYour previous response was truncated or invalid JSON. "
+    "Reply with ONLY a complete valid JSON object matching aerf_output_schema. "
+    "Be concise; use only schema keys; limit lists to 6 items."
+)
 
 
 @dataclass
@@ -77,6 +83,41 @@ class AERFPipelineResult:
     completed_stages: list[dict[str, Any]]
     failed_at_stage: int | None = None
     parse_error: str | None = None
+
+
+def _resolve_aerf_config(
+    cfg: AppConfig,
+    *,
+    api_key_override: str | None = None,
+) -> AppConfig:
+    """Raise output token budget for AERF stage JSON envelopes."""
+    max_tokens = max(cfg.provider_max_tokens, AERF_PROVIDER_MAX_TOKENS)
+    key_override = (api_key_override or "").strip()
+    key = key_override or cfg.anthropic_api_key
+    if max_tokens == cfg.provider_max_tokens and not key_override:
+        return cfg
+    return AppConfig(
+        artifact_library_path=cfg.artifact_library_path,
+        datasheet_search_paths=cfg.datasheet_search_paths,
+        schematic_image_dpi=cfg.schematic_image_dpi,
+        datasheet_url_fetch=cfg.datasheet_url_fetch,
+        url_fetch_timeout_sec=cfg.url_fetch_timeout_sec,
+        url_fetch_read_timeout_sec=cfg.url_fetch_read_timeout_sec,
+        url_fetch_warmup=cfg.url_fetch_warmup,
+        kicad_cli=cfg.kicad_cli,
+        anthropic_api_key=key,
+        ai_provider=cfg.ai_provider,
+        claude_model=cfg.claude_model,
+        provider_timeout_sec=cfg.provider_timeout_sec,
+        provider_read_timeout_sec=cfg.provider_read_timeout_sec,
+        provider_max_tokens=max_tokens,
+        datasheet_ai_discovery=cfg.datasheet_ai_discovery,
+        datasheet_ai_discovery_auto_fetch=cfg.datasheet_ai_discovery_auto_fetch,
+        datasheet_ai_discovery_max_urls=cfg.datasheet_ai_discovery_max_urls,
+        datasheet_reset_quarantine_local_pdf=cfg.datasheet_reset_quarantine_local_pdf,
+        datasheet_write_symbol_url=cfg.datasheet_write_symbol_url,
+        spice_write_symbol_fields=cfg.spice_write_symbol_fields,
+    )
 
 
 def _snapshot_image(snapshot: DesignSnapshot, *, include_image: bool) -> bytes | None:
@@ -253,32 +294,36 @@ def send_aerf_stage_prompt(
     provider: Any | None = None,
 ) -> AERFSendResult:
     """Send a built AERF prompt — caller must have approved transmission."""
-    cfg = config or load_config()
-    if api_key_override and api_key_override.strip():
-        cfg = AppConfig(
-            artifact_library_path=cfg.artifact_library_path,
-            datasheet_search_paths=cfg.datasheet_search_paths,
-            schematic_image_dpi=cfg.schematic_image_dpi,
-            datasheet_url_fetch=cfg.datasheet_url_fetch,
-            url_fetch_timeout_sec=cfg.url_fetch_timeout_sec,
-            url_fetch_read_timeout_sec=cfg.url_fetch_read_timeout_sec,
-            url_fetch_warmup=cfg.url_fetch_warmup,
-            kicad_cli=cfg.kicad_cli,
-            anthropic_api_key=api_key_override.strip(),
-            ai_provider=cfg.ai_provider,
-            claude_model=cfg.claude_model,
-            provider_timeout_sec=cfg.provider_timeout_sec,
-            provider_read_timeout_sec=cfg.provider_read_timeout_sec,
-            provider_max_tokens=cfg.provider_max_tokens,
-        )
+    cfg = _resolve_aerf_config(config or load_config(), api_key_override=api_key_override)
     llm = provider if provider is not None else get_provider(cfg)
+    image = _snapshot_image(snapshot, include_image=built.include_image)
     response = llm.send_message(
         built.text,
         system=built.system,
-        image=_snapshot_image(snapshot, include_image=built.include_image),
+        image=image,
         config=cfg,
     )
     parsed, parse_error = parse_stage_output(response.text, expected_stage_id=stage_id)
+    if parse_error and (
+        response.stop_reason == "max_tokens"
+        or parse_error.startswith("JSON decode error")
+    ):
+        retry_response = llm.send_message(
+            built.text + _AERF_TRUNCATION_RETRY_SUFFIX,
+            system=built.system,
+            image=image,
+            config=cfg,
+        )
+        retry_parsed, retry_error = parse_stage_output(
+            retry_response.text,
+            expected_stage_id=stage_id,
+        )
+        if retry_parsed is not None:
+            response = retry_response
+            parsed, parse_error = retry_parsed, retry_error
+        elif retry_error and retry_response.stop_reason != "max_tokens":
+            response = retry_response
+            parsed, parse_error = retry_parsed, retry_error
     return AERFSendResult(
         response=response,
         built=built,

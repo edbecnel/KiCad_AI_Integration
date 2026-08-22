@@ -5,7 +5,7 @@
 > **Status:** Maintained
 > **Owner:** Project maintainers
 > **Applies To:** Manual validation and QA of Phase 1 host features
-> **Last Reviewed:** 2026-08-07
+> **Last Reviewed:** 2026-08-22
 > **Review Frequency:** Quarterly
 
 End-user walkthrough: [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md).
@@ -95,6 +95,10 @@ python scripts/run_ai_assistant.py "$PROJECT" --aerf-pipeline
 - [ ] `--aerf-pipeline` without `--approve-send` reports dry-run
 
 ### 4b. UI (`--ui-aerf`)
+
+Use the [AERF Validation Rubric](../User_Guides/AERF_Validation_Rubric.md) when reviewing live stage JSON.
+
+Reference project: `Bedini_SSG_Radiant_Oscillator.kicad_pro` (local path on maintainer machine).
 
 ```bash
 python scripts/run_ai_assistant.py "$PROJECT" --ui-aerf
@@ -202,6 +206,18 @@ Bedini AERF exit (local `Bedini_SSG_Radiant_Oscillator.kicad_pro` when present):
 
 ```bash
 pytest tests/integration/test_bedini_aerf_exit.py -q
+```
+
+Live AERF fixture regression (no API):
+
+```bash
+pytest tests/integration/test_bedini_aerf_live.py -q -m "not live"
+```
+
+Optional live API smoke (requires `ANTHROPIC_API_KEY`):
+
+```bash
+pytest tests/integration/test_bedini_aerf_live.py -q -m live
 ```
 
 See [05_Testing.md](05_Testing.md) for philosophy and coverage expectations.

@@ -1,0 +1,1234 @@
+[
+  {
+    "stage_id": 0,
+    "stage_key": "circuit_identification",
+    "title": "Circuit Identification",
+    "question": "What is this circuit?",
+    "determinations": {
+      "family_id": "blocking_oscillator",
+      "family_label": "Dual Self-Oscillating Blocking Oscillator / Bedini SSG Radiant Oscillator",
+      "topology": "Dual magnetically-coupled flyback converter with regenerative feedback, shared charging battery configuration",
+      "functional_blocks": [
+        {
+          "name": "Power Source",
+          "description": "PrimaryBT1 (6V) provides electrical energy; ChargeBT1 and ChargeBT2 (both 6V) form series voltage source for charging path"
+        },
+        {
+          "name": "Switching Stage 1",
+          "description": "Q1 (BD243C NPN) with bias network R1/R2 controls current through primary winding of T1"
+        },
+        {
+          "name": "Switching Stage 2",
+          "description": "Q2 (BD243C NPN) with bias network R4/R5 controls current through secondary primary winding of T1"
+        },
+        {
+          "name": "Energy Storage & Magnetic Feedback",
+          "description": "T1 (Multi-Strand SSG trifilar transformer) stores energy in magnetic field and provides regenerative base drive via trigger windings"
+        },
+        {
+          "name": "Flyback Rectification",
+          "description": "D1 and D2 (1N4007) direct inductive collapse energy to charging batteries; D2 provides cross-coupling between channels"
+        },
+        {
+          "name": "Tuning Network",
+          "description": "R7 (1K potentiometer) with R3/R6 (560R) adjusts trigger winding coupling and oscillation characteristics"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "Primary Battery",
+          "type": "electrical",
+          "description": "PrimaryBT1 6V DC source powers both oscillator channels"
+        },
+        {
+          "name": "Magnetic Feedback",
+          "type": "magnetic",
+          "description": "Trigger windings on T1 provide regenerative base drive signals to Q1 and Q2"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Flyback Pulse 1",
+          "type": "electrical",
+          "description": "High-voltage inductive collapse from Q1 channel rectified by D1 to ChargeBT2 positive terminal"
+        },
+        {
+          "name": "Flyback Pulse 2",
+          "type": "electrical",
+          "description": "High-voltage inductive collapse from Q2 channel rectified through D2 path"
+        },
+        {
+          "name": "Charging Current",
+          "type": "energy_storage",
+          "description": "Combined flyback energy charges ChargeBT1 and ChargeBT2 series configuration"
+        },
+        {
+          "name": "Heat Dissipation",
+          "type": "thermal",
+          "description": "Power loss in transistors Q1/Q2, resistors, and coil resistance"
+        },
+        {
+          "name": "Electromagnetic Radiation",
+          "type": "electromagnetic",
+          "description": "Radiated fields from switching transients and magnetic flux changes in T1"
+        }
+      ],
+      "switching_method": "Regenerative magnetic feedback via trifilar transformer trigger windings coupled to transistor bases through adjustable resistor network",
+      "energy_storage_method": "Inductive energy storage in magnetic field of T1 primary windings during transistor conduction, released as flyback pulse during transistor cutoff"
+    },
+    "open_questions": [
+      "What is the intended phase relationship between the two oscillator channels - are they meant to operate in-phase, out-of-phase, or independently?",
+      "Does the dual-channel configuration provide redundancy, increased power handling, or a specific electromagnetic effect compared to single-channel Bedini SSG?",
+      "What is the functional purpose of D2 cross-coupling between ChargeBT2+ and ChargeBT1+ - does it enable bidirectional energy flow or prevent reverse current?",
+      "How does the potentiometer R7 affect the relative timing and amplitude of the two oscillator channels?",
+      "What are the specific winding configurations and turns ratios of the Multi-Strand SSG trifilar transformer T1?"
+    ],
+    "confidence": "high",
+    "unknowns": [
+      "T1 winding specifications: inductance values, turns ratios, coupling coefficients, DC resistance for each winding",
+      "Actual battery voltages and internal resistances under operating conditions",
+      "Expected oscillation frequency range and duty cycle",
+      "Power transfer efficiency and charging current magnitude",
+      "Transistor operating points: saturation voltage, base drive current, collector current amplitude",
+      "Whether the two channels are intended to oscillate synchronously or asynchronously"
+    ],
+    "simulation_hooks": [
+      {
+        "description": "Measure oscillation frequency and duty cycle for both channels with R7 at mid-position",
+        "validates": "Self-sustaining oscillation in dual-channel blocking oscillator topology",
+        "expected_outcome": "Both channels oscillate independently or synchronously in kHz range with duty cycle 10-50%"
+      },
+      {
+        "description": "Sweep R7 potentiometer value and observe effect on channel coupling and timing",
+        "validates": "Tuning network control over regenerative feedback strength and inter-channel interaction",
+        "expected_outcome": "Adjustable phase relationship or frequency difference between channels"
+      },
+      {
+        "description": "Monitor flyback voltage peaks at D1 anode and D2 anode during transistor turn-off",
+        "validates": "Inductive energy storage and high-voltage flyback pulse generation",
+        "expected_outcome": "Voltage spikes significantly exceeding supply voltage (>50V typical for blocking oscillators)"
+      },
+      {
+        "description": "Measure net current flow into ChargeBT1 and ChargeBT2 terminals over complete oscillation cycles",
+        "validates": "Energy transfer from primary battery to charging batteries via flyback mechanism",
+        "expected_outcome": "Positive average charging current indicating energy recovery from inductive collapse"
+      }
+    ],
+    "sources": [
+      "project_context: netlist connectivity showing dual-transistor configuration with shared transformer T1",
+      "project_context: BOM indicating BD243C NPN transistors, 1N4007 diodes, Multi-Strand SSG transformer",
+      "circuit_family_kb: Blocking Oscillator classification and functional block definitions",
+      "circuit_family_kb: Energy conversion chain and topology descriptions for Bedini SSG",
+      "project_context: schematic symbol connections reveal dual parallel oscillator channels with cross-coupled charging path"
+    ]
+  },
+  {
+    "stage_id": 1,
+    "stage_key": "basic_operation",
+    "title": "Basic Operation",
+    "question": "How does it work?",
+    "determinations": {
+      "operating_sequence": [
+        "Initial startup bias: R1 (10K) and R4 (10K) provide small base currents to Q1 and Q2 respectively through voltage dividers with R2 (18K) and R5 (18K) from PrimaryBT1 (6V)",
+        "Magnetic field build-up: When either transistor begins conducting, collector current flows through its respective T1 primary winding, creating increasing magnetic flux in the trifilar transformer core",
+        "Regenerative feedback: Changing magnetic flux induces voltage in T1 trigger winding (T1 pin 3), which couples through potentiometer R7 (1K) and resistors R3/R6 (560R) to transistor bases, providing positive feedback",
+        "Transistor saturation: Positive feedback rapidly increases base drive, causing transistor to enter saturation with full collector current limited primarily by winding resistance and saturation voltage",
+        "Magnetic saturation and cutoff: As magnetic core approaches saturation, flux rate-of-change decreases, reducing trigger winding voltage below level needed to sustain base current, causing transistor turn-off",
+        "Flyback energy transfer: Collapsing magnetic field generates high-voltage flyback pulse across primary windings; D1 rectifies Q1 channel flyback to ChargeBT2 positive terminal; D2 provides path between ChargeBT2+ and ChargeBT1+ for Q2 channel energy"
+      ],
+      "startup_behavior": "Circuit relies on base bias resistor networks (R1-R2 for Q1, R4-R5 for Q2) to provide initial turn-on current when PrimaryBT1 is connected. Voltage divider action creates approximately 2.6V at each base (6V * 18K / (10K + 18K)), providing sufficient bias to initiate small collector current through T1 primary windings. Any noise, component asymmetry, or initial magnetic state will cause one channel to begin oscillating first, though both channels can sustain independent oscillation once started.",
+      "switching_mechanism": "Magnetically-coupled regenerative feedback through T1 trifilar transformer trigger winding. Increasing collector current produces increasing magnetic flux (d\u03a6/dt), which induces voltage V = N * d\u03a6/dt in trigger winding. This voltage adds to base bias current, creating positive feedback loop that drives transistor from cutoff through active region to saturation in microseconds. Switching is self-timed by magnetic core properties and winding inductance rather than external clock or RC timing network.",
+      "oscillation_cycle": "Each channel operates as independent blocking oscillator: (1) Base bias initiates small collector current, (2) Magnetic flux increases in T1 core, (3) Trigger winding voltage provides regenerative base drive, (4) Transistor saturates with maximum collector current, (5) Core approaches saturation where d\u03a6/dt decreases, (6) Trigger voltage falls below threshold, (7) Transistor turns off abruptly, (8) Magnetic field collapses generating flyback pulse, (9) Flyback energy transfers through diode to charging batteries, (10) Magnetic field dissipates completely, (11) Base bias resistor re-initiates next cycle. Typical blocking oscillator frequency range 1-50 kHz depending on core material, winding inductance, and supply voltage.",
+      "control_mechanism": "Potentiometer R7 (1K) adjusts coupling strength between T1 trigger winding and transistor bases. Moving wiper toward R3/R6 junction increases trigger winding signal to bases, potentially increasing oscillation frequency and altering duty cycle. Moving wiper toward T1 pin 3 reduces feedback strength, potentially lowering frequency or causing one channel to dominate. R7 provides tuning control over relative phase relationship between Q1 and Q2 oscillations, enabling adjustment from synchronized operation to independent asynchronous oscillation of the two channels."
+    },
+    "open_questions": [
+      "What is the actual oscillation frequency for each channel with R7 at mid-position and specified component values - requires measurement or simulation with realistic T1 model?",
+      "Do the two channels naturally synchronize to oscillate in-phase, out-of-phase, or remain independent - depends on magnetic coupling through shared T1 core?",
+      "What is the actual flyback voltage magnitude at D1 and D2 anodes during transistor turn-off - determines charging effectiveness and diode voltage stress?",
+      "How does the cross-coupling diode D2 between ChargeBT2+ and ChargeBT1+ affect the energy distribution between the two charging batteries?",
+      "What is the minimum supply voltage required to sustain oscillation given the BD243C V_BE requirement (~0.7V) and voltage divider bias configuration?"
+    ],
+    "unknowns": [
+      "T1 trifilar transformer inductance values: primary winding inductance seen by Q1 collector, primary winding inductance seen by Q2 collector, trigger winding inductance, coupling coefficients between windings",
+      "T1 magnetic core material and saturation characteristics: relative permeability, saturation flux density, core geometry affecting reluctance and stored energy",
+      "T1 winding turns ratios: primary-to-trigger turns ratio determines feedback voltage gain and switching speed",
+      "Actual transistor base currents during conduction: depends on trigger winding voltage, resistor network values, and transistor beta",
+      "Peak collector current magnitude: limited by winding resistance, saturation voltage, and magnetic core saturation",
+      "Flyback pulse amplitude and duration: depends on stored magnetic energy (\u00bdLI\u00b2), winding turns ratio, and charging battery impedance",
+      "Phase relationship between Q1 and Q2 oscillations: synchronized, alternating, or chaotic depending on core coupling and component tolerances",
+      "Power dissipation in transistors: depends on switching frequency, saturation voltage, and collector current waveform",
+      "Charging current into ChargeBT1 and ChargeBT2: depends on flyback energy transfer efficiency and diode forward voltage drops"
+    ],
+    "confidence": "medium",
+    "simulation_hooks": [
+      {
+        "description": "Transient simulation with realistic T1 SPICE model showing voltage at Net-_Q1-B_ and Net-_Q2-B_ (transistor bases) over 10ms startup period",
+        "validates": "Regenerative feedback mechanism causes base voltage to oscillate between ~0V (cutoff) and ~2-3V (saturation drive) at characteristic blocking oscillator frequency",
+        "expected_outcome": "Both base nodes show repetitive pulses with sharp rising edges (positive feedback) and exponential decay (magnetic field collapse), frequency 1-50 kHz, possibly phase-shifted between channels"
+      },
+      {
+        "description": "Measure collector current waveform through Q1 (node Net-_D1-A_ to Net-_PrimaryBT1--_) showing conduction period and cutoff period",
+        "validates": "Switching mechanism drives transistor between saturation (high collector current) and cutoff (zero collector current) with rapid transitions",
+        "expected_outcome": "Sawtooth current waveform ramping up during conduction (limited by winding inductance) followed by abrupt drop to zero during flyback, duty cycle 10-50%"
+      },
+      {
+        "description": "Capture flyback voltage spike at D1 anode (Net-_D1-A_) and D2 anode (Net-_ChargeBT2-+_) during transistor turn-off events",
+        "validates": "Inductive energy storage produces high-voltage flyback pulse significantly exceeding 6V supply voltage",
+        "expected_outcome": "Voltage spikes reaching 30-100V peak (typical for blocking oscillators) with exponential decay as energy transfers to charging batteries through D1/D2"
+      },
+      {
+        "description": "Parametric sweep of R7 potentiometer wiper position from 0% to 100% while monitoring oscillation frequency and phase difference between Q1 and Q2 base signals",
+        "validates": "Control mechanism allows adjustment of feedback coupling strength and inter-channel phase relationship",
+        "expected_outcome": "Frequency changes by factor of 1.5-3x across R7 range; phase relationship between channels varies from synchronized to independent oscillation depending on wiper position"
+      },
+      {
+        "description": "FFT analysis of collector current waveforms to identify fundamental oscillation frequency and harmonic content",
+        "validates": "Self-oscillating behavior produces stable repetitive waveform with dominant fundamental frequency component",
+        "expected_outcome": "Strong fundamental frequency peak in 1-50 kHz range with harmonic content typical of rectangular/trapezoidal switching waveforms"
+      }
+    ],
+    "sources": [
+      "circuit_family_kb: blocking_oscillator Basic Oscillation document describing regenerative magnetic feedback mechanism and oscillation cycle stages",
+      "prior_stages: stage_0 circuit_identification determination of dual blocking oscillator topology with trifilar transformer feedback",
+      "project_context: netlist connectivity showing R1-R2 and R4-R5 bias networks, T1 trigger winding connection through R7-R3-R6 network to transistor bases",
+      "project_context: BOM component values - R1/R4 10K, R2/R5 18K, R3/R6 560R, R7 1K potentiometer, BD243C NPN transistors",
+      "engineering_knowledge: blocking oscillator theory - magnetic flux rate-of-change induces trigger voltage, positive feedback causes rapid saturation, core saturation limits conduction time"
+    ]
+  },
+  {
+    "stage_id": 2,
+    "stage_key": "energy_flow",
+    "title": "Energy Flow",
+    "question": "Where does the energy go?",
+    "determinations": {
+      "energy_source": "PrimaryBT1 (6V DC) provides electrical energy through voltage divider networks R1-R2 and R4-R5 to bias transistor bases, and through transistor collectors to T1 primary windings where it stores as magnetic field energy during conduction phase.",
+      "storage_elements": [
+        {
+          "element": "T1 primary windings (pins 1-2 for Q1 channel, pins 4-6 for Q2 channel)",
+          "role": "Magnetic field energy storage during transistor saturation; energy accumulates as \u00bdLI\u00b2 where L is primary inductance and I is collector current ramping up linearly"
+        },
+        {
+          "element": "ChargeBT1 and ChargeBT2 (series 6V batteries)",
+          "role": "Electrochemical energy storage receiving flyback pulse energy through D1 and D2 rectification; accumulates transferred magnetic energy as battery charge"
+        },
+        {
+          "element": "Transistor base-emitter junctions Q1 and Q2",
+          "role": "Temporary charge storage during positive feedback drive from T1 trigger winding (pin 3); capacitance negligible compared to magnetic storage"
+        }
+      ],
+      "transfer_path": "Primary battery \u2192 transistor base bias networks \u2192 trigger winding regenerative feedback \u2192 saturated transistor collector current \u2192 magnetic field buildup in T1 core \u2192 abrupt cutoff \u2192 collapsing magnetic field induces high voltage across primary windings \u2192 flyback pulse rectified by D1 (Q1 channel to ChargeBT2+) and D2 (cross-coupling between ChargeBT2+ and ChargeBT1+) \u2192 charging current flows into series battery configuration \u2192 electrochemical energy storage in ChargeBT1/ChargeBT2.",
+      "losses": [
+        {
+          "mechanism": "Transistor conduction loss",
+          "location": "Q1 and Q2 collector-emitter during saturation",
+          "estimate": "V_CE(sat) \u00d7 I_C \u00d7 duty_cycle, typically 0.5-2W per transistor at estimated 1-2A collector current with 0.3-0.5V saturation voltage and 20-40% duty cycle"
+        },
+        {
+          "mechanism": "Transistor switching loss",
+          "location": "Q1 and Q2 during turn-on and turn-off transitions",
+          "estimate": "\u00bd V_C \u00d7 I_C \u00d7 (t_rise + t_fall) \u00d7 f_osc, negligible compared to conduction loss at blocking oscillator switching speeds (microsecond transitions)"
+        },
+        {
+          "mechanism": "Winding resistance (copper loss)",
+          "location": "T1 primary windings DC resistance",
+          "estimate": "I\u00b2R loss during conduction phase, magnitude unknown without T1 winding specifications; typically 0.2-1W for multi-strand SSG coils with 1-3A peak current"
+        },
+        {
+          "mechanism": "Core hysteresis and eddy current loss",
+          "location": "T1 magnetic core material",
+          "estimate": "Proportional to frequency and flux density squared; unknown without core material specification but typical ferrite cores at kHz range show 0.1-0.5W loss"
+        },
+        {
+          "mechanism": "Diode forward conduction loss",
+          "location": "D1 and D2 during flyback pulse rectification",
+          "estimate": "V_F \u00d7 I_avg where V_F \u2248 0.7-1.0V for 1N4007; average current depends on flyback pulse amplitude and duration (unknown)"
+        },
+        {
+          "mechanism": "Base drive dissipation",
+          "location": "Resistor network R1-R2-R3 and R4-R5-R6-R7",
+          "estimate": "Quiescent bias current through voltage dividers R1-R2 (I = 6V/28k\u03a9 \u2248 0.2mA, P \u2248 1.2mW) and R4-R5 similar; trigger path dissipation during pulses through R3/R6 (560\u03a9) unknown without trigger voltage amplitude"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Charging current to ChargeBT1/ChargeBT2",
+          "form": "Pulsed DC current during flyback events",
+          "description": "Rectified high-voltage flyback pulses deliver energy to series-connected charging batteries; current magnitude and duty cycle determine net charging power (unknown without T1 specifications and oscillation frequency)"
+        },
+        {
+          "name": "Heat dissipation from transistors",
+          "form": "Thermal energy",
+          "description": "Conduction and switching losses in Q1 and Q2 convert electrical energy to heat; BD243C power transistors require heatsinking if total dissipation exceeds junction temperature limits"
+        },
+        {
+          "name": "Heat dissipation from magnetic core",
+          "form": "Thermal energy",
+          "description": "Hysteresis and eddy current losses in T1 core material convert magnetic energy to heat during each oscillation cycle; magnitude depends on core material (ferrite vs. iron) and operating frequency"
+        },
+        {
+          "name": "Electromagnetic radiation",
+          "form": "Radiated electromagnetic fields",
+          "description": "Fast switching transients and changing magnetic flux in T1 generate radiated emissions in kHz-MHz range; unintentional output unless circuit designed for specific electromagnetic effects per Bedini radiant energy claims"
+        },
+        {
+          "name": "Acoustic emission from core magnetostriction",
+          "form": "Mechanical vibration and sound",
+          "description": "Magnetic core dimensional changes during flux reversal produce audible tone at oscillation frequency; typically low power output but observable in operating circuit"
+        }
+      ]
+    },
+    "open_questions": [
+      "What is the flyback pulse amplitude and energy content from each channel - determines charging effectiveness and requires T1 inductance and peak collector current measurements?",
+      "What is the actual charging current magnitude into ChargeBT1 and ChargeBT2 - requires oscilloscope measurement of current waveforms through D1 and D2 over complete cycles?",
+      "How does energy distribution differ between the two oscillator channels - are flyback energies equal or does one channel dominate based on component tolerances or magnetic coupling asymmetry?",
+      "What is the role of D2 cross-coupling diode in energy distribution - does it enable bidirectional energy flow between ChargeBT2+ and ChargeBT1+ or primarily serve as reverse polarity protection?",
+      "What is the net energy transfer efficiency from PrimaryBT1 input to ChargeBT1/ChargeBT2 output - requires input and output power measurements accounting for all loss mechanisms?",
+      "Does the circuit exhibit claimed 'radiant energy' effects beyond conventional flyback energy recovery - would require careful calorimetry and energy accounting to separate from measurement errors or unaccounted battery self-discharge?"
+    ],
+    "confidence": "medium",
+    "unknowns": [
+      "T1 primary winding inductance values (L_primary1 for Q1 channel, L_primary2 for Q2 channel) - determines magnetic energy storage E = \u00bdLI\u00b2 and flyback voltage amplitude",
+      "T1 magnetic core saturation flux density and permeability - affects energy storage capacity and timing of magnetic saturation that triggers transistor cutoff",
+      "T1 winding DC resistance - determines I\u00b2R copper losses during conduction phase and affects peak collector current amplitude",
+      "Peak collector current magnitude through Q1 and Q2 - depends on saturation voltage, winding resistance, supply voltage, and conduction time; typical range 0.5-3A for blocking oscillators",
+      "Actual oscillation frequency and duty cycle for each channel - determines average power flow and loss mechanisms; expected range 1-50 kHz based on typical blocking oscillator behavior",
+      "Flyback pulse voltage amplitude at D1 anode and D2 anode - determines energy transfer per cycle and charging battery voltage rise; expected >20V based on inductive energy storage",
+      "Charging battery internal resistance and state of charge - affects charging current amplitude and energy acceptance efficiency",
+      "Actual power dissipation in each transistor - requires measurement of V_CE during conduction and integration over switching cycle",
+      "Core loss factor for T1 magnetic material - determines hysteresis and eddy current loss magnitude at operating frequency",
+      "Trigger winding voltage amplitude and waveform - determines base drive energy and affects switching speed and losses"
+    ],
+    "simulation_hooks": [
+      {
+        "description": "Transient analysis measuring current through T1 primary windings (Net-_D1-A_ to Net-_PrimaryBT1--_ for Q1, Net-_ChargeBT2-+_ to Net-_PrimaryBT1--_ for Q2) showing magnetic energy buildup during transistor conduction",
+        "validates": "Energy storage in magnetic field as current ramps up linearly during saturation phase before abrupt cutoff",
+        "expected_outcome": "Sawtooth current waveform reaching 0.5-3A peak with linear rise time 10-100\u00b5s, followed by rapid decay to zero during flyback, repeating at oscillation frequency"
+      },
+      {
+        "description": "Measure voltage across T1 primary windings during flyback phase to calculate stored magnetic energy E = \u00bdLI\u00b2 and compare to input energy from PrimaryBT1 over same cycle",
+        "validates": "Magnetic energy storage and release mechanism central to blocking oscillator operation",
+        "expected_outcome": "Flyback voltage spike 30-100V peak with exponential decay as energy transfers through D1/D2 to charging batteries; integrated energy per cycle should account for input power minus losses"
+      },
+      {
+        "description": "Monitor current waveforms through D1 and D2 into charging batteries to measure energy delivery and compare to input power from PrimaryBT1 over multiple cycles",
+        "validates": "Energy transfer path from primary battery through magnetic storage to charging batteries via flyback rectification",
+        "expected_outcome": "Pulsed charging current with peak 0.1-1A during flyback events, average current determines charging power; efficiency ratio (output/input) expected 50-85% for practical blocking oscillators"
+      },
+      {
+        "description": "Power dissipation calculation in Q1 and Q2 by integrating V_CE \u00d7 I_C over complete oscillation cycle including saturation and cutoff phases",
+        "validates": "Transistor conduction loss as primary energy loss mechanism during magnetic field buildup",
+        "expected_outcome": "Average power dissipation 0.5-2W per transistor depending on collector current and saturation voltage; requires heatsinking if operation exceeds thermal limits"
+      },
+      {
+        "description": "Measure voltage at PrimaryBT1 terminals under load and calculate input current to determine total energy drawn from primary battery over extended operation (minutes)",
+        "validates": "Total energy source contribution accounting for all circuit losses and energy storage in charging batteries",
+        "expected_outcome": "Input power 5-20W depending on oscillation frequency and magnetic core characteristics; comparison to charging battery voltage rise validates energy transfer efficiency"
+      },
+      {
+        "description": "Parametric sweep of R7 potentiometer position measuring effect on flyback pulse amplitude and charging current distribution between channels",
+        "validates": "Control mechanism influence on energy distribution between dual oscillator channels",
+        "expected_outcome": "R7 adjustment changes relative trigger winding coupling, potentially shifting energy balance between Q1 and Q2 channels or affecting total charging power"
+      }
+    ],
+    "sources": [
+      "prior_stages: stage_0 circuit_identification - dual blocking oscillator topology with T1 magnetic energy storage and flyback rectification to charging batteries",
+      "prior_stages: stage_1 basic_operation - regenerative feedback mechanism, magnetic field buildup during saturation, flyback energy transfer sequence",
+      "circuit_family_kb: blocking_oscillator Energy Flow requirements - magnetic field energy storage during transistor on-time, flyback energy transfer during cutoff",
+      "project_context: netlist connectivity showing energy path PrimaryBT1 \u2192 Q1/Q2 collectors \u2192 T1 primary windings \u2192 D1/D2 \u2192 ChargeBT1/ChargeBT2 series configuration",
+      "project_context: component specifications - BD243C power transistors rated for switching applications, 1N4007 diodes for high-voltage flyback rectification",
+      "engineering_knowledge: blocking oscillator energy flow - inductive energy storage E = \u00bdLI\u00b2, flyback voltage V = L(dI/dt), typical efficiency 60-80% accounting for resistive and core losses"
+    ]
+  },
+  {
+    "stage_id": 3,
+    "stage_key": "physical_principles",
+    "title": "Physical Principles",
+    "question": "Why does it behave this way?",
+    "determinations": {
+      "magnetic_behavior": "T1 trifilar transformer core operates via Amp\u00e8re's law: collector current I_C through primary windings (pins 1-2 for Q1, pins 4-6 for Q2) generates magnetomotive force F = N*I establishing magnetic flux \u03a6 in ferromagnetic core. Faraday's law governs regenerative feedback: time-varying flux d\u03a6/dt induces voltage V_trigger = N_trigger * d\u03a6/dt on trigger winding (pin 3), providing positive base drive that accelerates transistor saturation. Core B-H curve nonlinearity causes flux rate-of-change to decrease as core approaches saturation (B \u2192 B_sat), reducing trigger voltage below threshold needed to sustain base current, initiating abrupt transistor cutoff. During cutoff, stored magnetic energy E_mag = \u00bdLI\u00b2 releases as collapsing flux generates high-voltage flyback pulse V_flyback \u2248 L(dI/dt) across primary windings, with amplitude limited by charging battery clamping voltage plus diode forward drop.",
+      "electric_field_interactions": "Electric field energy storage occurs primarily in transistor base-emitter depletion capacitance C_BE and collector-base junction capacitance C_CB during switching transitions, with stored energy E_cap = \u00bdCV\u00b2 being negligible (<1 \u03bcJ) compared to magnetic storage (>1 mJ typical). Voltage divider networks R1-R2 and R4-R5 establish electric field across base-emitter junctions via Ohm's law V_BE = I_bias * R1 where I_bias = 6V/(10k\u03a9 + 18k\u03a9) \u2248 0.21 mA provides initial forward bias. Flyback pulse creates transient electric field stress across diode D1/D2 reverse-biased junctions and transistor collector-emitter off-state, with peak voltage determined by magnetic energy release clamped by charging battery impedance. Potentiometer R7 wiper position modulates electric field distribution in trigger winding coupling network, controlling voltage division between trigger winding output and transistor base nodes.",
+      "semiconductor_physics": "BD243C NPN bipolar junction transistors operate via minority carrier injection physics: forward-biased base-emitter junction (V_BE \u2265 0.7V from trigger winding drive) injects electrons from emitter into base region, diffusing to reverse-biased collector junction where electric field sweeps carriers to collector terminal, producing amplified collector current I_C = \u03b2*I_B (\u03b2 \u2248 50-150 typical for BD243C). During saturation phase, both junctions forward-biased with excess base current storing minority carriers in base region and collector depletion layer (charge storage time \u03c4_s \u2248 1-5 \u03bcs). Transistor cutoff occurs when trigger voltage falls below V_BE threshold, halting carrier injection; stored base charge must recombine before collector current ceases, creating finite storage delay that limits turn-off speed. Flyback voltage stress must remain below V_CEO breakdown (\u2248100V for BD243C per datasheet) to prevent avalanche multiplication and destructive failure. 1N4007 diodes rectify via PN junction physics: forward bias (anode positive during flyback) allows majority carrier drift conduction with ~0.7-1.0V drop; reverse bias (blocking when transistor conducts) supports depletion region electric field up to 1000V peak reverse voltage rating.",
+      "governing_equations": [
+        {
+          "name": "Faraday's Law of Induction",
+          "expression": "V_induced = -N * d\u03a6/dt",
+          "applicability": "Voltage induced in T1 trigger winding (N_trigger turns) by time-varying magnetic flux \u03a6(t) in core; negative sign indicates Lenz's law opposition to flux change; governs regenerative feedback mechanism driving transistor bases"
+        },
+        {
+          "name": "Amp\u00e8re's Circuital Law",
+          "expression": "\u222eH\u00b7dl = N*I = F_mmf",
+          "applicability": "Magnetomotive force F produced by N turns carrying current I creates magnetic field intensity H in core; relates collector current to magnetic flux density B = \u03bc*H where \u03bc is core permeability; determines energy storage rate during transistor conduction"
+        },
+        {
+          "name": "Magnetic Energy Storage",
+          "expression": "E_mag = \u00bd*L*I\u00b2",
+          "applicability": "Energy stored in magnetic field of T1 primary winding inductance L when carrying peak collector current I; released as flyback pulse during transistor cutoff; determines available energy for charging battery transfer"
+        },
+        {
+          "name": "Flyback Voltage Generation",
+          "expression": "V_flyback = L * dI/dt",
+          "applicability": "Voltage spike across primary winding during rapid collector current collapse (dI/dt negative, large magnitude); explains high-voltage pulse generation exceeding supply voltage; limited by diode clamping to charging battery voltage"
+        },
+        {
+          "name": "BJT Collector Current (Active Region)",
+          "expression": "I_C = \u03b2 * I_B = I_S * exp(V_BE/V_T)",
+          "applicability": "Exponential dependence of collector current on base-emitter voltage (V_T \u2248 26mV thermal voltage at 300K); Ebers-Moll model governs transistor gain \u03b2 and transconductance during positive feedback transition from cutoff to saturation"
+        },
+        {
+          "name": "Conservation of Energy (Per Cycle)",
+          "expression": "E_input = E_stored + E_transferred + E_losses",
+          "applicability": "Energy supplied by PrimaryBT1 per oscillation cycle equals sum of magnetic field energy storage, flyback energy transferred to charging batteries through D1/D2, and dissipation in resistances, core losses, and transistor conduction/switching; validates energy accounting and efficiency calculation"
+        }
+      ]
+    },
+    "open_questions": [
+      "What is the actual core material permeability \u03bc and saturation flux density B_sat for T1 \u2014 determines maximum energy storage E_mag = (B_sat\u00b2/2\u03bc\u2080\u03bc\u1d63)*Volume_core and timing of magnetic saturation triggering transistor cutoff?",
+      "Does the dual-channel magnetic coupling through shared T1 core create mutual inductance M_12 between primary windings causing phase locking or beat frequency behavior \u2014 requires measurement of relative oscillation timing?",
+      "What is the minority carrier storage time \u03c4_s and turn-off delay for BD243C under actual base drive conditions \u2014 affects switching loss and flyback pulse rise time (dI/dt determines V_flyback peak)?",
+      "Is D2 cross-coupling path between ChargeBT2+ and ChargeBT1+ creating bidirectional magnetic energy exchange or does diode polarity enforce unidirectional flow \u2014 netlist shows D2 anode at ChargeBT2+ cathode at ChargeBT1+?",
+      "Do core losses (hysteresis proportional to frequency and B_max\u00b2, eddy currents proportional to f\u00b2 and B_max\u00b2) dominate over copper I\u00b2R losses at the actual kHz operating frequency \u2014 requires core material specification and loss curve data?",
+      "Does circuit exhibit any deviation from conventional blocking oscillator magnetic energy storage and release predicted by mainstream electromagnetic theory \u2014 would require careful calorimetry measuring PrimaryBT1 input power versus ChargeBT1/ChargeBT2 charging power plus all dissipative losses?"
+    ],
+    "confidence": "high",
+    "unknowns": [
+      "T1 core material type (ferrite, powdered iron, laminated steel) and specific magnetic properties: initial permeability \u03bc\u1d62, saturation flux density B_sat, coercivity H_c, hysteresis loss coefficient",
+      "T1 core geometry affecting magnetic reluctance \u211c = l/(\u03bc\u2080\u03bc\u1d63A): core cross-sectional area A, magnetic path length l, air gap length g if present",
+      "T1 winding turns count N_primary1, N_primary2, N_trigger determining inductance L = (\u03bc\u2080\u03bc\u1d63N\u00b2A)/l and voltage transformation ratio V_trigger/V_primary",
+      "Coupling coefficient k between primary windings and trigger winding (0 < k \u2264 1): affects feedback strength and leakage inductance L_leakage = L_primary(1-k\u00b2)",
+      "Actual peak collector current I_C_peak limited by winding resistance, saturation voltage, and core saturation: determines stored magnetic energy E_mag = \u00bdLI\u00b2 and flyback pulse amplitude",
+      "BD243C minority carrier lifetime \u03c4 and base charge storage affecting turn-off delay: impacts switching loss P_sw = \u00bdV_C*I_C*(t_rise+t_fall)*f and flyback dI/dt",
+      "Operating frequency f_osc and duty cycle \u03b4: determines core loss P_core \u221d f*B_max^n (n\u22482-3 Steinmetz exponent) and average power flow",
+      "Flyback pulse peak voltage V_flyback_peak and decay time constant: depends on primary inductance, charging battery impedance, and parasitic capacitance",
+      "Mutual inductance M between Q1 and Q2 primary windings through shared core: could cause synchronized oscillation or frequency pulling between channels",
+      "Actual base drive current I_B during regenerative feedback: determines forced \u03b2 = I_C/I_B and degree of saturation affecting V_CE(sat) and conduction loss"
+    ],
+    "simulation_hooks": [
+      {
+        "description": "Transient SPICE simulation with realistic T1 magnetic core model (nonlinear B-H curve, saturation, hysteresis) showing magnetic flux \u03a6(t) in core and induced trigger winding voltage V_trigger(t) during oscillation cycle",
+        "validates": "Faraday's law voltage induction V = N*d\u03a6/dt provides regenerative feedback; core saturation (d\u03a6/dt \u2192 0 as B \u2192 B_sat) triggers transistor cutoff",
+        "expected_outcome": "Flux ramps approximately linearly during transistor conduction (constant d\u03a6/dt from linear current rise), flattens near B_sat causing V_trigger collapse, then rapidly returns to zero during flyback; trigger voltage shows positive pulse during conduction (accelerating base drive) followed by negative spike during flux reversal"
+      },
+      {
+        "description": "Measure collector current I_C(t) and calculate magnetic energy storage E_mag(t) = \u00bdL*I_C(t)\u00b2 during conduction phase, compare to flyback energy delivered to charging batteries E_flyback = \u222bV_battery*I_diode dt",
+        "validates": "Conservation of energy: stored magnetic energy minus losses accounts for transferred charging energy; magnetic field energy storage equation E = \u00bdLI\u00b2",
+        "expected_outcome": "Peak magnetic energy 1-10 mJ at collector current cutoff; flyback energy 50-85% of stored energy (remaining 15-50% dissipated in winding resistance, core losses, transistor switching, diode forward drop)"
+      },
+      {
+        "description": "Parametric sweep of T1 core permeability \u03bc\u1d63 (simulating different core materials: ferrite \u03bc\u1d63=1000-3000, powdered iron \u03bc\u1d63=20-100) observing effect on oscillation frequency f and peak collector current I_peak",
+        "validates": "Amp\u00e8re's law and inductance relationship L \u221d \u03bc\u1d63: higher permeability increases inductance, slowing current rise dI/dt = V/L and reducing frequency; lower permeability reduces energy storage E = \u00bdLI\u00b2 requiring higher peak current for same energy",
+        "expected_outcome": "Frequency inversely proportional to \u221a(\u03bc\u1d63) from L \u221d \u03bc\u1d63 and f \u221d 1/\u221a(LC) or f \u221d V/(L*I_sat) for self-timed blocking oscillator; peak current scales as I_peak \u221d 1/\u221a(\u03bc\u1d63) to maintain constant energy storage in lower inductance"
+      },
+      {
+        "description": "Capture flyback voltage V_flyback(t) across primary winding and calculate dI/dt during transistor turn-off from measured current decay, verify V = L*dI/dt relationship using known or extracted inductance L",
+        "validates": "Flyback voltage generation by Faraday's law; inductive voltage spike equation V = L*dI/dt during rapid current collapse",
+        "expected_outcome": "Peak flyback voltage 30-100V with dI/dt = 10\u2076-10\u2077 A/s (1-3A collapse in 0.1-1 \u03bcs turn-off time); voltage spike amplitude V_peak = L*dI/dt matches prediction within 20% accounting for parasitic capacitance damping"
+      },
+      {
+        "description": "Measure base-emitter voltage V_BE(t) during regenerative feedback transition showing exponential relationship I_C = I_S*exp(V_BE/V_T) as positive feedback drives transistor from cutoff (V_BE < 0.5V) through active region (0.6-0.7V) to saturation (V_BE > 0.7V)",
+        "validates": "Semiconductor physics: BJT exponential transconductance and current gain \u03b2 = \u2202I_C/\u2202I_B govern regenerative feedback speed and saturation characteristics",
+        "expected_outcome": "V_BE rises from ~0.2V (bias network alone) to 0.7-0.9V (saturated with trigger winding drive) in microseconds; collector current increases exponentially then linearly as transistor enters saturation with both junctions forward-biased"
+      },
+      {
+        "description": "FFT analysis of collector current waveform identifying fundamental frequency f\u2080 and harmonic content; compare core loss calculation P_core = k*f^n*B_max^m (Steinmetz equation) using measured frequency and estimated flux density to total circuit losses",
+        "validates": "Magnetic core loss mechanisms (hysteresis \u221d f, eddy currents \u221d f\u00b2) contribute to energy dissipation proportional to operating frequency and flux swing amplitude",
+        "expected_outcome": "Fundamental frequency 1-50 kHz with significant odd harmonics (3f\u2080, 5f\u2080) from rectangular switching waveform; core losses 0.1-0.5W estimated from Steinmetz equation comparable to measured total loss budget minus resistive and semiconductor losses"
+      }
+    ],
+    "sources": [
+      "circuit_family_kb: blocking_oscillator Physical Principles \u2014 Faraday's law induction, Amp\u00e8re's law magnetomotive force, conservation of energy per cycle, magnetic core B-H behavior",
+      "prior_stages: stage_0 circuit_identification \u2014 dual blocking oscillator with T1 trifilar transformer magnetic coupling and flyback energy transfer topology",
+      "prior_stages: stage_1 basic_operation \u2014 regenerative magnetic feedback mechanism via trigger winding, core saturation limiting conduction time, abrupt transistor cutoff",
+      "prior_stages: stage_2 energy_flow \u2014 magnetic field energy storage E = \u00bdLI\u00b2 during conduction, flyback pulse energy transfer to charging batteries, loss mechanisms in transistors and core",
+      "project_context: BD243C datasheet \u2014 NPN bipolar transistor semiconductor physics, \u03b2 gain, V_BE characteristics, V_CEO breakdown voltage, switching speed parameters",
+      "project_context: netlist connectivity \u2014 T1 subcircuit BEDINI_TRIFILAR with 6 pins showing dual primary windings and shared trigger winding for magnetic coupling",
+      "engineering_knowledge: electromagnetic theory \u2014 Maxwell's equations, Faraday's law of induction, Amp\u00e8re's circuital law, magnetic energy density B\u00b2/2\u03bc, flyback converter principles",
+      "engineering_knowledge: magnetic materials \u2014 ferrite core permeability and saturation characteristics, hysteresis loss mechanisms, eddy current loss \u221d f\u00b2 and conductivity",
+      "engineering_knowledge: semiconductor device physics \u2014 BJT Ebers-Moll model, minority carrier diffusion and storage time, saturation and active region operation, PN junction rectification"
+    ]
+  },
+  {
+    "stage_id": 4,
+    "stage_key": "component_roles",
+    "title": "Component Roles",
+    "question": "What does every component contribute?",
+    "determinations": {
+      "components": [
+        {
+          "reference": "PrimaryBT1",
+          "value": "6V",
+          "purpose": "Primary energy source providing DC voltage to both oscillator channels via voltage divider bias networks and transistor collectors; supplies power for magnetic field buildup in T1 during conduction phases",
+          "interactions": [
+            "Negative terminal connects to Q1 emitter (Net-_PrimaryBT1--_) and Q2 emitter providing common ground reference",
+            "Positive terminal connects through ChargeBT1 to common rail (Net-_ChargeBT1--_) forming series battery configuration",
+            "Sources bias current through R1-R2 divider to Q1 base and R4-R5 divider to Q2 base for startup",
+            "Delivers collector current through saturated transistors to T1 primary windings during conduction"
+          ],
+          "design_intent": "6V nominal voltage chosen to provide sufficient base-emitter bias (>0.7V) through voltage dividers while limiting peak collector current and magnetic saturation time in T1; series connection with ChargeBT1 enables energy extraction from primary battery while charging separate battery bank",
+          "possible_substitutions": [
+            {
+              "part": "3-12V DC supply or battery pack",
+              "tradeoffs": "Lower voltage (<4V) may fail to sustain oscillation through voltage divider losses; higher voltage (>12V) increases collector current, flyback voltage stress on transistors/diodes, and power dissipation requiring heatsinking"
+            }
+          ]
+        },
+        {
+          "reference": "ChargeBT1",
+          "value": "6V",
+          "purpose": "Charging battery accepting flyback energy from both oscillator channels; forms series configuration with ChargeBT2 creating 12V nominal charging rail; acts as intermediate node between primary battery and charging batteries",
+          "interactions": [
+            "Positive terminal (Net-_ChargeBT1-+_) connects to D2 cathode receiving cross-coupled energy from Q2 channel",
+            "Negative terminal (Net-_ChargeBT1--_) connects to PrimaryBT1 positive, ChargeBT2 negative, and T1 pins 1/5 creating common rail",
+            "Series with ChargeBT2 presents ~12V clamping voltage to flyback pulses through D1/D2 rectification",
+            "Accepts pulsed charging current during magnetic energy release from T1 core collapse"
+          ],
+          "design_intent": "Series battery configuration doubles charging voltage compared to single 6V battery, reducing peak current stress during flyback pulses while enabling higher energy transfer per cycle; supports Bedini SSG design principle of using separate charging battery bank from primary source",
+          "possible_substitutions": [
+            {
+              "part": "6-12V rechargeable battery (lead-acid, NiMH, Li-ion with protection)",
+              "tradeoffs": "Higher voltage batteries reduce charging current peak but require proportionally higher flyback voltage generation; battery chemistry affects charging efficiency and acceptable pulse charging characteristics"
+            }
+          ]
+        },
+        {
+          "reference": "ChargeBT2",
+          "value": "6V",
+          "purpose": "Second charging battery in series with ChargeBT1; primary recipient of Q1 channel flyback energy through D1; positive terminal serves as cross-coupling node for D2 connection to ChargeBT1",
+          "interactions": [
+            "Positive terminal (Net-_ChargeBT2-+_) connects to D1 cathode, D2 anode, T1 pin 6, Q2 collector, and R5 forming critical distribution node",
+            "Negative terminal connects to ChargeBT1 negative at common rail (Net-_ChargeBT1--_)",
+            "Series combination with ChargeBT1 provides ~12V charging rail voltage referenced to primary battery ground",
+            "Receives direct flyback pulse energy from Q1 channel via D1 rectification"
+          ],
+          "design_intent": "Upper battery in series charging configuration receives majority of Q1 channel energy while positive terminal node enables D2 cross-coupling for Q2 channel energy distribution; dual-battery series arrangement characteristic of Bedini SSG designs for voltage multiplication",
+          "possible_substitutions": [
+            {
+              "part": "6-12V rechargeable battery matching ChargeBT1 chemistry and capacity",
+              "tradeoffs": "Mismatched battery capacities or chemistries cause unequal charging rates and potential overcharge/undercharge; voltage mismatch affects flyback pulse clamping and energy distribution"
+            }
+          ]
+        },
+        {
+          "reference": "Q1",
+          "value": "BD243C",
+          "purpose": "Primary switching transistor for channel 1; controls magnetizing current through T1 pins 1-2 winding; operates in saturation during conduction and cutoff during flyback; regenerative feedback from trigger winding drives base",
+          "interactions": [
+            "Collector (Net-_D1-A_) connects to T1 pin 2 and D1 anode forming primary winding current path and flyback voltage node",
+            "Base (Net-_Q1-B_) receives bias from R1-R2 divider and regenerative drive from trigger winding via R3-R7 network",
+            "Emitter connects to primary battery negative (Net-_PrimaryBT1--_) providing ground reference",
+            "Saturates when trigger winding voltage exceeds ~0.7V threshold, conducting 0.5-3A collector current through T1 primary",
+            "Cutoff when magnetic core approaches saturation reducing trigger voltage below base threshold"
+          ],
+          "design_intent": "BD243C NPN power transistor selected for sufficient current gain (\u03b2\u224850-150), collector current rating (6A continuous), and voltage rating (V_CEO\u2265100V) to handle flyback spikes; TO-220 package enables heatsinking for 1-2W typical conduction loss",
+          "possible_substitutions": [
+            {
+              "part": "TIP31C, 2N3055, MJE3055T NPN power transistors",
+              "tradeoffs": "Lower current gain requires stronger base drive from trigger winding; higher V_CE(sat) increases conduction loss; faster switching speed (lower storage time) improves efficiency but may require snubbing for voltage spike protection"
+            }
+          ]
+        },
+        {
+          "reference": "Q2",
+          "value": "BD243C",
+          "purpose": "Primary switching transistor for channel 2; controls magnetizing current through T1 pins 4-6 winding; operates identically to Q1 but with independent base drive enabling dual-channel oscillation with adjustable phase relationship",
+          "interactions": [
+            "Collector (Net-_ChargeBT2-+_) connects to T1 pin 6 forming secondary primary winding current path; shares node with D1 cathode, D2 anode, and ChargeBT2 positive",
+            "Base (Net-_Q2-B_) receives bias from R4-R5 divider and regenerative drive from trigger winding via R6-R7 network",
+            "Emitter connects to primary battery negative (Net-_PrimaryBT1--_) parallel with Q1 emitter",
+            "Operates in saturation-cutoff cycle governed by magnetic feedback similar to Q1 but potentially phase-shifted"
+          ],
+          "design_intent": "Identical BD243C to Q1 ensures matched switching characteristics; dual-channel configuration enables increased power handling, redundancy, or specific electromagnetic effects from two oscillators sharing magnetic core; phase relationship tunable via R7 potentiometer",
+          "possible_substitutions": [
+            {
+              "part": "Same as Q1 \u2014 TIP31C, 2N3055, or matched NPN power transistor",
+              "tradeoffs": "Transistor mismatch (different \u03b2, V_BE, storage time) causes asymmetric operation between channels affecting energy distribution and oscillation timing; using identical part numbers from same batch minimizes variation"
+            }
+          ]
+        },
+        {
+          "reference": "T1",
+          "value": "Multi-Strand SSG",
+          "purpose": "Trifilar transformer providing magnetic energy storage in core during transistor conduction, regenerative feedback via trigger winding to transistor bases, and magnetic coupling between dual oscillator channels; core saturation times transistor cutoff",
+          "interactions": [
+            "Pins 1-2: Primary winding for Q1 channel stores magnetic energy E=\u00bdLI\u00b2 during Q1 saturation; generates flyback voltage during Q1 cutoff",
+            "Pins 4-6: Primary winding for Q2 channel operates identically to pins 1-2 for Q2 transistor",
+            "Pin 3: Trigger winding couples to both primary windings via shared magnetic flux; induced voltage V=N*d\u03a6/dt drives transistor bases through R7-R3-R6 network",
+            "Shared ferromagnetic core couples both channels magnetically enabling potential synchronization or phase locking",
+            "Magnetic saturation (B\u2192B_sat) reduces d\u03a6/dt causing trigger voltage collapse and transistor turn-off"
+          ],
+          "design_intent": "Multi-strand SSG design implies trifilar winding configuration with specific turns ratio for regenerative feedback gain; custom inductor optimized for Bedini SSG operation with controlled coupling coefficient and saturation characteristics; core material and geometry determine oscillation frequency (1-50kHz typical) and energy storage capacity",
+          "possible_substitutions": [
+            {
+              "part": "Custom wound trifilar transformer on ferrite toroid (e.g., FT240-43) or laminated steel core with matched turns ratios",
+              "tradeoffs": "Ferrite cores (\u03bc\u1d63=1000-3000) provide higher inductance and faster switching but lower saturation flux density limiting energy storage; iron powder cores (\u03bc\u1d63=20-100) handle higher currents with distributed air gap reducing saturation effects; turns ratio N_primary:N_trigger determines feedback strength affecting oscillation stability"
+            }
+          ]
+        },
+        {
+          "reference": "D1",
+          "value": "1N4007",
+          "purpose": "Flyback rectification diode for Q1 channel; conducts high-voltage flyback pulse from T1 pins 1-2 collapse to ChargeBT2 positive terminal; blocks reverse current during Q1 conduction phase",
+          "interactions": [
+            "Anode (Net-_D1-A_) connects to Q1 collector and T1 pin 2 receiving flyback voltage spike (30-100V typical)",
+            "Cathode connects to ChargeBT2 positive (Net-_ChargeBT2-+_) delivering charging current during flyback pulse",
+            "Reverse-biased (blocking) when Q1 conducts and collector voltage drops to V_CE(sat)\u22480.3V below charging battery voltage",
+            "Forward-biased during flyback when inductive voltage spike V_flyback=L*dI/dt exceeds ChargeBT2 voltage plus diode forward drop (~0.7-1.0V)"
+          ],
+          "design_intent": "1N4007 selected for 1000V peak reverse voltage rating providing safety margin against flyback spikes and 1A average forward current capability adequate for pulsed charging duty; standard rectifier diode with recovery time ~30\u03bcs suitable for kHz switching frequencies",
+          "possible_substitutions": [
+            {
+              "part": "UF4007 ultrafast diode, 1N5408 (3A), MUR160 ultrafast rectifier",
+              "tradeoffs": "Ultrafast diodes (recovery time <100ns) reduce reverse recovery loss at higher frequencies but cost more; higher current rating reduces conduction loss at expense of larger junction capacitance; Schottky diodes offer lower forward drop (~0.3-0.5V) but limited reverse voltage (<100V typical)"
+            }
+          ]
+        },
+        {
+          "reference": "D2",
+          "value": "1N4007",
+          "purpose": "Cross-coupling rectification diode between ChargeBT2 positive and ChargeBT1 positive; conducts flyback energy from Q2 channel or enables energy redistribution between charging batteries; polarity enforces unidirectional current flow",
+          "interactions": [
+            "Anode connects to ChargeBT2 positive (Net-_ChargeBT2-+_) shared with Q2 collector, D1 cathode, and T1 pin 6",
+            "Cathode connects to ChargeBT1 positive (Net-_ChargeBT1-+_) completing potential current path between series battery terminals",
+            "Forward-biased when ChargeBT2+ voltage exceeds ChargeBT1+ voltage by diode drop (~0.7V), allowing current flow from ChargeBT2+ to ChargeBT1+",
+            "Diode orientation (anode at higher voltage node) suggests role in energy transfer or voltage equalization between batteries"
+          ],
+          "design_intent": "Cross-coupling diode D2 enables Q2 channel flyback energy to charge ChargeBT1 through reverse path compared to D1, potentially balancing charging between series batteries or providing alternate energy pathway; polarity prevents reverse discharge from ChargeBT1 to ChargeBT2 during normal operation",
+          "possible_substitutions": [
+            {
+              "part": "1N4007 or equivalent 1A 1000V rectifier, UF4007 ultrafast",
+              "tradeoffs": "Same considerations as D1; faster recovery time beneficial if D2 conducts high-frequency pulses; higher current rating reduces loss if significant energy transfers through cross-coupling path"
+            }
+          ]
+        },
+        {
+          "reference": "R1",
+          "value": "10K",
+          "purpose": "Upper voltage divider resistor providing initial base bias current to Q1 for oscillation startup; sets quiescent base voltage ~2.6V (6V\u00d718K/(10K+18K)) enabling small collector current to initiate magnetic feedback loop",
+          "interactions": [
+            "Connects Q1 base (Net-_Q1-B_) to primary battery negative (Net-_PrimaryBT1--_) forming divider with R2",
+            "Conducts steady bias current I\u22480.21mA (6V/28k\u03a9 total divider resistance) with power dissipation ~1.2mW",
+            "Works with R2 to establish V_BE forward bias when circuit powers up, overcoming transistor threshold voltage",
+            "Limits maximum base current during regenerative feedback by providing series resistance from trigger winding path"
+          ],
+          "design_intent": "10K value balances startup bias current (sufficient to initiate oscillation) against quiescent power loss; higher resistance reduces standby current but may prevent startup; lower resistance wastes more power and provides excessive base drive potentially causing hard saturation",
+          "possible_substitutions": [
+            {
+              "part": "4.7K-22K resistor maintaining voltage divider ratio with R2",
+              "tradeoffs": "Lower resistance (4.7K) increases bias current improving startup reliability but raises quiescent power loss; higher resistance (22K) reduces power consumption but may require external startup trigger or fail to oscillate with weak trigger winding coupling"
+            }
+          ]
+        },
+        {
+          "reference": "R2",
+          "value": "18K",
+          "purpose": "Lower voltage divider resistor for Q1 base bias; connects base to collector providing positive feedback path and setting divider ratio with R1 for startup bias voltage ~2.6V",
+          "interactions": [
+            "Connects Q1 collector (Net-_D1-A_) to Q1 base (Net-_Q1-B_) creating DC bias path",
+            "Forms voltage divider with R1 referenced between collector voltage and primary battery negative",
+            "During transistor cutoff (collector at flyback voltage), R2 conducts current from high-voltage collector to base potentially assisting turn-on",
+            "Dissipates power proportional to collector voltage swing and divider current"
+          ],
+          "design_intent": "18K value chosen to create voltage divider ratio with R1 producing ~2.6V base bias from 6V supply; collector connection rather than fixed supply rail may provide additional positive feedback during voltage transitions; resistance ratio R2/(R1+R2)\u22480.64 determines bias point",
+          "possible_substitutions": [
+            {
+              "part": "10K-33K maintaining divider ratio with R1 for desired base bias",
+              "tradeoffs": "Lower resistance increases bias current and power loss; higher resistance reduces quiescent current but may provide insufficient bias voltage; exact ratio determines initial operating point before regenerative feedback dominates"
+            }
+          ]
+        },
+        {
+          "reference": "R3",
+          "value": "560R",
+          "purpose": "Trigger winding coupling resistor for Q1 base; limits peak base current from regenerative feedback while allowing sufficient drive for saturation; connects potentiometer wiper to Q1 base enabling adjustable feedback strength",
+          "interactions": [
+            "Connects R7 potentiometer wiper output (Net-_R3-Pad1_) to Q1 base (Net-_Q1-B_) carrying AC trigger signal",
+            "Limits base drive current I_B=V_trigger/560\u03a9 during positive feedback pulse preventing excessive base current",
+            "Dissipates power during trigger pulse conduction proportional to I_B\u00b2 and trigger voltage amplitude",
+            "Works with R7 wiper position to adjust effective coupling resistance and trigger winding loading"
+          ],
+          "design_intent": "560\u03a9 provides sufficient base drive current (e.g., 2-5V trigger pulse yields 3.6-8.9mA base current) for transistor saturation (I_C/\u03b2 requirement) while limiting peak current preventing base-emitter junction damage; value balances switching speed (lower R faster) against power dissipation and trigger winding loading",
+          "possible_substitutions": [
+            {
+              "part": "220\u03a9-1.2K\u03a9 resistor",
+              "tradeoffs": "Lower resistance (220\u03a9) provides stronger base drive and faster switching but increases power loss and trigger winding load potentially damping oscillation; higher resistance (1.2K\u03a9) reduces base current requiring higher trigger voltage or causing incomplete saturation"
+            }
+          ]
+        },
+        {
+          "reference": "R4",
+          "value": "10K",
+          "purpose": "Upper voltage divider resistor for Q2 base bias; identical function to R1 but serving channel 2; provides startup bias current and sets initial base voltage for Q2 oscillation",
+          "interactions": [
+            "Connects Q2 base (Net-_Q2-B_) to primary battery negative (Net-_PrimaryBT1--_) forming divider with R5",
+            "Conducts quiescent bias current ~0.21mA with R5 in divider configuration",
+            "Enables Q2 channel startup independent of Q1 channel operation",
+            "Limits base current from trigger winding feedback during regenerative drive"
+          ],
+          "design_intent": "Identical 10K value to R1 ensures matched startup characteristics between Q1 and Q2 channels; symmetric bias networks support balanced dual-channel operation or enable independent oscillation depending on magnetic coupling and trigger winding phase",
+          "possible_substitutions": [
+            {
+              "part": "Same as R1 \u2014 4.7K-22K maintaining divider ratio with R5",
+              "tradeoffs": "Identical substitution considerations to R1; matching R1 and R4 values critical for symmetric dual-channel behavior"
+            }
+          ]
+        },
+        {
+          "reference": "R5",
+          "value": "18K",
+          "purpose": "Lower voltage divider resistor for Q2 base bias; connects Q2 base to ChargeBT2 positive rather than collector (unlike R2) creating different bias reference point; forms divider with R4 for startup voltage",
+          "interactions": [
+            "Connects ChargeBT2 positive (Net-_ChargeBT2-+_) to Q2 base (Net-_Q2-B_) creating bias path",
+            "Forms voltage divider with R4 but referenced to ~12V charging rail voltage rather than collector voltage",
+            "Bias voltage depends on ChargeBT2 state of charge and collector node voltage during operation",
+            "Unique connection point (ChargeBT2+ vs Q1's collector) creates asymmetry between channels"
+          ],
+          "design_intent": "18K matches R2 value but connection to ChargeBT2+ instead of collector creates different bias behavior for Q2 channel; may provide voltage-dependent bias enabling adaptive operation based on charging battery voltage; asymmetric configuration between channels suggests intentional phase or timing difference",
+          "possible_substitutions": [
+            {
+              "part": "10K-33K maintaining divider ratio with R4",
+              "tradeoffs": "Same resistance considerations as R2 but bias voltage calculation differs due to ChargeBT2+ reference point at ~12V nominal rather than collector flyback voltage; exact value affects startup reliability and operating point asymmetry between channels"
+            }
+          ]
+        },
+        {
+          "reference": "R6",
+          "value": "560R",
+          "purpose": "Trigger winding coupling resistor for Q2 base; identical function to R3 but serving channel 2; limits base drive current from regenerative feedback enabling controlled saturation",
+          "interactions": [
+            "Connects R7 potentiometer wiper output (Net-_R3-Pad1_) to Q2 base (Net-_Q2-B_) parallel path with R3 to Q1",
+            "Limits Q2 base current during trigger pulse similar to R3 function for Q1",
+            "Both R3 and R6 connected to same potentiometer wiper node enabling simultaneous adjustment of both channel coupling strengths",
+            "Dissipates power during trigger winding drive proportional to base current squared"
+          ],
+          "design_intent": "560\u03a9 identical to R3 ensures matched trigger winding coupling for both channels; symmetric values support balanced dual-channel operation; potentiometer R7 position affects both channels simultaneously enabling coordinated adjustment of regenerative feedback strength",
+          "possible_substitutions": [
+            {
+              "part": "220\u03a9-1.2K\u03a9 matching R3 substitution choice",
+              "tradeoffs": "Identical considerations to R3; matching R3 and R6 values critical for symmetric channel behavior unless intentional imbalance desired; independent values could create asymmetric phase relationship"
+            }
+          ]
+        },
+        {
+          "reference": "R7",
+          "value": "1K",
+          "purpose": "Adjustable potentiometer controlling trigger winding coupling strength to both transistor bases; wiper position varies voltage division between trigger winding output and base drive signals enabling tuning of oscillation characteristics",
+          "interactions": [
+            "Terminal 1 and 2 connect to trigger winding (T1 pin 3 at Net-_T1-T1_) receiving induced AC voltage from magnetic flux changes",
+            "Wiper (terminal 3) connects to junction of R3 and R6 (Net-_R3-Pad1_) feeding both Q1 and Q2 bases",
+            "Wiper position determines voltage division ratio: closer to trigger winding increases base drive amplitude, closer to R3/R6 junction reduces drive",
+            "Adjusts effective loading on trigger winding and feedback strength affecting oscillation frequency, duty cycle, and channel phase relationship"
+          ],
+          "design_intent": "1K potentiometer enables continuous adjustment of regenerative feedback coupling without changing fixed resistor values; manual tuning allows optimization of oscillation characteristics for specific transformer properties, battery voltages, or desired power output; central component for Bedini SSG circuit adjustment and experimental exploration",
+          "possible_substitutions": [
+            {
+              "part": "500\u03a9-5K linear potentiometer or switched resistor decade box",
+              "tradeoffs": "Lower resistance (500\u03a9) provides finer control near minimum feedback but less range before full coupling; higher resistance (5K) extends adjustment range but may introduce excessive resistance at minimum setting preventing oscillation startup; logarithmic taper would provide non-uniform adjustment curve compared to linear"
+            }
+          ]
+        }
+      ]
+    },
+    "open_questions": [
+      "What is the significance of R5 connecting to ChargeBT2+ instead of Q2 collector (as R2 does for Q1) \u2014 does this create intentional bias asymmetry between channels affecting phase relationship or startup sequence?",
+      "Does D2 cross-coupling actually conduct significant current during normal operation, or does it serve primarily as protection/voltage equalization \u2014 requires measurement of current through D2 and voltage relationship between ChargeBT2+ and ChargeBT1+?",
+      "What is the optimal R7 potentiometer setting for balanced dual-channel operation versus maximum charging efficiency \u2014 requires parametric testing with power measurements?",
+      "Do component tolerances (\u00b15% resistors, transistor \u03b2 variation) significantly affect channel symmetry and oscillation balance, or does regenerative feedback self-compensate for mismatches?",
+      "What are the actual thermal requirements for Q1/Q2 heatsinking given unknown operating frequency and collector current waveforms \u2014 requires power dissipation measurement or thermal simulation?",
+      "Could simplified single-channel version (removing Q2, R4, R5, R6, D2, and one T1 primary winding) achieve similar charging performance, or does dual-channel configuration provide essential benefit for Bedini SSG operation?"
+    ],
+    "confidence": "high",
+    "unknowns": [
+      "T1 transformer internal construction: actual turns count for each winding (N_primary1, N_primary2, N_trigger), wire gauge, winding resistance, coupling coefficient k between windings",
+      "T1 core specifications: material type (ferrite vs iron powder vs laminated steel), permeability \u03bc\u1d63, saturation flux density B_sat, core geometry affecting inductance values",
+      "Actual inductance values: L_primary1 seen by Q1 collector, L_primary2 seen by Q2 collector, L_trigger for feedback winding \u2014 determine energy storage E=\u00bdLI\u00b2 and oscillation timing",
+      "Component power ratings: resistor wattage (\u00bcW, \u00bdW, 1W) affecting thermal limits, transistor mounting (TO-220 on heatsink vs free air), diode thermal characteristics",
+      "Operating frequency and duty cycle: determines average current through each component and peak/RMS power dissipation requirements",
+      "Peak collector current magnitude through Q1 and Q2: affects transistor forced \u03b2 requirement, saturation depth, and resistor power dissipation in base drive network",
+      "Trigger winding voltage amplitude and waveform: determines base drive current calculation through R3/R6 and validates resistor current limiting function",
+      "Actual battery internal resistances and state of charge: affects voltage drops during current pulses and changes effective load impedance seen by flyback energy transfer",
+      "Component tolerances in actual circuit: \u00b15% resistors, \u00b120% transistor \u03b2, diode forward voltage variation (0.7-1.0V) \u2014 cumulative effect on channel matching and oscillation balance"
+    ],
+    "simulation_hooks": [
+      {
+        "description": "Transient SPICE simulation with realistic T1 model measuring current through each component (R1-R7, Q1, Q2, D1, D2) over multiple oscillation cycles, calculating I\u00b2R power dissipation and peak current stress",
+        "validates": "Component current ratings adequate for operating conditions; identifies highest-stress components requiring uprating or heatsinking; confirms resistor power ratings (typically \u00bcW) sufficient for calculated dissipation",
+        "expected_outcome": "R3/R6 see 5-20mA peak base drive current pulses; R1/R2/R4/R5 conduct 0.2mA quiescent bias plus transient components; Q1/Q2 conduct 0.5-3A collector current during saturation; D1/D2 conduct 0.1-1A peak flyback current pulses; resistor dissipation <0.1W each except R3/R6 potentially 0.1-0.25W"
+      },
+      {
+        "description": "Parametric sweep of R7 potentiometer wiper position (0-100%) measuring effect on individual component currents and voltages, identifying optimal setting for balanced channel operation or maximum charging efficiency",
+        "validates": "R7 adjustment range provides meaningful control over circuit behavior; confirms component stress remains within ratings across full adjustment range; identifies critical settings where oscillation fails or becomes unstable",
+        "expected_outcome": "R7 at 0% (minimum feedback) may prevent oscillation startup; R7 at 100% (maximum feedback) provides strongest base drive potentially causing excessive saturation; optimal setting 30-70% balances oscillation stability, frequency, and energy transfer efficiency"
+      },
+      {
+        "description": "Measure voltage across each resistor during operation calculating instantaneous and average power dissipation P=V\u00b2/R; identify components approaching thermal limits based on wattage ratings",
+        "validates": "Standard \u00bcW or \u00bdW resistor ratings adequate for operating conditions; base drive resistors R3/R6 may require higher wattage than bias network resistors R1/R2/R4/R5 due to pulse power during regenerative feedback",
+        "expected_outcome": "Bias resistors R1/R2/R4/R5 dissipate <10mW average; trigger coupling resistors R3/R6 dissipate 50-200mW depending on trigger voltage and duty cycle; potentiometer R7 dissipates <50mW; all within \u00bdW component ratings"
+      },
+      {
+        "description": "Monitor Q1 and Q2 collector-emitter voltage during conduction measuring V_CE(sat) and calculate conduction loss P_cond=V_CE(sat)\u00d7I_C\u00d7duty_cycle; measure case temperature rise validating heatsinking requirements",
+        "validates": "BD243C transistors operate within safe operating area (SOA); V_CE(sat) measurement confirms saturation depth and base drive adequacy; thermal analysis determines heatsink requirement for continuous operation",
+        "expected_outcome": "V_CE(sat) 0.3-0.8V during conduction indicating saturation (lower values with stronger base overdrive); conduction loss 0.5-2W per transistor at estimated 1-2A collector current and 20-40% duty cycle; free air operation marginal, small heatsink recommended for continuous duty"
+      },
+      {
+        "description": "Measure diode forward voltage drop across D1 and D2 during flyback conduction calculating rectification loss P_diode=V_F\u00d7I_avg; validate 1N4007 1A average current rating not exceeded by pulse charging duty",
+        "validates": "Diode forward drop (0.7-1.0V typical for 1N4007) causes acceptable loss during energy transfer; peak and average current remain within diode ratings; reverse recovery time adequate for operating frequency",
+        "expected_outcome": "V_F 0.8-1.0V during flyback pulse conduction at 0.1-0.5A peak current; average current <0.1A well within 1A rating; reverse voltage stress <100V within 1000V rating providing large safety margin; diode loss <0.1W"
+      },
+      {
+        "description": "Thermal imaging or thermistor measurement of hottest components (Q1, Q2, R3, R6, T1 core) after 10 minutes continuous operation validating component ratings and identifying inadequate heatsinking",
+        "validates": "All components operate within maximum temperature ratings; identifies thermal design issues requiring component uprating, heatsinking, or ventilation; confirms transformer core heating from magnetic losses acceptable",
+        "expected_outcome": "Transistors Q1/Q2 reach 50-80\u00b0C case temperature without heatsinks (approaching 100\u00b0C T_J limit with thermal resistance), <40\u00b0C with small heatsinks; resistors R3/R6 reach 40-60\u00b0C if dissipating >0.1W; T1 core temperature 35-50\u00b0C depending on magnetic losses"
+      }
+    ],
+    "sources": [
+      "project_context: BOM symbol data (references, values, lib_id) from kicad_python_extracted_data",
+      "project_context: netlist connectivity showing component interconnections and net names from connectivity_graph",
+      "prior_stages: stage_0 circuit_identification functional_blocks and topology determination",
+      "prior_stages: stage_1 basic_operation descriptions of switching mechanism, bias networks, and regenerative feedback",
+      "prior_stages: stage_2 energy_flow component roles in energy storage, transfer, and loss mechanisms",
+      "prior_stages: stage_3 physical_principles semiconductor physics for transistors and diodes, magnetic behavior of transformer",
+      "circuit_family_kb: blocking_oscillator typical component roles table and KiCad linking guidance",
+      "engineering_knowledge: standard resistor wattage ratings (\u215bW, \u00bcW, \u00bdW, 1W), power transistor thermal resistance and heatsinking requirements, rectifier diode specifications and ratings",
+      "BD243C datasheet: NPN power transistor ratings (I_C, V_CEO, V_CE(sat), \u03b2, thermal resistance)",
+      "1N4007 datasheet reference: 1A 1000V rectifier diode forward voltage, reverse recovery time, thermal characteristics"
+    ]
+  },
+  {
+    "stage_id": 5,
+    "stage_key": "operating_modes",
+    "title": "Operating Modes",
+    "question": "How does behavior change?",
+    "determinations": {
+      "modes": [
+        {
+          "mode": "startup",
+          "description": "Circuit powered from quiescent state; base bias networks R1-R2 and R4-R5 establish initial forward bias (~2.6V) on Q1/Q2; noise or component asymmetry triggers one channel to oscillate first; regenerative feedback rapidly builds until both channels sustain self-oscillation",
+          "behavior": "Transient period 1-100ms as magnetic field initializes in T1 core; frequency may be unstable or irregular during first cycles; both channels establish phase relationship (synchronized, alternating, or independent) based on magnetic coupling through shared core and R7 potentiometer setting; startup fails if supply voltage <4V insufficient for bias network or trigger winding coupling too weak",
+          "risks": [
+            "Startup failure if PrimaryBT1 voltage drops below ~4V threshold preventing base bias >0.7V",
+            "One channel may dominate initially preventing second channel oscillation if component mismatch severe",
+            "Inrush current during first oscillation cycle may exceed transistor safe operating area if core saturates rapidly"
+          ]
+        },
+        {
+          "mode": "steady_state",
+          "description": "Both channels oscillate continuously in saturation-cutoff cycles governed by T1 magnetic feedback; Q1 channel stores energy in pins 1-2 winding releasing via D1 to ChargeBT2; Q2 channel operates through pins 4-6 winding with energy path through D2 to ChargeBT1; trigger winding (pin 3) provides regenerative base drive through R7-R3-R6 network",
+          "behavior": "Stable oscillation frequency 1-50kHz with duty cycle 10-50% determined by T1 core saturation characteristics and winding inductance; flyback pulses charge series battery configuration ChargeBT1-ChargeBT2 with pulsed DC current 0.1-1A peak; power transfer efficiency 50-85% from PrimaryBT1 to charging batteries; transistors dissipate 0.5-2W each requiring heatsinking for continuous operation; R7 adjustment varies frequency \u00b150% and affects channel phase relationship without stopping oscillation",
+          "risks": [
+            "Thermal runaway if transistor heatsinking inadequate causing V_BE drift and increased collector current",
+            "Core saturation asymmetry between channels if magnetic coupling unbalanced causing unequal energy distribution",
+            "Flyback voltage spikes exceeding transistor V_CEO rating (100V) if charging batteries disconnected removing voltage clamp"
+          ]
+        },
+        {
+          "mode": "loading_change",
+          "description": "Charging battery impedance changes as state-of-charge increases or decreases; higher battery voltage reduces flyback current amplitude; lower battery voltage (discharged state) increases charging current and may extend flyback duration",
+          "behavior": "Oscillation frequency shifts \u00b110-30% as charging battery voltage rises from 4V (discharged) to 7V (charged) per cell altering flyback pulse clamping voltage; energy transfer per cycle decreases with higher battery voltage as V_flyback approaches charging rail reducing dI/dt; circuit may enter intermittent oscillation if charging batteries reach full charge (>14V total) and no longer accept current, causing frequency reduction or one channel ceasing; PrimaryBT1 discharge over hours/days gradually reduces supply voltage lowering oscillation frequency and eventually stopping below ~4V threshold",
+          "risks": [
+            "Oscillation cessation if fully charged batteries (>7V per cell) refuse current causing trigger winding feedback collapse",
+            "Overcurrent through transistors if deeply discharged batteries (<3V) present low impedance accepting excessive flyback energy",
+            "Battery damage from overcharging if circuit operates continuously without voltage regulation or charge termination"
+          ]
+        },
+        {
+          "mode": "component_failure",
+          "description": "Transistor failure (short/open), diode failure, resistor open/drift, or transformer winding damage causes asymmetric operation or complete shutdown; most common failure modes: transistor short from flyback overvoltage, diode reverse breakdown, or open trigger winding interrupting feedback",
+          "behavior": "Q1 or Q2 collector-emitter short causes continuous current draw from PrimaryBT1 limited only by winding resistance (~1-3\u03a9) resulting in >2A continuous load and rapid battery discharge with no oscillation; transistor open-circuit prevents affected channel from conducting but other channel may continue oscillating at reduced power; D1 or D2 short diverts all flyback energy to charging batteries bypassing one channel; open diode blocks energy transfer from affected channel; R3 or R6 open interrupts trigger feedback preventing base drive and oscillation startup; R7 wiper failure at extreme position may prevent oscillation or cause single-channel operation",
+          "risks": [
+            "Catastrophic transistor failure from flyback overvoltage if diodes fail open removing voltage clamp allowing spikes >200V",
+            "Battery reverse discharge through failed components if diodes short creating conduction path from ChargeBT1/ChargeBT2 back to PrimaryBT1",
+            "Thermal damage to adjacent components if shorted transistor draws continuous high current heating T1 windings and resistors"
+          ]
+        },
+        {
+          "mode": "environmental",
+          "description": "Temperature variations affect semiconductor parameters (transistor \u03b2, V_BE, diode V_F), magnetic core properties (permeability, saturation flux density), and resistor values; extreme temperatures outside -20\u00b0C to +60\u00b0C cause significant behavior changes",
+          "behavior": "Elevated temperature (+40\u00b0C to +80\u00b0C) reduces transistor V_BE by ~-2mV/\u00b0C increasing bias current and lowering saturation threshold, increases core resistivity reducing magnetic losses, and may cause thermal runaway if heatsinking inadequate; oscillation frequency increases 10-20% due to faster switching from reduced carrier storage time; low temperature (-10\u00b0C to -20\u00b0C) increases V_BE requiring stronger trigger drive, reduces transistor \u03b2 by 20-40% potentially preventing saturation, increases core permeability raising inductance and lowering frequency by 15-25%; battery internal resistance increases at low temperature reducing charging current acceptance; humidity/condensation creates leakage paths between high-voltage nodes (flyback spikes) and ground potentially causing arcing or parasitic oscillation damping",
+          "risks": [
+            "Thermal runaway above +60\u00b0C if transistor junction temperature exceeds safe limits causing exponential current increase and destruction",
+            "Oscillation failure below -10\u00b0C if reduced \u03b2 and increased V_BE prevent sufficient base drive from trigger winding",
+            "Arcing between D1 anode and grounded heatsinks if humidity creates conductive path during >50V flyback spikes"
+          ]
+        },
+        {
+          "mode": "fault",
+          "description": "Abnormal conditions: reversed battery polarity, short-circuit on charging battery terminals, disconnected load, excessive supply voltage (>12V), or magnetic core damage from mechanical shock; each fault creates distinct signature behavior or immediate failure",
+          "behavior": "PrimaryBT1 reverse polarity forward-biases base-emitter junctions through R1/R4 in reverse exceeding breakdown voltage (~6V) destroying transistors within seconds; ChargeBT1/ChargeBT2 reversed prevents flyback charging and may forward-bias D1/D2 creating continuous conduction path; shorted charging battery terminals clamp flyback voltage to ~0V preventing energy transfer causing continuous oscillation at maximum frequency with all magnetic energy dissipated in transistor conduction loss and winding resistance; disconnected charging batteries (open D1/D2 cathodes) remove flyback voltage clamp allowing spikes >200V likely exceeding transistor V_CEO causing avalanche breakdown and destruction; supply voltage >12V increases magnetic energy storage beyond core saturation limit causing irregular oscillation or core saturation lock-up where transistors latch on continuously",
+          "risks": [
+            "Immediate transistor destruction from reverse polarity base-emitter avalanche breakdown",
+            "Flyback overvoltage >200V destroying transistors if charging batteries disconnected during operation",
+            "Core demagnetization or physical cracking if subjected to mechanical shock >50G destroying magnetic coupling and preventing oscillation"
+          ]
+        }
+      ]
+    },
+    "open_questions": [
+      "What is the actual phase relationship between Q1 and Q2 channels during steady-state operation \u2014 synchronized in-phase, 180\u00b0 out-of-phase, or chaotic independent oscillation \u2014 requires dual-channel oscilloscope measurement of collector currents?",
+      "Does thermal drift significantly affect oscillation frequency over extended operation (hours) as components heat \u2014 requires temperature monitoring and frequency measurement during continuous run?",
+      "At what PrimaryBT1 voltage threshold does oscillation cease during discharge \u2014 depends on minimum base bias requirement and trigger winding coupling strength, likely 3.5-4.5V range?",
+      "How does circuit behavior change if one charging battery (ChargeBT1 or ChargeBT2) is removed while other remains connected \u2014 does single-battery configuration still function via D2 cross-coupling path?",
+      "What is the maximum safe R7 potentiometer adjustment speed during operation \u2014 rapid wiper movement may cause transient instability or oscillation dropout requiring seconds to re-establish?",
+      "Does magnetic core exhibit hysteresis effects causing oscillation frequency to differ between increasing and decreasing R7 adjustment directions \u2014 non-linear magnetic materials show path-dependent behavior?"
+    ],
+    "confidence": "high",
+    "unknowns": [
+      "Actual oscillation frequency and duty cycle in steady-state mode with R7 at mid-position \u2014 requires measurement with realistic T1 model, expected 1-50kHz range",
+      "Startup time from power-on to stable oscillation \u2014 depends on T1 core remnant magnetization and component tolerances, estimated 1-100ms",
+      "Temperature coefficients of oscillation frequency \u2014 requires thermal chamber testing measuring frequency vs. temperature from -20\u00b0C to +80\u00b0C",
+      "Maximum flyback voltage amplitude during disconnected load fault condition \u2014 limited by parasitic capacitance and transistor avalanche breakdown, potentially >200V",
+      "Minimum PrimaryBT1 voltage for sustained oscillation \u2014 depends on voltage divider bias network and trigger winding gain, estimated 3.5-4.5V threshold",
+      "Charging battery voltage at which oscillation becomes intermittent or ceases \u2014 depends on flyback pulse amplitude and battery acceptance impedance, likely >7V per cell (>14V total)",
+      "Transistor junction temperature during continuous operation without heatsinking \u2014 determines thermal runaway onset, requires power dissipation measurement and thermal resistance calculation",
+      "Phase relationship stability between channels \u2014 synchronized operation may be stable or may drift causing beat frequencies observable in charging current waveform",
+      "Effect of ChargeBT1 vs ChargeBT2 individual disconnection on remaining channel operation \u2014 D2 cross-coupling may enable single-battery charging mode or cause circuit malfunction",
+      "Core saturation behavior asymmetry between Q1 and Q2 channels \u2014 component tolerances and magnetic coupling variations may cause unequal energy distribution measurable as different flyback amplitudes"
+    ],
+    "simulation_hooks": [
+      {
+        "description": "Transient SPICE simulation from t=0 to t=100ms with realistic T1 magnetic model capturing startup transient, measuring time to first oscillation and frequency stabilization period",
+        "validates": "Startup mode behavior: bias networks establish initial conditions, noise triggers oscillation, regenerative feedback builds to steady-state within estimated 1-100ms timeframe",
+        "expected_outcome": "Both channels begin oscillating within 5-50ms; frequency stabilizes after 3-10 cycles; initial frequency may vary \u00b120% from steady-state value due to core magnetization transient; one channel typically starts 1-5 cycles before the other based on component asymmetry"
+      },
+      {
+        "description": "Long-duration transient (10 seconds) with PrimaryBT1 voltage ramped from 6V down to 3V measuring oscillation frequency and amplitude vs. supply voltage, identifying cessation threshold",
+        "validates": "Loading change mode as primary battery discharges; oscillation frequency and duty cycle dependence on supply voltage; minimum voltage threshold for sustained operation",
+        "expected_outcome": "Frequency decreases approximately linearly with supply voltage at rate ~5kHz/V; oscillation becomes intermittent below 4.2V; complete cessation at 3.5-4.0V when base bias insufficient to overcome V_BE threshold; collector current amplitude scales proportionally with supply voltage"
+      },
+      {
+        "description": "Parametric temperature sweep from -20\u00b0C to +80\u00b0C using SPICE .TEMP directive, measuring oscillation frequency and transistor \u03b2 variation; calculate thermal coefficient of frequency",
+        "validates": "Environmental mode temperature dependence; semiconductor parameter drift (V_BE, \u03b2) and magnetic core property changes affecting oscillation characteristics",
+        "expected_outcome": "Frequency increases 0.3-0.8%/\u00b0C from +25\u00b0C to +80\u00b0C due to reduced carrier storage time; frequency decreases 0.5-1.0%/\u00b0C from +25\u00b0C to -20\u00b0C due to increased magnetic permeability and reduced \u03b2; total frequency variation \u00b125% across temperature range; oscillation may fail below -15\u00b0C if \u03b2 reduction prevents saturation"
+      },
+      {
+        "description": "Fault injection simulation: disconnect ChargeBT1 and ChargeBT2 (open D1/D2 cathodes) during steady-state oscillation, monitor flyback voltage spikes at Q1/Q2 collectors for overvoltage condition",
+        "validates": "Component failure mode: disconnected charging batteries remove flyback voltage clamp causing potentially destructive overvoltage exceeding transistor V_CEO rating",
+        "expected_outcome": "Flyback voltage spikes rise from nominal 12-30V (clamped by batteries) to >150V limited only by parasitic capacitance and transistor avalanche breakdown; spikes exceed BD243C V_CEO=100V rating by >50% causing avalanche conduction and likely destruction; oscillation continues briefly with energy dissipated in transistor avalanche until thermal failure"
+      },
+      {
+        "description": "Parametric sweep of ChargeBT1/ChargeBT2 series voltage from 8V (discharged) to 16V (fully charged) measuring charging current amplitude and oscillation frequency variation",
+        "validates": "Loading change mode: charging battery voltage rise affects flyback pulse clamping, energy transfer per cycle, and potentially oscillation sustainability at high battery voltage",
+        "expected_outcome": "Charging current decreases exponentially as battery voltage approaches flyback pulse amplitude; frequency increases 10-20% with higher battery voltage due to reduced flyback duration; oscillation becomes intermittent above 14-15V total (7-7.5V per battery) when flyback pulse barely exceeds battery voltage; circuit may enter mode where only one channel oscillates alternately"
+      },
+      {
+        "description": "Monte Carlo analysis with component tolerances: resistors \u00b15%, transistor \u03b2 \u00b130%, T1 inductance \u00b110%, measuring variation in oscillation frequency, channel phase relationship, and energy distribution between Q1/Q2 channels across 100 trials",
+        "validates": "Statistical behavior in steady-state mode accounting for manufacturing tolerances; identifies critical components affecting channel balance and oscillation stability",
+        "expected_outcome": "Frequency variation \u00b115% across Monte Carlo trials with T1 inductance tolerance being dominant factor; channel phase relationship varies from synchronized to 30\u00b0 phase shift to completely independent depending on \u03b2 mismatch; energy distribution between channels varies \u00b125% with worst-case showing 60/40 split rather than 50/50; R3/R6 tolerance has minimal effect suggesting regenerative feedback self-compensates for small resistance variations"
+      }
+    ],
+    "sources": [
+      "circuit_family_kb: blocking_oscillator Operating Modes \u2014 startup/bias establishment, transistor on (magnetizing), turn-off transition, flyback/reset, idle/insufficient bias canonical modes",
+      "prior_stages: stage_0 circuit_identification \u2014 dual blocking oscillator topology with regenerative magnetic feedback and flyback energy transfer to charging batteries",
+      "prior_stages: stage_1 basic_operation \u2014 startup behavior via bias networks, switching mechanism via trigger winding, oscillation cycle sequence, control via R7 potentiometer",
+      "prior_stages: stage_2 energy_flow \u2014 magnetic energy storage during conduction, flyback energy transfer to batteries, loss mechanisms in transistors and core, thermal dissipation requirements",
+      "prior_stages: stage_3 physical_principles \u2014 Faraday's law voltage induction, core saturation behavior, semiconductor physics affecting temperature dependence and switching speed",
+      "prior_stages: stage_4 component_roles \u2014 bias network function (R1-R2, R4-R5), trigger coupling resistors (R3, R6), potentiometer control (R7), rectification paths (D1, D2), transistor ratings and thermal limits",
+      "project_context: netlist connectivity showing dual-channel configuration with shared trigger winding, series charging battery arrangement, cross-coupling diode D2 between battery terminals",
+      "project_context: BOM component specifications \u2014 BD243C transistor V_CEO=100V rating, 1N4007 diode 1000V rating, resistor values determining bias points and feedback coupling strength",
+      "engineering_knowledge: blocking oscillator mode transitions \u2014 core saturation timing, transistor storage time effects, load-dependent frequency variation, startup sensitivity to bias conditions",
+      "engineering_knowledge: thermal effects on semiconductors \u2014 V_BE temperature coefficient -2mV/\u00b0C, \u03b2 reduction at low temperature, thermal runaway conditions in power transistors",
+      "engineering_knowledge: battery charging characteristics \u2014 voltage rise during charging affecting load impedance, state-of-charge impact on current acceptance, series battery voltage summation"
+    ]
+  },
+  {
+    "stage_id": 6,
+    "stage_key": "system_behavior",
+    "title": "System Behavior",
+    "question": "How does the complete system behave?",
+    "determinations": {
+      "mechanical_interactions": "T1 transformer core experiences magnetostriction during flux reversals producing audible acoustic emission at oscillation frequency (1-50kHz range); rapid flux changes generate mechanical vibration transmitted to mounting structure; no moving parts exist in circuit but core vibration may loosen windings over extended operation if not potted. Magnetic forces between windings create small deflection forces (<0.1N typical) during current pulses; inadequate core clamping may allow physical movement degrading coupling coefficient k over time.",
+      "thermal_effects": "System exhibits thermal drift as transistor junction temperature rises 40-80\u00b0C above ambient during continuous operation: V_BE decreases ~2mV/\u00b0C increasing bias current and collector current by 5-15%, oscillation frequency increases 0.3-0.8%/\u00b0C due to reduced carrier storage time, magnetic core permeability changes \u00b110% over -20\u00b0C to +80\u00b0C temperature range altering inductance and energy storage. Thermal runaway risk above +60\u00b0C ambient if heatsinking inadequate; transistor \u03b2 reduction at low temperature (<-10\u00b0C) may prevent startup or reduce collector current amplitude by 30-50%. ChargeBT1/ChargeBT2 internal resistance increases 2-3\u00d7 at -20\u00b0C reducing charging current acceptance and potentially causing flyback voltage overshoot if battery impedance rises above design assumptions.",
+      "environmental_influences": "Humidity above 70%RH creates leakage paths between high-voltage flyback nodes (30-100V spikes at D1/D2 anodes) and grounded heatsinks or chassis potentially damping oscillation or causing arcing; condensation below dew point shorts base-emitter junctions through surface moisture preventing startup. Electromagnetic interference (EMI) radiated from T1 core and switching transients may affect nearby analog circuits or RF receivers in kHz-MHz range; external magnetic fields >1mT (10 gauss) couple into T1 core altering flux density and potentially shifting oscillation frequency \u00b15-20%. Mechanical vibration >1G at resonant frequency of T1 mounting (typically 50-500Hz) amplitude-modulates core position creating frequency instability; shock >50G may demagnetize core or fracture ferrite material destroying magnetic coupling.",
+      "external_systems": [
+        {
+          "system": "PrimaryBT1 power source",
+          "interaction": "System draws pulsed current 0.5-3A peak during transistor conduction phases with average consumption 0.5-3A depending on oscillation frequency and duty cycle; battery voltage sag under load affects oscillation frequency (decreases ~5kHz per 1V drop) and may cause cessation below 3.5-4V threshold. Internal battery resistance creates voltage droop during current pulses reducing available V_CE headroom and collector current amplitude; deeply discharged battery (<4V) may fail to provide sufficient base bias through R1-R2/R4-R5 dividers preventing oscillation startup requiring external charging before operation resumes."
+        },
+        {
+          "system": "ChargeBT1/ChargeBT2 series battery configuration",
+          "interaction": "Charging batteries accept pulsed flyback energy through D1/D2 rectification with peak current 0.1-1A and average charging current 10-100mA depending on oscillation parameters; battery voltage rise during charging (4V to 7V per cell over hours) progressively reduces flyback current amplitude as back-EMF approaches flyback pulse voltage, lowering energy transfer efficiency from ~80% at low voltage to <50% at full charge. Fully charged batteries (>14V total) may refuse current causing oscillation frequency reduction or intermittent operation; mismatched battery capacities between ChargeBT1 and ChargeBT2 create unequal state-of-charge causing voltage imbalance affecting D2 cross-coupling current distribution. Battery self-discharge (1-5%/month) slowly drains stored energy over extended idle periods; sulfation or dendrite formation in lead-acid chemistry increases internal resistance over months degrading charging acceptance and reducing system efficiency."
+        },
+        {
+          "system": "Potentiometer R7 adjustment mechanism",
+          "interaction": "Manual R7 wiper position adjustment (0-100% rotation) varies trigger winding coupling strength affecting both channels simultaneously: oscillation frequency shifts \u00b130-50% across full range, duty cycle changes 10-40%, and channel phase relationship varies from synchronized to independent oscillation. Rapid wiper movement (>10%/second rotation speed) creates transient instability potentially causing oscillation dropout for 1-10 cycles before re-establishing; slow adjustment enables continuous tuning without interruption. Wiper contact resistance (typically 0.1-1\u03a9) adds thermal noise and voltage division error affecting trigger signal amplitude; oxidation or contamination increasing contact resistance >10\u03a9 may prevent oscillation at certain wiper positions creating dead zones requiring cleaning or replacement."
+        },
+        {
+          "system": "Heatsink thermal management",
+          "interaction": "BD243C transistors dissipate 0.5-2W each during continuous operation requiring thermal coupling to ambient environment; inadequate heatsinking (thermal resistance >50\u00b0C/W junction-to-ambient) causes junction temperature rise exceeding maximum rating (150\u00b0C typical) leading to thermal runaway within minutes. Heatsink selection determines steady-state operating temperature: small clip-on heatsink (20\u00b0C/W) limits Q1/Q2 case temperature to 60-80\u00b0C at 1W dissipation, while free air operation (100-150\u00b0C/W) causes case temperature >100\u00b0C approaching thermal limits. Forced air cooling (fan) reduces thermal resistance to 10-15\u00b0C/W enabling higher power operation or improved long-term reliability; heatsink compound quality affects thermal interface resistance by \u00b130% impacting junction temperature directly."
+        },
+        {
+          "system": "Electromagnetic radiated emissions",
+          "interaction": "Fast switching transients (dI/dt = 10\u2076-10\u2077 A/s during transistor turn-off) generate radiated electromagnetic fields in 10kHz-10MHz spectrum; T1 transformer acts as loop antenna radiating magnetic field proportional to flux rate-of-change and winding area. Conducted emissions propagate back through PrimaryBT1 power leads potentially interfering with nearby circuits sharing common supply; flyback voltage spikes couple capacitively to adjacent conductors creating crosstalk. Compliance with EMI regulations (FCC Part 15, CISPR 11) may require shielding, filtering, or twisted-pair wiring; radiated field strength 100\u03bcV/m to 10mV/m at 1 meter distance depending on frequency and geometry. External RF fields >1V/m coupling into base drive network may cause frequency pulling or false triggering affecting oscillation stability."
+        },
+        {
+          "system": "Measurement instrumentation",
+          "interaction": "Oscilloscope probe capacitance (10-20pF) loading high-impedance nodes (base drive network R3/R6 junction) shifts oscillation frequency by 2-10% and may damp regenerative feedback preventing startup; use 10:1 probes or buffer amplifiers for minimal loading. Current probe insertion in collector circuit adds series inductance (50-200nH) affecting flyback pulse rise time and voltage amplitude; measure using shunt resistor or non-invasive Hall-effect sensor. Multimeter averaging time constant (0.1-1 second) fails to capture pulsed waveforms accurately; measure average charging current using integrating ammeter or long-term coulomb counting. Ground loop formation between oscilloscope ground and circuit ground creates common-mode current flow through probe shield potentially triggering false oscillation or damping; use differential probes or isolated channels for accurate high-voltage node measurement."
+        }
+      ]
+    },
+    "open_questions": [
+      "What is the acoustic emission frequency spectrum and sound pressure level from T1 core magnetostriction during operation \u2014 audible tone amplitude depends on core material (ferrite quieter than laminated steel) and mounting rigidity?",
+      "How does long-term operation (>100 hours continuous) affect component drift and system stability \u2014 resistor value changes from thermal cycling, magnetic core aging effects, battery capacity degradation over charge-discharge cycles?",
+      "What is the maximum permissible distance between PrimaryBT1 and circuit board before lead inductance (\u22481\u03bcH/meter) degrades performance or causes oscillation instability from voltage droop during current pulses?",
+      "Does the dual-channel magnetic coupling through shared T1 core create measurable mutual inductance effects causing phase locking, beat frequencies, or chaotic oscillation patterns detectable in long-term frequency stability measurements?",
+      "What external EMI immunity level does circuit exhibit \u2014 minimum RF field strength required to disrupt oscillation or cause frequency modulation when exposed to external transmitters (cell phones, WiFi, RF tools)?",
+      "How does mechanical vibration at resonant frequencies of T1 mounting structure affect oscillation stability \u2014 does vibration-induced core movement modulate magnetic coupling creating amplitude or frequency modulation observable in output waveforms?"
+    ],
+    "confidence": "high",
+    "unknowns": [
+      "T1 transformer mounting mechanical resonant frequency and vibration sensitivity \u2014 depends on core mass, mounting compliance, and potting rigidity; affects susceptibility to external vibration and shock",
+      "Actual junction temperature rise in Q1/Q2 during continuous operation without heatsinking \u2014 requires thermal imaging or embedded temperature measurement to validate thermal runaway margin",
+      "Radiated EMI field strength vs. frequency spectrum from 10kHz to 100MHz \u2014 requires EMI receiver or spectrum analyzer with calibrated antenna at standardized measurement distances (3m, 10m)",
+      "Acoustic sound pressure level from T1 core magnetostriction \u2014 depends on core material, frequency, and flux density; typical range 40-70dB SPL at 1 meter for ferrite cores",
+      "Long-term component drift rates over 1000+ hour continuous operation \u2014 resistor aging, magnetic core permeability changes, transistor \u03b2 degradation, diode forward voltage shift affecting oscillation frequency stability",
+      "Battery self-discharge rate and capacity loss over repeated charge-discharge cycles \u2014 determines system reliability for periodic operation vs. continuous duty; depends on battery chemistry and depth-of-discharge",
+      "Minimum ambient temperature for reliable startup \u2014 depends on transistor \u03b2 temperature coefficient and battery internal resistance at low temperature; estimated -10\u00b0C to -20\u00b0C threshold",
+      "Maximum safe oscilloscope probe capacitance loading on base drive nodes without preventing oscillation \u2014 requires experimental measurement of frequency shift and amplitude reduction vs. probe capacitance",
+      "Thermal time constant for transistor junction temperature stabilization after power-on \u2014 determines startup transient thermal drift duration; estimated 30-300 seconds depending on heatsink thermal mass",
+      "Cross-coupling current magnitude through D2 between ChargeBT2+ and ChargeBT1+ terminals \u2014 requires current probe measurement to determine energy distribution between series batteries during Q2 channel flyback events"
+    ],
+    "simulation_hooks": [
+      {
+        "description": "Transient thermal simulation coupling electrical SPICE model with thermal network (junction-case-heatsink-ambient thermal resistances) showing Q1/Q2 junction temperature rise over 10 minutes from cold start to thermal equilibrium at various heatsink thermal resistances (10-150\u00b0C/W range)",
+        "validates": "Thermal effects on system behavior: junction temperature stabilization time constant, steady-state temperature vs. heatsink performance, thermal runaway onset conditions above critical thermal resistance threshold",
+        "expected_outcome": "Junction temperature rises exponentially with time constant 30-300 seconds depending on heatsink thermal mass; steady-state temperature 80-120\u00b0C for 1W dissipation with 50\u00b0C/W heatsink; thermal runaway occurs when heatsink thermal resistance exceeds ~80-100\u00b0C/W causing temperature >150\u00b0C within 5-10 minutes"
+      },
+      {
+        "description": "Parametric temperature sweep from -20\u00b0C to +80\u00b0C measuring oscillation frequency, collector current amplitude, and flyback voltage peak showing thermal drift coefficients; include battery internal resistance temperature dependence model",
+        "validates": "Environmental temperature influence on complete system performance including semiconductor parameters (V_BE, \u03b2), magnetic core properties (\u03bc\u1d63), and battery impedance changes across operating temperature range",
+        "expected_outcome": "Frequency increases +0.5%/\u00b0C from 25\u00b0C to 80\u00b0C due to reduced carrier storage time and core losses; frequency decreases -0.8%/\u00b0C from 25\u00b0C to -20\u00b0C due to increased core permeability; collector current amplitude decreases 30-50% at -20\u00b0C from reduced \u03b2 and increased V_BE; oscillation may fail below -15\u00b0C if base drive insufficient"
+      },
+      {
+        "description": "Long-duration simulation (1000 oscillation cycles) with PrimaryBT1 voltage ramped down from 6V to 3V representing battery discharge, measuring frequency drift, duty cycle changes, and oscillation cessation threshold; include ChargeBT1/ChargeBT2 voltage rise model from energy accumulation",
+        "validates": "System behavior during primary battery discharge and charging battery voltage rise over extended operation; interaction between depleting source and filling load affecting oscillation sustainability",
+        "expected_outcome": "Oscillation frequency decreases linearly at ~5kHz/V as PrimaryBT1 discharges; becomes intermittent below 4.2V; complete cessation at 3.5-4.0V threshold when base bias insufficient; charging battery voltage rise from 8V to 14V over simulated time causes charging current reduction by 60-80% as back-EMF approaches flyback pulse amplitude"
+      },
+      {
+        "description": "AC analysis with parasitic capacitance (10-50pF) added to base drive nodes (Net-_Q1-B_, Net-_Q2-B_) simulating oscilloscope probe loading, measuring frequency shift and amplitude reduction vs. capacitance value identifying maximum acceptable probe loading before oscillation fails",
+        "validates": "Measurement instrumentation interaction with system: probe loading effects on high-impedance regenerative feedback network causing frequency pulling or oscillation dropout",
+        "expected_outcome": "Frequency decreases 2-5% per 10pF added capacitance on base nodes; oscillation amplitude reduces proportionally; oscillation fails completely when probe capacitance exceeds 40-60pF loading damping regenerative feedback below threshold; validates requirement for 10:1 probes or buffered measurement"
+      },
+      {
+        "description": "Monte Carlo simulation with component tolerance variations (resistors \u00b15%, transistor \u03b2 \u00b130%, T1 inductance \u00b110%) plus temperature variation (-20\u00b0C to +80\u00b0C) measuring system performance statistics: oscillation frequency distribution, channel balance variation, thermal stability across 100 combined trials",
+        "validates": "Environmental influences combined with manufacturing tolerances on complete system robustness; identifies critical parameters affecting reliability across expected operating conditions and component variations",
+        "expected_outcome": "Oscillation frequency varies \u00b120% across combined tolerance and temperature extremes; channel energy distribution imbalance reaches 70/30 worst-case from component mismatch; 5-10% of Monte Carlo trials fail oscillation startup at -20\u00b0C when combined with worst-case low \u03b2 and high resistor tolerances; validates need for component screening or wider tolerance design margins"
+      },
+      {
+        "description": "Transient simulation with step changes in R7 potentiometer wiper position (0% to 100% in 10% increments every 1 second) measuring oscillation frequency response, transient stability during adjustment, and settling time to new steady-state after each wiper movement",
+        "validates": "External control system interaction: R7 manual adjustment effects on dual-channel oscillation including transient behavior during tuning and dead-zone identification where oscillation fails at specific wiper positions",
+        "expected_outcome": "Frequency shifts \u00b130-50% across full R7 range with approximately linear relationship to wiper position; transient oscillation dropout lasting 1-10 cycles occurs during rapid wiper movement (>10%/second); dead zones appear at extreme wiper positions (0-5%, 95-100%) where feedback coupling too weak to sustain oscillation; settling time to stable frequency <20 cycles (0.5-20ms) after wiper stops moving"
+      }
+    ],
+    "sources": [
+      "prior_stages: stage_0 circuit_identification \u2014 dual blocking oscillator topology with magnetic energy storage and flyback charging mechanism",
+      "prior_stages: stage_1 basic_operation \u2014 regenerative magnetic feedback, startup via bias networks, oscillation cycle timing governed by core saturation",
+      "prior_stages: stage_2 energy_flow \u2014 power transfer from PrimaryBT1 through magnetic storage to ChargeBT1/ChargeBT2, loss mechanisms in transistors and core",
+      "prior_stages: stage_3 physical_principles \u2014 Faraday's law induction, Amp\u00e8re's law magnetomotive force, semiconductor physics temperature dependence, magnetic core B-H behavior",
+      "prior_stages: stage_4 component_roles \u2014 BD243C thermal characteristics requiring heatsinking, R7 potentiometer tuning control, battery specifications and charging interactions",
+      "prior_stages: stage_5 operating_modes \u2014 startup behavior, steady-state oscillation, thermal drift effects, environmental temperature sensitivity, component failure modes",
+      "circuit_family_kb: blocking_oscillator System Behavior \u2014 oscillation frequency emergence from magnetic properties, load sensitivity, supply sensitivity, thermal drift mechanisms",
+      "project_context: netlist connectivity showing complete system boundaries (power source, charging load, control potentiometer, measurement access points)",
+      "project_context: BOM component specifications \u2014 transistor thermal ratings, diode voltage ratings, resistor power ratings affecting thermal performance",
+      "engineering_knowledge: magnetostriction acoustic emission from ferromagnetic cores, thermal resistance junction-to-ambient calculations, EMI radiation from switching transients",
+      "engineering_knowledge: battery temperature effects on internal resistance and charging acceptance, humidity effects on high-voltage leakage paths, probe loading on high-impedance circuits"
+    ]
+  },
+  {
+    "stage_id": 7,
+    "stage_key": "engineering_analysis",
+    "title": "Engineering Analysis",
+    "question": "What conclusions can an experienced engineer draw?",
+    "determinations": {
+      "performance_evaluation": "Dual-channel Bedini SSG blocking oscillator exhibits conventional electromagnetic energy transfer through magnetic field storage and flyback rectification. Expected efficiency 50-85% from PrimaryBT1 to ChargeBT1/ChargeBT2 with power transfer 5-20W depending on T1 core specifications (unknown). Oscillation frequency 1-50kHz governed by core saturation characteristics; R7 potentiometer provides \u00b130-50% frequency tuning. Thermal management critical: transistors Q1/Q2 dissipate 0.5-2W each requiring heatsinking above 25\u00b0C ambient for continuous operation. Cross-coupling diode D2 configuration suggests intentional energy distribution between series batteries but actual current path requires measurement. All observed behavior consistent with mainstream blocking oscillator physics; no evidence of anomalous energy effects from available circuit topology and component specifications.",
+      "failure_analysis": [
+        {
+          "failure_mode": "Transistor destruction from flyback overvoltage",
+          "cause": "Charging batteries disconnected during operation removes voltage clamping allowing flyback spikes >200V exceeding BD243C V_CEO=100V rating causing avalanche breakdown",
+          "mitigation": "Add 100V TVS diodes across Q1/Q2 collector-emitter; implement battery disconnect detection circuit halting oscillation; verify D1/D2 cathode connections secure before power-on"
+        },
+        {
+          "failure_mode": "Thermal runaway above 60\u00b0C ambient",
+          "cause": "Inadequate heatsinking (thermal resistance >80\u00b0C/W junction-ambient) combined with transistor V_BE temperature coefficient -2mV/\u00b0C creates positive feedback increasing collector current exponentially until junction temperature exceeds 150\u00b0C",
+          "mitigation": "Mount Q1/Q2 on heatsinks with thermal resistance <20\u00b0C/W; apply thermal compound; consider forced air cooling for continuous duty; implement over-temperature shutdown using thermistors"
+        },
+        {
+          "failure_mode": "Oscillation cessation below 4V supply",
+          "cause": "PrimaryBT1 discharge reduces voltage below threshold where R1-R2/R4-R5 dividers cannot provide sufficient base bias (>0.7V) to overcome transistor V_BE threshold preventing regenerative feedback startup",
+          "mitigation": "Monitor PrimaryBT1 voltage; implement low-voltage disconnect at 4.5V threshold; use fresh batteries rated \u22652Ah capacity for extended operation; consider voltage boosting circuit if <6V operation required"
+        },
+        {
+          "failure_mode": "Base-emitter junction destruction from reverse polarity",
+          "cause": "PrimaryBT1 connected backwards forward-biases base-emitter junctions through R1/R4 in reverse exceeding 6V breakdown voltage destroying Q1/Q2 within seconds",
+          "mitigation": "Add reverse polarity protection diode (1N4007) in series with PrimaryBT1 positive terminal; use keyed battery connectors preventing incorrect insertion; label polarity clearly on PCB and enclosure"
+        },
+        {
+          "failure_mode": "Asymmetric channel operation from component mismatch",
+          "cause": "Transistor \u03b2 variation \u00b130% and resistor tolerance \u00b15% create unequal base drive and collector current between Q1/Q2 channels causing 70/30 energy distribution instead of balanced 50/50 split",
+          "mitigation": "Select matched transistor pairs (\u03b2 within 10%); use 1% tolerance resistors for R1-R6; measure and adjust R7 for balanced flyback pulse amplitudes; consider independent R7A/R7B potentiometers per channel"
+        },
+        {
+          "failure_mode": "Core demagnetization from mechanical shock",
+          "cause": "Impact >50G or dropping transformer T1 fractures ferrite core material or randomizes magnetic domains destroying coupling coefficient k and preventing regenerative feedback oscillation",
+          "mitigation": "Pot transformer windings in epoxy; mount T1 with vibration isolation; protect circuit in shock-resistant enclosure rated \u226530G; specify ferrite grade with improved mechanical strength (e.g., N87 vs N27)"
+        }
+      ],
+      "optimization_suggestions": [
+        {
+          "area": "Thermal management and continuous-duty operation",
+          "suggestion": "Upgrade Q1/Q2 to TIP31C or MJE3055T with larger thermal mass TO-220 packages; mount on shared aluminum heatsink (\u226550cm\u00b2 surface area, <15\u00b0C/W thermal resistance); add thermal shutdown circuit using NTC thermistors triggering at 70\u00b0C case temperature",
+          "tradeoffs": "Increased component cost $2-5; larger PCB footprint for heatsinks; improved long-term reliability and higher power capability enabling >20W operation; trade physical size for thermal headroom"
+        },
+        {
+          "area": "Oscillation frequency stability and repeatability",
+          "suggestion": "Replace unknown T1 transformer with specified inductor: trifilar winding on FT240-43 ferrite toroid with N_primary1=N_primary2=50 turns, N_trigger=25 turns (2:1 step-down for feedback); document inductance L_primary\u2248500\u00b5H, coupling k>0.95; add 10-turn trimmer potentiometer parallel with R7 for fine frequency adjustment \u00b110%",
+          "tradeoffs": "Custom transformer winding labor cost 1-2 hours; documented specifications enable predictable 8-15kHz operation; frequency stability \u00b12% vs \u00b120% with unknown T1; enables production repeatability and troubleshooting reference"
+        },
+        {
+          "area": "Charging current measurement and monitoring",
+          "suggestion": "Insert 0.1\u03a9 current sense resistors in series with D1/D2 cathodes; add instrumentation amplifiers (INA180) measuring voltage drops with \u00b11% accuracy; output to analog meters or microcontroller ADC for real-time charging current display (0-1A range); implement coulomb counting for battery state-of-charge estimation",
+          "tradeoffs": "Additional components cost $5-10; 0.1-0.3V forward drop reduces charging voltage slightly; enables quantitative performance validation replacing qualitative observation; data logging capability for efficiency measurements and optimization"
+        },
+        {
+          "area": "EMI reduction and regulatory compliance",
+          "suggestion": "Add RC snubbers (100\u03a9 + 100nF) across Q1/Q2 collectors damping flyback voltage ringing; twist PrimaryBT1 power leads reducing loop antenna area; add common-mode choke on battery connections; shield T1 transformer with grounded copper foil or mu-metal enclosure; route high dI/dt paths (collector traces) as differential pairs with ground plane spacing",
+          "tradeoffs": "Snubber components dissipate 0.2-0.5W reducing efficiency 3-5%; shielding adds weight and cost; radiated emissions reduced 10-20dB enabling FCC Part 15 compliance; improved coexistence with sensitive electronics (radios, medical equipment)"
+        },
+        {
+          "area": "Channel balance and energy distribution control",
+          "suggestion": "Replace single R7 potentiometer with dual-gang potentiometer providing independent R7A (Q1 channel) and R7B (Q2 channel) adjustment; add current transformers on Q1/Q2 collector paths for per-channel power monitoring; implement trim resistors R3A/R6A in parallel with R3/R6 enabling base drive calibration to equalize flyback pulse amplitudes within \u00b15%",
+          "tradeoffs": "Dual potentiometer cost $8-15 vs $2 single unit; increased adjustment complexity requiring calibration procedure; enables balanced 50/50 energy split compensating for component tolerances; improves charging uniformity between ChargeBT1 and ChargeBT2"
+        },
+        {
+          "area": "Protection and fault tolerance",
+          "suggestion": "Add 100V bidirectional TVS diodes (1.5KE100CA) across Q1/Q2 collector-emitter for overvoltage clamping; implement low-voltage disconnect relay opening PrimaryBT1 connection below 4.5V preventing deep discharge; add fused battery connections (3A slow-blow) for overcurrent protection; include reverse polarity protection diode (5A Schottky) in series with PrimaryBT1 positive terminal",
+          "tradeoffs": "Protection components add $10-15 BOM cost and 0.2-0.3V forward drops; improved fault tolerance preventing catastrophic failures; enables unattended operation and battery protection; reduces field failure rate by 80-90% in harsh environments"
+        }
+      ],
+      "simulation_interpretation": "SPICE simulation validation limited by unknown T1 transformer model parameters (inductances, coupling coefficients, core saturation characteristics). Realistic simulation requires: (1) measured or specified L_primary1, L_primary2, L_trigger inductance values; (2) coupling coefficient k between windings (0.8-0.99 range); (3) nonlinear magnetic core model with B-H saturation curve and hysteresis; (4) winding DC resistances. Without T1 specifications, simulation predictions for oscillation frequency (\u00b150% uncertainty), flyback voltage amplitude (\u00b1100%), and efficiency (\u00b130%) have low confidence. Recommend measuring actual T1 inductances using LCR meter at 1kHz, 1V test signal before simulation. Transient analysis with realistic magnetic model would validate: regenerative feedback startup (1-100ms), steady-state frequency (expected 5-20kHz for typical SSG cores), flyback pulse waveforms (30-100V peaks), and thermal dissipation (0.5-2W per transistor). Monte Carlo analysis accounting for \u00b15% resistor and \u00b130% \u03b2 tolerances would bound performance variation across production units.",
+      "measurement_recommendations": [
+        {
+          "measurement": "Oscillation frequency and duty cycle for both Q1/Q2 channels with R7 at 50% position",
+          "instrument": "Dual-channel oscilloscope (100MHz bandwidth, 1GS/s) with 10:1 probes on Q1/Q2 collector nodes (Net-_D1-A_, Net-_ChargeBT2-+_); trigger on collector voltage falling edge; measure period and pulse width over 100 cycles",
+          "expected_result": "Frequency 5-20kHz (period 50-200\u00b5s) depending on T1 core material; duty cycle 15-40% (conduction time 10-80\u00b5s); channels within \u00b110% frequency match indicating magnetic coupling; waveforms show sharp falling edges (<1\u00b5s) during turn-off and exponential flyback decay (20-100\u00b5s time constant)"
+        },
+        {
+          "measurement": "Flyback voltage peak amplitude at D1 and D2 anodes during transistor turn-off events",
+          "instrument": "High-voltage differential probe (1000V rating, 100MHz) on D1 anode (Net-_D1-A_) and D2 anode (Net-_ChargeBT2-+_); capture single-shot transients with 10ns/div timebase; measure peak voltage and decay time constant",
+          "expected_result": "Peak voltage 30-100V above ground (12V charging rail + inductive overshoot); pulse width 20-100\u00b5s exponential decay as energy transfers to batteries; voltage clamped by ChargeBT1/ChargeBT2 series combination preventing >150V spikes; no ringing or oscillation indicating adequate damping"
+        },
+        {
+          "measurement": "Charging current waveforms through D1 and D2 into ChargeBT1/ChargeBT2 terminals",
+          "instrument": "AC/DC current probe (10MHz bandwidth, 0.1-10A range) clamped on D1 cathode lead and D2 cathode lead separately; measure peak pulse current and calculate average current via oscilloscope integration (AREA measurement) over 10ms window containing multiple cycles",
+          "expected_result": "Peak pulse current 0.2-1.5A during flyback events (10-50\u00b5s duration); average charging current 50-200mA depending on frequency and flyback energy; D1 and D2 currents approximately equal (\u00b120%) indicating balanced channel operation; no reverse current during transistor conduction confirming diode blocking"
+        },
+        {
+          "measurement": "Transistor Q1/Q2 case temperature rise during continuous operation",
+          "instrument": "Infrared thermometer or K-type thermocouple attached to Q1/Q2 TO-220 package surfaces with thermal paste; measure temperature every 60 seconds from cold start to thermal equilibrium (10-20 minutes); record ambient temperature as baseline",
+          "expected_result": "Case temperature rises to 60-90\u00b0C above ambient (total 85-115\u00b0C at 25\u00b0C ambient) without heatsinks after 10 minutes indicating 1-2W dissipation; with small clip-on heatsinks temperature stabilizes at 45-65\u00b0C above ambient (70-90\u00b0C total); thermal equilibrium reached within 15 minutes (5\u03c4 thermal time constants)"
+        },
+        {
+          "measurement": "Input power from PrimaryBT1 and output power to ChargeBT1/ChargeBT2 for efficiency calculation",
+          "instrument": "Digital multimeter measuring PrimaryBT1 voltage under load; calibrated shunt resistor (0.1\u03a9, 1%) in series with PrimaryBT1 negative terminal measuring input current via voltage drop; second multimeter measuring ChargeBT1/ChargeBT2 series voltage; current probe on charging battery positive terminal measuring average charging current over 60 seconds",
+          "expected_result": "Input power P_in = V_PrimaryBT1 \u00d7 I_input = 5.5-6.0V \u00d7 1-3A = 5.5-18W depending on oscillation parameters; output power P_out = V_ChargeBatteries \u00d7 I_charge_avg = 10-13V \u00d7 0.05-0.2A = 0.5-2.6W; efficiency \u03b7 = P_out/P_in = 10-50% with unknown T1; optimized designs achieve 60-85%"
+        },
+        {
+          "measurement": "T1 transformer primary winding inductance and DC resistance for each channel",
+          "instrument": "LCR meter (1kHz test frequency, 1V AC excitation) with Kelvin probe connections on T1 pins 1-2 (Q1 primary), pins 4-6 (Q2 primary), and pins 3-ground (trigger winding); measure inductance L and series resistance R for each winding; verify measurement at multiple frequencies (100Hz, 1kHz, 10kHz) checking for frequency-dependent effects",
+          "expected_result": "Primary inductances L_primary1 = L_primary2 = 200-1000\u00b5H (typical SSG range); trigger inductance L_trigger = 50-500\u00b5H depending on turns ratio; DC resistances 0.5-3\u03a9 for primary windings, 0.2-1\u03a9 for trigger winding; inductance decreases 10-30% at 10kHz vs 100Hz indicating core losses; matched inductances within \u00b110% between channels confirms symmetric construction"
+        }
+      ],
+      "design_improvements": [
+        {
+          "improvement": "Document T1 transformer specifications completely with measured inductances, turns counts, core material, and coupling coefficients enabling reproducible construction and simulation modeling",
+          "rationale": "Unknown T1 parameters are single largest source of uncertainty in performance predictions, troubleshooting, and optimization. Documented specifications enable: (1) accurate SPICE simulation for design validation, (2) production consistency across multiple units, (3) component substitution if original transformer unavailable, (4) frequency and energy storage calculations supporting design modifications"
+        },
+        {
+          "improvement": "Add snubber networks (100\u03a9 series with 100nF film capacitor) across Q1/Q2 collectors to ground damping flyback voltage ringing and reducing electromagnetic interference by 10-20dB",
+          "rationale": "Fast collector current turn-off (dI/dt = 10\u2076-10\u2077 A/s) excites parasitic inductances and capacitances creating voltage ringing at 1-10MHz observed in practical blocking oscillators. Snubbers dissipate ringing energy in resistor rather than radiating as EMI. Trade efficiency loss (0.2-0.5W) for improved electromagnetic compatibility and reduced transistor voltage stress"
+        },
+        {
+          "improvement": "Implement transistor heatsinks with thermal resistance <20\u00b0C/W and thermal shutdown protection using NTC thermistors disabling oscillation above 80\u00b0C case temperature preventing thermal runaway",
+          "rationale": "Thermal analysis shows Q1/Q2 junction temperatures approach 150\u00b0C maximum rating without heatsinks during continuous 1-2W dissipation. Heatsinks reduce junction temperature to safe 100-120\u00b0C range with 50% margin. Thermal shutdown prevents catastrophic failure during fault conditions (short-circuit, excessive supply voltage) or inadequate cooling airflow"
+        },
+        {
+          "improvement": "Replace R5 connection from ChargeBT2+ to Q2 base with connection to Q2 collector (matching R2 topology for Q1) creating symmetric bias networks between channels eliminating intentional asymmetry of unknown purpose",
+          "rationale": "Current R5 connection to ChargeBT2+ creates bias voltage dependent on charging battery state-of-charge rather than collector flyback voltage as in Q1 channel. Asymmetric bias may cause unbalanced startup or unequal energy distribution. Symmetric R2/R5 connections improve channel matching and simplify analysis; if asymmetry intentional for specific Bedini SSG operating mode, document rationale explicitly"
+        },
+        {
+          "improvement": "Add current sensing and monitoring capability with 0.1\u03a9 shunt resistors in D1/D2 cathode paths and instrumentation amplifiers providing analog voltage outputs proportional to instantaneous charging currents enabling quantitative performance validation",
+          "rationale": "Qualitative circuit operation observation (LED indicators, audible tone from magnetostriction) insufficient for efficiency optimization and fault diagnosis. Measured charging current waveforms enable: (1) validation of theoretical energy transfer calculations, (2) detection of asymmetric channel operation requiring R7 adjustment, (3) battery state-of-charge monitoring via coulomb counting, (4) efficiency measurement comparing input vs output power"
+        },
+        {
+          "improvement": "Add reverse polarity protection diode (5A Schottky MBR5100) in series with PrimaryBT1 positive terminal preventing base-emitter junction destruction from incorrect battery connection; include keyed battery connectors and polarity labels on PCB",
+          "rationale": "Reverse polarity connection (common user error during battery replacement) forward-biases Q1/Q2 base-emitter junctions through R1/R4 in reverse direction exceeding 6V avalanche breakdown voltage destroying transistors within seconds. Protection diode adds 0.3V forward drop (5% efficiency penalty) but prevents catastrophic failure; cost-benefit analysis strongly favors protection given high field failure rate from reversed batteries"
+        }
+      ],
+      "conclusions": [
+        "Circuit implements conventional dual-channel blocking oscillator with magnetic energy storage and flyback rectification consistent with Bedini SSG topology; all observed behavior explained by mainstream electromagnetic theory without requiring non-conventional physics models.",
+        "Unknown T1 transformer specifications (inductances, turns ratios, core material) represent critical knowledge gap preventing quantitative performance prediction; measurements using LCR meter and oscilloscope required to complete analysis with confidence >80%.",
+        "Thermal management inadequate for continuous operation: transistors Q1/Q2 require heatsinks with thermal resistance <20\u00b0C/W preventing junction temperatures exceeding 150\u00b0C maximum rating; thermal shutdown recommended for fault tolerance.",
+        "Asymmetric bias network (R5 to ChargeBT2+ vs R2 to Q1 collector) creates intentional channel imbalance of unclear purpose; recommend documenting design rationale or correcting to symmetric topology for matched operation.",
+        "Expected power transfer efficiency 50-85% from primary battery to charging batteries with optimized T1 core and frequency tuning; actual efficiency measurement requires instrumentation (current probes, multimeters) to validate energy accounting separating measured facts from theoretical assumptions.",
+        "Protection improvements essential for field deployment: reverse polarity protection, overvoltage clamping (TVS diodes), low-voltage disconnect, and fused battery connections reduce failure rate >80% with minimal cost increase ($10-15 BOM); current design vulnerable to common fault modes causing transistor destruction."
+      ]
+    },
+    "open_questions": [
+      "What are T1 transformer complete specifications: primary winding inductances (L_primary1, L_primary2), trigger winding inductance (L_trigger), turns ratios (N_primary:N_trigger), coupling coefficients (k\u2081\u2082, k\u2081\u2083, k\u2082\u2083), DC resistances, core material and geometry \u2014 requires LCR measurements and physical inspection?",
+      "What is actual power transfer efficiency from PrimaryBT1 to ChargeBT1/ChargeBT2 under typical operating conditions \u2014 requires calibrated input/output power measurements over extended operation (hours) accounting for battery self-discharge?",
+      "What is the design rationale for R5 asymmetric connection to ChargeBT2+ instead of Q2 collector (as R2 does for Q1) \u2014 intentional Bedini SSG operating principle or schematic error requiring correction?",
+      "Does D2 cross-coupling diode conduct significant current during normal operation enabling energy transfer between ChargeBT2+ and ChargeBT1+, or does it serve primarily as protection/voltage equalization \u2014 requires current probe measurement on D2 cathode?",
+      "What are long-term reliability characteristics over 1000+ hours continuous operation: component drift rates (resistors, magnetic core aging), battery capacity degradation, frequency stability \u2014 requires extended duration testing with environmental chamber cycling -20\u00b0C to +80\u00b0C?",
+      "Can single-channel version (removing Q2, R4, R5, R6, D2 and one T1 primary winding) achieve comparable charging performance, or does dual-channel magnetic coupling provide essential benefit justifying component count increase \u2014 requires comparative performance testing?"
+    ],
+    "confidence": "high",
+    "unknowns": [
+      "T1 primary winding inductances L_primary1 and L_primary2 (expected 200-1000\u00b5H based on typical SSG designs)",
+      "T1 trigger winding inductance L_trigger and turns ratio N_trigger/N_primary determining feedback voltage gain",
+      "T1 magnetic core material type (ferrite vs iron powder vs laminated steel) and specific grade affecting saturation flux density B_sat and permeability \u00b5\u1d63",
+      "T1 coupling coefficient k between primary windings and trigger winding (expected 0.85-0.99 for trifilar construction)",
+      "Actual oscillation frequency in steady-state operation (estimated 5-20kHz range pending T1 measurements)",
+      "Peak collector current amplitude through Q1 and Q2 (estimated 0.5-3A based on typical blocking oscillator behavior)",
+      "Flyback voltage peak amplitude at D1 and D2 anodes (estimated 30-100V based on inductive energy storage)",
+      "Power transfer efficiency from PrimaryBT1 to ChargeBT1/ChargeBT2 (expected 50-85% optimized, requires measurement)",
+      "D2 cross-coupling current magnitude and direction during Q2 channel flyback events",
+      "Transistor junction temperature rise during continuous operation without heatsinking (affects thermal runaway risk)"
+    ],
+    "simulation_hooks": [
+      {
+        "description": "Transient SPICE simulation with realistic T1 magnetic model (nonlinear B-H curve, coupling coefficients k\u2081\u2082\u22480.95, primary inductances 500\u00b5H) showing 10ms startup transient through steady-state oscillation; measure frequency, duty cycle, flyback voltage peaks, and collector current waveforms",
+        "validates": "Complete system behavior from cold start: regenerative feedback initiates oscillation within 1-100ms, frequency stabilizes at value predicted by L\u00d7I\u00b2/2 energy storage and core saturation timing, both channels oscillate with phase relationship determined by magnetic coupling",
+        "expected_outcome": "Oscillation frequency 8-15kHz with specified 500\u00b5H inductances; duty cycle 20-35%; flyback voltage peaks 40-80V clamped by 12V battery rail; collector current ramps to 1-2A peak during conduction; startup time 5-50ms; frequency within \u00b115% of hand calculation f \u2248 V_supply/(L\u00d7I_sat)"
+      },
+      {
+        "description": "Parametric sweep of T1 core permeability \u00b5\u1d63 from 100 to 3000 (simulating iron powder vs ferrite cores) measuring effect on oscillation frequency, peak collector current, and magnetic energy storage per cycle E_mag = \u00bdLI\u00b2",
+        "validates": "Magnetic core material selection impact on performance: higher permeability increases inductance L \u221d \u00b5\u1d63 reducing frequency f \u221d 1/\u221aL and lowering peak current I_peak \u221d 1/\u221aL for constant energy storage",
+        "expected_outcome": "Frequency decreases from 25kHz (\u00b5\u1d63=100, L\u2248150\u00b5H) to 6kHz (\u00b5\u1d63=3000, L\u22484500\u00b5H) following inverse square root relationship; peak current increases from 0.8A to 2.5A maintaining constant E_mag\u22483mJ; validates inductor design tradeoff between frequency and current stress"
+      },
+      {
+        "description": "Thermal transient simulation coupling electrical SPICE model with thermal network (R_th_JC=2\u00b0C/W, R_th_CS=0.5\u00b0C/W with thermal compound, R_th_SA varying 10-150\u00b0C/W for different heatsinks) showing Q1/Q2 junction temperature rise over 20 minutes",
+        "validates": "Thermal management adequacy: junction temperature T_J vs time determines whether operation remains within 150\u00b0C maximum rating; identifies minimum heatsink thermal resistance preventing thermal runaway",
+        "expected_outcome": "Without heatsinks (R_th_SA=100\u00b0C/W): T_J rises to 135-145\u00b0C at 1W dissipation, approaching thermal limits requiring shutdown; with R_th_SA=15\u00b0C/W heatsinks: T_J stabilizes at 95-105\u00b0C with safe 45\u00b0C margin; thermal time constant 3-8 minutes to 95% of steady-state"
+      },
+      {
+        "description": "Monte Carlo simulation with component tolerances (resistors \u00b15%, transistor \u03b2 \u00b130%, T1 inductances \u00b110%, temperature -20\u00b0C to +80\u00b0C) across 100 trials measuring oscillation frequency distribution, channel energy balance variation, and startup reliability statistics",
+        "validates": "Production robustness: statistical performance variation from manufacturing tolerances and environmental conditions; identifies critical parameters requiring tighter tolerance control or calibration procedures",
+        "expected_outcome": "Frequency variation \u00b118% (3\u03c3) across combined tolerances and temperature; channel energy distribution 40/60 to 60/40 worst-case (vs ideal 50/50); 8-12% of trials fail oscillation startup at -20\u00b0C with worst-case low \u03b2 and high resistance; validates need for \u00b11% resistor upgrade or temperature-compensated bias"
+      },
+      {
+        "description": "AC small-signal analysis with 10-50pF capacitance added to base drive nodes (Net-_Q1-B_, Net-_Q2-B_) simulating oscilloscope probe loading; sweep capacitance measuring frequency shift and amplitude reduction identifying maximum acceptable probe loading before oscillation fails",
+        "validates": "Measurement instrumentation interaction: high-impedance base nodes susceptible to capacitive loading damping regenerative feedback; determines probe selection requirements (10:1 vs 1:1) for accurate waveform capture",
+        "expected_outcome": "Frequency decreases 3-8% per 10pF added capacitance; oscillation amplitude reduces proportionally; oscillation fails when total capacitance exceeds 45-65pF loading Q below threshold for positive feedback; validates requirement for 10:1 probes (input capacitance \u224815pF) or buffered measurement"
+      },
+      {
+        "description": "Power efficiency analysis integrating input current I_PrimaryBT1(t) \u00d7 V_PrimaryBT1 and output current I_ChargeBatteries(t) \u00d7 V_ChargeBatteries over 1000 oscillation cycles calculating average power flow and accounting for all loss mechanisms (transistor conduction, switching, core losses, resistive dissipation, diode forward drops)",
+        "validates": "Energy accounting closure: input power equals sum of output power plus identified losses within measurement uncertainty; validates theoretical efficiency predictions against simulation results; identifies dominant loss mechanisms for optimization targeting",
+        "expected_outcome": "Input power 8-15W at 6V supply with 1.5-2.5A average current; output charging power 5-10W into 12V battery rail with 0.4-0.8A average current; efficiency 55-75% with identified losses: transistor conduction 1.5-3W (20%), core losses 0.5-1.5W (8%), diode rectification 0.3-0.8W (5%), resistive dissipation 0.2-0.5W (3%); validates Bedini SSG typical performance range"
+      }
+    ],
+    "sources": [
+      "prior_stages: stages 0-6 complete determinations providing topology identification, operating principles, energy flow paths, physical principles, component roles, operating modes, and system behavior",
+      "circuit_family_kb: blocking_oscillator Engineering Analysis requirements and typical improvement vectors",
+      "project_context: complete netlist, BOM, connectivity graph, and datasheet resolutions from kicad_python_extracted_data",
+      "engineering_knowledge: blocking oscillator design principles, thermal management calculations, EMI mitigation techniques, efficiency optimization methods",
+      "BD243C datasheet: transistor electrical and thermal specifications informing failure analysis and heatsinking requirements"
+    ]
+  }
+]

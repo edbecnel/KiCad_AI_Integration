@@ -71,7 +71,7 @@ CORRECTLY STILL OPEN (do not mark complete without new work)
 - Netlist gap-fill detection (Net-(…) names, unconnected pins)
 - Netlist gap-fill connectivity-inference prompt template (SUBCKT templates exist)
 - Context inclusion checkboxes in chat UI
-- E2E manual KiCad validation sign-off
+- ~~E2E manual KiCad validation sign-off~~ — **done** Aug 2026 (live Bedini AERF 0–7 + EKM; see `tests/fixtures/bedini_aerf_live/`)
 - examples/bedini_babcock/ sample project
 - Unified Assistant shell (ADP-011)
 - Native KiCad plugin, multi-turn chat (Phase 2)

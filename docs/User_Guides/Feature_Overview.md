@@ -233,15 +233,15 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | Engineering Notebook UI | Full primitive editors, search, JSON view (`--ui-notebook`) | Dockable KiCad plugin (Phase 2) |
 | Conversation Manager | Deferred Phase 2 | Multi-turn transcripts |
 | Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Host-agnostic validation hooks; closed loop deferred |
-| Blocking Oscillator KB | Complete (00–07); **AERF exit signed off** (Bedini integration tests, Aug 2026) | Additional circuit families |
+| Blocking Oscillator KB | Complete (00–07); **live AERF sign-off** (Bedini API run Aug 2026; fixtures + rubric) | Additional circuit families |
 
 ### Bottom line
 
 | | |
 |---|---|
 | **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library; simulation/SUBCKT panel; PCB/BOM/ERC/DRC context; Assistant shell scaffold |
-| **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + exit validation; EIE chat/simulation/AERF UI; Blocking Oscillator KB |
-| **In progress** | Phase 2 dockable plugin, netlist graph context, simulation closed loop |
+| **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + **live Bedini validation**; EIE chat/simulation/AERF UI; Blocking Oscillator KB |
+| **In progress** | Phase 2 dockable plugin, simulation closed loop |
 | **Later** | Native plugin, additional hosts, conversation persistence via EKM |
 
 This is a **foundation**, not a finished product. The central idea — automatic context, structured engineering reasoning, and controlled AI review — works today for schematic-level questions in KiCad, while the platform architecture is defined to grow beyond any single editor.

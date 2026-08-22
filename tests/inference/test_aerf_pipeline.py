@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from context.model import ProjectContext
 from inference.aerf import (
+    AERF_PROVIDER_MAX_TOKENS,
     build_aerf_stage_prompt_bundle,
     build_ekm_writeback_plan,
     parse_stage_output,
     run_aerf_pipeline,
     run_aerf_stage,
     send_aerf_stage_prompt,
+    _resolve_aerf_config,
 )
 from providers.types import ProviderResponse, TokenUsage
 
@@ -117,6 +119,14 @@ def test_run_aerf_stage_does_not_send_without_approval() -> None:
     assert result.built.template == "aerf_stage_0"
     assert result.send is None
     assert provider.calls == []
+
+
+def test_resolve_aerf_config_raises_max_tokens() -> None:
+    from utils.config import AppConfig, DEFAULT_PROVIDER_MAX_TOKENS
+
+    cfg = AppConfig(provider_max_tokens=DEFAULT_PROVIDER_MAX_TOKENS)
+    resolved = _resolve_aerf_config(cfg)
+    assert resolved.provider_max_tokens == AERF_PROVIDER_MAX_TOKENS
 
 
 def test_send_aerf_stage_prompt_parses_response() -> None:

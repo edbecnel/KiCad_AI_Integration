@@ -382,9 +382,12 @@ Automated coverage (run `PYTHONPATH=src pytest`):
 - Stage output JSON validation (`tests/reasoning/test_stage_schemas.py`)
 - AERF pipeline mock provider (`tests/inference/test_aerf_pipeline.py`)
 - Bedini local project when present (`tests/integration/test_bedini_aerf_exit.py`)
+- Live Bedini stage fixtures (`tests/integration/test_bedini_aerf_live.py`, no API)
 - PCB extraction fixture (`tests/context/test_pcb_extract.py`)
 
 Manual sign-off (your schematic):
+
+Use the [AERF Validation Rubric](AERF_Validation_Rubric.md) when reviewing live stage JSON.
 
 1. `--ui` → Assistant shell → Refresh context
 2. `--ui-aerf` → stages 0–7 with Approve & Send → Write to EKM

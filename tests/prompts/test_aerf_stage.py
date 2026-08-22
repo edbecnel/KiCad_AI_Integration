@@ -24,6 +24,7 @@ def test_aerf_stage_prompt_xml_sections(stage_id: int) -> None:
         "kicad_python_extracted_data",
         "engineering_knowledge",
         "aerf_methodology",
+        "aerf_output_discipline",
         "aerf_evidence_model",
         "aerf_output_schema",
     ):
