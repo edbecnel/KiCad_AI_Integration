@@ -36,8 +36,8 @@ class AssistantFrame(wx.Frame):
         self.SetSizer(sizer)
         self.Bind(wx.EVT_CLOSE, self._on_close)
 
-    def open_placeholder_panel(self, tab_id: str) -> None:
-        self._shell.open_placeholder_panel(tab_id)
+    def focus_tab(self, tab_id: str) -> None:
+        self._shell.focus_tab(tab_id)
 
     def _on_close(self, event: wx.CloseEvent) -> None:
         if not self._shell.confirm_close():

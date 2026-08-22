@@ -402,7 +402,6 @@ def main_ui_chat(
     show_assistant_shell(
         path,
         focus_tab="chat",
-        open_focus_panel=True,
     )
 
 
@@ -426,7 +425,7 @@ def main_ui_datasheets(
 
     from ui.assistant_shell import show_assistant_shell
 
-    show_assistant_shell(path, focus_tab="datasheets", open_focus_panel=True)
+    show_assistant_shell(path, focus_tab="datasheets")
 
 
 def main_ui_simulation(project_path: str | Path | None = None) -> None:
@@ -444,7 +443,7 @@ def main_ui_simulation(project_path: str | Path | None = None) -> None:
 
     from ui.assistant_shell import show_assistant_shell
 
-    show_assistant_shell(path, focus_tab="simulation", open_focus_panel=True)
+    show_assistant_shell(path, focus_tab="simulation")
 
 
 def _print_writeback_plan(plan) -> None:
@@ -613,7 +612,7 @@ def main_ui_aerf(
 
     from ui.assistant_shell import show_assistant_shell
 
-    show_assistant_shell(path, focus_tab="aerf", open_focus_panel=True)
+    show_assistant_shell(path, focus_tab="aerf")
 
 
 def main_ui_launcher(project_path: str | Path | None = None, *, focus_tab: str | None = None) -> None:

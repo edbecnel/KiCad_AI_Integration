@@ -31,3 +31,17 @@ class AssistantTabPanel(wx.Panel):
     def confirm_discard(self) -> bool:
         """Return False to veto shell close when this tab has unsaved edits."""
         return True
+
+    def _hide_placeholder(self) -> None:
+        """Drop the idle-state label from layout so it cannot paint over the shell."""
+        sizer = self.GetSizer()
+        if sizer is not None:
+            sizer.Hide(self._placeholder)
+        self._placeholder.Hide()
+
+    def _show_placeholder(self) -> None:
+        """Restore the idle-state label after the embedded shell is torn down."""
+        sizer = self.GetSizer()
+        if sizer is not None:
+            sizer.Show(self._placeholder)
+        self._placeholder.Show()

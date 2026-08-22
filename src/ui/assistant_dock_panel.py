@@ -33,5 +33,5 @@ class AssistantDockPanel(wx.Panel):
     def confirm_close(self) -> bool:
         return self._shell.confirm_close()
 
-    def open_placeholder_panel(self, tab_id: str) -> None:
-        self._shell.open_placeholder_panel(tab_id)
+    def focus_tab(self, tab_id: str) -> None:
+        self._shell.focus_tab(tab_id)

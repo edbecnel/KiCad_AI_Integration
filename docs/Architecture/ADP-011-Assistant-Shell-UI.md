@@ -2,7 +2,7 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › ADP-011
 
-**Status:** Partial (Phase 1 scaffold — `src/ui/assistant_shell.py`, `--ui`; embedded tabs and KiCad dock Phase 2)
+**Status:** Partial (Phase B complete — all tabs embedded; KiCad dock plugin Phase C)
 
 **Author:** Ed Becnel
 

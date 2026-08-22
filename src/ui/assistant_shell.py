@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ui.aerf_dialog import show_aerf_dialog
+from ui.aerf_tab import AERFTab
 from ui.assistant_tab import ASSISTANT_TAB_IDS, AssistantTabPanel, tab_index_for_focus
-from ui.chat_dialog import show_chat_dialog
+from ui.chat_tab import ChatTab
 from ui.context_controller import ContextController
+from ui.datasheets_tab import DatasheetsTab
 from ui.launcher import (
     effective_initial_project_path,
     present_top_level_window,
@@ -16,10 +17,8 @@ from ui.launcher import (
 )
 from ui.kicad_host import prepare_kicad_ui_launch
 from ui.launcher_dialog import normalize_launcher_project_path
-from ui.missing_datasheets_dialog import show_missing_datasheets_dialog
 from ui.notebook_tab import NotebookTab
-from ui.placeholder_tab import PlaceholderTab
-from ui.simulation_dialog import show_simulation_dialog
+from ui.simulation_tab import SimulationTab
 from utils.config import load_config
 
 try:
@@ -44,7 +43,6 @@ class AssistantShell(wx.Panel):
         self._controller = ContextController(config=load_config())
         self._controller.bind_listener(self._on_context_refreshed)
         self._tabs: dict[str, AssistantTabPanel] = {}
-        self._placeholder_tabs: dict[str, PlaceholderTab] = {}
         self._notebook_tab: NotebookTab | None = None
 
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -52,8 +50,8 @@ class AssistantShell(wx.Panel):
         intro = wx.StaticText(
             self,
             label=(
-                "Unified Assistant shell — shared project context and feature tabs. "
-                "Notebook is embedded; other tabs open legacy panels until Sprint 2."
+                "Unified Assistant shell — shared project context and embedded feature tabs. "
+                "Refresh context once in the header; each tab updates from the same project."
             ),
         )
         intro.Wrap(760)
@@ -80,46 +78,17 @@ class AssistantShell(wx.Panel):
         vbox.Add(self._summary, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         self._notebook = wx.Notebook(self)
-        modal_parent = self.GetTopLevelParent()
 
-        placeholder_specs: tuple[tuple[str, str, str, object], ...] = (
-            (
-                "chat",
-                "Chat",
-                "Ad-hoc Q&A (general_review). Not full AERF.",
-                lambda pro, parent: show_chat_dialog(pro, parent=parent),
-            ),
-            (
-                "datasheets",
-                "Datasheets",
-                "Attach PDFs and resolve missing datasheets.",
-                lambda pro, parent: show_missing_datasheets_dialog(pro, parent=parent),
-            ),
-            (
-                "simulation",
-                "Simulation",
-                "SPICE gap scan and SUBCKT generation.",
-                lambda pro, parent: show_simulation_dialog(pro, parent=parent),
-            ),
-            (
-                "aerf",
-                "AERF",
-                "Staged engineer analysis (stages 0–7).",
-                lambda pro, parent: show_aerf_dialog(pro, parent=parent),
-            ),
+        tab_specs: tuple[tuple[str, str, type[AssistantTabPanel]], ...] = (
+            ("chat", "Chat", ChatTab),
+            ("datasheets", "Datasheets", DatasheetsTab),
+            ("simulation", "Simulation", SimulationTab),
+            ("aerf", "AERF", AERFTab),
         )
-        for tab_id, label, hint, opener in placeholder_specs:
-            tab = PlaceholderTab(
-                self._notebook,
-                tab_id=tab_id,
-                label=label,
-                hint=hint,
-                open_modal=opener,
-                modal_parent=modal_parent,
-            )
+        for tab_id, label, tab_cls in tab_specs:
+            tab = tab_cls(self._notebook)
             self._notebook.AddPage(tab, label)
             self._tabs[tab_id] = tab
-            self._placeholder_tabs[tab_id] = tab
 
         notebook_tab = NotebookTab(self._notebook)
         self._notebook.AddPage(notebook_tab, "Notebook")
@@ -147,18 +116,18 @@ class AssistantShell(wx.Panel):
         self._notify_active_tab_selected()
 
     def confirm_close(self) -> bool:
-        """Return False when the embedded notebook has unsaved edits."""
-        if self._notebook_tab is not None and not self._notebook_tab.confirm_discard():
-            return False
+        """Return False when any tab blocks close (unsaved edits or busy operations)."""
+        for tab in self._tabs.values():
+            if not tab.confirm_discard():
+                return False
         return True
 
-    def open_placeholder_panel(self, tab_id: str) -> None:
-        """Select a placeholder tab and open its legacy modal panel."""
-        if tab_id not in self._placeholder_tabs:
+    def focus_tab(self, tab_id: str) -> None:
+        """Select a tab by id (CLI deep links)."""
+        if tab_id not in ASSISTANT_TAB_IDS:
             return
-        idx = ASSISTANT_TAB_IDS.index(tab_id)
-        self._notebook.SetSelection(idx)
-        self._placeholder_tabs[tab_id].open_modal_panel()
+        self._notebook.SetSelection(ASSISTANT_TAB_IDS.index(tab_id))
+        self._notify_active_tab_selected()
 
     def _on_browse(self, _event: wx.CommandEvent) -> None:
         dlg = wx.FileDialog(
@@ -230,6 +199,6 @@ def show_assistant_shell(
 
     frame = AssistantFrame(kicad_parent, initial_path=project_path, focus_tab=focus_tab)
     present_top_level_window(frame, kicad_parent)
-    if open_focus_panel and focus_tab and focus_tab != "notebook":
-        frame.open_placeholder_panel(focus_tab)
+    if focus_tab:
+        frame.focus_tab(focus_tab)
     run_wx_main_loop_if_needed()

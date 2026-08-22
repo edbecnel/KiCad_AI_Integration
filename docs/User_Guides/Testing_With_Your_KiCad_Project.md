@@ -116,16 +116,9 @@ In the launcher:
 
 You do **not** need shell commands to verify netlist export — look for a line like `SPICE netlist: 22 lines (partial — …)` in the context summary.
 
-### Known UX limitation (until unified shell ships)
+### Known UX limitation (until dockable plugin ships)
 
-The launcher and Chat panel both use the window title **"KiCad AI Assistant"**. If you only see Chat (API key, question field, **Approve & Send**), the launcher may be hidden behind it — use the window menu or click **Datasheets** on the launcher to open datasheet attach/find.
-
-**Datasheet attach and AI discovery are not in Chat.** Use either:
-
-- Launcher → **Datasheets** button (window titled **"Datasheets"**), or
-- `--ui-datasheets` directly (see below).
-
-A single tabbed window is planned — [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md).
+The launcher dialog (`show_launcher_dialog`) remains for legacy entry; **`--ui` opens the unified Assistant shell** with all tabs embedded. Use the **Datasheets** tab (not Chat) for PDF attach and AI discovery.
 
 ---
 

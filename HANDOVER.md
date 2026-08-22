@@ -1,31 +1,32 @@
 ```
-HANDOVER — Phase 2 Sprint 1 (ADP-011 Phase A) — completed
+HANDOVER — Phase 2 Sprint 2 (ADP-011 Phase B) — completed
 ================================================================================
 Date: 2026-08-22
 Repo: KiCad_AI_Integration
 
 SUMMARY
 -------
-Assistant shell foundation: centralized context collection, embedded Notebook tab,
-frame/dock hosts. Chat/Datasheets/Simulation/AERF remain placeholder tabs with modal fallback.
+All Assistant shell tabs are now embedded: Chat, Datasheets, Simulation, AERF, Notebook.
+Legacy modal dialogs remain as thin wrappers around *Shell panels.
 
 WHAT WAS DONE
 -------------
-1. ContextController (`src/ui/context_controller.py`) — single refresh, listener notify
-2. Tab protocol (`assistant_tab.py`), NotebookTab, PlaceholderTab
-3. AssistantShell refactored to wx.Panel with embedded Notebook
-4. AssistantFrame (`--ui`) and AssistantDockPanel stub
-5. `--ui-notebook` selects embedded tab (no auto-open modal)
-6. Tests: `tests/ui/test_assistant_shell.py`
+1. DatasheetsShell + DatasheetsTab (from missing_datasheets_dialog.py)
+2. SimulationShell + SimulationTab
+3. ChatShell + ChatTab
+4. AERFShell + AERFTab
+5. AssistantShell wired with embedded tabs; PlaceholderTab removed from shell
+6. CLI deep links (--ui-chat, etc.) focus embedded tabs (no modal pop)
+7. Tests: tests/ui/test_embedded_tabs.py
 
 RECOMMENDED NEXT
 ----------------
-Phase 2 Sprint 2: migrate remaining tabs (Datasheets → Simulation → Chat → AERF).
-See `docs/Architecture/ADP-011-Assistant-Shell-UI.md` §10 Phase B.
+Phase 2 Sprint 3: KiCad action plugin (AssistantDockPanel registration) + Conversation Manager.
+See `docs/Architecture/ADP-011-Assistant-Shell-UI.md` §10 Phase C.
 
-PRIOR — Phase 1 Close-out Sprint (completed)
---------------------------------------------
-See git history / prior HANDOVER for Phase 1 close-out details.
+PRIOR — Phase 2 Sprint 1 (ADP-011 Phase A)
+------------------------------------------
+See git history for ContextController, NotebookTab, frame/dock hosts.
 
 AUTHORITATIVE STATUS
 --------------------
