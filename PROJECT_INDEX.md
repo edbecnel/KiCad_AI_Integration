@@ -12,8 +12,8 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 | Item | Status |
 |------|--------|
-| Phase | Phase 1 — stretch slice + provider + chat UI (in progress) |
-| Code | Schematic context, datasheet resolver, Missing Datasheets UI, Claude provider, prompt builder (general review), chat UI (`--ui-chat`) |
+| Phase | Post Track C/D — Phase 1 file-based close-out complete; Phase 2 next |
+| Code | Full assistant: chat, datasheets, simulation, AERF, notebook, pin connectivity, gap-fill detection, CI (`pytest`) |
 | Documentation framework | EDF Phase 3 — ADRs and architecture stubs complete |
 | License | MIT — see [LICENSE](LICENSE) |
 
@@ -143,7 +143,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 3. ~~Search, collapsible sections, renderer split (`src/ui/notebook_renderer.py`)~~ (done)
 4. ~~Non-modal panel + Advanced JSON view (`--ui-notebook-panel`)~~ (done)
 
-**Recommended next:** Phase 2 — embedded Assistant tabs, dockable KiCad plugin, multi-turn chat. Phase 1 polish: netlist graph, audit templates, EDF navigation — see [Master Task List](tasks/MASTER_TASK_LIST.md).
+**Recommended next:** Phase 2 — embedded Assistant tabs, dockable KiCad plugin, multi-turn chat. See [Master Task List](tasks/MASTER_TASK_LIST.md).
 
 Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
 

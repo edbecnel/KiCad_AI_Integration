@@ -420,7 +420,7 @@ class MissingDatasheetsDialog:
 
         btn_row2 = wx.BoxSizer(wx.HORIZONTAL)
         self._btn_refresh = wx.Button(self._footer, label="Refresh")
-        self._btn_force = wx.Button(self._footer, label="Force refresh URLs")
+        self._btn_force = wx.Button(self._footer, label="Force refresh all URLs")
         self._btn_cancel = wx.Button(self._footer, label="Cancel")
         self._btn_cancel.Hide()
         self._btn_close = wx.Button(self._footer, wx.ID_CLOSE, label="Close")
@@ -740,8 +740,8 @@ class MissingDatasheetsDialog:
             return
         self._force_refresh_urls = True
         self._set_status(
-            "Force refreshing HTTPS datasheet URLs (project-wide)…",
-            "Does not bypass catalog for parts without HTTPS URLs.",
+            "Force refreshing all HTTPS datasheet URLs (full catalog bypass)…",
+            "Re-fetches every symbol HTTPS URL; does not affect parts without HTTPS fields.",
         )
         self._row_status.clear()
         self._refresh_rows()

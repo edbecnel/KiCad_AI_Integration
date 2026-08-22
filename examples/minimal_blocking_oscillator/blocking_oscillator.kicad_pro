@@ -1,0 +1,23 @@
+{
+  "board": {},
+  "boards": [],
+  "cvpcb": {},
+  "erc": {},
+  "libraries": {},
+  "meta": {
+    "filename": "blocking_oscillator.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {},
+  "pcbnew": {},
+  "schematic": {
+    "sheets": [
+      {
+        "name": "",
+        "uuid": "00000000-0000-0000-0000-000000000001"
+      }
+    ]
+  },
+  "sheets": [],
+  "text_variables": {}
+}

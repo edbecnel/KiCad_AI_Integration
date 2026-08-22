@@ -440,7 +440,7 @@ Documents per-stage AERF prompts (`src/prompts/templates/aerf_stage.py`) and EKM
 
 ## ADP-011: Assistant Shell User Interface
 
-**Status:** Proposed (v1.0, 2026-07-31), not implemented
+**Status:** Partial (v1.0, 2026-07-31) — Phase 1 scaffold (`assistant_shell.py`, `--ui`); embedded tabs Phase 2
 
 Defines unified tabbed Assistant shell replacing launcher + separate modals. Target for Phase 2 dockable plugin and `--ui` consolidation.
 
@@ -562,7 +562,7 @@ The following architecture topics are documented under `docs/Architecture/`:
 - AI Provider Layer (abstract interface, Claude implementation)
 - Conversation Manager (deferred to Phase 2)
 - KiCad User Interface (wxPython dialog → dockable chat window)
-- AERF Orchestrator (proposed, not implemented)
+- AERF Orchestrator (implemented — `src/reasoning/`, `src/inference/aerf.py`)
 
 ## AI provider integration
 

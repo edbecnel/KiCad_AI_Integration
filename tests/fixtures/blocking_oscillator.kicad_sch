@@ -1,0 +1,194 @@
+(kicad_sch
+  (version 20250114)
+  (generator "eeschema")
+  (generator_version "9.0")
+  (uuid "00000000-0000-0000-0000-000000000001")
+  (paper "A4")
+  (title_block
+    (title "Minimal Blocking Oscillator")
+  )
+  (label "COIL_PLUS"
+    (at 120 80 0)
+    (uuid "00000000-0000-0000-0000-000000000100")
+  )
+  (label "TRIGGER"
+    (at 140 100 0)
+    (uuid "00000000-0000-0000-0000-000000000101")
+  )
+  (label "FEEDBACK"
+    (at 160 120 0)
+    (uuid "00000000-0000-0000-0000-000000000102")
+  )
+  (symbol
+    (lib_id "Device:Q_NPN_BCE")
+    (at 100 100 0)
+    (uuid "00000000-0000-0000-0000-000000000010")
+    (property "Reference" "Q1"
+      (at 100 90 0)
+    )
+    (property "Value" "2N2222"
+      (at 100 110 0)
+    )
+    (property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
+      (at 100 120 0)
+    )
+    (property "Datasheet" ""
+      (at 100 130 0)
+    )
+    (property "Spice_Model" "2N2222"
+    	(at 100 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Spice_Primitive" "Q"
+    	(at 100 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Sim.Device" "NPN"
+    	(at 100 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Sim.Type" "GUMMELPOON"
+    	(at 100 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Sim.Pins" "1=C 2=B 3=E"
+    	(at 100 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (pin "1" (uuid "00000000-0000-0000-0000-000000000011"))
+    (pin "2" (uuid "00000000-0000-0000-0000-000000000012"))
+    (pin "3" (uuid "00000000-0000-0000-0000-000000000013"))
+  )
+  (symbol
+    (lib_id "Device:T_Custom")
+    (at 200 100 0)
+    (uuid "00000000-0000-0000-0000-000000000020")
+    (property "Reference" "T1"
+      (at 200 90 0)
+    )
+    (property "Value" "TrifilarCoil"
+      (at 200 110 0)
+    )
+    (property "Footprint" ""
+      (at 200 120 0)
+    )
+    (property "Datasheet" ""
+      (at 200 130 0)
+    )
+    (pin "1" (uuid "00000000-0000-0000-0000-000000000021"))
+    (pin "2" (uuid "00000000-0000-0000-0000-000000000022"))
+    (pin "3" (uuid "00000000-0000-0000-0000-000000000023"))
+  )
+  (symbol
+    (lib_id "Device:R")
+    (at 300 100 0)
+    (uuid "00000000-0000-0000-0000-000000000030")
+    (property "Reference" "R1"
+      (at 300 90 0)
+    )
+    (property "Value" "1k"
+      (at 300 110 0)
+    )
+    (property "Footprint" "Resistor_SMD:R_0805"
+      (at 300 120 0)
+    )
+    (property "Datasheet" ""
+      (at 300 130 0)
+    )
+    (property "Vds_max" "60V"
+      (at 300 140 0)
+    )
+    (property "Spice_Model" "1k"
+    	(at 300 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Spice_Primitive" "R"
+    	(at 300 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Sim.Device" "R"
+    	(at 300 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Sim.Pins" "1=1 2=2"
+    	(at 300 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (property "Sim.Params" "r=1k"
+    	(at 300 110 0)
+    	(hide yes)
+    	(show_name no)
+    	(do_not_autoplace no)
+    	(effects
+    		(font
+    			(size 1.27 1.27)
+    		)
+    	)
+    )
+    (pin "1" (uuid "00000000-0000-0000-0000-000000000031"))
+    (pin "2" (uuid "00000000-0000-0000-0000-000000000032"))
+  )
+)

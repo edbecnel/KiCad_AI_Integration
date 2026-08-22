@@ -22,6 +22,10 @@ from prompts.templates.netlist_crosscheck import (
     NETLIST_CROSSCHECK_SYSTEM,
     build_netlist_crosscheck_sections,
 )
+from prompts.templates.netlist_gap_fill import (
+    NETLIST_GAP_FILL_SYSTEM,
+    build_netlist_gap_fill_sections,
+)
 from context.context_flags import ContextIncludeFlags
 
 TemplateName = str
@@ -80,6 +84,17 @@ def build_prompt_summary(ctx: ProjectContext, *, include_image: bool = False) ->
             lines.append(f"Schematic image: export failed — {err}")
         else:
             lines.append("Schematic image: requested but not exported")
+    gaps = getattr(ctx, "connectivity_gaps", None)
+    if gaps and isinstance(gaps, dict) and gaps.get("needs_connectivity_inference"):
+        lines.append(
+            f"Connectivity gaps: {gaps.get('gap_count', 0)} "
+            "(unconnected pins or auto-generated nets)"
+        )
+    budget = getattr(ctx, "token_budget", None)
+    if budget and isinstance(budget, dict):
+        lines.append(
+            f"Estimated context tokens: ~{budget.get('estimated_total_tokens', 0)}"
+        )
     return "\n".join(lines)
 
 
@@ -249,6 +264,32 @@ def build_netlist_crosscheck_prompt(
         text=text,
         system=NETLIST_CROSSCHECK_SYSTEM,
         template="netlist_crosscheck",
+        preview_summary=preview,
+        estimated_text_tokens=est,
+    )
+
+
+def build_netlist_gap_fill_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    """Build netlist connectivity gap-fill inference prompt."""
+    sections = build_netlist_gap_fill_sections(
+        ctx,
+        question,
+        functional_description=functional_description,
+        include=include,
+    )
+    text = wrap_xml_sections(sections)
+    preview = build_prompt_summary(ctx, include_image=False)
+    est = estimate_tokens(text)
+    return BuiltPrompt(
+        text=text,
+        system=NETLIST_GAP_FILL_SYSTEM,
+        template="netlist_gap_fill",
         preview_summary=preview,
         estimated_text_tokens=est,
     )

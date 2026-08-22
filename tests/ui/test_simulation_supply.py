@@ -26,7 +26,8 @@ def test_get_simulation_panel_context(tmp_path: Path) -> None:
     pro.write_text("{}", encoding="utf-8")
     sch = tmp_path / "testproj.kicad_sch"
     sch.write_text((FIXTURES / "testproj.kicad_sch").read_text(encoding="utf-8"), encoding="utf-8")
-    panel = get_simulation_panel_context(pro, verbose=False)
+    cfg = AppConfig(artifact_library_path=tmp_path / "library")
+    panel = get_simulation_panel_context(pro, config=cfg, verbose=False)
     assert panel.ctx.project_name == "testproj"
     assert any(r.part == "F0D3180" for r in panel.rows_all)
 

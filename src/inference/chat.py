@@ -14,6 +14,7 @@ from prompts import (
     build_general_review_prompt,
     build_isolation_clearance_prompt,
     build_netlist_crosscheck_prompt,
+    build_netlist_gap_fill_prompt,
     build_pcb_layout_prompt,
 )
 from providers import get_provider
@@ -41,7 +42,8 @@ def collect_chat_context(
         project_path,
         config=config,
         include_image=include_image,
-        retry_failed_urls=retry_failed_urls or force_refresh_urls,
+        retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
         verbose=verbose,
     )
 
@@ -61,6 +63,7 @@ def build_chat_prompt(
         "pcb_layout_audit": build_pcb_layout_prompt,
         "isolation_clearance_audit": build_isolation_clearance_prompt,
         "netlist_crosscheck": build_netlist_crosscheck_prompt,
+        "netlist_gap_fill": build_netlist_gap_fill_prompt,
     }
     builder = builders.get(template, build_general_review_prompt)
     if template == "general_review":

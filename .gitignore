@@ -51,3 +51,6 @@ htmlcov/
 kicad_ai/exports/
 tests/fixtures/kicad_ai/
 reports/handover/*
+reports/conformance/*.json
+*.env.local
+.kicad_ai_config.json

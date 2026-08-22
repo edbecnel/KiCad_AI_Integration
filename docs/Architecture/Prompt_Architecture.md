@@ -120,7 +120,7 @@ Per-stage prompt templates for the eight AERF reasoning stages (0–7). Each sta
 - `<engineering_knowledge>` — relevant EKM sections when present
 - `<aerf_methodology>` — knowledge classification and evidence-chain guidance from [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md)
 
-Dry-run assembly: `build_aerf_stage_prompt()` / `build_aerf_stage_prompt_bundle()` in EIE — no auto cloud send. Full multi-stage orchestration with approval gating is deferred.
+Dry-run assembly: `build_aerf_stage_prompt()` in `src/prompts/builder.py`. Full multi-stage orchestration with approval gating is **implemented** via `run_aerf_pipeline()` (`src/inference/aerf.py`), `--ui-aerf`, and EKM write-back ([ADP-007](ADP-007-AERF-Prompt-Integration.md)).
 
 Stage templates follow the same XML-section conventions as other prompts. The SUBCKT two-stage pipeline (`facts` → `synthesis`) is a precedent for staged orchestration but is not itself an AERF stage.
 
@@ -128,14 +128,13 @@ See [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md), [Engineeri
 
 ## Token Budgeting
 
-_To be detailed during Phase 1 implementation._
+Implemented in `src/context/token_budget.py` and `src/prompts/compact.py`:
 
-Planned strategies:
+- `estimate_context_tokens()` on collected `ProjectContext`
+- Compact symbol table when >50 symbols (`compact_snapshot_for_prompt`)
+- Token estimate shown in chat context preview via `BuiltPrompt.estimated_text_tokens`
 
-- Summarize large nets and omit S-expression noise
-- Chunk oversized payloads
-- Partial context flags — PCB-only, schematic-only, critical-nets-only
-- Configurable system-role persona per template
+Planned extensions: net/S-expression chunking, configurable persona per template.
 
 See [Cost Optimization](../AI/Cost_Optimization.md).
 

@@ -1,10 +1,16 @@
-# Bedini / Babcock Reference Example (placeholder)
+# Bedini / Babcock Reference Example
 
 Validation scenario for flyback recovery and patent-driver PCB analysis — not the full project scope.
 
-A bundled sample project is not yet included in this directory. Use your own KiCad project or the repository fixture `tests/fixtures/testproj.kicad_pro` for smoke testing.
+## Bundled smoke-test project
 
-**Full testing guide:** [Testing With Your KiCad Project](../../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
+For CI and local smoke tests without a full Bedini SSG schematic, use:
+
+**[minimal_blocking_oscillator](../minimal_blocking_oscillator/README.md)** — small blocking-oscillator KiCad project with transistor, coil, and labeled nets.
+
+## Full Bedini validation
+
+Live AERF stages 0–7 sign-off uses captured fixtures in `tests/fixtures/bedini_aerf_live/` and the [AERF Validation Rubric](../../docs/User_Guides/AERF_Validation_Rubric.md). Run against your own Bedini project when available.
 
 ## Sample questions
 
@@ -14,16 +20,16 @@ A bundled sample project is not yet included in this directory. Use your own KiC
 
 ## Run
 
-With your own project:
+With the minimal example:
 
 ```bash
-python scripts/run_ai_assistant.py "/path/to/your/project.kicad_pro" --ui-chat
+python scripts/run_ai_assistant.py examples/minimal_blocking_oscillator/blocking_oscillator.kicad_pro --ui-chat
 ```
 
-With the built-in fixture (no API key needed for context-only):
+With the built-in test fixture:
 
 ```bash
 python scripts/run_ai_assistant.py tests/fixtures/testproj.kicad_pro
 ```
 
-See [E2E Chat UI validation](../../docs/Developer_Handbook/06_E2E_Chat_UI.md) and [E2E Full Flow](../../docs/Developer_Handbook/07_E2E_Full_Flow.md).
+See [Testing With Your KiCad Project](../../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [E2E Chat UI validation](../../docs/Developer_Handbook/06_E2E_Chat_UI.md), and [E2E Full Flow](../../docs/Developer_Handbook/07_E2E_Full_Flow.md).

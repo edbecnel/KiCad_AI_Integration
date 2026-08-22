@@ -97,7 +97,7 @@ These frameworks are components of **AERP** — the host-agnostic stack. See [AE
 | **ADP-008** | AI Engineering Reasoning Framework |
 | **ADP-009** | Host Integration Layer |
 | **ADP-010** | Engineering Inference Engine |
-| **ADP-011** | Assistant Shell User Interface (proposed — not implemented) |
+| **ADP-011** | Assistant Shell User Interface (partial — Phase 1 scaffold; embedded tabs Phase 2) |
 
 ### Planned ADPs (referenced, no standalone doc yet)
 

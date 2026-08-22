@@ -21,6 +21,7 @@ def build_bom_summary(symbols: list[SymbolInstance]) -> list[dict[str, Any]]:
                 "lib_id": sym.lib_id,
                 "datasheet": sym.datasheet,
                 "sheet": sym.sheet_name,
+                "custom_fields": dict(sym.custom_fields) if sym.custom_fields else {},
             }
         )
     return sorted(rows, key=lambda r: r["reference"])

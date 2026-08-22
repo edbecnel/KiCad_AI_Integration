@@ -33,6 +33,9 @@ class ProjectContext:
     bom_summary: list[dict[str, Any]] | None = None
     erc_drc_summary: dict[str, Any] | None = None
     connectivity_graph: dict[str, Any] | None = None
+    project_metadata: dict[str, Any] | None = None
+    connectivity_gaps: dict[str, Any] | None = None
+    token_budget: dict[str, Any] | None = None
     schematic_image_error: str | None = None
     ai_discovery_results: dict[str, Any] = field(default_factory=dict)
 
@@ -74,6 +77,9 @@ class ProjectContext:
             "bom_summary": self.bom_summary,
             "erc_drc_summary": self.erc_drc_summary,
             "connectivity_graph": self.connectivity_graph,
+            "project_metadata": self.project_metadata,
+            "connectivity_gaps": self.connectivity_gaps,
+            "token_budget": self.token_budget,
             "schematic_image_meta": (
                 self.schematic_image_meta.to_dict()
                 if self.schematic_image_meta

@@ -70,6 +70,7 @@ class ChatDialog:
                 "PCB layout audit",
                 "Isolation / clearance",
                 "Netlist crosscheck",
+                "Netlist gap-fill",
             ],
         )
         self._template_choice.SetSelection(0)
@@ -156,6 +157,7 @@ class ChatDialog:
             "pcb_layout_audit",
             "isolation_clearance_audit",
             "netlist_crosscheck",
+            "netlist_gap_fill",
         ]
         idx = self._template_choice.GetSelection()
         if idx < 0 or idx >= len(labels):
@@ -199,8 +201,29 @@ class ChatDialog:
         except OSError as exc:
             self._status.SetLabel(f"Context error: {exc}")
             return
+        if self._ctx is not None and self._chk_image.GetValue():
+            err = self._ctx.schematic_image_error
+            if err:
+                self._status.SetLabel(f"Schematic image unavailable: {err}")
+            elif self._unsaved_schematic_warning():
+                self._status.SetLabel(
+                    "Context ready — schematic file newer than project; save in KiCad before image export."
+                )
+                self._update_preview()
+                return
         self._update_preview()
+        if self._ctx is not None and self._ctx.schematic_image_error and self._chk_image.GetValue():
+            return
         self._status.SetLabel("Context ready — review preview, then Approve & Send.")
+
+    def _unsaved_schematic_warning(self) -> bool:
+        if self._ctx is None:
+            return False
+        pro = self._project_path
+        sch = pro.with_suffix(".kicad_sch")
+        if not sch.is_file() or not pro.is_file():
+            return False
+        return sch.stat().st_mtime > pro.stat().st_mtime
 
     def _update_preview(self) -> None:
         if self._ctx is None:

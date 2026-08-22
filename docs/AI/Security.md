@@ -62,6 +62,25 @@ KiCad AI Integration enforces these additional rules:
 
 See [Development Environment](../Developer_Handbook/01_Development_Environment.md) for credential setup.
 
+## Credential storage
+
+- **API keys:** `ANTHROPIC_API_KEY` environment variable, or optional local config (`kicad_ai_config.json` in user home — not committed)
+- **Never** commit `.env`, API keys, or project-specific secrets to the repository
+- The wxPython chat UI masks the API key field; loaded from env/config at dialog open
+
+## What leaves the machine
+
+| Action | Data transmitted | Approval gate |
+|--------|------------------|---------------|
+| **Chat** (`--ui-chat`) | Selected context (schematic summary, BOM, PCB, ERC/DRC, netlist, optional schematic image) + user question | Approve & Send in UI |
+| **AERF stage** (`--ui-aerf`) | One stage prompt: project snapshot, KB excerpt, prior stage JSON, EKM excerpts | Per-stage Approve & Send |
+| **Datasheet HTTPS fetch** | URL only (server response is PDF stored locally) | Automatic on resolve; user controls symbol fields |
+| **AI datasheet discovery** | Part value + provider web search query | Opt-in; URL approval before download unless auto-fetch enabled |
+| **SUBCKT generation** | Symbol context + datasheet text (Tier A) | User initiates from Simulation panel |
+| **`--ask` CLI** | Same as chat without UI preview | **Dev bypass — no approval** |
+
+Datasheet PDFs and generated SPICE libraries remain in `~/kicad_ai_library/` and project `kicad_ai/` unless explicitly included in a prompt (e.g. Tier A PDF text extraction).
+
 ## Security Review
 
 AI-generated changes require extra care when they affect:

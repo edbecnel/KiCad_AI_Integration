@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 stretch slice + platform Tracks B–D complete. **Working:** Assistant shell scaffold (`--ui`), schematic context + datasheet library, chat UI with Approve & Send and context toggles (`--ui-chat`), simulation/SUBCKT panel (`--ui-simulation`), built-in sim model auto-apply, AERF staged analysis (`--ui-aerf`), Engineering Notebook (`--ui-notebook`), EKM runtime + AERF write-back, PCB/BOM/ERC/DRC context extractors, netlist connectivity graph, audit templates (`isolation_clearance`, `netlist_crosscheck`), `pcb_layout_audit` prompt template. **Still open:** native KiCad plugin, embedded Assistant tabs (ADP-011 Phase 2).
+**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell scaffold, schematic context with pin connectivity and gap detection, chat UI with audit templates, simulation/SUBCKT panel, AERF staged analysis, Engineering Notebook, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase 1.5 live KiCad API extractors; Phase 2 native plugin and embedded Assistant tabs.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -64,7 +64,7 @@ baseline before feature work begins.
 - [ ] Require explicit user approval before any cloud API transmission — done for `--ui-chat`; `--ask` is dev bypass
 - [x] Provide a context preview so users can see what will be sent — chat dialog
 - [x] Support selective context inclusion (user toggles per data type) — schematic, PCB, BOM, ERC/DRC, netlist in chat UI (`context_flags.py`, `chat_dialog.py`); firmware toggle TBD
-- [ ] Document data-handling and credential-storage practices
+- [x] Document data-handling and credential-storage practices — [Security](../docs/AI/Security.md) §Credential storage, §What leaves the machine
 
 **Phase 0 exit criteria:** Repo scaffold exists, config schema defined, dev/test
 instructions documented, security rules established.
@@ -87,7 +87,7 @@ S-expression file parsing.
 #### Schematic (`.kicad_sch`)
 
 - [x] Extract component references, values, and footprints — `src/context/schematic_parse.py`
-- [ ] Extract pin connections and net labels — schematic labels via `schematic_connectivity.py` (pins TBD)
+- [x] Extract pin connections and net labels — schematic labels + pin lists via `schematic_connectivity.py`; netlist graph when exported
 - [x] Extract schematic hierarchy (sheets, subsheets) — one-level subsheet walk
 - [x] Extract custom component fields (e.g. `Datasheet`, `Vds_max`)
 
@@ -97,13 +97,13 @@ S-expression file parsing.
 - [x] Extract tracks per net (width, length, layer) — file-based via `pcb_extract.py` (not live `pcbnew` API)
 - [x] Extract vias and zones — `pcb_extract.py`
 - [x] Extract net classes (clearance, track width rules) — `pcb_extract.py`
-- [ ] Extract board design settings and constraints (live `pcbnew` API)
+- [ ] Extract board design settings and constraints (live `pcbnew` API) — Phase 1.5
 - [x] Compute board statistics (layer usage, trace totals, etc.) — `pcb_summary` / `pcb_extract`
 
 #### Project metadata
 
-- [ ] Read project file for name, paths, and project-level settings
-- [ ] Detect active schematic and PCB file paths from open editor context
+- [x] Read project file for name, paths, and project-level settings — `src/context/project_metadata.py`
+- [ ] Detect active schematic and PCB file paths from open editor context (Phase 1.5 — live KiCad API)
 
 #### Netlist
 
@@ -113,13 +113,13 @@ S-expression file parsing.
 #### BOM
 
 - [x] Extract bill of materials with component attributes — `src/context/bom_summary.py` (value/footprint roll-up from symbols)
-- [ ] Include custom fields relevant to AI review (datasheet URLs, ratings) beyond symbol fields
+- [x] Include custom fields relevant to AI review (datasheet URLs, ratings) beyond symbol fields — `bom_summary` `custom_fields`
 
 #### ERC / DRC
 
 - [x] Gather ERC violation results (read existing report files when present) — `src/context/erc_drc_summary.py`
 - [x] Gather DRC violation results (read existing report files when present) — `src/context/erc_drc_summary.py`
-- [ ] Run ERC/DRC via KiCad API and ingest live results
+- [ ] Run ERC/DRC via KiCad API and ingest live results (Phase 1.5)
 
 #### Optional schematic image (Phase 1 stretch)
 
@@ -129,14 +129,14 @@ S-expression file parsing.
 - [x] Export via `kicad-cli sch export pdf --black-and-white --exclude-drawing-sheet`
 - [x] Rasterize with `pdftoppm -png -r 600 -singlefile`
 - [x] Detect KiCad 9+ native `sch export png --dpi` and prefer when available
-- [ ] Check `pdftoppm` availability; surface clear UI error if Poppler is missing
-- [ ] Prompt user to save project before export when schematic has unsaved edits
+- [x] Check `pdftoppm` availability; surface clear UI error if Poppler is missing — `schematic_image_error` in chat context
+- [x] Prompt user to save project before export when schematic has unsaved edits — chat dialog mtime warning
 - [x] Extend `ProjectContext` with optional `schematic_image` and `schematic_image_meta`
 
 #### Netlist gap-fill detection (Phase 1 stretch)
 
-- [ ] Detect symbols with incomplete netlist connectivity — see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md)
-- [ ] Flag auto-generated net names (`Net-(…)`) and unconnected pins in context model
+- [x] Detect symbols with incomplete netlist connectivity — `src/context/netlist_gap_fill.py`
+- [x] Flag auto-generated net names (`Net-(…)`) and unconnected pins in context model
 - [x] Detect symbols missing `Spice_Model` or unresolved `.include`/`.lib` references in exported SPICE netlist — `src/context/simulation_gaps.py`
 - [x] **Shared artifact library:** create `artifact_library_path` with `catalog.json`, `datasheets/`, `libs/`; dedupe by `sha256`
 - [x] **Per-project registry:** `kicad_ai/project_manifest.json` beside `.kicad_pro`; link to catalog entries
@@ -148,7 +148,7 @@ S-expression file parsing.
 - [x] **Datasheet resolver:** persistent `url_fetch_log.json` per part+URL (`downloaded` / `failed`); skip repeat fetches; set `needs_ai_datasheet_discovery` on failure
 - [x] **AI datasheet discovery mode:** opt-in web search for official PDF URLs, auto-download, `ai_discovery_log.json`; on failure show URL + manual attach / `{Value}.pdf` instructions — see [AI Datasheet Discovery](../docs/Specifications/AI_Datasheet_Discovery.md)
 - [x] **Per-part datasheet reset:** unlink manifest/catalog, clear `url_fetch_log`, quarantine `{Value}.pdf`, `force_refresh_parts` resolver bypass; **Datasheets** panel (Missing | All required) + `--reset-datasheet` CLI
-- [ ] **Project-wide force refresh datasheets (UI):** re-fetch all symbol HTTPS URLs with full catalog/`url_fetch_log` bypass — **Force refresh URLs** today only retries failed URL fetches
+- [x] **Project-wide force refresh datasheets (UI):** re-fetch all symbol HTTPS URLs with full catalog/`url_fetch_log` bypass — **Force refresh all URLs** button
 - [x] **Catalog scan:** pick up new files in shared `datasheets/` — `ArtifactStore.scan_datasheets_folder()`
 - [x] **CLI user notice:** print **Manual datasheets required** when auto-fetch fails for datasheet-required parts (`context/datasheet_requirements.py`)
 - [x] SUBCKT routing: Tier A/B/C tier hints via `DatasheetResolution.tier_hint`; prompts in `src/prompts/templates/subckt.py`
@@ -158,8 +158,8 @@ S-expression file parsing.
 
 #### Optional (Phase 1 stretch)
 
-- [ ] Extract currently selected schematic/PCB objects as focused context
-- [ ] Accept optional external firmware file path (e.g. Pico `main.py`) for cross-review
+- [ ] Extract currently selected schematic/PCB objects as focused context (Phase 1.5)
+- [ ] Accept optional external firmware file path (e.g. Pico `main.py`) for cross-review (Phase 1.5)
 
 ### 1.2 Project Context Model
 
@@ -170,11 +170,11 @@ S-expression file parsing.
 - [x] Include SPICE netlist summary — `netlist_summary`
 - [x] Include BOM roll-up — `bom_summary`
 - [x] Include ERC/DRC report summaries when files exist — `erc_drc_summary`
-- [ ] Include: full nets, footprints, board_stats, constraints (live pcbnew)
-- [ ] Support optional `user_description` (design intent text) and `selection` context
+- [ ] Include: full nets, footprints, board_stats, constraints (live pcbnew) — Phase 1.5
+- [ ] Support optional `user_description` (design intent text) and `selection` context — intent in chat UI; selection Phase 1.5
 - [x] Serialize to JSON for prompt assembly and debugging
 - [x] Support partial context flags (schematic, PCB, BOM, ERC/DRC, netlist) — `ContextIncludeFlags`; firmware TBD
-- [ ] Design for token budgeting (summarization hooks, size estimation)
+- [x] Design for token budgeting (summarization hooks, size estimation) — `src/context/token_budget.py`, `src/prompts/compact.py`
 - [x] Include optional `schematic_image` and `schematic_image_meta` fields when multimodal context is enabled
 
 ### 1.3 Prompt Builder
@@ -184,7 +184,7 @@ S-expression file parsing.
 - [x] PCB layout / trace audit template — `src/prompts/templates/pcb_layout.py`, `build_pcb_layout_prompt`
 - [x] Isolation and clearance audit template — `src/prompts/templates/isolation_clearance.py`
 - [x] Netlist-vs-visual cross-reference template — `src/prompts/templates/netlist_crosscheck.py`
-- [ ] Netlist gap-fill template — connectivity inference and SUBCKT `.lib` generation — [Netlist Gap Fill spec](../docs/Specifications/Netlist_Gap_Fill.md) (SUBCKT templates exist; connectivity-inference template TBD)
+- [x] Netlist gap-fill template — connectivity inference — `src/prompts/templates/netlist_gap_fill.py`
 - [x] SUBCKT Tier A two-stage prompts (PDF fact extraction, then model synthesis matched to KiCad pin order) — `src/prompts/templates/subckt.py`, `src/context/subckt_generation.py`
 - [x] SUBCKT Tier B multi-source context prompt (symbol pins, fields, footprint, schematic context — no part-number-only)
 - [x] SUBCKT Tier C last-resort prompt with mandatory `needs-manual-review` labeling
@@ -256,7 +256,7 @@ Full-flow checklists: [Testing With Your KiCad Project](../docs/User_Guides/Test
 
 #### Reference example
 
-- [ ] Add `examples/bedini_babcock/` sample project (or equivalent test project)
+- [x] Add `examples/minimal_blocking_oscillator/` sample project + updated `examples/bedini_babcock/README.md`
 - [ ] Include pre-built prompt template for flyback recovery audit
 - [ ] Document expected inputs and sample questions for manual validation — see [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
 
@@ -273,6 +273,18 @@ Full-flow checklists: [Testing With Your KiCad Project](../docs/User_Guides/Test
 **Phase 1 exit criteria:** Engineer opens KiCad, runs one script, asks a design question,
 reviews the context preview, approves transmission, and receives a context-aware Claude
 response without manual export/copy-paste.
+
+---
+
+## Phase 1.5 — Live KiCad API (deferred)
+
+**Goal:** Extractors and validators that require in-process KiCad (`pcbnew`, live ERC/DRC). Not CI-gated; best-effort when KiCad is available with file-based fallback.
+
+- [ ] Live `pcbnew` board settings and design constraints
+- [ ] Run ERC/DRC via KiCad API and ingest live results
+- [ ] Detect active schematic and PCB from open editor context
+- [ ] Selected-object focus context for chat
+- [ ] Optional external firmware file path for cross-review
 
 ---
 
@@ -374,7 +386,7 @@ not only free-form chat.
 ### Documentation
 
 - [x] User install and setup guide (API key, KiCad version, first run) — partial: [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [00_First_Time_Setup](../docs/Developer_Handbook/00_First_Time_Setup.md)
-- [x] Developer guide (repo layout, running tests, adding extractors/providers) — partial: [Developer Handbook](../docs/Developer_Handbook/README.md); contribution workflow TBD
+- [x] Developer guide (repo layout, running tests, adding extractors/providers) — [Developer Handbook](../docs/Developer_Handbook/README.md); [CONTRIBUTING.md](../CONTRIBUTING.md)
 - [x] Architecture docs: Prompt Architecture, AI Provider Interface, Roadmap
 - [x] Feature Overview: KiCad host capabilities, platform scope, how-it-works, and gap summary — [Feature Overview](../docs/User_Guides/Feature_Overview.md) (authoritative scope reference)
 - [x] [Custom Trifilar Coil Simulation Setup](../docs/User_Guides/Custom_Trifilar_Coil_Simulation_Setup.md) user guide
@@ -385,22 +397,22 @@ not only free-form chat.
 
 ### Security
 
-- [ ] Audit credential storage approach
+- [ ] Audit credential storage approach — partial: documented in Security.md
 - [ ] Context redaction options (exclude paths, obfuscate project name)
 - [ ] Local-model path for air-gapped / privacy-sensitive workflows (Ollama, etc.)
-- [ ] Document what data leaves the machine on each request
+- [x] Document what data leaves the machine on each request — [Security](../docs/AI/Security.md) §What leaves the machine
 
 ### Testing & CI
 
 - [x] pytest suite runnable without KiCad installed
-- [ ] Mock `pcbnew` for unit tests
+- [x] Mock `pcbnew` for unit tests — `tests/conftest.py` stub
+- [x] CI pipeline: lint + unit tests — `.github/workflows/ci.yml` (pytest)
 - [x] Golden-file prompt snapshots to catch regressions — `tests/prompts/golden/`, `tests/context/golden/`
-- [ ] CI pipeline: lint + unit tests (optional KiCad-in-Docker for integration)
 
 ### Project housekeeping
 
-- [ ] Resolve license (currently TBD in README)
-- [ ] Contribution guidelines (coding standards, PR workflow, test requirements)
+- [x] Resolve license — MIT ([LICENSE](../LICENSE))
+- [x] Contribution guidelines — [CONTRIBUTING.md](../CONTRIBUTING.md)
 - [ ] `.gitignore` coverage for config files with secrets, generated artifacts
 
 ---

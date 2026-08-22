@@ -18,7 +18,8 @@ def test_normalize_launcher_project_path_accepts_kicad_pro() -> None:
 
 def test_normalize_launcher_project_path_accepts_directory() -> None:
     pro = normalize_launcher_project_path(str(FIXTURES))
-    assert pro.name == "testproj.kicad_pro"
+    assert pro.suffix == ".kicad_pro"
+    assert pro.parent == FIXTURES.resolve()
 
 
 def test_normalize_launcher_project_path_rejects_empty() -> None:

@@ -19,7 +19,7 @@ This repository implements an **AI-assisted Electrical Engineering Reasoning Pla
 | **KiCad user today** | Schematic-aware AI chat, datasheet management, early simulation/SUBCKT tooling — run from a script alongside KiCad |
 | **Platform (longer term)** | Host-independent reasoning (EKM, AERF, EIE, prompts, providers) usable from other EDA tools, CLI, web, or lab software |
 
-**Status:** Early working prototype on the KiCad host. Core flows are demonstrated; full Phase 1 vision and most platform frameworks are not complete.
+**Status:** Early working prototype on the KiCad host. Platform frameworks (EKM, AERF, EIE) are implemented; KiCad host Phase 1 file-based close-out is complete. Phase 2 productization (native plugin, embedded tabs) is next.
 
 ### Separation principle
 
@@ -87,18 +87,17 @@ The unified **Assistant shell** (`--ui`) provides a shared project header and ta
 | Chat audit templates | General review, PCB layout, isolation/clearance, netlist crosscheck (template selector in `--ui-chat`) |
 | Netlist export | Via `kicad-cli` when available |
 | **Simulation / SUBCKT panel** (`--ui-simulation`) | Gap scan, AI SUBCKT generation, spice field write-back to schematic — functional but not production-complete |
-| **Netlist gap-fill / SUBCKT** | UI and generation exist; Tier A/B/C prompt pipeline and PDF fact extraction not finished — see [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md) |
+| Netlist gap-fill / SUBCKT | Gap detection + connectivity-inference template in chat; SUBCKT Tier A/B/C pipeline implemented — see [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md) |
 | Developer `--ask` shortcut | Works but bypasses approval UI — internal testing only |
 
 ### Not built yet (KiCad host — Phase 1 still open)
 
 #### Richer project context
-- Live ERC/DRC from KiCad API (today: scan saved report files only)
+- Live ERC/DRC from KiCad API (today: scan saved report files only) — **Phase 1.5**
+- Pin-level connectivity from schematic geometry (today: pin lists + netlist graph when exported)
 
 #### More AI capabilities (KiCad host)
-- Netlist gap-fill connectivity-inference template (SUBCKT Tier A/B/C exist)
-- Complete SUBCKT Tier A/B/C prompt pipeline (datasheet-backed fact extraction before synthesis)
-- Project-wide **force refresh datasheets** UI (retry-all with full catalog bypass)
+- Project-wide **force refresh datasheets** — **Force refresh all URLs** button re-fetches HTTPS symbol URLs with catalog bypass
 
 #### Product polish (KiCad host)
 - **Embedded tab UIs** and KiCad dockable Assistant shell (Phase 2) — [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md)

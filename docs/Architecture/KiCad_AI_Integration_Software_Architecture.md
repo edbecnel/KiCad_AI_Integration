@@ -96,7 +96,7 @@ Capabilities
 - Generate KiCad scripts
 - Generate SPICE simulations
 - Suggest alternative circuits
-- Staged circuit analysis via [AERF](ADP-008-AI-Engineering-Reasoning-Framework.md) (proposed; not implemented)
+- Staged circuit analysis via [AERF](ADP-008-AI-Engineering-Reasoning-Framework.md) — **implemented** (`--ui-aerf`, stages 0–7)
 
 ---
 
@@ -148,20 +148,20 @@ Should contain
 
 ---
 
-## 2a. AERF Orchestrator (proposed, not implemented)
+## 2a. AERF Orchestrator (implemented)
 
 Staged engineering reasoning pipeline between context collection and prompt conclusions. See [ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md).
 
-Responsibilities (planned)
+Responsibilities
 
-- Circuit family recognition
+- Circuit family recognition — `src/reasoning/classifier.py`
 - Load Circuit Family KB excerpts from `docs/Engineering_Knowledge/`
-- Execute AERF stages 0–7 sequentially with accumulated context
-- Emit structured JSON per stage
+- Execute AERF stages 0–7 sequentially with accumulated context — `src/inference/aerf.py`
+- Emit structured JSON per stage with approval gating (`--ui-aerf`, `--approve-send`)
 - Route simulation hooks to simulation subsystem ([ADP-006](ADP-006-Simulation-Abstraction.md); closed loop deferred)
-- Distill approved conclusions to EKM ([ADP-007](ADP-007-AERF-Prompt-Integration.md); implemented)
+- Distill approved conclusions to EKM — `src/ekm/aerf_writeback.py` ([ADP-007](ADP-007-AERF-Prompt-Integration.md))
 
-Target location: `src/reasoning/` (stub created; full implementation deferred)
+Location: `src/reasoning/`, `src/inference/aerf.py`, `src/prompts/templates/aerf_stage.py`
 
 ---
 

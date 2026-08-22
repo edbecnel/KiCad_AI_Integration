@@ -1,4 +1,4 @@
-"""Bedini / AERF exit criteria integration tests."""
+"""Blocking oscillator / AERF exit criteria integration tests (repo fixtures)."""
 
 from __future__ import annotations
 
@@ -9,15 +9,14 @@ import pytest
 
 from context.collector import collect_stretch_context
 from context.context_flags import ContextIncludeFlags
-from context.model import ProjectContext
 from inference.aerf import build_ekm_writeback_plan, run_aerf_pipeline
 from inference.chat import build_chat_prompt
 from providers.types import ProviderResponse, TokenUsage
 from reasoning.stage_schemas import STAGE_DETERMINATION_KEYS
+from utils.config import AppConfig
 
-BEDINI_PRO = Path(
-    "/Users/edbecnel/Development/Local/Bedini_Self_Oscillator/Bedini_SSG_Radiant_Oscillator.kicad_pro"
-)
+FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
+OSCILLATOR_PRO = FIXTURES / "blocking_oscillator.kicad_pro"
 
 _STAGE_FROM_SYSTEM = re.compile(r"Stage (\d+) —")
 
@@ -80,26 +79,28 @@ class _BediniMockProvider:
         return ProviderResponse(text=body, model="mock", usage=TokenUsage(1, 1))
 
 
-@pytest.mark.skipif(not BEDINI_PRO.is_file(), reason="Local Bedini project not present")
-def test_bedini_collect_context() -> None:
-    ctx = collect_stretch_context(BEDINI_PRO, verbose=False)
-    assert ctx.project_name
+@pytest.fixture
+def oscillator_config(tmp_path: Path) -> AppConfig:
+    return AppConfig(artifact_library_path=tmp_path / "library")
+
+
+def test_bedini_collect_context(oscillator_config: AppConfig) -> None:
+    ctx = collect_stretch_context(OSCILLATOR_PRO, config=oscillator_config, verbose=False)
+    assert ctx.project_name == "blocking_oscillator"
     assert len(ctx.symbols) > 0
     assert ctx.bom_summary is not None
     assert len(ctx.bom_summary) > 0
 
 
-@pytest.mark.skipif(not BEDINI_PRO.is_file(), reason="Local Bedini project not present")
-def test_bedini_aerf_pipeline_dry_run() -> None:
-    ctx = collect_stretch_context(BEDINI_PRO, verbose=False)
+def test_bedini_aerf_pipeline_dry_run(oscillator_config: AppConfig) -> None:
+    ctx = collect_stretch_context(OSCILLATOR_PRO, config=oscillator_config, verbose=False)
     result = run_aerf_pipeline(ctx, approve_send=False)
     assert result.family_id == "blocking_oscillator"
     assert len(result.stage_runs) == 8
 
 
-@pytest.mark.skipif(not BEDINI_PRO.is_file(), reason="Local Bedini project not present")
-def test_bedini_aerf_exit_mock_pipeline_and_writeback() -> None:
-    ctx = collect_stretch_context(BEDINI_PRO, verbose=False)
+def test_bedini_aerf_exit_mock_pipeline_and_writeback(oscillator_config: AppConfig) -> None:
+    ctx = collect_stretch_context(OSCILLATOR_PRO, config=oscillator_config, verbose=False)
     provider = _BediniMockProvider()
     result = run_aerf_pipeline(
         ctx,
@@ -113,10 +114,9 @@ def test_bedini_aerf_exit_mock_pipeline_and_writeback() -> None:
     assert "circuit_overview" in plan.section_ids
 
 
-@pytest.mark.skipif(not BEDINI_PRO.is_file(), reason="Local Bedini project not present")
-def test_bedini_chat_smoke_build_prompt() -> None:
-    """Chat smoke: build general_review prompt from Bedini context (no provider call)."""
-    ctx = collect_stretch_context(BEDINI_PRO, verbose=False)
+def test_bedini_chat_smoke_build_prompt(oscillator_config: AppConfig) -> None:
+    """Chat smoke: build general_review prompt from fixture context (no provider call)."""
+    ctx = collect_stretch_context(OSCILLATOR_PRO, config=oscillator_config, verbose=False)
     built = build_chat_prompt(
         ctx,
         "Summarize the blocking oscillator topology and key components.",
@@ -124,4 +124,4 @@ def test_bedini_chat_smoke_build_prompt() -> None:
     )
     assert built.template == "general_review"
     assert len(built.text) > 200
-    assert "Bedini" in built.text or "blocking" in built.text.lower()
+    assert "blocking" in built.text.lower() or "oscillator" in built.text.lower()

@@ -15,7 +15,12 @@ from context.schematic_image import (
     SchematicExportError,
     export_schematic_image,
 )
-from context.schematic_connectivity import connectivity_summary, parse_project_labels
+from context.schematic_connectivity import (
+    build_pin_connectivity,
+    connectivity_summary,
+    parse_project_labels,
+    parse_project_pins,
+)
 from context.schematic_parse import (
     discover_schematic_paths,
     parse_project_schematics,
@@ -77,6 +82,10 @@ def collect_stretch_context(
     store.scan_datasheets_folder()
     resolver = DatasheetResolver(cfg, store, verbose=verbose)
     refresh_parts = {p.strip() for p in (force_refresh_parts or set())}
+    if force_refresh_urls:
+        for sym in symbols:
+            if sym.datasheet.startswith("https://"):
+                refresh_parts.add(sym.value or sym.reference)
     resolutions = resolver.resolve_all(
         symbols,
         project_info,
@@ -142,21 +151,45 @@ def collect_stretch_context(
     )
 
     labels = parse_project_labels(project_root, schematic_paths)
-    if labels:
-        ctx.schematic_connectivity = connectivity_summary(labels)
+    schematic_pins = parse_project_pins(project_root, schematic_paths)
+    pin_connectivity = build_pin_connectivity(symbols, schematic_pins, None)
+    if labels or schematic_pins:
+        ctx.schematic_connectivity = connectivity_summary(
+            labels,
+            pin_connectivity=pin_connectivity,
+        )
 
     from context.pcb_summary import collect_pcb_summary
     from context.netlist_export import collect_netlist_summary
     from context.bom_summary import build_bom_summary
     from context.erc_drc_summary import collect_erc_drc_summary
+    from context.project_metadata import read_project_metadata
+    from context.netlist_gap_fill import detect_connectivity_gaps
+    from context.token_budget import estimate_context_tokens
 
+    ctx.project_metadata = read_project_metadata(pro_path)
     ctx.pcb_summary = collect_pcb_summary(pro_path)
     ctx.netlist_summary = collect_netlist_summary(pro_path, config=cfg)
     from context.netlist_graph import build_connectivity_graph_from_summary
 
     ctx.connectivity_graph = build_connectivity_graph_from_summary(ctx.netlist_summary)
+    if ctx.connectivity_graph and schematic_pins:
+        pin_connectivity = build_pin_connectivity(
+            symbols, schematic_pins, ctx.connectivity_graph
+        )
+        if labels or schematic_pins:
+            ctx.schematic_connectivity = connectivity_summary(
+                labels,
+                pin_connectivity=pin_connectivity,
+            )
     ctx.bom_summary = build_bom_summary(symbols)
     ctx.erc_drc_summary = collect_erc_drc_summary(pro_path)
+    ctx.connectivity_gaps = detect_connectivity_gaps(
+        symbols,
+        pin_connectivity=pin_connectivity,
+        connectivity_graph=ctx.connectivity_graph,
+    )
+    ctx.token_budget = estimate_context_tokens(ctx)
 
     if include_image and schematic_paths:
         exports_dir = project_root / "kicad_ai" / "exports"

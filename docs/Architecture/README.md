@@ -20,7 +20,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [ADP-009: Host Integration Layer](ADP-009-Host-Integration-Layer.md)
 - [ADP-010: Engineering Inference Engine](ADP-010-Engineering-Inference-Engine.md)
-- [ADP-011: Assistant Shell User Interface](ADP-011-Assistant-Shell-UI.md) (proposed — not implemented)
+- [ADP-011: Assistant Shell User Interface](ADP-011-Assistant-Shell-UI.md) (partial — Phase 1 scaffold; embedded tabs Phase 2)
 - [Prompt Architecture](Prompt_Architecture.md)
 - [AI Provider Interface](AI_Provider_Interface.md)
 - [Roadmap](Roadmap.md)
@@ -50,7 +50,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [ADP-009: Host Integration Layer](ADP-009-Host-Integration-Layer.md)
 - [ADP-010: Engineering Inference Engine](ADP-010-Engineering-Inference-Engine.md)
-- [ADP-011: Assistant Shell User Interface](ADP-011-Assistant-Shell-UI.md) (proposed — not implemented)
+- [ADP-011: Assistant Shell User Interface](ADP-011-Assistant-Shell-UI.md) (partial — Phase 1 scaffold; embedded tabs Phase 2)
 
 ## What Belongs Here
 
