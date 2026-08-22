@@ -343,18 +343,30 @@ Project files are read from disk for context collection; nothing is sent to the 
 
 If you prefer running inside KiCad:
 
-1. Open **KiCad PCB Editor** (`pcbnew`) with your project.
+1. Open **KiCad PCB Editor** (`pcbnew`) with your project and **save** the board.
 2. **Tools → Scripting Console**
 3. Run:
 
 ```python
-exec(open("/absolute/path/to/KiCad_AI_Integration/scripts/run_ai_assistant.py").read())
-main_ui_chat("/absolute/path/to/project.kicad_pro")
+import sys; sys.path.insert(0, "/absolute/path/to/KiCad_AI_Integration/src"); from ui.launcher import show_assistant_shell; show_assistant_shell()
 ```
 
-Other panels: `main_ui_aerf(...)`, `main_ui_notebook(...)`, `main_ui_datasheets(...)`, etc. (defined in the same script).
+With a saved board open, the Assistant **auto-selects** the project (no Browse step). Or load the CLI script and call a panel directly:
+
+```python
+exec(open("/absolute/path/to/KiCad_AI_Integration/scripts/run_ai_assistant.py").read())
+main_ui_launcher()  # or main_ui_chat(), main_ui_aerf(), etc.
+```
 
 **Note:** On macOS, Scripting Console paste/focus can be unreliable — **Terminal launch is recommended** for UI testing.
+
+**macOS full screen:** If the PCB editor is full screen, the Assistant cannot open as a separate window on top of it (same limitation as KiPython). Exit full screen (**Control+Command+F**) and launch again, or use Terminal:
+
+```bash
+PYTHONPATH=src python scripts/run_ai_assistant.py "/path/to/project.kicad_pro" --ui
+```
+
+A dockable in-editor panel is planned (Phase 2 plugin).
 
 ---
 
@@ -362,6 +374,7 @@ Other panels: `main_ui_aerf(...)`, `main_ui_notebook(...)`, `main_ui_datasheets(
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
+| Assistant does nothing / no window (Scripting Console, macOS) | PCB editor is **full screen** — macOS blocks overlay windows | Exit full screen (**Control+Command+F**), or launch from Terminal with `--ui` |
 | `wxPython is required` | wx not installed for your Terminal Python | `pip install wxPython`, or run from KiCad Scripting Console |
 | `No project path` | Missing `.kicad_pro` argument | Pass full path to `.kicad_pro` |
 | `Provider error` / auth failure | Missing or invalid API key | Set `ANTHROPIC_API_KEY` or `anthropic_api_key` in `~/kicad_ai_config.json` |

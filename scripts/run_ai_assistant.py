@@ -82,21 +82,9 @@ from utils.config import DatasheetUrlFetchPolicy, load_config  # noqa: E402
 
 
 def _default_project_path() -> Path | None:
-    try:
-        import pcbnew  # type: ignore[import-untyped]
+    from ui.launcher import try_resolve_project_pro_path
 
-        board = pcbnew.GetBoard()
-        if board is None:
-            return None
-        filename = board.GetFileName()
-        if not filename:
-            return None
-        pcb_path = Path(filename)
-        for pro in pcb_path.parent.glob("*.kicad_pro"):
-            return pro
-    except ImportError:
-        pass
-    return None
+    return try_resolve_project_pro_path(None)
 
 
 def _parse_cli_args(

@@ -41,11 +41,18 @@ def show_notebook_panel(
     project_path: Path | str,
     *,
     parent: wx.Window | None = None,
-) -> NotebookPanelFrame:
+) -> NotebookPanelFrame | None:
     """Show a non-modal Engineering Notebook frame."""
     if wx is None:
         raise RuntimeError("wxPython is required; run inside KiCad or install wx on PYTHONPATH")
+    from ui.launcher import present_top_level_window, run_wx_main_loop_if_needed
+    from ui.kicad_host import prepare_kicad_ui_launch
+
+    ok, kicad_parent = prepare_kicad_ui_launch(parent)
+    if not ok:
+        return None
     path = Path(project_path).expanduser()
-    frame = NotebookPanelFrame(path, parent=parent)
-    frame.Show()
+    frame = NotebookPanelFrame(path, parent=kicad_parent)
+    present_top_level_window(frame, kicad_parent)
+    run_wx_main_loop_if_needed()
     return frame

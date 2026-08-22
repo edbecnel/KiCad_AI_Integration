@@ -16,7 +16,7 @@ New contributors should follow [00_First_Time_Setup.md](./00_First_Time_Setup.md
 |------|-----------------|---------|-------------------|
 | KiCad | 8.0+ | EDA platform and embedded Python runtime | [kicad.org](https://www.kicad.org/) |
 | Git | 2.x | Version control | System package manager |
-| Python | 3.x (bundled with KiCad) | Script execution inside KiCad | Included with KiCad |
+| Python | 3.9+ (KiCad embeds 3.9.x) | Script execution; Terminal dev may use 3.11+ | `pyproject.toml` |
 | wxPython | Bundled with KiCad | In-KiCad UI dialogs | Included with KiCad |
 
 ### KiCad Python API
@@ -75,15 +75,23 @@ Full walkthrough: [Testing With Your KiCad Project](../User_Guides/Testing_With_
 
 ### KiCad Scripting Console
 
-Alternative when you want KiCad's bundled wxPython:
+Alternative when you want KiCad's bundled wxPython. KiCad 8–10 embed **Python 3.9.x**; host UI code must avoid PEP 604 unions (`X | Y`) with wx types in runtime-evaluated positions (see `src/ui/wx_typing.py`).
 
 1. Open your project in **KiCad PCB Editor** (`pcbnew`)
 2. Select **Tools > Scripting Console**
-3. Run:
+3. In the **Shell** pane (top, `>>>` prompt — not the History tab), run:
+
+```python
+import sys; sys.path.insert(0, "/absolute/path/to/KiCad_AI_Integration/src"); from ui.launcher import show_assistant_shell; show_assistant_shell()
+```
+
+The Assistant auto-parents to the open **PcbFrame** / **SchematicFrame** in normal windowed mode. When the PCB editor has a **saved** board open, `show_assistant_shell()` with no path auto-selects the matching `.kicad_pro` beside the `.kicad_pcb`. **macOS full screen** is different: separate windows (Assistant, KiPython) cannot overlay the PCB editor — exit full screen (**Control+Command+F**) or launch from **Terminal** with `--ui`.
+
+Or load the CLI script:
 
 ```python
 exec(open("/absolute/path/to/KiCad_AI_Integration/scripts/run_ai_assistant.py").read())
-main_ui_chat("/absolute/path/to/project.kicad_pro")
+main_ui_launcher("/absolute/path/to/project.kicad_pro")
 ```
 
 On macOS, Terminal launch is often more reliable than Scripting Console paste/focus.

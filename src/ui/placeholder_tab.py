@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from pathlib import Path
 
 from context.model import ProjectContext
 from ui.assistant_tab import AssistantTabPanel
+from ui.wx_typing import ModalOpener
 
 try:
     import wx
 except ImportError:  # pragma: no cover
     wx = None  # type: ignore[assignment]
-
-ModalOpener = Callable[[Path, wx.Window | None], None]
 
 
 class PlaceholderTab(AssistantTabPanel):

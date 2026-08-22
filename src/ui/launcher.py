@@ -38,6 +38,25 @@ def resolve_project_pro_path(project_path: Path | str | None = None) -> Path:
     raise FileNotFoundError("No .kicad_pro next to open board")
 
 
+def try_resolve_project_pro_path(project_path: Path | str | None = None) -> Path | None:
+    """
+    Resolve .kicad_pro without raising when auto-detection fails.
+
+    When ``project_path`` is omitted, uses the open KiCad board (``pcbnew.GetBoard()``).
+    """
+    try:
+        return resolve_project_pro_path(project_path)
+    except (RuntimeError, FileNotFoundError, OSError):
+        return None
+
+
+def effective_initial_project_path(initial_path: Path | str | None = None) -> Path | str | None:
+    """Return explicit path or auto-detect from the open KiCad board for UI initialization."""
+    if initial_path is not None:
+        return initial_path
+    return try_resolve_project_pro_path(None)
+
+
 def ensure_wx_app() -> bool:
     """
     Ensure a wx.App exists before showing UI.
@@ -54,6 +73,71 @@ def ensure_wx_app() -> bool:
         _wx_app = wx.App(False)
         return False
     return app.IsMainLoopRunning()
+
+
+def run_wx_main_loop_if_needed() -> None:
+    """
+    Run the wx event loop when launched from an external Terminal.
+
+    No-op when embedded in KiCad (main loop already running). Modal dialogs
+    use ``ShowModal()`` and do not need this.
+    """
+    import wx
+
+    app = wx.GetApp()
+    if app is not None and not app.IsMainLoopRunning():
+        app.MainLoop()
+
+
+_KICAD_EDITOR_FRAME_NAMES = ("PcbFrame", "SchematicFrame", "ModEditFrame")
+_KICAD_CONSOLE_FRAME_NAMES = frozenset({"KiPython", ""})
+
+
+def resolve_kicad_parent_window() -> object | None:
+    """
+    Return the active KiCad editor frame when running inside KiCad.
+
+    Uses the same frame names as KiCad's ``kicad_pyshell`` (``PcbFrame``,
+    ``SchematicFrame``). Parenting helps center assistant windows in normal
+    windowed mode; macOS full-screen is handled separately in ``kicad_host``.
+    """
+    import wx
+
+    app = wx.GetApp()
+    if app is None or not app.IsMainLoopRunning():
+        return None
+
+    for name in _KICAD_EDITOR_FRAME_NAMES:
+        frame = wx.FindWindowByName(name)
+        if frame is not None:
+            return frame
+
+    top = app.GetTopWindow()
+    if top is not None:
+        window_name = top.GetName()
+        if window_name not in _KICAD_CONSOLE_FRAME_NAMES:
+            return top
+    return None
+
+
+def resolve_ui_parent(parent: object | None = None) -> object | None:
+    """Use explicit parent or auto-detect KiCad editor window when embedded."""
+    if parent is not None:
+        return parent
+    return resolve_kicad_parent_window()
+
+
+def present_top_level_window(window: object, parent: object | None = None) -> None:
+    """Show a frame/dialog, center on parent when embedded, and raise."""
+    import wx
+
+    window.Show()
+    if parent is not None and isinstance(parent, wx.Window):
+        if hasattr(window, "CenterOnParent"):
+            window.CenterOnParent()
+    window.Raise()
+    if hasattr(window, "SetFocus"):
+        window.SetFocus()
 
 
 def show_missing_datasheets_dialog(
@@ -78,10 +162,19 @@ def show_missing_datasheets_dialog(
         show_missing_datasheets_dialog()  # uses open board's project
     """
     from ui.missing_datasheets_dialog import show_missing_datasheets_dialog as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
+    ok, parent = prepare_kicad_ui_launch(None)
+    if not ok:
+        return
     pro = resolve_project_pro_path(project_path)
-    _show(pro, retry_failed_urls=retry_failed_urls, force_refresh_urls=force_refresh_urls, ai_datasheets=ai_datasheets)
+    _show(
+        pro,
+        parent=parent,
+        retry_failed_urls=retry_failed_urls,
+        force_refresh_urls=force_refresh_urls,
+        ai_datasheets=ai_datasheets,
+    )
 
 
 def show_chat_dialog(
@@ -92,11 +185,15 @@ def show_chat_dialog(
 ) -> None:
     """Open the KiCad AI chat panel (modal)."""
     from ui.chat_dialog import show_chat_dialog as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
+    ok, parent = prepare_kicad_ui_launch(None)
+    if not ok:
+        return
     pro = resolve_project_pro_path(project_path)
     _show(
         pro,
+        parent=parent,
         retry_failed_urls=retry_failed_urls,
         force_refresh_urls=force_refresh_urls,
     )
@@ -107,10 +204,13 @@ def show_simulation_dialog(
 ) -> None:
     """Open the Simulation models (SUBCKT) panel (modal)."""
     from ui.simulation_dialog import show_simulation_dialog as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
+    ok, parent = prepare_kicad_ui_launch(None)
+    if not ok:
+        return
     pro = resolve_project_pro_path(project_path)
-    _show(pro)
+    _show(pro, parent=parent)
 
 
 def show_aerf_dialog(
@@ -121,11 +221,15 @@ def show_aerf_dialog(
 ) -> None:
     """Open the AERF staged analysis panel (modal)."""
     from ui.aerf_dialog import show_aerf_dialog as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
+    ok, parent = prepare_kicad_ui_launch(None)
+    if not ok:
+        return
     pro = resolve_project_pro_path(project_path)
     _show(
         pro,
+        parent=parent,
         retry_failed_urls=retry_failed_urls,
         force_refresh_urls=force_refresh_urls,
     )
@@ -136,10 +240,13 @@ def show_notebook_dialog(
 ) -> None:
     """Open the Engineering Notebook panel (modal)."""
     from ui.notebook_dialog import show_notebook_dialog as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
+    ok, parent = prepare_kicad_ui_launch(None)
+    if not ok:
+        return
     pro = resolve_project_pro_path(project_path)
-    _show(pro)
+    _show(pro, parent=parent)
 
 
 def show_notebook_panel(
@@ -147,10 +254,13 @@ def show_notebook_panel(
 ) -> None:
     """Open the Engineering Notebook as a non-modal frame (KiCad embedding path)."""
     from ui.notebook_panel import show_notebook_panel as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
+    ok, parent = prepare_kicad_ui_launch(None)
+    if not ok:
+        return
     pro = resolve_project_pro_path(project_path)
-    _show(pro)
+    _show(pro, parent=parent)
 
 
 def show_launcher_dialog(
@@ -158,9 +268,13 @@ def show_launcher_dialog(
 ) -> None:
     """Open the KiCad AI Assistant launcher (project picker + panel shortcuts)."""
     from ui.launcher_dialog import show_launcher_dialog as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
-    _show(project_path)
+    ok, parent = prepare_kicad_ui_launch(None)
+    if not ok:
+        return
+    resolved = try_resolve_project_pro_path(project_path)
+    _show(resolved if resolved is not None else project_path, parent=parent)
 
 
 def show_assistant_shell(
@@ -172,11 +286,15 @@ def show_assistant_shell(
 ) -> None:
     """Open the unified Assistant shell (ADP-011)."""
     from ui.assistant_shell import show_assistant_shell as _show
+    from ui.kicad_host import prepare_kicad_ui_launch
 
-    ensure_wx_app()
+    ok, resolved_parent = prepare_kicad_ui_launch(parent)
+    if not ok:
+        return
+    resolved = try_resolve_project_pro_path(project_path)
     _show(
-        project_path,
-        parent=parent,
+        resolved if resolved is not None else project_path,
+        parent=resolved_parent,
         focus_tab=focus_tab,
         open_focus_panel=open_focus_panel,
     )

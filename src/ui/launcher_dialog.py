@@ -12,7 +12,7 @@ from context.artifacts.store import ArtifactStore
 from prompts.builder import build_prompt_summary
 from ui.aerf_dialog import show_aerf_dialog
 from ui.chat_dialog import show_chat_dialog
-from ui.launcher import ensure_wx_app, resolve_project_pro_path
+from ui.launcher import effective_initial_project_path, ensure_wx_app, resolve_project_pro_path
 from ui.missing_datasheets_dialog import show_missing_datasheets_dialog
 from ui.notebook_dialog import show_notebook_dialog
 from ui.simulation_dialog import show_simulation_dialog
@@ -117,11 +117,12 @@ class LauncherDialog:
         path_row = wx.BoxSizer(wx.HORIZONTAL)
         path_row.Add(wx.StaticText(panel, label="Project:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=6)
         self._txt_path = wx.TextCtrl(panel)
-        if initial_path:
+        effective_path = effective_initial_project_path(initial_path)
+        if effective_path is not None:
             try:
-                self._txt_path.SetValue(str(resolve_project_pro_path(initial_path)))
+                self._txt_path.SetValue(str(resolve_project_pro_path(effective_path)))
             except (FileNotFoundError, OSError):
-                self._txt_path.SetValue(str(initial_path))
+                self._txt_path.SetValue(str(effective_path))
         path_row.Add(self._txt_path, proportion=1, flag=wx.RIGHT, border=6)
         self._btn_browse_file = wx.Button(panel, label="Browse…")
         self._btn_browse_dir = wx.Button(panel, label="Folder…")
@@ -174,7 +175,7 @@ class LauncherDialog:
         self._btn_aerf.Bind(wx.EVT_BUTTON, lambda _e: self._open_panel("aerf"))
         self._btn_notebook.Bind(wx.EVT_BUTTON, lambda _e: self._open_panel("notebook"))
 
-        if initial_path:
+        if effective_path is not None:
             self._on_refresh(None)
 
     def show_modal(self) -> int:

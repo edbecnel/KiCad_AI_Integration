@@ -44,8 +44,11 @@ def _install_mock_pcbnew() -> None:
         def GetFootprints(self):
             return []
 
+        def GetFileName(self) -> str:
+            return ""
+
     def GetBoard():
-        return _Board()
+        return None
 
     pcbnew.GetBoard = GetBoard
     sys.modules["pcbnew"] = pcbnew

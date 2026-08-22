@@ -8,7 +8,13 @@ from ui.aerf_dialog import show_aerf_dialog
 from ui.assistant_tab import ASSISTANT_TAB_IDS, AssistantTabPanel, tab_index_for_focus
 from ui.chat_dialog import show_chat_dialog
 from ui.context_controller import ContextController
-from ui.launcher import ensure_wx_app, resolve_project_pro_path
+from ui.launcher import (
+    effective_initial_project_path,
+    present_top_level_window,
+    resolve_project_pro_path,
+    run_wx_main_loop_if_needed,
+)
+from ui.kicad_host import prepare_kicad_ui_launch
 from ui.launcher_dialog import normalize_launcher_project_path
 from ui.missing_datasheets_dialog import show_missing_datasheets_dialog
 from ui.notebook_tab import NotebookTab
@@ -56,11 +62,12 @@ class AssistantShell(wx.Panel):
         path_row = wx.BoxSizer(wx.HORIZONTAL)
         path_row.Add(wx.StaticText(self, label="Project:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=6)
         self._txt_path = wx.TextCtrl(self)
-        if initial_path:
+        effective_path = effective_initial_project_path(initial_path)
+        if effective_path is not None:
             try:
-                self._txt_path.SetValue(str(resolve_project_pro_path(initial_path)))
+                self._txt_path.SetValue(str(resolve_project_pro_path(effective_path)))
             except (FileNotFoundError, OSError):
-                self._txt_path.SetValue(str(initial_path))
+                self._txt_path.SetValue(str(effective_path))
         path_row.Add(self._txt_path, proportion=1, flag=wx.RIGHT, border=6)
         self._btn_browse = wx.Button(self, label="Browse…")
         self._btn_refresh = wx.Button(self, label="Refresh context")
@@ -134,7 +141,7 @@ class AssistantShell(wx.Panel):
         if focus_idx is not None:
             self._notebook.SetSelection(focus_idx)
 
-        if initial_path:
+        if effective_path is not None:
             self._on_refresh(None)
 
         self._notify_active_tab_selected()
@@ -214,10 +221,15 @@ def show_assistant_shell(
     """Show the unified Assistant shell in a standalone frame."""
     if wx is None:
         raise RuntimeError("wxPython is required; run inside KiCad or install wx on PYTHONPATH")
-    ensure_wx_app()
+    from ui.kicad_host import prepare_kicad_ui_launch
+
+    ok, kicad_parent = prepare_kicad_ui_launch(parent)
+    if not ok:
+        return
     from ui.assistant_frame import AssistantFrame
 
-    frame = AssistantFrame(parent, initial_path=project_path, focus_tab=focus_tab)
-    frame.Show()
+    frame = AssistantFrame(kicad_parent, initial_path=project_path, focus_tab=focus_tab)
+    present_top_level_window(frame, kicad_parent)
     if open_focus_panel and focus_tab and focus_tab != "notebook":
         frame.open_placeholder_panel(focus_tab)
+    run_wx_main_loop_if_needed()
