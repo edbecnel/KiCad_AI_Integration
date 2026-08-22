@@ -16,7 +16,7 @@ from ui.launcher import (
     run_wx_main_loop_if_needed,
 )
 from ui.kicad_host import prepare_kicad_ui_launch
-from ui.launcher_dialog import normalize_launcher_project_path
+from ui.project_path import normalize_launcher_project_path
 from ui.notebook_tab import NotebookTab
 from ui.simulation_tab import SimulationTab
 from ui.shell_preferences import get_last_tab, set_last_tab

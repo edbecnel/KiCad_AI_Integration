@@ -72,3 +72,21 @@ def test_embedded_shells_do_not_create_orphan_header_buttons(shell_cls: str) -> 
         )
 
     frame.Destroy()
+
+
+def test_embedded_tabs_receive_updated_summary_on_refresh() -> None:
+    wx = _ensure_wx_app()
+    from ui.assistant_shell import AssistantShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    frame = wx.Frame(None, title="test")
+    shell = AssistantShell(frame, initial_path=pro)
+    frame.Show(False)
+
+    first_summary = shell._controller.summary_text
+    assert first_summary
+    shell._controller.refresh(pro)
+    assert shell._summary.GetValue() == shell._controller.summary_text
+    assert shell._controller.last_error is None
+
+    frame.Destroy()

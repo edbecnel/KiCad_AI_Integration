@@ -7,7 +7,7 @@ from pathlib import Path
 
 from context.collector import collect_stretch_context
 from context.model import ProjectContext
-from ui.launcher_dialog import format_launcher_context_summary
+from ui.project_path import format_launcher_context_summary
 from utils.config import AppConfig, load_config
 
 ContextListener = Callable[[ProjectContext, str], None]

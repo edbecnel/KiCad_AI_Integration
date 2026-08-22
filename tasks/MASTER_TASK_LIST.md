@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with all five embedded tabs, KiCad ActionPlugin entry, multi-turn Chat (Conversation Manager), centralized context (`ContextController`), simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase D modal cleanup, Phase 1.5 live KiCad API extractors, incremental context refresh between chat turns.
+**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with all five embedded tabs, KiCad ActionPlugin entry, multi-turn Chat with disk persistence (`kicad_ai/conversation.json`), centralized context (`ContextController`), simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase 1.5 live KiCad API extractors, incremental context refresh between chat turns, multi-provider settings UI.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -308,12 +308,13 @@ response without manual export/copy-paste.
 - [x] Non-blocking UI (API calls on background thread)
 - [x] Resize-friendly layout
 - [x] **ADP-011 Phase C polish** — last tab per project, Datasheets tab badge, Ctrl+1..5 shortcuts
+- [x] **ADP-011 Phase D cleanup** — removed `launcher_dialog.py` and modal `*_dialog.py` wrappers; `launcher.py` facade; expanded shell tests
 
 ### Conversation Manager
 
 - [x] Maintain multi-turn chat history within session
 - [x] Attach prior conversation turns to subsequent API requests
-- [ ] Store prompt history for debugging and replay
+- [x] Store prompt history for debugging and replay — `kicad_ai/conversation.json` via `SessionStore`
 
 ### Incremental context
 
@@ -322,10 +323,10 @@ response without manual export/copy-paste.
 
 ### Enhanced UX
 
-- [ ] Markdown rendering in response pane (headers, lists, code blocks)
-- [ ] Prompt template library (user-selectable from UI)
-- [ ] Token usage display per request
-- [ ] Cost estimation per model
+- [x] Markdown rendering in response pane (headers, lists, code blocks) — `conversation/formatting.py`
+- [x] Prompt template library (user-selectable from UI) — Chat template dropdown
+- [x] Token usage display per request — conversation log + status line
+- [x] Cost estimation per model — `conversation/pricing.py`
 - [ ] Context caching across conversation turns (static project data)
 
 ### Multi-provider support

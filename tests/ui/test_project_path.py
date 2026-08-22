@@ -1,4 +1,4 @@
-"""Tests for launcher dialog helpers (no wx required)."""
+"""Tests for project path helpers (no wx required)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from ui.launcher_dialog import normalize_launcher_project_path
+from ui.project_path import normalize_launcher_project_path
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
 

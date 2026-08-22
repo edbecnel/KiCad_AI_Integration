@@ -1,35 +1,46 @@
 ```
-HANDOVER — Phase 2 Sprint 3 (ADP-011 Phase C) — completed
+HANDOVER — Phase 2 Sprint 4 (ADP-011 Phase D) — completed
 ================================================================================
-Date: 2026-08-22
+Date: 2026-08-23
 Repo: KiCad_AI_Integration
 
 SUMMARY
 -------
-KiCad ActionPlugin launches the unified Assistant shell as a non-modal editor-parented
-frame. Chat supports multi-turn sessions via the Conversation Manager (in-memory per project).
+Legacy launcher dialog and modal `*_dialog.py` entry paths are removed. The unified
+Assistant shell (`--ui`, ActionPlugin, `--ui-*` deep links) is the sole UI entry.
+Conversation sessions persist to `<project>/kicad_ai/conversation.json` for replay/debug.
+Chat conversation log shows markdown-friendly formatting plus per-turn token/cost summary.
 
 WHAT WAS DONE
 -------------
-1. KiCad ActionPlugin (`src/plugin/kicad_ai_assistant/`) — Tools → External Plugins
-2. Singleton Assistant frame (`src/plugin/assistant_window.py`)
-3. Conversation Manager (`src/conversation/`) — ChatSession, SessionStore
-4. Multi-turn provider API (`ClaudeProvider.send_messages`) + inference/chat follow-ups
-5. ChatShell — conversation log, New conversation, follow-up sends with approve gate
-6. Shell polish — last tab per project, Datasheets tab badge, Ctrl+1..5 shortcuts
-7. Tests: conversation, plugin, assistant window, chat session inference
+1. **Phase D cleanup** — removed `launcher_dialog.py` and modal wrappers; helpers moved to
+   `src/ui/project_path.py`; `launcher.py` exports `show_assistant_shell` only
+2. **Shell integration tests** — CLI deep links, context propagation, tab badges, last-tab restore
+3. **Conversation persistence** — disk-backed `SessionStore` + `get_session_store()` singleton
+4. **Enhanced Chat UX** — markdown display formatting, token/cost per assistant turn, template hint
+5. **Plugin verification** — `tests/plugin/test_macos_plugin_path.py` (Documents/KiCad/10.0 path)
+6. **Docs** — ADP-011 Phase D complete, testing guide, MASTER_TASK_LIST updated
+
+ENTRY POINTS
+------------
+- Terminal: `python scripts/run_ai_assistant.py /path/to/project.kicad_pro --ui`
+- Deep links: `--ui-chat`, `--ui-datasheets`, `--ui-simulation`, `--ui-aerf`, `--ui-notebook`
+- KiCad: Tools → External Plugins → KiCad AI Assistant
+- macOS plugin symlink: `~/Documents/KiCad/10.0/scripting/plugins/kicad_ai_assistant.py`
+  → repo `src/plugin/kicad_ai_assistant_plugin.py`
 
 RECOMMENDED NEXT
 ----------------
-Phase D cleanup — remove LauncherDialog and modal-only entry paths; expand shell tests.
-See `docs/Architecture/ADP-011-Assistant-Shell-UI.md` §10 Phase D.
+- Incremental context refresh between chat turns (reduce API cost)
+- Multi-provider settings UI (OpenAI / Ollama)
+- True wxAUI docking inside KiCad editor (deferred)
 
-PRIOR — Phase 2 Sprint 2 (ADP-011 Phase B)
+PRIOR — Phase 2 Sprint 3 (ADP-011 Phase C)
 ------------------------------------------
-All Assistant tabs embedded (Chat, Datasheets, Simulation, AERF, Notebook).
+KiCad ActionPlugin, Conversation Manager (in-memory), multi-turn Chat, shell polish.
 
 AUTHORITATIVE STATUS
 --------------------
-- `tasks/MASTER_TASK_LIST.md` (Last Reviewed: 2026-08-22)
-- `docs/User_Guides/Feature_Overview.md`
+- `tasks/MASTER_TASK_LIST.md` (Last Reviewed: 2026-08-23)
+- `docs/Architecture/ADP-011-Assistant-Shell-UI.md`
 ```

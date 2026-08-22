@@ -21,17 +21,17 @@ to respond; ``url_fetch_read_timeout_sec`` (default 60) limits PDF download time
 
 ``--retry-failed`` re-attempts HTTPS URLs that were previously logged as failed (after fetch improvements).
 
-``--ui`` opens the KiCad AI Assistant launcher (project picker, context refresh, panel shortcuts).
+``--ui`` opens the unified KiCad AI Assistant shell (embedded tabs, shared project context).
 
-``--ui-datasheets`` opens the Missing Required Datasheets wxPython panel (requires wx; use inside KiCad or a wx-enabled Python).
+``--ui-datasheets`` opens the Assistant shell on the Datasheets tab (requires wx).
 
-``--ui-chat`` opens the KiCad AI chat panel with context preview and Approve & Send (requires wx).
+``--ui-chat`` opens the Assistant shell on the Chat tab with context preview and Approve & Send (requires wx).
 
-``--ui-simulation`` opens the Simulation models (SUBCKT) wxPython panel.
+``--ui-simulation`` opens the Assistant shell on the Simulation tab.
 
-``--ui-aerf`` opens the AERF staged analysis panel (per-stage Approve & Send).
+``--ui-aerf`` opens the Assistant shell on the AERF staged analysis tab.
 
-``--ui-notebook`` opens the Engineering Notebook panel (view/edit EKM sections).
+``--ui-notebook`` opens the Assistant shell on the Engineering Notebook tab.
 
 ``--ui-notebook-panel`` opens the Engineering Notebook as a non-modal frame (KiCad embedding path).
 
@@ -587,7 +587,7 @@ def main_ui_notebook_panel(project_path: str | Path | None = None) -> None:
         print("No project path. Pass a .kicad_pro path or open a board in KiCad.")
         return
 
-    from ui.launcher import show_notebook_panel
+    from ui.notebook_panel import show_notebook_panel
 
     show_notebook_panel(path)
 

@@ -111,3 +111,84 @@ def test_assistant_shell_focus_tab_selects_page() -> None:
     shell = AssistantShell(frame, focus_tab="simulation")
     assert shell._notebook.GetSelection() == ASSISTANT_TAB_IDS.index("simulation")
     frame.Destroy()
+
+
+@pytest.mark.parametrize(
+    "focus_tab",
+    ("chat", "datasheets", "simulation", "aerf", "notebook"),
+)
+def test_assistant_shell_cli_deep_links_select_tab(focus_tab: str) -> None:
+    pytest.importorskip("wx")
+    wx = _ensure_wx_app()
+
+    from ui.assistant_shell import AssistantShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    frame = wx.Frame(None, title="test")
+    shell = AssistantShell(frame, initial_path=pro, focus_tab=focus_tab)
+    frame.Show(False)
+
+    assert shell._notebook.GetSelection() == ASSISTANT_TAB_IDS.index(focus_tab)
+    frame.Destroy()
+
+
+def test_assistant_shell_context_propagates_to_all_tabs(test_config: AppConfig) -> None:
+    pytest.importorskip("wx")
+    wx = _ensure_wx_app()
+
+    from ui.assistant_shell import AssistantShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    frame = wx.Frame(None, title="test")
+    shell = AssistantShell(frame, initial_path=pro)
+    frame.Show(False)
+
+    assert shell._controller.context is not None
+    for tab_id in ASSISTANT_TAB_IDS:
+        tab = shell._tabs[tab_id]
+        assert not tab._placeholder.IsShown(), f"{tab_id} still showing placeholder"
+        if tab_id == "notebook":
+            assert shell._notebook_tab is not None
+            assert shell._notebook_tab._shell is not None
+        else:
+            assert tab._shell is not None
+
+    frame.Destroy()
+
+
+def test_assistant_shell_datasheets_tab_badge_after_refresh(test_config: AppConfig) -> None:
+    pytest.importorskip("wx")
+    wx = _ensure_wx_app()
+
+    from ui.assistant_shell import AssistantShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    frame = wx.Frame(None, title="test")
+    shell = AssistantShell(frame, initial_path=pro)
+    frame.Show(False)
+
+    idx = ASSISTANT_TAB_IDS.index("datasheets")
+    label = shell._notebook.GetPageText(idx)
+    assert label.startswith("Datasheets")
+
+    frame.Destroy()
+
+
+def test_assistant_shell_restores_last_tab_per_project(
+    test_config: AppConfig,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pytest.importorskip("wx")
+    wx = _ensure_wx_app()
+
+    from ui.assistant_shell import AssistantShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    monkeypatch.setattr("ui.assistant_shell.get_last_tab", lambda _path: "aerf")
+
+    frame = wx.Frame(None, title="test")
+    shell = AssistantShell(frame, initial_path=pro)
+    frame.Show(False)
+
+    assert shell._notebook.GetSelection() == ASSISTANT_TAB_IDS.index("aerf")
+    frame.Destroy()

@@ -8,6 +8,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from conversation.formatting import format_markdown_for_display
+from conversation.pricing import estimate_cost_usd
+
 
 class ChatRole(str, Enum):
     USER = "user"
@@ -26,6 +29,7 @@ class ChatTurn:
     api_content: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
+    model: str | None = None
 
     def api_text(self) -> str:
         """Content sent to or received from the provider."""
@@ -50,6 +54,7 @@ class ChatSession:
         *,
         input_tokens: int | None = None,
         output_tokens: int | None = None,
+        model: str | None = None,
     ) -> None:
         self.turns.append(
             ChatTurn(
@@ -57,6 +62,7 @@ class ChatSession:
                 text=text,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
+                model=model,
             ),
         )
 
@@ -79,5 +85,20 @@ class ChatSession:
         lines: list[str] = []
         for turn in self.turns:
             label = "You" if turn.role is ChatRole.USER else "Assistant"
-            lines.append(f"--- {label} ---\n{turn.text}\n")
+            body = turn.text if turn.role is ChatRole.USER else format_markdown_for_display(turn.text)
+            lines.append(f"--- {label} ---\n{body}")
+            if turn.role is ChatRole.ASSISTANT and (
+                turn.input_tokens is not None or turn.output_tokens is not None
+            ):
+                parts = []
+                if turn.input_tokens is not None and turn.output_tokens is not None:
+                    parts.append(f"{turn.input_tokens} in, {turn.output_tokens} out tokens")
+                if turn.model:
+                    parts.append(turn.model)
+                cost = estimate_cost_usd(turn.model, turn.input_tokens, turn.output_tokens)
+                if cost is not None:
+                    parts.append(f"~${cost:.4f}")
+                if parts:
+                    lines.append(f"[{' · '.join(parts)}]")
+            lines.append("")
         return "\n".join(lines).rstrip()

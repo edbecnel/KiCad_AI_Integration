@@ -2,7 +2,7 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › ADP-011
 
-**Status:** Partial (Phase C complete — KiCad plugin + Conversation Manager; Phase D cleanup next)
+**Status:** Complete (Phases A–D — unified shell, plugin, conversation persistence)
 
 **Author:** Ed Becnel
 
@@ -91,24 +91,24 @@ flowchart TB
   Docked["KiCad dockable panel"] --> shell
 ```
 
-### 5.1 Shared header (replaces launcher)
+### 5.1 Shared header
 
-Reuses logic from [`src/ui/launcher_dialog.py`](../../src/ui/launcher_dialog.py):
+Implemented in [`src/ui/assistant_shell.py`](../../src/ui/assistant_shell.py) with helpers in [`src/ui/project_path.py`](../../src/ui/project_path.py):
 
-- Project path field + **Browse…** / **Folder…**
-- **Refresh context** (single source of truth)
+- Project path field + **Browse…**
+- **Refresh context** (single source of truth via `ContextController`)
 - Read-only summary: symbols, datasheet counts, SPICE netlist line, simulation gap count
-- Optional: tab badges (e.g. Datasheets tab shows missing count)
+- Tab badges (Datasheets tab shows missing count)
 
 ### 5.2 Feature tabs
 
-| Tab | Role | Current dialog |
+| Tab | Role | Implementation |
 |-----|------|----------------|
-| **Chat** | Ask questions; Approve & Send; context preview | [`chat_dialog.py`](../../src/ui/chat_dialog.py) |
-| **Datasheets** | Attach PDF, AI find, reset links | [`missing_datasheets_dialog.py`](../../src/ui/missing_datasheets_dialog.py) |
-| **Simulation** | Gap scan, SUBCKT generation, spice write-back | [`simulation_dialog.py`](../../src/ui/simulation_dialog.py) |
-| **AERF** | Staged analysis; EKM write-back | [`aerf_dialog.py`](../../src/ui/aerf_dialog.py) |
-| **Notebook** | EKM view/edit | [`notebook_shell.py`](../../src/ui/notebook_shell.py) (already embeddable) |
+| **Chat** | Ask questions; Approve & Send; multi-turn conversation | [`chat_tab.py`](../../src/ui/chat_tab.py) + [`chat_shell.py`](../../src/ui/chat_shell.py) |
+| **Datasheets** | Attach PDF, AI find, reset links | [`datasheets_tab.py`](../../src/ui/datasheets_tab.py) + [`datasheets_shell.py`](../../src/ui/datasheets_shell.py) |
+| **Simulation** | Gap scan, SUBCKT generation, spice write-back | [`simulation_tab.py`](../../src/ui/simulation_tab.py) + [`simulation_shell.py`](../../src/ui/simulation_shell.py) |
+| **AERF** | Staged analysis; EKM write-back | [`aerf_tab.py`](../../src/ui/aerf_tab.py) + [`aerf_shell.py`](../../src/ui/aerf_shell.py) |
+| **Notebook** | EKM view/edit | [`notebook_tab.py`](../../src/ui/notebook_tab.py) + [`notebook_shell.py`](../../src/ui/notebook_shell.py) |
 
 ---
 
@@ -165,9 +165,7 @@ Long-running tab actions (AI send, SUBCKT generation) remain on background threa
 | `--ui-aerf` | Open shell; select **AERF** tab |
 | `--ui-notebook` | Open shell; select **Notebook** tab |
 
-[`src/ui/launcher.py`](../../src/ui/launcher.py) becomes a thin facade exporting `show_assistant_shell()` for the script and future plugin.
-
-During migration, legacy `show_*_dialog()` wrappers may remain temporarily; they are removed in the cleanup phase.
+[`src/ui/launcher.py`](../../src/ui/launcher.py) is a thin facade exporting `show_assistant_shell()` for the script and KiCad plugin.
 
 ---
 
@@ -181,38 +179,40 @@ During migration, legacy `show_*_dialog()` wrappers may remain temporarily; they
 
 ---
 
-## 10. Migration Phases (deferred — future implementation)
+## 10. Migration Phases
 
-### Phase A — Shell skeleton
+### Phase A — Shell skeleton ✅
 
-- Add `AssistantShell`, `ContextController`, `AssistantFrame`, `AssistantDockPanel`.
-- Wire `--ui` to frame; **Notebook** tab first (proves embed pattern).
+- `AssistantShell`, `ContextController`, `AssistantFrame`, `AssistantDockPanel` stub
+- `--ui` opens unified frame; **Notebook** tab first
 
-### Phase B — Migrate remaining tabs
+### Phase B — Migrate remaining tabs ✅
 
-Order: Datasheets → Simulation → Chat → AERF (matches typical user workflow).
+Embedded **Chat**, **Datasheets**, **Simulation**, **AERF** tabs (`*Shell` + `*Tab`).
 
-### Phase C — Polish and plugin
+### Phase C — Polish and plugin ✅
 
-- Tab badges, remember last tab per project, keyboard shortcuts.
-- KiCad action plugin registers dockable `AssistantDockPanel`.
+- Tab badges, remember last tab per project, keyboard shortcuts (Ctrl+1..5)
+- KiCad ActionPlugin with non-modal `AssistantFrame` singleton
 
-### Phase D — Cleanup
+### Phase D — Cleanup ✅
 
-- Remove `LauncherDialog` and modal-only entry paths.
-- Add `tests/ui/test_assistant_shell.py` (tab selection, context propagation, CLI deep links).
+- Removed `LauncherDialog` and modal-only `*_dialog.py` entry paths
+- Expanded `tests/ui/test_assistant_shell.py` and `tests/ui/test_embedded_tabs.py`
 
 ---
 
-## 11. Current Workaround (until shell is built)
+## 11. Datasheet attach workflow
 
-Datasheet attach and AI discovery are **not** in the Chat panel. Use one of:
+Datasheet attach and AI discovery are in the **Datasheets** tab (not Chat):
 
 ```bash
 python scripts/run_ai_assistant.py "/path/to/project.kicad_pro" --ui-datasheets
 ```
 
-Or from the launcher (`--ui`): click **Datasheets** (not Chat) — look for the window titled **"Datasheets"**.
+Or open the unified shell (`--ui` or the KiCad ActionPlugin) and select the **Datasheets** tab.
+
+Chat supports **multi-turn** follow-up questions; sessions persist to `kicad_ai/conversation.json` per project. Use **New conversation** to reset in-memory and on-disk history.
 
 See [Testing With Your KiCad Project](../User_Guides/Testing_With_Your_KiCad_Project.md) for the full walkthrough.
 

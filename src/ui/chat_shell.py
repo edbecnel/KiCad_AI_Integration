@@ -7,7 +7,7 @@ from pathlib import Path
 
 from context.model import ProjectContext
 from context.context_flags import ContextIncludeFlags
-from conversation.store import SessionStore
+from conversation.store import get_session_store
 from prompts import BuiltPrompt
 from providers.errors import ProviderError
 from ui.chat_supply import (
@@ -48,7 +48,7 @@ class ChatShell(wx.Panel):
         self._ctx: ProjectContext | None = None
         self._built: BuiltPrompt | None = None
         self._sending = False
-        self._session_store = SessionStore()
+        self._session_store = get_session_store()
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         key_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -73,6 +73,14 @@ class ChatShell(wx.Panel):
         )
         self._template_choice.SetSelection(0)
         template_row.Add(self._template_choice, proportion=1)
+        template_row.AddStretchSpacer()
+        template_row.Add(
+            wx.StaticText(
+                self,
+                label="Prompt templates — choose a review style before sending.",
+            ),
+            flag=wx.ALIGN_CENTER_VERTICAL,
+        )
         vbox.Add(template_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         self._chk_image = wx.CheckBox(self, label="Include schematic image")
@@ -161,6 +169,7 @@ class ChatShell(wx.Panel):
         """Use project context from the Assistant shell header."""
         self._ctx = ctx
         self._update_preview()
+        self._refresh_conversation_log()
         self._status.SetLabel("Context ready — review preview, then Approve & Send.")
 
     def _session(self):
@@ -392,7 +401,9 @@ class ChatShell(wx.Panel):
             result.response.text,
             input_tokens=result.response.usage.input_tokens,
             output_tokens=result.response.usage.output_tokens,
+            model=result.response.model,
         )
+        self._session_store.save(self._project_path)
         self._sending = False
         self._btn_send.Enable(True)
         if not self._embedded:

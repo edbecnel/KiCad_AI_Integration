@@ -108,11 +108,11 @@ Optional: pre-fill a project path:
 python scripts/run_ai_assistant.py "/path/to/project.kicad_pro" --ui
 ```
 
-In the launcher:
+In the unified Assistant shell:
 
-1. Click **Browse…** (`.kicad_pro`) or **Folder…** (project directory).
+1. Click **Browse…** to select a `.kicad_pro` file (or pass the path on the command line).
 2. Click **Refresh context** — the summary shows symbols, datasheets, **SPICE netlist status**, PCB counts, and simulation gaps.
-3. Click **Chat**, **Datasheets**, **Simulation**, **AERF**, or another panel button.
+3. Use the **Chat**, **Datasheets**, **Simulation**, **AERF**, or **Notebook** tabs (or `Ctrl+1` … `Ctrl+5`).
 
 You do **not** need shell commands to verify netlist export — look for a line like `SPICE netlist: 22 lines (partial — …)` in the context summary.
 
@@ -124,7 +124,7 @@ Install the ActionPlugin per [Development Environment](../Developer_Handbook/01_
 
 True wxAUI docking inside the PCB editor is deferred. The plugin uses a separate non-modal Assistant frame. On **macOS full screen**, exit full screen (**Control+Command+F**) or use Terminal `--ui` if the window does not appear.
 
-The legacy launcher dialog (`show_launcher_dialog`) remains for older entry paths; **`--ui` and the ActionPlugin** open the unified Assistant shell with all tabs embedded. Use the **Datasheets** tab (not Chat) for PDF attach and AI discovery. Chat supports **multi-turn** follow-up questions within a session (**New conversation** resets history).
+**`--ui` and the ActionPlugin** open the unified Assistant shell with all tabs embedded. Use the **Datasheets** tab (not Chat) for PDF attach and AI discovery. Chat supports **multi-turn** follow-up questions; history is saved to `kicad_ai/conversation.json` per project (**New conversation** resets it).
 
 ---
 
