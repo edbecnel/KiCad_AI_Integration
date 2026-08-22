@@ -10,7 +10,7 @@ _MACOS_FULLSCREEN_MESSAGE = (
     "• Exit full screen: Control+Command+F, then launch again\n"
     "• Or use Terminal (works in any KiCad window mode):\n"
     "  PYTHONPATH=src python scripts/run_ai_assistant.py /path/to/project.kicad_pro --ui\n\n"
-    "A dockable in-editor panel is planned for a future release (Phase 2 plugin)."
+    "A dockable in-editor panel is available via the KiCad ActionPlugin (non-modal frame)."
 )
 
 

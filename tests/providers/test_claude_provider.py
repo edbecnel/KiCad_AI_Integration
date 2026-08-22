@@ -80,6 +80,25 @@ def test_send_message_multimodal_includes_image_block() -> None:
     assert content[1]["text"] == "Describe this schematic."
 
 
+def test_send_messages_multi_turn() -> None:
+    captured: dict = {}
+
+    def opener(request, timeout):
+        captured["body"] = json.loads(request.data.decode("utf-8"))
+        return _FakeResponse(json.dumps(_success_payload()).encode("utf-8"))
+
+    provider = ClaudeProvider(_config(), opener=opener)
+    messages = [
+        {"role": "user", "content": "first"},
+        {"role": "assistant", "content": "reply"},
+        {"role": "user", "content": "second"},
+    ]
+    provider.send_messages(messages, system="sys")
+
+    assert captured["body"]["messages"] == messages
+    assert captured["body"]["system"] == "sys"
+
+
 def test_missing_api_key_raises_auth_error() -> None:
     provider = ClaudeProvider(AppConfig(anthropic_api_key=None))
     with pytest.raises(AuthError, match="API key"):

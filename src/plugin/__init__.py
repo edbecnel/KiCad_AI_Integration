@@ -1,6 +1,9 @@
-"""Phase 2 native plugin entry points (placeholder).
+"""Phase 2 native plugin entry points.
 
-The Engineering Notebook non-modal widget lives in ``ui.notebook_panel.NotebookPanelFrame``.
-Phase 2 dockable KiCad plugin registration will host that panel (or ``ui.notebook_shell.NotebookShell``)
-alongside chat and AERF — see ADP-003 §13 and Feature Overview.
+Install ``kicad_ai_assistant/`` into KiCad's ``scripting/plugins/`` directory.
+See ``docs/Developer_Handbook/01_Development_Environment.md``.
 """
+
+from plugin.assistant_window import get_assistant_frame, show_assistant_window
+
+__all__ = ["get_assistant_frame", "show_assistant_window"]

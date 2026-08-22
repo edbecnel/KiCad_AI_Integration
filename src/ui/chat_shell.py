@@ -7,6 +7,7 @@ from pathlib import Path
 
 from context.model import ProjectContext
 from context.context_flags import ContextIncludeFlags
+from conversation.store import SessionStore
 from prompts import BuiltPrompt
 from providers.errors import ProviderError
 from ui.chat_supply import (
@@ -15,7 +16,8 @@ from ui.chat_supply import (
     collect_chat_context,
     send_chat_prompt,
 )
-from utils.config import AppConfig, load_config
+from inference.chat import build_followup_prompt
+from utils.config import load_config
 
 try:
     import wx
@@ -45,7 +47,8 @@ class ChatShell(wx.Panel):
         self._cfg = load_config()
         self._ctx: ProjectContext | None = None
         self._built: BuiltPrompt | None = None
-        self._approved = False
+        self._sending = False
+        self._session_store = SessionStore()
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         key_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -117,13 +120,15 @@ class ChatShell(wx.Panel):
             btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
         self._btn_send = wx.Button(self, label="Approve && Send")
         btn_row.Add(self._btn_send, flag=wx.RIGHT, border=6)
+        self._btn_new_conversation = wx.Button(self, label="New conversation")
+        btn_row.Add(self._btn_new_conversation, flag=wx.RIGHT, border=6)
         btn_row.AddStretchSpacer()
         if not self._embedded:
             self._btn_close = wx.Button(self, label="Close")
             btn_row.Add(self._btn_close)
         vbox.Add(btn_row, flag=wx.EXPAND | wx.ALL, border=8)
 
-        vbox.Add(wx.StaticText(self, label="Response:"), flag=wx.LEFT, border=8)
+        vbox.Add(wx.StaticText(self, label="Conversation:"), flag=wx.LEFT, border=8)
         self._response = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
         vbox.Add(self._response, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
@@ -135,6 +140,7 @@ class ChatShell(wx.Panel):
         if not self._embedded:
             self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
+        self._btn_new_conversation.Bind(wx.EVT_BUTTON, self._on_new_conversation)
         if not self._embedded:
             self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._chk_image.Bind(wx.EVT_CHECKBOX, self._on_preview_update)
@@ -156,6 +162,26 @@ class ChatShell(wx.Panel):
         self._ctx = ctx
         self._update_preview()
         self._status.SetLabel("Context ready — review preview, then Approve & Send.")
+
+    def _session(self):
+        return self._session_store.get_or_create(self._project_path)
+
+    def _refresh_conversation_log(self) -> None:
+        self._response.SetValue(self._session().format_conversation_log())
+
+    def _on_new_conversation(self, _event: wx.CommandEvent) -> None:
+        if self._sending:
+            return
+        if self._session().turns and wx.MessageBox(
+            "Start a new conversation? Current session history will be cleared.",
+            "New conversation",
+            wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        self._session_store.reset(self._project_path)
+        self._refresh_conversation_log()
+        self._txt_question.SetValue("")
+        self._status.SetLabel("New conversation — enter a question, then Approve & Send.")
 
     def confirm_close(self) -> bool:
         return True
@@ -259,7 +285,7 @@ class ChatShell(wx.Panel):
         self._preview.SetValue(preview_text)
 
     def _on_send(self, _event: wx.CommandEvent) -> None:
-        if self._approved:
+        if self._sending:
             return
         question = self._txt_question.GetValue().strip()
         if not question:
@@ -270,27 +296,45 @@ class ChatShell(wx.Panel):
         if self._ctx is None:
             return
 
-        if not wx.MessageBox(
-            "Send this context and question to Anthropic?\n\n"
-            "Review the preview above before approving.",
+        session = self._session()
+        is_followup = bool(session.turns)
+        approve_text = (
+            "Send this follow-up question to Anthropic?\n\n"
+            "Prior conversation turns will be included."
+            if is_followup
+            else "Send this context and question to Anthropic?\n\n"
+            "Review the preview above before approving."
+        )
+        if wx.MessageBox(
+            approve_text,
             "Approve transmission",
             wx.YES_NO | wx.ICON_QUESTION,
-        ) == wx.YES:
+        ) != wx.YES:
             return
 
-        self._approved = True
+        self._sending = True
         self._btn_send.Enable(False)
         if not self._embedded:
             self._btn_refresh.Enable(False)
 
-        built = build_chat_prompt(
-            self._ctx,
-            question,
-            functional_description=self._txt_intent.GetValue().strip() or None,
-            include_image=self._chk_image.GetValue(),
-            include=self._context_flags(),
-            template=self._selected_template(),
-        )
+        intent = self._txt_intent.GetValue().strip() or None
+        template = self._selected_template()
+        if is_followup:
+            built = build_followup_prompt(
+                self._ctx,
+                question,
+                functional_description=intent,
+                template=template,
+            )
+        else:
+            built = build_chat_prompt(
+                self._ctx,
+                question,
+                functional_description=intent,
+                include_image=self._chk_image.GetValue(),
+                include=self._context_flags(),
+                template=template,
+            )
         api_key = self._txt_key.GetValue().strip() or None
         approx_mb = (len(built.text) + built.image_byte_size) / (1024 * 1024)
         if built.include_image:
@@ -304,37 +348,60 @@ class ChatShell(wx.Panel):
 
         threading.Thread(
             target=self._send_in_background,
-            args=(built, api_key),
+            args=(built, question, api_key),
             daemon=True,
         ).start()
 
-    def _send_in_background(self, built: BuiltPrompt, api_key: str | None) -> None:
+    def _send_in_background(
+        self,
+        built: BuiltPrompt,
+        question: str,
+        api_key: str | None,
+    ) -> None:
+        session = self._session()
         try:
             result = send_chat_prompt(
                 built,
                 self._ctx,  # type: ignore[arg-type]
                 config=self._cfg,
                 api_key_override=api_key,
+                session=session,
             )
         except ProviderError as exc:
             wx.CallAfter(self._on_send_failed, exc)
             return
-        wx.CallAfter(self._on_send_succeeded, result)
+        wx.CallAfter(self._on_send_succeeded, result, question, built.text)
 
     def _on_send_failed(self, exc: ProviderError) -> None:
-        self._approved = False
+        self._sending = False
         self._btn_send.Enable(True)
         if not self._embedded:
             self._btn_refresh.Enable(True)
         self._status.SetLabel(f"Provider error: {exc}")
         wx.MessageBox(str(exc), "Provider error", wx.OK | wx.ICON_ERROR)
 
-    def _on_send_succeeded(self, result: ChatSendResult) -> None:
-        self._response.SetValue(result.response.text)
+    def _on_send_succeeded(
+        self,
+        result: ChatSendResult,
+        question: str,
+        api_content: str,
+    ) -> None:
+        session = self._session()
+        session.append_user(question, api_content=api_content)
+        session.append_assistant(
+            result.response.text,
+            input_tokens=result.response.usage.input_tokens,
+            output_tokens=result.response.usage.output_tokens,
+        )
+        self._sending = False
+        self._btn_send.Enable(True)
         if not self._embedded:
             self._btn_refresh.Enable(True)
+        self._txt_question.SetValue("")
+        self._refresh_conversation_log()
         self._status.SetLabel(
-            f"Done — {result.response.usage.input_tokens} in, "
+            f"Turn {session.user_turn_count} — "
+            f"{result.response.usage.input_tokens} in, "
             f"{result.response.usage.output_tokens} out tokens "
-            f"({result.response.model})"
+            f"({result.response.model}). Ask a follow-up or start a new conversation."
         )

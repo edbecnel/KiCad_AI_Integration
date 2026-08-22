@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from context.datasheet_requirements import summarize_required_missing_datasheets
 from ui.aerf_tab import AERFTab
 from ui.assistant_tab import ASSISTANT_TAB_IDS, AssistantTabPanel, tab_index_for_focus
 from ui.chat_tab import ChatTab
@@ -11,7 +12,6 @@ from ui.context_controller import ContextController
 from ui.datasheets_tab import DatasheetsTab
 from ui.launcher import (
     effective_initial_project_path,
-    present_top_level_window,
     resolve_project_pro_path,
     run_wx_main_loop_if_needed,
 )
@@ -19,6 +19,7 @@ from ui.kicad_host import prepare_kicad_ui_launch
 from ui.launcher_dialog import normalize_launcher_project_path
 from ui.notebook_tab import NotebookTab
 from ui.simulation_tab import SimulationTab
+from ui.shell_preferences import get_last_tab, set_last_tab
 from utils.config import load_config
 
 try:
@@ -44,6 +45,13 @@ class AssistantShell(wx.Panel):
         self._controller.bind_listener(self._on_context_refreshed)
         self._tabs: dict[str, AssistantTabPanel] = {}
         self._notebook_tab: NotebookTab | None = None
+        self._tab_labels: dict[str, str] = {
+            "chat": "Chat",
+            "datasheets": "Datasheets",
+            "simulation": "Simulation",
+            "aerf": "AERF",
+            "notebook": "Notebook",
+        }
 
         vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -89,6 +97,7 @@ class AssistantShell(wx.Panel):
             tab = tab_cls(self._notebook)
             self._notebook.AddPage(tab, label)
             self._tabs[tab_id] = tab
+            self._tab_labels[tab_id] = label
 
         notebook_tab = NotebookTab(self._notebook)
         self._notebook.AddPage(notebook_tab, "Notebook")
@@ -105,8 +114,12 @@ class AssistantShell(wx.Panel):
         self._btn_browse.Bind(wx.EVT_BUTTON, self._on_browse)
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_tab_changed)
+        self.Bind(wx.EVT_CHAR_HOOK, self._on_char_hook)
 
         focus_idx = tab_index_for_focus(focus_tab)
+        if focus_idx is None and effective_path is not None:
+            saved_tab = get_last_tab(effective_path)
+            focus_idx = tab_index_for_focus(saved_tab)
         if focus_idx is not None:
             self._notebook.SetSelection(focus_idx)
 
@@ -154,12 +167,51 @@ class AssistantShell(wx.Panel):
             return
         self._summary.SetValue(self._controller.summary_text)
         self._status.SetLabel(f"Context ready — {pro.name}")
+        self._update_tab_badges(self._controller.context)
+
+    def _update_tab_badges(self, ctx) -> None:
+        if ctx is None:
+            return
+        missing = summarize_required_missing_datasheets(
+            ctx.symbols,
+            ctx.datasheet_resolutions,
+            ai_discovery_results=ctx.ai_discovery_results,
+        )
+        missing_count = len(missing)
+        base = self._tab_labels["datasheets"]
+        label = base if missing_count == 0 else f"{base} ({missing_count})"
+        idx = ASSISTANT_TAB_IDS.index("datasheets")
+        self._notebook.SetPageText(idx, label)
+
+    def _on_char_hook(self, event: wx.KeyEvent) -> None:
+        if event.GetModifiers() == wx.MOD_CONTROL:
+            key = event.GetKeyCode()
+            shortcuts = {
+                ord("1"): "chat",
+                ord("2"): "datasheets",
+                ord("3"): "simulation",
+                ord("4"): "aerf",
+                ord("5"): "notebook",
+            }
+            tab_id = shortcuts.get(key)
+            if tab_id is not None:
+                self.focus_tab(tab_id)
+                return
+        event.Skip()
 
     def _on_context_refreshed(self, ctx, summary: str) -> None:
         for tab in self._tabs.values():
             tab.on_context_refreshed(ctx, summary)
+        self._update_tab_badges(ctx)
 
     def _on_tab_changed(self, _event: wx.NotebookEvent) -> None:
+        idx = self._notebook.GetSelection()
+        if 0 <= idx < len(ASSISTANT_TAB_IDS):
+            try:
+                pro = normalize_launcher_project_path(self._txt_path.GetValue())
+                set_last_tab(pro, ASSISTANT_TAB_IDS[idx])
+            except (ValueError, FileNotFoundError, OSError):
+                pass
         self._notify_active_tab_selected()
 
     def _notify_active_tab_selected(self) -> None:
@@ -195,10 +247,7 @@ def show_assistant_shell(
     ok, kicad_parent = prepare_kicad_ui_launch(parent)
     if not ok:
         return
-    from ui.assistant_frame import AssistantFrame
+    from plugin.assistant_window import show_assistant_window
 
-    frame = AssistantFrame(kicad_parent, initial_path=project_path, focus_tab=focus_tab)
-    present_top_level_window(frame, kicad_parent)
-    if focus_tab:
-        frame.focus_tab(focus_tab)
+    show_assistant_window(kicad_parent, project_path, focus_tab=focus_tab)
     run_wx_main_loop_if_needed()

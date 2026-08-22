@@ -9,7 +9,7 @@ from utils.config import AppConfig
 
 
 class BaseProvider(Protocol):
-    """Stateless LLM provider — caller supplies full prompt each call."""
+    """Stateless LLM provider — caller supplies conversation messages each call."""
 
     def send_message(
         self,
@@ -21,4 +21,14 @@ class BaseProvider(Protocol):
         config: AppConfig | None = None,
     ) -> ProviderResponse:
         """Send a single user message and return the assistant reply."""
+        ...
+
+    def send_messages(
+        self,
+        messages: list[dict[str, object]],
+        *,
+        system: str | None = None,
+        config: AppConfig | None = None,
+    ) -> ProviderResponse:
+        """Send a multi-turn message list and return the assistant reply."""
         ...

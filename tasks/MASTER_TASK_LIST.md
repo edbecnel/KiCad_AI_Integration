@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with all five embedded tabs, centralized context (`ContextController`), chat UI, simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **In progress:** KiCad action plugin, Conversation Manager. **Still open:** Phase 1.5 live KiCad API extractors.
+**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with all five embedded tabs, KiCad ActionPlugin entry, multi-turn Chat (Conversation Manager), centralized context (`ContextController`), simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase D modal cleanup, Phase 1.5 live KiCad API extractors, incremental context refresh between chat turns.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -294,24 +294,25 @@ response without manual export/copy-paste.
 
 ### Plugin packaging
 
-- [ ] Convert entry point to KiCad action plugin with toolbar/menu integration
-- [ ] Document install path (`plugins/` directory) and update workflow
-- [ ] Plugin metadata (name, description, icon, version)
+- [x] Convert entry point to KiCad action plugin with toolbar/menu integration
+- [x] Document install path (`plugins/` directory) and update workflow
+- [x] Plugin metadata (name, description, icon, version)
 
 ### Dockable Assistant shell
 
 - [x] **Assistant shell scaffold** — shared header + tab bar (`src/ui/assistant_shell.py`, `--ui`) — [ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md) partial
 - [x] **ADP-011 Phase A** — `ContextController` (`src/ui/context_controller.py`), `AssistantFrame`, `AssistantDockPanel` stub, embedded **Notebook** tab (`NotebookTab`); Chat/Datasheets/Simulation/AERF remain placeholder + modal fallback
 - [x] **ADP-011 Phase B** — embedded **Chat**, **Datasheets**, **Simulation**, **AERF** tabs (`*Shell` + `*Tab`); legacy modal wrappers preserved
-- [ ] **KiCad action plugin** — register dockable `AssistantDockPanel` in `src/plugin/`
-- [ ] Persistent wx panel dockable alongside schematic/PCB editor (hosts `AssistantShell`)
-- [ ] Non-blocking UI (API calls on background thread)
-- [ ] Resize-friendly layout
+- [x] **KiCad action plugin** — register `kicad_ai_assistant` ActionPlugin; non-modal `AssistantFrame` singleton (`src/plugin/`)
+- [x] Persistent wx panel alongside schematic/PCB editor (non-modal frame host; true AUI dock deferred)
+- [x] Non-blocking UI (API calls on background thread)
+- [x] Resize-friendly layout
+- [x] **ADP-011 Phase C polish** — last tab per project, Datasheets tab badge, Ctrl+1..5 shortcuts
 
 ### Conversation Manager
 
-- [ ] Maintain multi-turn chat history within session
-- [ ] Attach prior conversation turns to subsequent API requests
+- [x] Maintain multi-turn chat history within session
+- [x] Attach prior conversation turns to subsequent API requests
 - [ ] Store prompt history for debugging and replay
 
 ### Incremental context

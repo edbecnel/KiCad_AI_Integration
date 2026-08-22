@@ -2,7 +2,7 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › ADP-011
 
-**Status:** Partial (Phase B complete — all tabs embedded; KiCad dock plugin Phase C)
+**Status:** Partial (Phase C complete — KiCad plugin + Conversation Manager; Phase D cleanup next)
 
 **Author:** Ed Becnel
 

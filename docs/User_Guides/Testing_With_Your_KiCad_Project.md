@@ -116,9 +116,15 @@ In the launcher:
 
 You do **not** need shell commands to verify netlist export — look for a line like `SPICE netlist: 22 lines (partial — …)` in the context summary.
 
-### Known UX limitation (until dockable plugin ships)
+### KiCad plugin entry (recommended in-editor)
 
-The launcher dialog (`show_launcher_dialog`) remains for legacy entry; **`--ui` opens the unified Assistant shell** with all tabs embedded. Use the **Datasheets** tab (not Chat) for PDF attach and AI discovery.
+Install the ActionPlugin per [Development Environment](../Developer_Handbook/01_Development_Environment.md#kicad-actionplugin-phase-2), then in **KiCad PCB Editor** use **Tools → External Plugins → KiCad AI Assistant**. The unified shell opens as a non-modal window parented to the editor (same tabs as `--ui`).
+
+### Known UX limitation
+
+True wxAUI docking inside the PCB editor is deferred. The plugin uses a separate non-modal Assistant frame. On **macOS full screen**, exit full screen (**Control+Command+F**) or use Terminal `--ui` if the window does not appear.
+
+The legacy launcher dialog (`show_launcher_dialog`) remains for older entry paths; **`--ui` and the ActionPlugin** open the unified Assistant shell with all tabs embedded. Use the **Datasheets** tab (not Chat) for PDF attach and AI discovery. Chat supports **multi-turn** follow-up questions within a session (**New conversation** resets history).
 
 ---
 

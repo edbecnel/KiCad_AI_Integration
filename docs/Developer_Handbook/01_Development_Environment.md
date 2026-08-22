@@ -96,6 +96,37 @@ main_ui_launcher("/absolute/path/to/project.kicad_pro")
 
 On macOS, Terminal launch is often more reliable than Scripting Console paste/focus.
 
+### KiCad ActionPlugin (Phase 2)
+
+Install the plugin package so **Tools → External Plugins → KiCad AI Assistant** opens the unified shell from the PCB Editor.
+
+**Find your plugins folder** (paths vary by OS and KiCad settings). In **PCB Editor → Tools → Scripting Console**:
+
+```python
+import pcbnew
+print(pcbnew.PLUGIN_DIRECTORIES_SEARCH)
+```
+
+Typical locations:
+
+| OS | Common user plugins path |
+|----|--------------------------|
+| macOS | `~/Documents/KiCad/<version>/scripting/plugins/` |
+| macOS (alternate) | `~/Library/Preferences/kicad/<version>/scripting/plugins/` |
+| Linux | `~/.config/kicad/<version>/scripting/plugins/` |
+
+**Development symlink** (use the path from `PLUGIN_DIRECTORIES_SEARCH`):
+
+```bash
+PLUGIN_DIR="$HOME/Documents/KiCad/10.0/scripting/plugins"   # adjust version/path
+mkdir -p "$PLUGIN_DIR"
+ln -sfn "$(pwd)/src/plugin/kicad_ai_assistant_plugin.py" "$PLUGIN_DIR/kicad_ai_assistant.py"
+```
+
+Use a **single `.py` file symlink** (recommended). KiCad loads `scripting/plugins/*.py` directly; a package directory is optional but less reliable on some setups.
+
+Restart KiCad PCB Editor after installing. The plugin opens a **non-modal** Assistant frame parented to the editor (same shell as `--ui`). Set `KICAD_AI_SRC` to your repo `src/` directory only if the symlink is broken or the repo moved.
+
 ### Unit tests (no KiCad)
 
 Unit and integration tests run outside KiCad using file-based fixtures and mocked providers. See [05_Testing.md](05_Testing.md) and [Master Task List](../../tasks/MASTER_TASK_LIST.md).

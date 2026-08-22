@@ -47,6 +47,25 @@ class ClaudeProvider:
         config: AppConfig | None = None,
     ) -> ProviderResponse:
         cfg = config or self._config
+        content = self._build_user_content(
+            prompt,
+            image=image,
+            image_media_type=image_media_type,
+        )
+        return self.send_messages(
+            [{"role": "user", "content": content}],
+            system=system,
+            config=cfg,
+        )
+
+    def send_messages(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        system: str | None = None,
+        config: AppConfig | None = None,
+    ) -> ProviderResponse:
+        cfg = config or self._config
         api_key = (cfg.anthropic_api_key or "").strip()
         if not api_key:
             raise AuthError(
@@ -54,13 +73,7 @@ class ClaudeProvider:
                 "anthropic_api_key in ~/kicad_ai_config.json."
             )
 
-        payload = self._build_payload(
-            prompt,
-            system=system,
-            image=image,
-            image_media_type=image_media_type,
-            config=cfg,
-        )
+        payload = self._build_messages_payload(messages, system=system, config=cfg)
         raw = self._post_json(
             payload,
             api_key=api_key,
@@ -69,17 +82,15 @@ class ClaudeProvider:
         )
         return self._parse_response(raw, model=cfg.claude_model)
 
-    def _build_payload(
-        self,
+    @staticmethod
+    def _build_user_content(
         prompt: str,
         *,
-        system: str | None,
         image: bytes | None,
         image_media_type: str,
-        config: AppConfig,
-    ) -> dict[str, Any]:
+    ) -> str | list[dict[str, Any]]:
         if image is not None:
-            content: str | list[dict[str, Any]] = [
+            return [
                 {
                     "type": "image",
                     "source": {
@@ -90,17 +101,43 @@ class ClaudeProvider:
                 },
                 {"type": "text", "text": prompt},
             ]
-        else:
-            content = prompt
+        return prompt
 
+    def _build_messages_payload(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        system: str | None,
+        config: AppConfig,
+    ) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "model": config.claude_model,
             "max_tokens": config.provider_max_tokens,
-            "messages": [{"role": "user", "content": content}],
+            "messages": messages,
         }
         if system:
             payload["system"] = system
         return payload
+
+    def _build_payload(
+        self,
+        prompt: str,
+        *,
+        system: str | None,
+        image: bytes | None,
+        image_media_type: str,
+        config: AppConfig,
+    ) -> dict[str, Any]:
+        content = self._build_user_content(
+            prompt,
+            image=image,
+            image_media_type=image_media_type,
+        )
+        return self._build_messages_payload(
+            [{"role": "user", "content": content}],
+            system=system,
+            config=config,
+        )
 
     def _post_json(
         self,
