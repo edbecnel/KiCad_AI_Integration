@@ -7,5 +7,8 @@
   "kicad_cli": "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli",
   "datasheet_url_fetch": "if_missing",
   "schematic_image_dpi": 600,
-  "provider_max_tokens": 4096
+  "provider_max_tokens": 4096,
+  "learning_auto_promote": true,
+  "learning_min_confidence": "high",
+  "learning_library_subdir": "circuit_families"
 }

@@ -12,6 +12,12 @@ from ekm.errors import EKMError, EKMIOError, EKMValidationError, EKMVersionError
 from ekm.io import document_summary, init_empty, load, load_json_file, save
 from ekm.model import EKMDocument, SUPPORTED_SCHEMA_VERSION
 from ekm.paths import EKM_DIR_NAME, EKM_FILENAME, ekm_path_for_project, resolve_ekm_path
+from ekm.prompt_context import (
+    EKMPromptBundle,
+    extract_ekm_family_id,
+    load_ekm_prompt_bundle,
+    load_ekm_sections_for_prompt,
+)
 from ekm.validate import assert_supported_version, validate_document, validate_document_data
 from ekm.view_model import EKMViewModel, FieldView, SearchHit, SectionView
 
@@ -21,6 +27,7 @@ __all__ = [
     "EKM_DIR_NAME",
     "EKM_FILENAME",
     "EKMDocument",
+    "EKMPromptBundle",
     "EKMError",
     "EKMIOError",
     "EKMValidationError",
@@ -35,10 +42,13 @@ __all__ = [
     "assert_supported_version",
     "document_summary",
     "ekm_path_for_project",
+    "extract_ekm_family_id",
     "get_field_editor_spec",
     "init_empty",
     "load",
     "load_json_file",
+    "load_ekm_prompt_bundle",
+    "load_ekm_sections_for_prompt",
     "plan_aerf_writeback",
     "resolve_ekm_path",
     "save",

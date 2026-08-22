@@ -546,6 +546,11 @@ def main_aerf_pipeline(
             _print_writeback_plan(result.writeback_plan)
         if result.ekm_path is not None:
             print(f"\nEKM saved: {result.ekm_path}")
+        if result.promotion_message:
+            if result.promoted_family_id:
+                print(f"Library promotion: {result.promoted_family_id} ({result.promotion_message})")
+            else:
+                print(f"Library promotion skipped: {result.promotion_message}")
     else:
         pipeline = run_aerf_pipeline(
             ctx,

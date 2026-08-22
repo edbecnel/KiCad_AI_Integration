@@ -148,7 +148,10 @@ def _collect_field_specs(
     specs: list[tuple[str, dict[str, Any]]] = []
 
     if 0 in stages:
-        value = _json_text(stages[0].get("determinations", {}))
+        determinations = stages[0].get("determinations", {})
+        if not isinstance(determinations, dict):
+            determinations = {}
+        value = _json_text(determinations)
         specs.append(
             (
                 "circuit_overview",
@@ -161,6 +164,20 @@ def _collect_field_specs(
                 ),
             )
         )
+        family_id = determinations.get("family_id")
+        if isinstance(family_id, str) and family_id.strip():
+            specs.append(
+                (
+                    "circuit_overview",
+                    _text_field(
+                        "aerf_family_id",
+                        label="AERF circuit family id",
+                        value=family_id.strip(),
+                        source="aerf_stage_0",
+                        approved_at=approved_at,
+                    ),
+                ),
+            )
 
     stages_1_3 = {sid: stages[sid] for sid in (1, 2, 3) if sid in stages}
     if stages_1_3:

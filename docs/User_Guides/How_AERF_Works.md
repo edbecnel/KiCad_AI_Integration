@@ -111,7 +111,9 @@ AERF uses the **same class of LLM** as a browser chatbot. The difference is **wo
 
 ## Limitations (today)
 
-- Only **Blocking Oscillator** circuit family KB is complete; classifier heuristics are coarse
+- Only **Blocking Oscillator** circuit family KB is fully curated in-repo; **generic** scaffold supports unknown topologies
+- **Learned** families auto-promote to `~/kicad_ai_library/circuit_families/` when confidence gates pass ([ADP-012](../Architecture/ADP-012-Learning-and-Canonical-Knowledge.md))
+- Project EKM auto-loads on subsequent AERF runs on the same project
 - Schematic connectivity is partial (net labels; full pin-level graph not yet in context)
 - Simulation **closed loop** (run sim → refine stages) is architecture-only ([ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md))
 - Chat (`general_review`) does not include full AERF methodology

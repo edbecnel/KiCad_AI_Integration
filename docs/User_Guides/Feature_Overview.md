@@ -240,7 +240,7 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | | |
 |---|---|
 | **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library; simulation/SUBCKT panel; PCB/BOM/ERC/DRC context; Assistant shell scaffold |
-| **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + **live Bedini validation**; EIE chat/simulation/AERF UI; Blocking Oscillator KB |
+| **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + **learning loop** (EKM reload, library promotion); EIE chat/simulation/AERF UI; Blocking Oscillator KB |
 | **In progress** | Phase 2 dockable plugin, simulation closed loop |
 | **Later** | Native plugin, additional hosts, conversation persistence via EKM |
 

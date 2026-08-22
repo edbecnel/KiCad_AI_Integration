@@ -44,6 +44,8 @@ class AERFDialog:
         self._family_id = "blocking_oscillator"
         self._current_stage = 0
         self._completed_stages: list[dict] = []
+        self._ekm_sections: dict | None = None
+        self._ekm_family_id: str | None = None
         self._built: BuiltPrompt | None = None
         self._approved = False
 
@@ -147,9 +149,18 @@ class AERFDialog:
         except OSError as exc:
             self._status.SetLabel(f"Context error: {exc}")
             return
+        from ekm.prompt_context import load_ekm_prompt_bundle
+
+        bundle = load_ekm_prompt_bundle(self._project_path)
+        self._ekm_sections = bundle.sections or None
+        self._ekm_family_id = bundle.family_id
+        if self._ekm_family_id and not self._txt_family.GetValue().strip():
+            self._txt_family.SetValue(self._ekm_family_id)
         self._family_id = self._txt_family.GetValue().strip() or "blocking_oscillator"
+        ekm_note = "EKM loaded" if self._ekm_sections else "no EKM"
         self._status.SetLabel(
-            f"Context ready — {self._ctx.project_name}. Preview or send stage {self._current_stage}."
+            f"Context ready — {self._ctx.project_name} ({ekm_note}). "
+            f"Preview or send stage {self._current_stage}."
         )
 
     def _on_preview(self, _event: wx.CommandEvent) -> None:
@@ -164,6 +175,7 @@ class AERFDialog:
             self._family_id,
             self._current_stage,
             prior_stages=self._completed_stages,
+            ekm_sections=self._ekm_sections,
             include_image=self._chk_image.GetValue(),
         )
         self._built = built
@@ -219,9 +231,26 @@ class AERFDialog:
             wx.MessageBox(str(exc), "EKM write-back error", wx.OK | wx.ICON_ERROR)
             return
 
+        promo_msg = ""
+        try:
+            from learning.family_promotion import try_auto_promote
+
+            promo = try_auto_promote(
+                self._completed_stages,
+                self._ctx,  # type: ignore[arg-type]
+                self._project_path,
+                config=self._cfg,
+            )
+            if promo.promoted:
+                promo_msg = f"\nPromoted to library family: {promo.family_id}"
+            elif promo.message != "auto_promote_disabled":
+                promo_msg = f"\nLibrary promotion skipped: {promo.message}"
+        except OSError as exc:
+            promo_msg = f"\nLibrary promotion error: {exc}"
+
         self._status.SetLabel(f"EKM updated — {saved}")
         wx.MessageBox(
-            f"Engineering knowledge saved to:\n{saved}",
+            f"Engineering knowledge saved to:\n{saved}{promo_msg}",
             "EKM write-back",
             wx.OK | wx.ICON_INFORMATION,
         )
@@ -250,6 +279,7 @@ class AERFDialog:
             self._family_id,
             self._current_stage,
             prior_stages=self._completed_stages,
+            ekm_sections=self._ekm_sections,
             include_image=self._chk_image.GetValue(),
         )
         self._built = built

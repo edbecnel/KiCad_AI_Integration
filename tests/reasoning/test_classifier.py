@@ -48,7 +48,7 @@ def test_classify_user_hint_override() -> None:
 def test_classify_low_confidence_empty_context() -> None:
     ctx = ProjectContext(project_path="/tmp/p", project_name="empty")
     result = classify_circuit_family(ctx)
-    assert result.family_id == "blocking_oscillator"
+    assert result.family_id == "generic"
     assert result.confidence == "low"
 
 

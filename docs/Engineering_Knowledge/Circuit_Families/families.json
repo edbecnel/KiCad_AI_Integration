@@ -10,6 +10,17 @@
         "net_keywords": ["trigger", "feedback", "coil", "oscillator", "flyback"],
         "min_score": 2
       }
+    },
+    {
+      "family_id": "generic",
+      "directory": "Generic",
+      "label": "Generic Circuit",
+      "status": "complete",
+      "recognition": {
+        "symbol_lib_patterns": [],
+        "net_keywords": [],
+        "min_score": 0
+      }
     }
   ]
 }

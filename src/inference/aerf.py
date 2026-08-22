@@ -117,7 +117,29 @@ def _resolve_aerf_config(
         datasheet_reset_quarantine_local_pdf=cfg.datasheet_reset_quarantine_local_pdf,
         datasheet_write_symbol_url=cfg.datasheet_write_symbol_url,
         spice_write_symbol_fields=cfg.spice_write_symbol_fields,
+        learning_auto_promote=cfg.learning_auto_promote,
+        learning_min_confidence=cfg.learning_min_confidence,
+        learning_library_subdir=cfg.learning_library_subdir,
     )
+
+
+def _resolve_ekm_for_aerf(
+    snapshot: DesignSnapshot,
+    ekm_sections: dict[str, Any] | None,
+    ekm_family_id: str | None,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Auto-load project EKM for AERF when caller did not supply sections."""
+    if ekm_sections is not None and ekm_family_id is not None:
+        return ekm_sections, ekm_family_id
+    project_path = getattr(snapshot, "project_path", None)
+    if not project_path:
+        return ekm_sections, ekm_family_id
+    from ekm.prompt_context import load_ekm_prompt_bundle
+
+    bundle = load_ekm_prompt_bundle(project_path)
+    sections = ekm_sections if ekm_sections is not None else (bundle.sections or None)
+    family_id = ekm_family_id or bundle.family_id
+    return sections, family_id
 
 
 def _snapshot_image(snapshot: DesignSnapshot, *, include_image: bool) -> bytes | None:
@@ -200,11 +222,14 @@ def classify_and_plan(
     *,
     user_hint: str | None = None,
     ekm_family_id: str | None = None,
+    config: AppConfig | None = None,
 ) -> tuple[FamilyClassification, AERFStagePlan]:
+    cfg = config or load_config()
     classification = classify_circuit_family(
         snapshot,
         user_hint=user_hint,
         ekm_family_id=ekm_family_id,
+        config=cfg,
     )
     plan = plan_stage(classification.family_id, stage_id, snapshot)
     return classification, plan
@@ -251,6 +276,7 @@ def build_stage0_bundle(
             stage_id=0,
             user_hint=user_hint,
             ekm_family_id=ekm_family_id,
+            config=load_config(),
         )
         resolved_family = classification.family_id
     return build_stage_bundle(
@@ -388,12 +414,21 @@ def run_aerf_pipeline(
     provider: Any | None = None,
 ) -> AERFPipelineResult:
     """Run AERF stages sequentially; accumulate parsed outputs in ``completed_stages``."""
+    ekm_sections, loaded_ekm_family = _resolve_ekm_for_aerf(
+        snapshot,
+        ekm_sections,
+        ekm_family_id,
+    )
+    if ekm_family_id is None:
+        ekm_family_id = loaded_ekm_family
+
     resolved_family = family_id
     if resolved_family is None:
         classification = classify_circuit_family(
             snapshot,
             user_hint=user_hint,
             ekm_family_id=ekm_family_id,
+            config=config or load_config(),
         )
         resolved_family = classification.family_id
 
@@ -448,6 +483,8 @@ class AERFPipelineWritebackResult:
     pipeline: AERFPipelineResult
     writeback_plan: AERFWritebackPlan
     ekm_path: Path | None = None
+    promotion_message: str | None = None
+    promoted_family_id: str | None = None
 
 
 def build_ekm_writeback_plan(pipeline_result: AERFPipelineResult) -> AERFWritebackPlan:
@@ -496,8 +533,24 @@ def run_aerf_pipeline_and_writeback(
         pipeline.completed_stages,
         approve=approve_ekm_writeback,
     )
+    promotion_message: str | None = None
+    promoted_family_id: str | None = None
+    if approve_ekm_writeback and pipeline.failed_at_stage is None and pipeline.completed_stages:
+        from learning.family_promotion import try_auto_promote
+
+        promo = try_auto_promote(
+            pipeline.completed_stages,
+            snapshot,
+            project_path,
+            config=config or load_config(),
+        )
+        promotion_message = promo.message
+        promoted_family_id = promo.family_id if promo.promoted else None
+
     return AERFPipelineWritebackResult(
         pipeline=pipeline,
         writeback_plan=writeback_plan,
         ekm_path=ekm_path,
+        promotion_message=promotion_message,
+        promoted_family_id=promoted_family_id,
     )

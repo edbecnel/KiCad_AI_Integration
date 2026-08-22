@@ -532,6 +532,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] Per-stage prompt templates (ADP-007)
 - [x] EKM stage-output mapping and write-back (ADP-007) — `src/ekm/aerf_writeback.py`
 - [ ] Simulation closed loop — validate/refine stages (ADP-006)
+- [x] AERF learning loop — EKM auto-reload, generic family, library merge, confidence-gated promotion ([ADP-012](../docs/Architecture/ADP-012-Learning-and-Canonical-Knowledge.md))
 - [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
 - [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
 

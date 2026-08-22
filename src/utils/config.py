@@ -24,6 +24,10 @@ DatasheetUrlFetchPolicy = Literal["if_missing", "always", "never"]
 DEFAULT_DATASHEET_URL_FETCH: DatasheetUrlFetchPolicy = "if_missing"
 AiProviderKind = Literal["claude"]
 
+LearningMinConfidence = Literal["high", "medium", "low"]
+DEFAULT_LEARNING_LIBRARY_SUBDIR = "circuit_families"
+DEFAULT_LEARNING_MIN_CONFIDENCE: LearningMinConfidence = "high"
+
 
 @dataclass
 class AppConfig:
@@ -49,6 +53,9 @@ class AppConfig:
     datasheet_reset_quarantine_local_pdf: bool = True
     datasheet_write_symbol_url: bool = False
     spice_write_symbol_fields: bool = True
+    learning_auto_promote: bool = True
+    learning_min_confidence: LearningMinConfidence = DEFAULT_LEARNING_MIN_CONFIDENCE
+    learning_library_subdir: str = DEFAULT_LEARNING_LIBRARY_SUBDIR
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AppConfig:
@@ -100,6 +107,11 @@ class AppConfig:
             ),
             datasheet_write_symbol_url=bool(data.get("datasheet_write_symbol_url", False)),
             spice_write_symbol_fields=bool(data.get("spice_write_symbol_fields", True)),
+            learning_auto_promote=bool(data.get("learning_auto_promote", True)),
+            learning_min_confidence=_parse_learning_min_confidence(data),
+            learning_library_subdir=str(
+                data.get("learning_library_subdir", DEFAULT_LEARNING_LIBRARY_SUBDIR)
+            ),
         )
 
 
@@ -108,6 +120,13 @@ def _parse_ai_provider(data: dict[str, Any]) -> AiProviderKind:
     if provider == "claude":
         return "claude"
     return DEFAULT_AI_PROVIDER
+
+
+def _parse_learning_min_confidence(data: dict[str, Any]) -> LearningMinConfidence:
+    value = str(data.get("learning_min_confidence", DEFAULT_LEARNING_MIN_CONFIDENCE)).lower()
+    if value in ("high", "medium", "low"):
+        return value  # type: ignore[return-value]
+    return DEFAULT_LEARNING_MIN_CONFIDENCE
 
 
 def _parse_datasheet_url_fetch(data: dict[str, Any]) -> DatasheetUrlFetchPolicy:

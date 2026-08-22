@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 from platform_core.contracts import DesignSnapshot
 from reasoning.family_registry import CircuitFamily, load_families
+from utils.config import AppConfig, load_config
 
 ConfidenceLevel = Literal["high", "medium", "low"]
+CLASSIFIABLE_STATUSES = frozenset({"complete", "learned"})
 
 
 @dataclass(frozen=True)
@@ -82,7 +85,7 @@ def _score_family(
     for keyword in rules.net_keywords:
         if keyword.lower() in net_blob:
             score += 1
-            tag = f"net:{keyword.lower()}"
+            tag = f"net:{keyword}"
             if tag not in basis:
                 basis.append(tag)
 
@@ -90,7 +93,7 @@ def _score_family(
 
 
 def _confidence_for_score(score: int, min_score: int) -> ConfidenceLevel:
-    if score >= min_score + 1:
+    if score >= min_score + 2:
         return "high"
     if score >= min_score:
         return "medium"
@@ -109,30 +112,67 @@ def _hint_matches_family(user_hint: str, family: CircuitFamily) -> bool:
     return any(hint in c or c in hint for c in candidates)
 
 
+def _classifiable_families(config: AppConfig | None = None) -> list[CircuitFamily]:
+    cfg = config or load_config()
+    return [
+        family
+        for family in load_families(library_path=cfg.artifact_library_path, config=cfg)
+        if family.status in CLASSIFIABLE_STATUSES
+    ]
+
+
+def _generic_family(config: AppConfig | None = None) -> CircuitFamily | None:
+    cfg = config or load_config()
+    try:
+        from reasoning.family_registry import get_family
+
+        return get_family(
+            "generic",
+            library_path=cfg.artifact_library_path,
+            config=cfg,
+        )
+    except KeyError:
+        return None
+
+
 def classify_circuit_family(
     snapshot: DesignSnapshot,
     *,
     user_hint: str | None = None,
     ekm_family_id: str | None = None,
+    library_path: Path | None = None,
+    config: AppConfig | None = None,
 ) -> FamilyClassification:
     """Classify circuit family from a design snapshot using manifest heuristics."""
+    cfg = config or load_config()
+    lib = library_path or cfg.artifact_library_path
     snapshot_data = snapshot.to_dict(include_image_bytes=False)
-    complete = [f for f in load_families() if f.status == "complete"]
+    classifiable = _classifiable_families(cfg)
 
-    if not complete:
-        raise ValueError("No complete circuit families in manifest")
+    if not classifiable:
+        generic = _generic_family(cfg)
+        if generic is None:
+            raise ValueError("No classifiable circuit families in manifest")
+        return FamilyClassification(
+            family_id=generic.family_id,
+            family_label=generic.label,
+            confidence="low",
+            recognition_basis=["fallback_generic"],
+        )
 
     scored: list[tuple[CircuitFamily, int, list[str]]] = []
-    for family in complete:
+    for family in classifiable:
+        if family.family_id == "generic":
+            continue
         score, basis = _score_family(family, snapshot_data)
         scored.append((family, score, basis))
 
     scored.sort(key=lambda item: item[1], reverse=True)
-    best_family, best_score, best_basis = scored[0]
+    best_family, best_score, best_basis = scored[0] if scored else (classifiable[0], 0, [])
     min_score = (best_family.recognition.min_score if best_family.recognition else 1)
 
     if user_hint:
-        for family in complete:
+        for family in classifiable:
             if _hint_matches_family(user_hint, family):
                 hint_basis = list(best_basis)
                 if "user_hint" not in hint_basis:
@@ -146,7 +186,7 @@ def classify_circuit_family(
                 )
 
     if ekm_family_id:
-        for family in complete:
+        for family in classifiable:
             if family.family_id == ekm_family_id:
                 ekm_basis = list(best_basis)
                 if "ekm_prior" not in ekm_basis:
@@ -161,6 +201,17 @@ def classify_circuit_family(
                     alternatives=_alternatives(scored, family.family_id),
                     recognition_basis=ekm_basis,
                 )
+
+    if best_score < min_score:
+        generic = _generic_family(cfg)
+        if generic is not None:
+            return FamilyClassification(
+                family_id=generic.family_id,
+                family_label=generic.label,
+                confidence="low",
+                alternatives=_alternatives(scored, generic.family_id),
+                recognition_basis=["low_recognition_score", *best_basis],
+            )
 
     confidence = _confidence_for_score(best_score, min_score)
     return FamilyClassification(
