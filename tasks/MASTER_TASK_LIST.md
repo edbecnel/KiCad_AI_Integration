@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with all five embedded tabs, KiCad ActionPlugin entry, multi-turn Chat with disk persistence (`kicad_ai/conversation.json`), centralized context (`ContextController`), simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase 1.5 live KiCad API extractors, incremental context refresh between chat turns, multi-provider settings UI.
+**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with all five embedded tabs, KiCad ActionPlugin entry, multi-turn Chat with disk persistence and incremental context refresh, centralized context (`ContextController`), multi-provider settings (Claude + Ollama), simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase 1.5 live KiCad API extractors.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -318,8 +318,8 @@ response without manual export/copy-paste.
 
 ### Incremental context
 
-- [ ] Detect project changes between conversation turns
-- [ ] Refresh only modified context layers instead of full re-extract every message
+- [x] Detect project changes between conversation turns — `context/fingerprint.py`
+- [x] Refresh only modified context layers instead of full re-extract every message — `context/incremental.py`
 
 ### Enhanced UX
 
@@ -327,13 +327,13 @@ response without manual export/copy-paste.
 - [x] Prompt template library (user-selectable from UI) — Chat template dropdown
 - [x] Token usage display per request — conversation log + status line
 - [x] Cost estimation per model — `conversation/pricing.py`
-- [ ] Context caching across conversation turns (static project data)
+- [x] Context caching across conversation turns (static project data) — `kicad_ai/context_cache.json`
 
 ### Multi-provider support
 
-- [ ] Provider profile switching in settings UI
-- [ ] Implement at least one additional provider (e.g. OpenAI or Ollama) via abstraction layer
-- [ ] Model selection per provider
+- [x] Provider profile switching in settings UI — `ui/settings_dialog.py`, shell **Settings…** button
+- [x] Implement at least one additional provider (e.g. OpenAI or Ollama) via abstraction layer — `providers/ollama.py`
+- [x] Model selection per provider — Claude model + Ollama model fields in settings
 
 **Phase 2 exit criteria:** Dockable in-editor Assistant shell with conversation history, template
 library, token/cost visibility, and provider profile switching.
@@ -567,7 +567,6 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [ ] Dockable KiCad action plugin shell (Phase 2; widget ready in `src/ui/notebook_panel.py`)
 
 ---
-
 
 ## Track E — Routing Abstraction (ADP-013)
 

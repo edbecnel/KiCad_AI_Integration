@@ -5,6 +5,7 @@ from __future__ import annotations
 import threading
 from pathlib import Path
 
+from context.context_cache import save_context_cache
 from context.model import ProjectContext
 from context.context_flags import ContextIncludeFlags
 from conversation.store import get_session_store
@@ -16,7 +17,7 @@ from ui.chat_supply import (
     collect_chat_context,
     send_chat_prompt,
 )
-from inference.chat import build_followup_prompt
+from inference.chat import build_followup_prompt, prepare_followup_context
 from utils.config import load_config
 
 try:
@@ -307,6 +308,22 @@ class ChatShell(wx.Panel):
 
         session = self._session()
         is_followup = bool(session.turns)
+        dirty_layers: set[str] = set()
+        cache_entry = None
+        if is_followup:
+            self._ctx, dirty_layers, cache_entry = prepare_followup_context(
+                self._ctx,  # type: ignore[arg-type]
+                self._project_path,
+                config=self._cfg,
+                include_flags=self._context_flags(),
+                include_image=self._chk_image.GetValue(),
+            )
+            if dirty_layers:
+                self._status.SetLabel(
+                    f"Project changed — refreshed: {', '.join(sorted(dirty_layers))}"
+                )
+                self.Layout()
+
         approve_text = (
             "Send this follow-up question to Anthropic?\n\n"
             "Prior conversation turns will be included."
@@ -334,6 +351,9 @@ class ChatShell(wx.Panel):
                 question,
                 functional_description=intent,
                 template=template,
+                project_path=self._project_path,
+                dirty_layers=dirty_layers,
+                cache_entry=cache_entry,
             )
         else:
             built = build_chat_prompt(
@@ -404,6 +424,12 @@ class ChatShell(wx.Panel):
             model=result.response.model,
         )
         self._session_store.save(self._project_path)
+        if session.user_turn_count == 1:
+            save_context_cache(
+                self._project_path,
+                self._ctx,  # type: ignore[arg-type]
+                prompt_excerpt=api_content[:2000] if api_content else None,
+            )
         self._sending = False
         self._btn_send.Enable(True)
         if not self._embedded:

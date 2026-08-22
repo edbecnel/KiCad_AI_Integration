@@ -16,6 +16,8 @@ DEFAULT_URL_FETCH_WARMUP = True
 DEFAULT_CONFIG_FILENAME = "kicad_ai_config.json"
 DEFAULT_AI_PROVIDER = "claude"
 DEFAULT_CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
+DEFAULT_OLLAMA_MODEL = "llama3.2"
 DEFAULT_PROVIDER_TIMEOUT_SEC = 120
 DEFAULT_PROVIDER_READ_TIMEOUT_SEC = 600
 DEFAULT_PROVIDER_MAX_TOKENS = 4096
@@ -23,7 +25,7 @@ DEFAULT_ROUTING_TIMEOUT_SEC = 600
 
 DatasheetUrlFetchPolicy = Literal["if_missing", "always", "never"]
 DEFAULT_DATASHEET_URL_FETCH: DatasheetUrlFetchPolicy = "if_missing"
-AiProviderKind = Literal["claude"]
+AiProviderKind = Literal["claude", "ollama"]
 
 LearningMinConfidence = Literal["high", "medium", "low"]
 DEFAULT_LEARNING_LIBRARY_SUBDIR = "circuit_families"
@@ -45,6 +47,8 @@ class AppConfig:
     anthropic_api_key: str | None = None
     ai_provider: AiProviderKind = DEFAULT_AI_PROVIDER
     claude_model: str = DEFAULT_CLAUDE_MODEL
+    ollama_base_url: str = DEFAULT_OLLAMA_BASE_URL
+    ollama_model: str = DEFAULT_OLLAMA_MODEL
     provider_timeout_sec: int = DEFAULT_PROVIDER_TIMEOUT_SEC
     provider_read_timeout_sec: int = DEFAULT_PROVIDER_READ_TIMEOUT_SEC
     provider_max_tokens: int = DEFAULT_PROVIDER_MAX_TOKENS
@@ -61,6 +65,39 @@ class AppConfig:
     freerouting_cli: str | None = None
     routing_enabled: bool = False
     routing_timeout_sec: int = DEFAULT_ROUTING_TIMEOUT_SEC
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "artifact_library_path": str(self.artifact_library_path),
+            "datasheet_search_paths": [str(p) for p in self.datasheet_search_paths],
+            "schematic_image_dpi": self.schematic_image_dpi,
+            "datasheet_url_fetch": self.datasheet_url_fetch,
+            "url_fetch_timeout_sec": self.url_fetch_timeout_sec,
+            "url_fetch_read_timeout_sec": self.url_fetch_read_timeout_sec,
+            "url_fetch_warmup": self.url_fetch_warmup,
+            "kicad_cli": self.kicad_cli,
+            "anthropic_api_key": self.anthropic_api_key,
+            "ai_provider": self.ai_provider,
+            "claude_model": self.claude_model,
+            "ollama_base_url": self.ollama_base_url,
+            "ollama_model": self.ollama_model,
+            "provider_timeout_sec": self.provider_timeout_sec,
+            "provider_read_timeout_sec": self.provider_read_timeout_sec,
+            "provider_max_tokens": self.provider_max_tokens,
+            "datasheet_ai_discovery": self.datasheet_ai_discovery,
+            "datasheet_ai_discovery_auto_fetch": self.datasheet_ai_discovery_auto_fetch,
+            "datasheet_ai_discovery_max_urls": self.datasheet_ai_discovery_max_urls,
+            "datasheet_reset_quarantine_local_pdf": self.datasheet_reset_quarantine_local_pdf,
+            "datasheet_write_symbol_url": self.datasheet_write_symbol_url,
+            "spice_write_symbol_fields": self.spice_write_symbol_fields,
+            "learning_auto_promote": self.learning_auto_promote,
+            "learning_min_confidence": self.learning_min_confidence,
+            "learning_library_subdir": self.learning_library_subdir,
+            "freerouting_jar": self.freerouting_jar,
+            "freerouting_cli": self.freerouting_cli,
+            "routing_enabled": self.routing_enabled,
+            "routing_timeout_sec": self.routing_timeout_sec,
+        }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AppConfig:
@@ -91,6 +128,8 @@ class AppConfig:
             or os.environ.get("ANTHROPIC_API_KEY"),
             ai_provider=_parse_ai_provider(data),
             claude_model=str(data.get("claude_model", DEFAULT_CLAUDE_MODEL)),
+            ollama_base_url=str(data.get("ollama_base_url", DEFAULT_OLLAMA_BASE_URL)),
+            ollama_model=str(data.get("ollama_model", DEFAULT_OLLAMA_MODEL)),
             provider_timeout_sec=int(
                 data.get("provider_timeout_sec", DEFAULT_PROVIDER_TIMEOUT_SEC)
             ),
@@ -128,8 +167,8 @@ class AppConfig:
 
 def _parse_ai_provider(data: dict[str, Any]) -> AiProviderKind:
     provider = str(data.get("ai_provider", DEFAULT_AI_PROVIDER)).lower()
-    if provider == "claude":
-        return "claude"
+    if provider in ("claude", "ollama"):
+        return provider  # type: ignore[return-value]
     return DEFAULT_AI_PROVIDER
 
 
@@ -204,3 +243,14 @@ def load_config(config_path: Path | None = None) -> AppConfig:
         )
 
     return AppConfig.from_dict(merged)
+
+
+def default_config_path() -> Path:
+    return Path.home() / DEFAULT_CONFIG_FILENAME
+
+
+def save_config(config: AppConfig, config_path: Path | None = None) -> Path:
+    """Write user preferences to the local config file."""
+    path = (config_path or default_config_path()).expanduser()
+    path.write_text(json.dumps(config.to_dict(), indent=2) + "\n", encoding="utf-8")
+    return path

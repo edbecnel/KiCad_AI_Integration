@@ -16,6 +16,10 @@ All notable changes to this project will be documented in this file.
 - Engineering Engine Provider pattern documented in Platform Architecture (watch item)
 - Freerouting config: `freerouting_jar`, `freerouting_cli`, `routing_enabled`, `routing_timeout_sec`
 
+- Incremental context refresh (`context/fingerprint.py`, `context/incremental.py`) and static context cache (`kicad_ai/context_cache.json`)
+- Ollama provider (`providers/ollama.py`) and Settings dialog for multi-provider configuration
+- Phase 2 exit criteria: provider profile switching and incremental context between chat turns
+
 - ADR-0004: Optional multimodal schematic context (600 DPI default via `kicad-cli` + `pdftoppm`)
 - [Prompt Architecture](docs/Architecture/Prompt_Architecture.md): multimodal context and netlist gap-fill prompt sections
 - [Netlist Gap Fill](docs/Specifications/Netlist_Gap_Fill.md) specification (Draft)

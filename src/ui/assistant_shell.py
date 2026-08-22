@@ -20,6 +20,7 @@ from ui.project_path import normalize_launcher_project_path
 from ui.notebook_tab import NotebookTab
 from ui.simulation_tab import SimulationTab
 from ui.shell_preferences import get_last_tab, set_last_tab
+from ui.settings_dialog import show_settings_dialog
 from utils.config import load_config
 
 try:
@@ -77,8 +78,10 @@ class AssistantShell(wx.Panel):
         path_row.Add(self._txt_path, proportion=1, flag=wx.RIGHT, border=6)
         self._btn_browse = wx.Button(self, label="Browse…")
         self._btn_refresh = wx.Button(self, label="Refresh context")
+        self._btn_settings = wx.Button(self, label="Settings…")
         path_row.Add(self._btn_browse, flag=wx.RIGHT, border=4)
-        path_row.Add(self._btn_refresh)
+        path_row.Add(self._btn_refresh, flag=wx.RIGHT, border=4)
+        path_row.Add(self._btn_settings)
         vbox.Add(path_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         self._summary = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
@@ -113,6 +116,7 @@ class AssistantShell(wx.Panel):
 
         self._btn_browse.Bind(wx.EVT_BUTTON, self._on_browse)
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
+        self._btn_settings.Bind(wx.EVT_BUTTON, self._on_settings)
         self._notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_tab_changed)
         self.Bind(wx.EVT_CHAR_HOOK, self._on_char_hook)
 
@@ -152,6 +156,12 @@ class AssistantShell(wx.Panel):
         if dlg.ShowModal() == wx.ID_OK:
             self._txt_path.SetValue(dlg.GetPath())
         dlg.Destroy()
+
+    def _on_settings(self, _event: wx.CommandEvent) -> None:
+        saved = show_settings_dialog(self, config=self._controller._config or load_config())
+        if saved is not None:
+            self._controller._config = saved
+            self._status.SetLabel(f"Settings saved — provider: {saved.ai_provider}")
 
     def _on_refresh(self, _event: wx.CommandEvent | None) -> None:
         try:

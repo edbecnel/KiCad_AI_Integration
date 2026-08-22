@@ -7,7 +7,18 @@ from pathlib import Path
 from typing import Any
 
 from context.collector import collect_stretch_context
+from context.context_cache import (
+    ContextCacheEntry,
+    cache_matches_project,
+    load_context_cache,
+    save_context_cache,
+)
 from context.context_flags import ContextIncludeFlags
+from context.incremental import (
+    detect_dirty_layers,
+    layers_for_flags,
+    refresh_context_layers,
+)
 from context.model import ProjectContext
 from conversation.session import ChatSession
 from prompts import (
@@ -84,12 +95,45 @@ def build_chat_prompt(
     )
 
 
+def prepare_followup_context(
+    ctx: ProjectContext,
+    project_path: Path | str,
+    *,
+    config: AppConfig | None = None,
+    include_flags: ContextIncludeFlags | None = None,
+    include_image: bool = False,
+    auto_refresh: bool = True,
+) -> tuple[ProjectContext, set[str], ContextCacheEntry | None]:
+    """
+    Detect dirty layers and optionally refresh them before a follow-up send.
+
+    Returns updated context, set of layers that were dirty, and cache entry if valid.
+    """
+    flags = include_flags or ContextIncludeFlags()
+    relevant = layers_for_flags(flags)
+    dirty = detect_dirty_layers(project_path) & relevant
+    updated = ctx
+    if dirty and auto_refresh:
+        updated = refresh_context_layers(
+            ctx,
+            project_path,
+            dirty,
+            config=config,
+            include_image=include_image and "image" in dirty,
+        )
+    cache_entry = load_context_cache(project_path) if cache_matches_project(project_path) else None
+    return updated, dirty, cache_entry
+
+
 def build_followup_prompt(
     ctx: ProjectContext,
     question: str,
     *,
     functional_description: str | None = None,
     template: str = "general_review",
+    project_path: Path | str | None = None,
+    dirty_layers: set[str] | None = None,
+    cache_entry: ContextCacheEntry | None = None,
 ) -> BuiltPrompt:
     """Build a lighter follow-up prompt for multi-turn chat."""
     template_prompt = build_chat_prompt(
@@ -99,20 +143,39 @@ def build_followup_prompt(
         include_image=False,
         template=template,
     )
-    snapshot_parts = [
-        f"Project: {ctx.project_name}",
-        f"Symbols: {len(ctx.symbols)}",
-    ]
-    if ctx.netlist_summary:
-        line = ctx.netlist_summary.get("status_line")
-        if line:
-            snapshot_parts.append(str(line))
-    snapshot = "; ".join(snapshot_parts)
-    body = (
-        "Follow-up question in an ongoing conversation. "
-        "Full project context was provided in the first turn.\n\n"
-        f"Current project snapshot: {snapshot}\n\n"
+
+    use_cache = (
+        cache_entry is not None
+        and (dirty_layers is None or not dirty_layers)
+        and project_path is not None
+        and cache_matches_project(project_path)
     )
+
+    if use_cache and cache_entry is not None:
+        snapshot = cache_entry.snapshot.format_summary()
+        body = (
+            "Follow-up question in an ongoing conversation. "
+            "Full project context was provided in the first turn.\n\n"
+            f"Cached project snapshot: {snapshot}\n\n"
+        )
+    else:
+        snapshot_parts = [
+            f"Project: {ctx.project_name}",
+            f"Symbols: {len(ctx.symbols)}",
+        ]
+        if ctx.netlist_summary:
+            line = ctx.netlist_summary.get("status_line")
+            if line:
+                snapshot_parts.append(str(line))
+        snapshot = "; ".join(snapshot_parts)
+        body = (
+            "Follow-up question in an ongoing conversation. "
+            "Full project context was provided in the first turn.\n\n"
+            f"Current project snapshot: {snapshot}\n\n"
+        )
+        if dirty_layers:
+            body += f"Updated layers since last turn: {', '.join(sorted(dirty_layers))}\n\n"
+
     if functional_description:
         body += f"Design intent: {functional_description}\n\n"
     body += f"Question: {question}"

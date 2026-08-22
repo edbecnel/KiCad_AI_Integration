@@ -10,6 +10,7 @@ from providers.errors import (
     TimeoutError,
 )
 from providers.factory import get_provider
+from providers.ollama import OllamaProvider
 from providers.types import ProviderKind, ProviderResponse, TokenUsage
 
 __all__ = [
@@ -17,6 +18,7 @@ __all__ = [
     "BaseProvider",
     "ClaudeProvider",
     "MalformedResponseError",
+    "OllamaProvider",
     "ProviderError",
     "ProviderKind",
     "ProviderResponse",

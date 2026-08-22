@@ -5,9 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
+from context.context_cache import save_context_cache
+from context.context_flags import ContextIncludeFlags
 from context.model import ProjectContext
 from conversation.session import ChatSession
-from inference.chat import build_followup_prompt, send_chat_prompt
+from inference.chat import build_followup_prompt, prepare_followup_context, send_chat_prompt
 from prompts import BuiltPrompt
 from providers.types import ProviderResponse, TokenUsage
 
@@ -28,6 +30,52 @@ def test_build_followup_prompt_is_lighter_than_first_turn() -> None:
     assert "test" in first.text
     assert first.include_image is False
     assert first.system is not None
+
+
+def test_build_followup_prompt_uses_cache_when_provided(tmp_path: Path) -> None:
+    pro = tmp_path / "test.kicad_pro"
+    sch = tmp_path / "test.kicad_sch"
+    pro.write_text("{}", encoding="utf-8")
+    sch.write_text("sch", encoding="utf-8")
+
+    ctx = ProjectContext(
+        project_path=str(pro),
+        project_name="test",
+        symbols=[],
+        netlist_summary={"status_line": "SPICE netlist: 10 lines"},
+    )
+    entry = save_context_cache(pro, ctx)
+    built = build_followup_prompt(
+        ctx,
+        "What is U3?",
+        template="general_review",
+        project_path=pro,
+        dirty_layers=set(),
+        cache_entry=entry,
+    )
+    assert "Cached project snapshot" in built.text
+    assert "Follow-up question" in built.text
+
+
+def test_prepare_followup_context_refreshes_dirty_layers(tmp_path: Path) -> None:
+    pro = tmp_path / "test.kicad_pro"
+    sch = tmp_path / "test.kicad_sch"
+    pro.write_text("{}", encoding="utf-8")
+    sch.write_text("v1", encoding="utf-8")
+
+    from context.fingerprint import compute_fingerprint, save_fingerprint
+
+    save_fingerprint(compute_fingerprint(pro))
+    sch.write_text("v2", encoding="utf-8")
+
+    ctx = ProjectContext(project_path=str(pro), project_name="test", symbols=[])
+    updated, dirty, _cache = prepare_followup_context(
+        ctx,
+        pro,
+        include_flags=ContextIncludeFlags(schematic=True),
+    )
+    assert "schematic" in dirty
+    assert updated is not None
 
 
 def test_send_chat_prompt_uses_send_messages_on_followup() -> None:

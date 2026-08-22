@@ -6,6 +6,9 @@ from collections.abc import Callable
 from pathlib import Path
 
 from context.collector import collect_stretch_context
+from context.context_cache import save_context_cache
+from context.fingerprint import compute_fingerprint, save_fingerprint
+from context.incremental import refresh_context_layers
 from context.model import ProjectContext
 from ui.project_path import format_launcher_context_summary
 from utils.config import AppConfig, load_config
@@ -36,6 +39,7 @@ class ContextController:
         try:
             ctx = collect_stretch_context(pro, config=cfg, verbose=False)
             summary = format_launcher_context_summary(pro, ctx, cfg=cfg)
+            save_fingerprint(compute_fingerprint(pro))
         except OSError as exc:
             self.last_error = str(exc)
             self.project_path = None
@@ -48,3 +52,33 @@ class ContextController:
         self.summary_text = summary
         for listener in self._listeners:
             listener(ctx, summary)
+
+    def refresh_layers(self, layers: set[str], *, include_image: bool = False) -> bool:
+        """Partially refresh dirty layers on the current context."""
+        if self.context is None or self.project_path is None or not layers:
+            return False
+        cfg = self._config or load_config()
+        try:
+            ctx = refresh_context_layers(
+                self.context,
+                self.project_path,
+                layers,
+                config=cfg,
+                include_image=include_image,
+            )
+            summary = format_launcher_context_summary(self.project_path, ctx, cfg=cfg)
+        except OSError as exc:
+            self.last_error = str(exc)
+            return False
+
+        self.context = ctx
+        self.summary_text = summary
+        for listener in self._listeners:
+            listener(ctx, summary)
+        return True
+
+    def save_context_cache(self, *, prompt_excerpt: str | None = None) -> None:
+        """Persist static context snapshot after a successful chat turn."""
+        if self.context is None or self.project_path is None:
+            return
+        save_context_cache(self.project_path, self.context, prompt_excerpt=prompt_excerpt)

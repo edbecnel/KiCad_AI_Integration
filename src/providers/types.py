@@ -10,6 +10,7 @@ class ProviderKind(str, Enum):
     """Supported AI provider backends."""
 
     CLAUDE = "claude"
+    OLLAMA = "ollama"
 
 
 @dataclass
