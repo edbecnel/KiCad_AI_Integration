@@ -161,3 +161,22 @@ def show_launcher_dialog(
 
     ensure_wx_app()
     _show(project_path)
+
+
+def show_assistant_shell(
+    project_path: Path | str | None = None,
+    *,
+    parent: object | None = None,
+    focus_tab: str | None = None,
+    open_focus_panel: bool = False,
+) -> None:
+    """Open the unified Assistant shell (ADP-011)."""
+    from ui.assistant_shell import show_assistant_shell as _show
+
+    ensure_wx_app()
+    _show(
+        project_path,
+        parent=parent,
+        focus_tab=focus_tab,
+        open_focus_panel=open_focus_panel,
+    )

@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell scaffold, schematic context with pin connectivity and gap detection, chat UI with audit templates, simulation/SUBCKT panel, AERF staged analysis, Engineering Notebook, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase 1.5 live KiCad API extractors; Phase 2 native plugin and embedded Assistant tabs.
+**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with centralized context (`ContextController`), embedded Notebook tab, chat UI with audit templates, simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **In progress:** Phase 2 — remaining embedded tabs, KiCad action plugin, Conversation Manager. **Still open:** Phase 1.5 live KiCad API extractors.
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -300,8 +300,10 @@ response without manual export/copy-paste.
 
 ### Dockable Assistant shell
 
-- [x] **Assistant shell scaffold** — shared header + tab bar; tabs open existing modal panels (`src/ui/assistant_shell.py`, `--ui`) — [ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md) partial
-- [ ] **Embedded tab UIs + KiCad dock** — replace modal opens with in-shell panels; dockable plugin host
+- [x] **Assistant shell scaffold** — shared header + tab bar (`src/ui/assistant_shell.py`, `--ui`) — [ADP-011](../docs/Architecture/ADP-011-Assistant-Shell-UI.md) partial
+- [x] **ADP-011 Phase A** — `ContextController` (`src/ui/context_controller.py`), `AssistantFrame`, `AssistantDockPanel` stub, embedded **Notebook** tab (`NotebookTab`); Chat/Datasheets/Simulation/AERF remain placeholder + modal fallback
+- [ ] **Embedded tab UIs (remaining)** — migrate Chat, Datasheets, Simulation, AERF from modals to in-shell panels
+- [ ] **KiCad action plugin** — register dockable `AssistantDockPanel` in `src/plugin/`
 - [ ] Persistent wx panel dockable alongside schematic/PCB editor (hosts `AssistantShell`)
 - [ ] Non-blocking UI (API calls on background thread)
 - [ ] Resize-friendly layout

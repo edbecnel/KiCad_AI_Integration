@@ -1,0 +1,50 @@
+"""Centralized project context collection for the Assistant shell (ADP-011)."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from pathlib import Path
+
+from context.collector import collect_stretch_context
+from context.model import ProjectContext
+from ui.launcher_dialog import format_launcher_context_summary
+from utils.config import AppConfig, load_config
+
+ContextListener = Callable[[ProjectContext, str], None]
+
+
+class ContextController:
+    """Owns ProjectContext refresh and notifies Assistant tab panels."""
+
+    def __init__(self, *, config: AppConfig | None = None) -> None:
+        self.project_path: Path | None = None
+        self.context: ProjectContext | None = None
+        self.summary_text: str = ""
+        self.last_error: str | None = None
+        self._config = config
+        self._listeners: list[ContextListener] = []
+
+    def bind_listener(self, callback: ContextListener) -> None:
+        """Register a callback invoked after each successful refresh."""
+        self._listeners.append(callback)
+
+    def refresh(self, project_path: Path) -> None:
+        """Collect context once and notify listeners."""
+        self.last_error = None
+        pro = Path(project_path).expanduser().resolve()
+        cfg = self._config or load_config()
+        try:
+            ctx = collect_stretch_context(pro, config=cfg, verbose=False)
+            summary = format_launcher_context_summary(pro, ctx, cfg=cfg)
+        except OSError as exc:
+            self.last_error = str(exc)
+            self.project_path = None
+            self.context = None
+            self.summary_text = ""
+            return
+
+        self.project_path = pro
+        self.context = ctx
+        self.summary_text = summary
+        for listener in self._listeners:
+            listener(ctx, summary)

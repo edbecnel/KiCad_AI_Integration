@@ -14,8 +14,10 @@ def ekm_path_for_project(project_dir: Path) -> Path:
 
 
 def resolve_ekm_path(path: Path) -> Path:
-    """Resolve a path that may be a project dir or an EKM JSON file."""
+    """Resolve a path that may be a project dir, .kicad_pro file, or an EKM JSON file."""
     p = Path(path).expanduser().resolve()
+    if p.suffix == ".kicad_pro":
+        return ekm_path_for_project(p.parent)
     if p.is_dir():
         return ekm_path_for_project(p)
     return p

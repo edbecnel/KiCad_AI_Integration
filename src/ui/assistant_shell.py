@@ -1,16 +1,20 @@
-"""Unified Assistant shell (ADP-011 scaffold) — tabbed frame with shared project header."""
+"""Unified Assistant shell (ADP-011) — embedded tabbed panel with shared project header."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 from ui.aerf_dialog import show_aerf_dialog
+from ui.assistant_tab import ASSISTANT_TAB_IDS, AssistantTabPanel, tab_index_for_focus
 from ui.chat_dialog import show_chat_dialog
+from ui.context_controller import ContextController
 from ui.launcher import ensure_wx_app, resolve_project_pro_path
-from ui.launcher_dialog import build_launcher_context_summary, normalize_launcher_project_path
+from ui.launcher_dialog import normalize_launcher_project_path
 from ui.missing_datasheets_dialog import show_missing_datasheets_dialog
-from ui.notebook_dialog import show_notebook_dialog
+from ui.notebook_tab import NotebookTab
+from ui.placeholder_tab import PlaceholderTab
 from ui.simulation_dialog import show_simulation_dialog
+from utils.config import load_config
 
 try:
     import wx
@@ -18,100 +22,140 @@ except ImportError:  # pragma: no cover
     wx = None  # type: ignore[assignment]
 
 
-class AssistantShellFrame:
-    """Non-modal shell with shared project path and feature tabs."""
+class AssistantShell(wx.Panel):
+    """Shared header, context controller, and feature tabs."""
 
     def __init__(
         self,
-        parent: wx.Window | None,
+        parent: wx.Window,
         initial_path: Path | str | None = None,
         *,
         focus_tab: str | None = None,
     ) -> None:
         if wx is None:
-            raise RuntimeError("wxPython is required for AssistantShellFrame")
-        self._frame = wx.Frame(
-            parent,
-            title="KiCad AI Assistant",
-            size=(820, 680),
-            style=wx.DEFAULT_FRAME_STYLE,
-        )
-        panel = wx.Panel(self._frame)
+            raise RuntimeError("wxPython is required for AssistantShell")
+        super().__init__(parent)
+        self._controller = ContextController(config=load_config())
+        self._controller.bind_listener(self._on_context_refreshed)
+        self._tabs: dict[str, AssistantTabPanel] = {}
+        self._placeholder_tabs: dict[str, PlaceholderTab] = {}
+        self._notebook_tab: NotebookTab | None = None
+
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         intro = wx.StaticText(
-            panel,
+            self,
             label=(
                 "Unified Assistant shell — shared project context and feature tabs. "
-                "Each tab opens the feature panel as a child window."
+                "Notebook is embedded; other tabs open legacy panels until Sprint 2."
             ),
         )
         intro.Wrap(760)
         vbox.Add(intro, flag=wx.ALL, border=8)
 
         path_row = wx.BoxSizer(wx.HORIZONTAL)
-        path_row.Add(wx.StaticText(panel, label="Project:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=6)
-        self._txt_path = wx.TextCtrl(panel)
+        path_row.Add(wx.StaticText(self, label="Project:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=6)
+        self._txt_path = wx.TextCtrl(self)
         if initial_path:
             try:
                 self._txt_path.SetValue(str(resolve_project_pro_path(initial_path)))
             except (FileNotFoundError, OSError):
                 self._txt_path.SetValue(str(initial_path))
         path_row.Add(self._txt_path, proportion=1, flag=wx.RIGHT, border=6)
-        self._btn_browse = wx.Button(panel, label="Browse…")
-        self._btn_refresh = wx.Button(panel, label="Refresh context")
+        self._btn_browse = wx.Button(self, label="Browse…")
+        self._btn_refresh = wx.Button(self, label="Refresh context")
         path_row.Add(self._btn_browse, flag=wx.RIGHT, border=4)
         path_row.Add(self._btn_refresh)
         vbox.Add(path_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
-        self._summary = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self._summary = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self._summary.SetMinSize((-1, 140))
         vbox.Add(self._summary, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
-        self._notebook = wx.Notebook(panel)
-        self._tabs: dict[str, wx.Panel] = {}
-        for tab_id, label, hint in (
-            ("chat", "Chat", "Ad-hoc Q&A (general_review). Not full AERF."),
-            ("datasheets", "Datasheets", "Attach PDFs and resolve missing datasheets."),
-            ("simulation", "Simulation", "SPICE gap scan and SUBCKT generation."),
-            ("aerf", "AERF", "Staged engineer analysis (stages 0–7)."),
-            ("notebook", "Notebook", "Engineering Knowledge Model editor."),
-        ):
-            tab_panel = wx.Panel(self._notebook)
-            tab_vbox = wx.BoxSizer(wx.VERTICAL)
-            hint_ctrl = wx.StaticText(tab_panel, label=hint)
-            hint_ctrl.Wrap(700)
-            tab_vbox.Add(hint_ctrl, flag=wx.ALL, border=10)
-            open_btn = wx.Button(tab_panel, label=f"Open {label} panel")
-            open_btn.Bind(wx.EVT_BUTTON, lambda _e, t=tab_id: self._open_panel(t))
-            tab_vbox.Add(open_btn, flag=wx.LEFT | wx.BOTTOM, border=10)
-            tab_panel.SetSizer(tab_vbox)
-            self._notebook.AddPage(tab_panel, label)
-            self._tabs[tab_id] = tab_panel
+        self._notebook = wx.Notebook(self)
+        modal_parent = self.GetTopLevelParent()
+
+        placeholder_specs: tuple[tuple[str, str, str, object], ...] = (
+            (
+                "chat",
+                "Chat",
+                "Ad-hoc Q&A (general_review). Not full AERF.",
+                lambda pro, parent: show_chat_dialog(pro, parent=parent),
+            ),
+            (
+                "datasheets",
+                "Datasheets",
+                "Attach PDFs and resolve missing datasheets.",
+                lambda pro, parent: show_missing_datasheets_dialog(pro, parent=parent),
+            ),
+            (
+                "simulation",
+                "Simulation",
+                "SPICE gap scan and SUBCKT generation.",
+                lambda pro, parent: show_simulation_dialog(pro, parent=parent),
+            ),
+            (
+                "aerf",
+                "AERF",
+                "Staged engineer analysis (stages 0–7).",
+                lambda pro, parent: show_aerf_dialog(pro, parent=parent),
+            ),
+        )
+        for tab_id, label, hint, opener in placeholder_specs:
+            tab = PlaceholderTab(
+                self._notebook,
+                tab_id=tab_id,
+                label=label,
+                hint=hint,
+                open_modal=opener,
+                modal_parent=modal_parent,
+            )
+            self._notebook.AddPage(tab, label)
+            self._tabs[tab_id] = tab
+            self._placeholder_tabs[tab_id] = tab
+
+        notebook_tab = NotebookTab(self._notebook)
+        self._notebook.AddPage(notebook_tab, "Notebook")
+        self._tabs["notebook"] = notebook_tab
+        self._notebook_tab = notebook_tab
 
         vbox.Add(self._notebook, proportion=1, flag=wx.EXPAND | wx.ALL, border=8)
 
-        self._status = wx.StaticText(panel, label="Select a project and refresh context.")
+        self._status = wx.StaticText(self, label="Select a project and refresh context.")
         vbox.Add(self._status, flag=wx.ALL, border=8)
 
-        panel.SetSizer(vbox)
+        self.SetSizer(vbox)
 
         self._btn_browse.Bind(wx.EVT_BUTTON, self._on_browse)
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
+        self._notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_tab_changed)
+
+        focus_idx = tab_index_for_focus(focus_tab)
+        if focus_idx is not None:
+            self._notebook.SetSelection(focus_idx)
 
         if initial_path:
             self._on_refresh(None)
 
-        if focus_tab and focus_tab in self._tabs:
-            idx = list(self._tabs.keys()).index(focus_tab)
-            self._notebook.SetSelection(idx)
+        self._notify_active_tab_selected()
 
-    def show(self) -> None:
-        self._frame.Show()
+    def confirm_close(self) -> bool:
+        """Return False when the embedded notebook has unsaved edits."""
+        if self._notebook_tab is not None and not self._notebook_tab.confirm_discard():
+            return False
+        return True
+
+    def open_placeholder_panel(self, tab_id: str) -> None:
+        """Select a placeholder tab and open its legacy modal panel."""
+        if tab_id not in self._placeholder_tabs:
+            return
+        idx = ASSISTANT_TAB_IDS.index(tab_id)
+        self._notebook.SetSelection(idx)
+        self._placeholder_tabs[tab_id].open_modal_panel()
 
     def _on_browse(self, _event: wx.CommandEvent) -> None:
         dlg = wx.FileDialog(
-            self._frame,
+            self,
             "Select KiCad project",
             wildcard="KiCad project (*.kicad_pro)|*.kicad_pro",
             style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
@@ -127,35 +171,37 @@ class AssistantShellFrame:
             self._status.SetLabel(str(exc))
             return
         self._status.SetLabel("Collecting context…")
-        self._frame.Layout()
-        try:
-            summary = build_launcher_context_summary(pro)
-        except OSError as exc:
-            self._status.SetLabel(f"Context error: {exc}")
+        self.Layout()
+        self._controller.refresh(pro)
+        if self._controller.last_error:
+            self._status.SetLabel(f"Context error: {self._controller.last_error}")
             return
-        self._summary.SetValue(summary)
+        self._summary.SetValue(self._controller.summary_text)
         self._status.SetLabel(f"Context ready — {pro.name}")
 
-    def _project_path(self) -> Path:
-        return normalize_launcher_project_path(self._txt_path.GetValue())
+    def _on_context_refreshed(self, ctx, summary: str) -> None:
+        for tab in self._tabs.values():
+            tab.on_context_refreshed(ctx, summary)
 
-    def _open_panel(self, panel: str) -> None:
-        try:
-            pro = self._project_path()
-        except (ValueError, FileNotFoundError, OSError) as exc:
-            wx.MessageBox(str(exc), "KiCad AI Assistant", wx.OK | wx.ICON_WARNING)
+    def _on_tab_changed(self, _event: wx.NotebookEvent) -> None:
+        self._notify_active_tab_selected()
+
+    def _notify_active_tab_selected(self) -> None:
+        idx = self._notebook.GetSelection()
+        if idx < 0:
             return
-        parent = self._frame
-        if panel == "chat":
-            show_chat_dialog(pro, parent=parent)
-        elif panel == "datasheets":
-            show_missing_datasheets_dialog(pro, parent=parent)
-        elif panel == "simulation":
-            show_simulation_dialog(pro, parent=parent)
-        elif panel == "aerf":
-            show_aerf_dialog(pro, parent=parent)
-        elif panel == "notebook":
-            show_notebook_dialog(pro, parent=parent)
+        page = self._notebook.GetPage(idx)
+        if isinstance(page, AssistantTabPanel):
+            page.on_tab_selected()
+
+    def _active_tab_panel(self) -> AssistantTabPanel | None:
+        idx = self._notebook.GetSelection()
+        if idx < 0:
+            return None
+        page = self._notebook.GetPage(idx)
+        if isinstance(page, AssistantTabPanel):
+            return page
+        return None
 
 
 def show_assistant_shell(
@@ -165,11 +211,13 @@ def show_assistant_shell(
     focus_tab: str | None = None,
     open_focus_panel: bool = False,
 ) -> None:
-    """Show the unified Assistant shell (non-modal frame)."""
+    """Show the unified Assistant shell in a standalone frame."""
     if wx is None:
         raise RuntimeError("wxPython is required; run inside KiCad or install wx on PYTHONPATH")
     ensure_wx_app()
-    shell = AssistantShellFrame(parent, initial_path=project_path, focus_tab=focus_tab)
-    shell.show()
-    if open_focus_panel and focus_tab:
-        shell._open_panel(focus_tab)
+    from ui.assistant_frame import AssistantFrame
+
+    frame = AssistantFrame(parent, initial_path=project_path, focus_tab=focus_tab)
+    frame.Show()
+    if open_focus_panel and focus_tab and focus_tab != "notebook":
+        frame.open_placeholder_panel(focus_tab)

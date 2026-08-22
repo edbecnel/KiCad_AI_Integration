@@ -584,7 +584,7 @@ def main_ui_notebook(project_path: str | Path | None = None) -> None:
 
     from ui.assistant_shell import show_assistant_shell
 
-    show_assistant_shell(path, focus_tab="notebook", open_focus_panel=True)
+    show_assistant_shell(path, focus_tab="notebook")
 
 
 def main_ui_notebook_panel(project_path: str | Path | None = None) -> None:

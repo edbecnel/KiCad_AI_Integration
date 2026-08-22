@@ -1,56 +1,31 @@
 ```
-HANDOVER — Phase 1 Close-out Sprint (completed)
+HANDOVER — Phase 2 Sprint 1 (ADP-011 Phase A) — completed
 ================================================================================
 Date: 2026-08-22
 Repo: KiCad_AI_Integration
 
 SUMMARY
 -------
-Phase 1 file-based close-out, housekeeping, and documentation reconciliation
-completed per the Phase 1 Close-out Sprint plan.
+Assistant shell foundation: centralized context collection, embedded Notebook tab,
+frame/dock hosts. Chat/Datasheets/Simulation/AERF remain placeholder tabs with modal fallback.
 
 WHAT WAS DONE
 -------------
-1. Tests: fixed 5 failures; repointed AERF exit tests to repo fixture
-   `tests/fixtures/blocking_oscillator.kicad_pro`; 245 tests passing.
-
-2. Phase 1 code:
-   - Pin-level schematic connectivity (`src/context/schematic_connectivity.py`)
-   - Project metadata from `.kicad_pro` (`src/context/project_metadata.py`)
-   - Netlist gap-fill detection (`src/context/netlist_gap_fill.py`)
-   - Netlist gap-fill prompt template (`src/prompts/templates/netlist_gap_fill.py`)
-   - Token budgeting hooks (`src/context/token_budget.py`)
-   - BOM custom fields in `bom_summary`
-   - Project-wide force-refresh datasheets (catalog bypass for HTTPS URLs)
-   - Chat: pdftoppm error surfacing, unsaved-schematic warning, gap-fill template
-
-3. Examples:
-   - `examples/minimal_blocking_oscillator/` bundled smoke-test project
-   - Updated `examples/bedini_babcock/README.md`
-
-4. Housekeeping:
-   - `.github/workflows/ci.yml` (pytest on push/PR)
-   - `CONTRIBUTING.md`
-   - `.gitignore` audit
-   - `docs/AI/Security.md` data-handling table
-   - Mock `pcbnew` stub in `tests/conftest.py`
-
-5. Documentation reconciliation:
-   - README, PROJECT_INDEX, Feature Overview, Prompt Architecture, Glossary,
-     Software Architecture, Architecture README, MASTER_TASK_LIST (Phase 1.5 note)
-
-DEFERRED — Phase 1.5 (live KiCad API, KiCad-only)
--------------------------------------------------
-- Live `pcbnew` board settings / constraints
-- Run ERC/DRC via KiCad API
-- Detect active schematic/PCB from open editor
-- Selected-object focus context
-- External firmware file path toggle
+1. ContextController (`src/ui/context_controller.py`) — single refresh, listener notify
+2. Tab protocol (`assistant_tab.py`), NotebookTab, PlaceholderTab
+3. AssistantShell refactored to wx.Panel with embedded Notebook
+4. AssistantFrame (`--ui`) and AssistantDockPanel stub
+5. `--ui-notebook` selects embedded tab (no auto-open modal)
+6. Tests: `tests/ui/test_assistant_shell.py`
 
 RECOMMENDED NEXT
 ----------------
-Phase 2: native KiCad plugin, embedded Assistant tabs, multi-turn chat.
-See `tasks/MASTER_TASK_LIST.md` §Phase 2 and `docs/Architecture/ADP-011-Assistant-Shell-UI.md`.
+Phase 2 Sprint 2: migrate remaining tabs (Datasheets → Simulation → Chat → AERF).
+See `docs/Architecture/ADP-011-Assistant-Shell-UI.md` §10 Phase B.
+
+PRIOR — Phase 1 Close-out Sprint (completed)
+--------------------------------------------
+See git history / prior HANDOVER for Phase 1 close-out details.
 
 AUTHORITATIVE STATUS
 --------------------
