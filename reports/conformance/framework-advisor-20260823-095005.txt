@@ -1,0 +1,182 @@
+Engineering Documentation Framework Adoption Conformance Validation
+===================================================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Started: 2026-08-23 09:50:05 +0800
+
+Framework Advisor conformance analysis
+--------------------------------------
+Engineering Documentation Framework Advisor
+Ruleset: 2026-07-10-stage1
+===========================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Project name: KiCad_AI_Integration
+Repository mode: EDF adopting project
+Overall compliance: 72%
+Structure score: 100%
+AI score: 100%
+Navigation score: 0%
+Governance score: 91%
+
+This report is read-only.
+No files or folders were created, modified, moved, renamed, or deleted.
+
+Missing required directories
+----------------------------
+None.
+
+Missing recommended root files
+------------------------------
+None.
+
+Missing AI handbook files
+-------------------------
+None.
+
+Missing Governance files
+------------------------
+None.
+
+Broken links
+------------
+- .cursor/plans/comprehensive_user_guide.plan.md -> docs/Templates/User_Guide_Template.md
+- .cursor/plans/comprehensive_user_guide.plan.md -> docs/User_Guides/Feature_Overview.md
+- .cursor/plans/comprehensive_user_guide.plan.md -> README.md
+- .cursor/plans/comprehensive_user_guide.plan.md -> PROJECT_INDEX.md
+- .cursor/plans/comprehensive_user_guide.plan.md -> docs/User_Guides/How_AERF_Works.md
+- .cursor/plans/comprehensive_user_guide.plan.md -> docs/User_Guides/Testing_With_Your_KiCad_Project.md
+- .cursor/plans/comprehensive_user_guide.plan.md -> src/ui/help_dialog.py
+- .cursor/plans/comprehensive_user_guide.plan.md -> src/ui/markdown_render.py
+- .cursor/plans/comprehensive_user_guide.plan.md -> docs/User_Guides/guide_manifest.json
+- .cursor/plans/comprehensive_user_guide.plan.md -> src/ui/assistant_shell.py
+- .cursor/plans/comprehensive_user_guide.plan.md -> src/ui/launcher.py
+- .cursor/plans/comprehensive_user_guide.plan.md -> src/ui/assistant_tab.py
+- .cursor/plans/comprehensive_user_guide.plan.md -> tests/ui/test_help_dialog.py
+- .cursor/Handover.md -> docs/User_Guides/Feature_Overview.md
+- .cursor/Handover.md -> tasks/MASTER_TASK_LIST.md
+- .cursor/Handover.md -> docs/Architecture/Platform_Architecture.md
+- .cursor/Handover.md -> docs/Architecture/ADRs/ADR-0009-Platform-Architecture-Foundation.md
+- .cursor/Handover.md -> docs/User_Guides/Feature_Overview.md
+- .cursor/Handover.md -> tasks/MASTER_TASK_LIST.md
+- PROJECT_OVERVIEW.md -> [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- PROJECT_OVERVIEW.md -> [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- PROJECT_INDEX.md -> [Software Architecture (KiCad Host)](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- docs/Engineering_Knowledge/README.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Circuit_Families/README.md -> ../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md
+- docs/Engineering_Knowledge/Engineering_Reasoning_Methodology.md -> [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/User_Guides/Feature_Overview.md -> [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- docs/Architecture/README.md -> [Software Architecture (KiCad Host)](KiCad_AI_Integration_Software_Architecture.md)
+- docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md -> [AI Engineering Reasoning Framework (ADP-008)](ADP-008-AI-Engineering-Reasoning-Framework.md)
+- docs/Developer_Handbook/README.md -> [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- README.md -> [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md)
+- README.md -> [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+
+Orphan documents
+----------------
+- .cursor/plans/comprehensive_user_guide.plan.md
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/06 - System Behavior.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/00 - Circuit Identification.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/07 - Engineering Analysis.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/04 - Component Roles.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/02 - Energy Flow.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/01 - Basic Oscillation.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/03 - Physical Principles.md
+- docs/Engineering_Knowledge/Circuit_Families/Generic/05 - Operating Modes.md
+- reports/handover/HANDOVER-20260801.md
+
+Navigation issues
+-----------------
+- docs/Engineering_Knowledge/Circuit_Families/Generic/06 - System Behavior.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/06 - System Behavior.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/00 - Circuit Identification.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/00 - Circuit Identification.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/07 - Engineering Analysis.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/07 - Engineering Analysis.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/04 - Component Roles.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/04 - Component Roles.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/02 - Energy Flow.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/02 - Energy Flow.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/01 - Basic Oscillation.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/01 - Basic Oscillation.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/03 - Physical Principles.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/03 - Physical Principles.md: missing parent domain README link.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/05 - Operating Modes.md: missing breadcrumb navigation.
+- docs/Engineering_Knowledge/Circuit_Families/Generic/05 - Operating Modes.md: missing parent domain README link.
+- docs/User_Guides/08_PCB_Routing.md: missing breadcrumb navigation.
+- docs/User_Guides/09_Configuration_Reference.md: missing breadcrumb navigation.
+- docs/User_Guides/10_Security_and_Approval.md: missing breadcrumb navigation.
+- docs/User_Guides/05_AERF_Staged_Analysis.md: missing breadcrumb navigation.
+- docs/User_Guides/02_Chat.md: missing breadcrumb navigation.
+- docs/User_Guides/Workflows/PCB_Layout_Review_and_Route.md: missing breadcrumb navigation.
+- docs/User_Guides/Workflows/Simulation_Readiness.md: missing breadcrumb navigation.
+- docs/User_Guides/Workflows/New_Project_to_EKM.md: missing breadcrumb navigation.
+- docs/User_Guides/03_Datasheets.md: missing breadcrumb navigation.
+- docs/User_Guides/06_Engineering_Notebook.md: missing breadcrumb navigation.
+- docs/User_Guides/01_Assistant_Shell.md: missing breadcrumb navigation.
+- docs/User_Guides/00_Getting_Started.md: missing breadcrumb navigation.
+- docs/User_Guides/04_Simulation_and_SUBCKT.md: missing breadcrumb navigation.
+- docs/User_Guides/07_Design_Audits.md: missing breadcrumb navigation.
+- docs/User_Guides/11_Troubleshooting.md: missing breadcrumb navigation.
+
+Governance metadata and lifecycle issues
+----------------------------------------
+- docs/Architecture/ADP-013-Phase1-Review.md: missing or invalid Status.
+- docs/Architecture/ADP-013-Phase1-Review.md: missing Owner.
+- docs/Architecture/ADP-013-Phase1-Review.md: missing Applies To.
+
+Overdue reviews
+---------------
+None.
+
+Markdown outside canonical locations
+------------------------------------
+- .cursor/plans/comprehensive_user_guide.plan.md
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- CONTRIBUTING.md
+- examples/minimal_blocking_oscillator/README.md
+- examples/bedini_babcock/README.md
+- Architecture_Inventory.md
+- HANDOVER.md
+- reports/handover/HANDOVER-20260801.md
+
+Warnings
+--------
+None.
+
+Recommendations
+---------------
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+- Add required breadcrumb and parent navigation.
+- Correct governance metadata and lifecycle issues.
+
+
+Validation completed: 2026-08-23 09:50:37 +0800
+
+============================================================
+Conformance validation completed successfully.
+
+Report:
+reports/conformance/framework-advisor-20260823-095005.txt
+
+Compliance scores:
+- Overall: 72%
+- Structure: 100%
+- AI: 100%
+- Navigation: 0%
+- Governance: 91%
+
+Next recommended actions:
+- Audit Markdown outside canonical locations.
+- Repair broken relative Markdown links.
+- Link orphan documents from the project hierarchy.
+- Add required breadcrumb and parent navigation.
+- Correct governance metadata and lifecycle issues.
+============================================================
