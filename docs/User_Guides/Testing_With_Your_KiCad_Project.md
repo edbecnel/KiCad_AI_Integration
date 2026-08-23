@@ -407,6 +407,24 @@ Use the [AERF Validation Rubric](AERF_Validation_Rubric.md) when reviewing live 
 4. Optional Chat smoke test (ad-hoc Q&A, not AERF)
 5. **Audits tab** (Ctrl+6): run schematic or PCB layout review; confirm `kicad_ai/reviews/*.json` saved
 6. **Live context** (KiCad plugin only): open PCB, enable **Focus on KiCad selection** in Chat; run **Explain DRC** if `kicad-cli` is on PATH
+7. **Routing tab** (Ctrl+7): configure Freerouting + `routing_enabled`; run autoroute, review DRC, Accept/Reject candidate
+
+### Routing prerequisites (Freerouting KiCad plugin NOT required)
+
+KAI uses headless Freerouting plus pcbnew DSN/SES — not the interactive Content Manager plugin.
+
+| Prerequisite | Required for E2E? | Notes |
+|---|---|---|
+| Freerouting KiCad plugin | **No** | Out of scope; use standalone JAR/CLI |
+| KiCad AI Integration (pcbnew) | **Yes** | DSN export / SES import |
+| Standalone Freerouting (JAR or CLI) | **Yes** | `freerouting_jar` / `freerouting_cli` in config or env |
+| `routing_enabled: true` | **Yes** | Opt-in; defaults to `false` |
+| Open `.kicad_pcb` in PCB Editor | **Yes** | Board must be loaded in pcbnew |
+| `kicad-cli pcb drc` | Recommended | Post-route validation via shared `run_live_drc()` |
+
+CLI: `--ui-routing` opens the Assistant shell on the Routing tab.
+
+Optional E2E: `FREEROUTING_JAR=/path/to/freerouting.jar pytest -m kicad tests/integration/test_routing_e2e.py`
 
 ### Live KiCad features (plugin or Scripting Console)
 
@@ -420,7 +438,7 @@ These require KiCad with `pcbnew` in-process. CI uses mocked `pcbnew` stubs.
 | Selection focus | Chat checkbox | Select footprints/nets in PCB Editor |
 | Firmware cross-review | Chat firmware browse | Any text file (e.g. `main.py`) |
 
-CLI shortcuts: `--audit-schematic` or `--audit-pcb` opens the Assistant shell on the Audits tab.
+CLI shortcuts: `--audit-schematic` or `--audit-pcb` opens the Assistant shell on the Audits tab; `--ui-routing` opens the Routing tab.
 
 ---
 

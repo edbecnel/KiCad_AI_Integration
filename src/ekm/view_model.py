@@ -61,6 +61,10 @@ class SearchHit:
 
 
 def _field_label(section_title: str, fld: dict[str, Any]) -> str:
+    metadata = fld.get("metadata") or {}
+    question = metadata.get("question")
+    if isinstance(question, str) and question.strip():
+        return question.strip()
     label = fld.get("label")
     if isinstance(label, str) and label.strip():
         return label.strip()

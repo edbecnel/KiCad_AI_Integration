@@ -40,6 +40,9 @@ def _doc_with_sections() -> EKMDocument:
                             "label": "Open question",
                             "value": "Pending Review",
                             "options": ["Pending Review", "Resolved", "Deferred"],
+                            "metadata": {
+                                "question": "What is the measured switching frequency?",
+                            },
                         }
                     ],
                 },
@@ -60,6 +63,7 @@ def test_sections_sorted_by_order() -> None:
     assert [s.section_id for s in sections] == ["circuit_overview", "open_items"]
     assert sections[0].fields[0].label == "Summary"
     assert sections[0].fields[0].editor_kind == "text"
+    assert sections[1].fields[0].label == "What is the measured switching frequency?"
 
 
 def test_update_text_field_marks_dirty() -> None:

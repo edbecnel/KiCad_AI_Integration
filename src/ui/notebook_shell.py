@@ -131,6 +131,8 @@ class NotebookShell(wx.Panel):
             self._section_widgets = widgets
             self._sections_content.Add(container, flag=wx.EXPAND)
         self._sections_scroll.Layout()
+        self._sections_scroll.FitInside()
+        self._sections_page.Layout()
         self._update_summary()
         self._set_status("Edit fields below, then Save to persist.")
 

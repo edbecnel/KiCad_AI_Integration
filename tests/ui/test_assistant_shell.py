@@ -115,7 +115,7 @@ def test_assistant_shell_focus_tab_selects_page() -> None:
 
 @pytest.mark.parametrize(
     "focus_tab",
-    ("chat", "datasheets", "simulation", "aerf", "notebook", "audits"),
+    ("chat", "datasheets", "simulation", "aerf", "notebook", "audits", "routing"),
 )
 def test_assistant_shell_cli_deep_links_select_tab(focus_tab: str) -> None:
     pytest.importorskip("wx")

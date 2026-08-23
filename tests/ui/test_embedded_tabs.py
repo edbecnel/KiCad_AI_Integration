@@ -25,7 +25,7 @@ def _ensure_wx_app():
     return wx
 
 
-@pytest.mark.parametrize("tab_id", ("chat", "datasheets", "simulation", "aerf", "notebook", "audits"))
+@pytest.mark.parametrize("tab_id", ("chat", "datasheets", "simulation", "aerf", "notebook", "audits", "routing"))
 def test_assistant_shell_embedded_tabs_load_on_refresh(tab_id: str) -> None:
     wx = _ensure_wx_app()
     from ui.assistant_shell import AssistantShell
@@ -49,14 +49,28 @@ def test_assistant_shell_embedded_tabs_load_on_refresh(tab_id: str) -> None:
     frame.Destroy()
 
 
-@pytest.mark.parametrize("shell_cls", ("ChatShell", "AERFShell"))
+def _iter_descendant_buttons(window):
+    """Yield every Button under window (depth-first)."""
+    import wx
+
+    for child in window.GetChildren():
+        if isinstance(child, wx.Button):
+            yield child
+        yield from _iter_descendant_buttons(child)
+
+
+@pytest.mark.parametrize("shell_cls", ("ChatShell", "AERFShell", "SimulationShell", "DatasheetsShell"))
 def test_embedded_shells_do_not_create_orphan_header_buttons(shell_cls: str) -> None:
     """Embedded shells must not create sizer-less buttons at (0,0) over the API key row."""
     wx = _ensure_wx_app()
     if shell_cls == "ChatShell":
         from ui.chat_shell import ChatShell as shell_type
-    else:
+    elif shell_cls == "AERFShell":
         from ui.aerf_shell import AERFShell as shell_type
+    elif shell_cls == "SimulationShell":
+        from ui.simulation_shell import SimulationShell as shell_type
+    else:
+        from ui.datasheets_shell import DatasheetsShell as shell_type
 
     pro = FIXTURES / "testproj.kicad_pro"
     frame = wx.Frame(None, title="test")
@@ -64,12 +78,26 @@ def test_embedded_shells_do_not_create_orphan_header_buttons(shell_cls: str) -> 
     shell = shell_type(panel, pro, embedded=True)
     frame.Show(False)
 
-    for child in shell.GetChildren():
-        if not isinstance(child, wx.Button):
-            continue
-        assert child.GetContainingSizer() is not None, (
-            f"orphan button {child.GetLabel()!r} in embedded {shell_cls}"
+    for button in _iter_descendant_buttons(shell):
+        assert button.GetContainingSizer() is not None, (
+            f"orphan button {button.GetLabel()!r} in embedded {shell_cls}"
         )
+
+    frame.Destroy()
+
+
+def test_embedded_chat_shell_uses_vertical_scroll() -> None:
+    wx = _ensure_wx_app()
+    from ui.chat_shell import ChatShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    frame = wx.Frame(None, title="test")
+    panel = wx.Panel(frame)
+    shell = ChatShell(panel, pro, embedded=True)
+    frame.Show(False)
+
+    scroll_children = [c for c in shell.GetChildren() if isinstance(c, wx.ScrolledWindow)]
+    assert len(scroll_children) == 1
 
     frame.Destroy()
 

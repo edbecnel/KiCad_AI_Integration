@@ -107,6 +107,7 @@ def _parse_cli_args(
     bool,
     bool,
     bool,
+    bool,
     int | None,
     str | None,
     bool,
@@ -132,6 +133,7 @@ def _parse_cli_args(
     ui_launcher = False
     audit_schematic = False
     audit_pcb = False
+    ui_routing = False
     aerf_plan = False
     aerf_stage: int | None = None
     aerf_family: str | None = None
@@ -175,6 +177,8 @@ def _parse_cli_args(
             audit_schematic = True
         elif arg == "--audit-pcb":
             audit_pcb = True
+        elif arg == "--ui-routing":
+            ui_routing = True
         elif arg == "--aerf-plan":
             aerf_plan = True
         elif arg == "--aerf-stage":
@@ -235,6 +239,7 @@ def _parse_cli_args(
         ui_launcher,
         audit_schematic,
         audit_pcb,
+        ui_routing,
         aerf_plan,
         aerf_stage,
         aerf_family,
@@ -641,6 +646,11 @@ def main_ui_audit(
     show_assistant_shell(project_path, focus_tab=focus_tab)
 
 
+def main_ui_routing(project_path: str | Path | None = None) -> None:
+    """Open the Assistant shell on the Routing tab."""
+    main_ui_audit(project_path, focus_tab="routing")
+
+
 def main_ui_launcher(project_path: str | Path | None = None, *, focus_tab: str | None = None) -> None:
     """Open the unified Assistant shell (ADP-011 scaffold)."""
     try:
@@ -808,6 +818,7 @@ if __name__ == "__main__":
         ui_launcher,
         audit_schematic,
         audit_pcb,
+        ui_routing,
         aerf_plan,
         aerf_stage,
         aerf_family,
@@ -839,6 +850,8 @@ if __name__ == "__main__":
         main_ui_audit(arg_path, focus_tab="audits")
     elif audit_pcb:
         main_ui_audit(arg_path, focus_tab="audits")
+    elif ui_routing:
+        main_ui_routing(arg_path)
     elif aerf_plan:
         main_aerf_plan(
             arg_path,

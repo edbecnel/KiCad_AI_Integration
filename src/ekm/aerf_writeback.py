@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -93,22 +94,28 @@ def _text_field(
     }
 
 
+def _open_question_field_id(stage_id: int, question: str) -> str:
+    key = f"{stage_id}:{question.strip()}"
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()[:12]
+    return f"open_question_stage_{stage_id}_{digest}"
+
+
 def _open_question_field(
     stage_id: int,
-    index: int,
     question: str,
     *,
     approved_at: str,
 ) -> dict[str, Any]:
+    text = question.strip()
     return {
-        "id": f"open_question_stage_{stage_id}_{index}",
+        "id": _open_question_field_id(stage_id, text),
         "type": "enum",
         "label": f"Open question (stage {stage_id})",
         "value": _OPEN_QUESTION_STATUS,
         "options": list(_OPEN_QUESTION_OPTIONS),
         "metadata": {
             "source": f"aerf_stage_{stage_id}",
-            "question": question,
+            "question": text,
             "status": _OPEN_QUESTION_STATUS,
             "approved_at": approved_at,
         },
@@ -266,7 +273,7 @@ def _collect_field_specs(
         open_questions = stages[stage_id].get("open_questions") or []
         if not isinstance(open_questions, list):
             continue
-        for index, question in enumerate(open_questions):
+        for question in open_questions:
             if not isinstance(question, str) or not question.strip():
                 continue
             specs.append(
@@ -274,8 +281,7 @@ def _collect_field_specs(
                     "open_items",
                     _open_question_field(
                         stage_id,
-                        index,
-                        question.strip(),
+                        question,
                         approved_at=approved_at,
                     ),
                 ),
@@ -366,9 +372,22 @@ def apply_aerf_writeback(
     timestamp = approved_at or _utc_now_iso()
     field_specs = _collect_field_specs(_index_stages(stage_outputs), approved_at=timestamp)
 
-    for section_id, fld in field_specs:
+    open_specs = [(section_id, fld) for section_id, fld in field_specs if section_id == "open_items"]
+    other_specs = [(section_id, fld) for section_id, fld in field_specs if section_id != "open_items"]
+
+    for section_id, fld in other_specs:
         section = _ensure_section(doc, section_id)
         _upsert_field(section, fld)
+
+    if open_specs:
+        section = _ensure_section(doc, "open_items")
+        preserved = [
+            fld
+            for fld in section.get("fields") or []
+            if isinstance(fld, dict)
+            and not str(fld.get("id", "")).startswith("open_question_stage_")
+        ]
+        section["fields"] = preserved + [fld for _section_id, fld in open_specs]
 
     return doc
 

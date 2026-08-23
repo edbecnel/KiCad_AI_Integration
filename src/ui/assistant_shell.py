@@ -7,6 +7,7 @@ from pathlib import Path
 from context.datasheet_requirements import summarize_required_missing_datasheets
 from ui.aerf_tab import AERFTab
 from ui.audits_tab import AuditsTab
+from ui.routing_tab import RoutingTab
 from ui.assistant_tab import ASSISTANT_TAB_IDS, AssistantTabPanel, tab_index_for_focus
 from ui.chat_tab import ChatTab
 from ui.context_controller import ContextController
@@ -54,6 +55,7 @@ class AssistantShell(wx.Panel):
             "aerf": "AERF",
             "notebook": "Notebook",
             "audits": "Audits",
+            "routing": "Routing",
         }
 
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -77,18 +79,22 @@ class AssistantShell(wx.Panel):
                 self._txt_path.SetValue(str(resolve_project_pro_path(effective_path)))
             except (FileNotFoundError, OSError):
                 self._txt_path.SetValue(str(effective_path))
-        path_row.Add(self._txt_path, proportion=1, flag=wx.RIGHT, border=6)
+        path_row.Add(self._txt_path, proportion=1, flag=wx.EXPAND)
+        vbox.Add(path_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=8)
+
+        header_btn_row = wx.BoxSizer(wx.HORIZONTAL)
         self._btn_browse = wx.Button(self, label="Browse…")
         self._btn_refresh = wx.Button(self, label="Refresh context")
         self._btn_settings = wx.Button(self, label="Settings…")
-        path_row.Add(self._btn_browse, flag=wx.RIGHT, border=4)
-        path_row.Add(self._btn_refresh, flag=wx.RIGHT, border=4)
-        path_row.Add(self._btn_settings)
-        vbox.Add(path_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        header_btn_row.Add(self._btn_browse, flag=wx.RIGHT, border=4)
+        header_btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=4)
+        header_btn_row.Add(self._btn_settings)
+        header_btn_row.AddStretchSpacer()
+        vbox.Add(header_btn_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
 
         self._summary = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self._summary.SetMinSize((-1, 140))
-        vbox.Add(self._summary, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        self._summary.SetMinSize((-1, 80))
+        vbox.Add(self._summary, proportion=0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         self._notebook = wx.Notebook(self)
 
@@ -112,6 +118,10 @@ class AssistantShell(wx.Panel):
         audits_tab = AuditsTab(self._notebook)
         self._notebook.AddPage(audits_tab, "Audits")
         self._tabs["audits"] = audits_tab
+
+        routing_tab = RoutingTab(self._notebook)
+        self._notebook.AddPage(routing_tab, "Routing")
+        self._tabs["routing"] = routing_tab
 
         vbox.Add(self._notebook, proportion=1, flag=wx.EXPAND | wx.ALL, border=8)
 
@@ -209,6 +219,7 @@ class AssistantShell(wx.Panel):
                 ord("4"): "aerf",
                 ord("5"): "notebook",
                 ord("6"): "audits",
+                ord("7"): "routing",
             }
             tab_id = shortcuts.get(key)
             if tab_id is not None:

@@ -83,14 +83,16 @@ class SimulationShell(wx.Panel if wx else object):  # type: ignore[misc]
         self._btn_generate = wx.Button(self._footer, label="Generate SUBCKT…")
         self._btn_apply_spice = wx.Button(self._footer, label="Apply simulation model…")
         self._btn_refresh = wx.Button(self._footer, label="Refresh")
-        self._btn_close = wx.Button(self._footer, wx.ID_CLOSE, label="Close")
         btn_row.Add(self._btn_apply_builtin, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_generate, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_apply_spice, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
         btn_row.AddStretchSpacer()
         if not self._embedded:
+            self._btn_close = wx.Button(self._footer, wx.ID_CLOSE, label="Close")
             btn_row.Add(self._btn_close)
+        else:
+            self._btn_close = None
         footer_sizer.Add(btn_row, flag=wx.EXPAND)
         self._footer.SetSizer(footer_sizer)
         outer.Add(self._footer, flag=wx.EXPAND | wx.ALL, border=10)

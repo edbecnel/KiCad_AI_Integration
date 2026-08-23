@@ -1,47 +1,45 @@
 ```
-HANDOVER — Phase 1.5 Live KiCad API + Phase 3 One-Click Audits
+HANDOVER — ADP-013 Routing UI (Sprint 11)
 ================================================================================
 Date: 2026-08-23
 Repo: KiCad_AI_Integration
 
 SUMMARY
 -------
-Phase 1.5 live KiCad extractors and Phase 3 one-click audit workflows are implemented.
-Live context enriches ProjectContext when pcbnew / kicad-cli are available; structured
-review reports persist under kicad_ai/reviews/. Phase 3 exit criteria met.
+Routing tab added to the Assistant shell (Ctrl+7). Freerouting autoroute workflow
+with approve-before-run, checkpoint accept/reject, live DRC quality report, and
+optional post-route AI review. Phase 1.5/3 work remains on main from prior sprint.
 
 WHAT WAS DONE
 -------------
-1. **context/live/** — probe, editor_context, board_settings, drc_runner (shared API),
-   selection, firmware, enrich_live_context
-2. **erc_drc_summary** — live DRC via run_live_drc first; .rpt file fallback retained
-3. **inference/routing.py** — post-route quality uses shared run_live_drc (no duplicate CLI)
-4. **Chat UI** — Focus on KiCad selection checkbox; optional firmware file browse
-5. **context/review_report.py** — ReviewFinding / ReviewReport + JSON persistence
-6. **inference/audit.py** — schematic, PCB, DRC explain, isolation, circuit explanation
-7. **Audits tab** — embedded in Assistant shell (Ctrl+6); AuditsShell one-click actions
-8. **CLI** — --audit-schematic / --audit-pcb open shell on Audits tab
-9. **Tests** — context/live, review_report, inference/audit, ui/audits_tab (373 passed)
+1. **Routing tab** — `src/ui/routing_tab.py`, `src/ui/routing_shell.py` (Ctrl+7)
+2. **Workflow** — policy summary, approve-before-route, background `run_routing()`,
+   accept/reject checkpoint, post-route DRC via shared `run_live_drc()`
+3. **Post-route AI review** — `run_post_route_review()` in `inference/audit.py`
+4. **CLI** — `--ui-routing` opens shell on Routing tab
+5. **Tests** — ui/routing_*, integration/test_routing_e2e.py (@pytest.mark.kicad)
+6. **380 tests passing**
 
-LIVE FEATURES (require KiCad plugin or Scripting Console)
--------------------------------------------------------
-- pcbnew board settings and editor paths when a board is open
-- kicad-cli pcb drc JSON when CLI is configured
-- PCB selection focus for chat prompts
-- Optional firmware file cross-review
+PREREQUISITES (manual E2E — Freerouting KiCad plugin NOT required)
+------------------------------------------------------------------
+- KiCad AI Integration plugin or Scripting Console (pcbnew for DSN/SES)
+- Standalone Freerouting JAR or CLI + `routing_enabled: true`
+- Open `.kicad_pcb` in PCB Editor; optional `kicad-cli` for post-route DRC
 
-PHASE 3 EXIT
-------------
-One-click schematic and PCB layout reviews with structured findings JSON.
-Domain workflows: Explain DRC, isolation/clearance, circuit explanation.
+STILL OPEN (ADP-013)
+--------------------
+- Human architecture review approval
+- Routing policy persistence (`kicad_ai/routing_policy.json` TBD)
+- Phase 4: parse AI policy JSON into RoutingPolicy from Chat
+- Phase 5: compare candidates, re-route loop
 
-PRIOR — ADP-013 Routing / Phase 2
----------------------------------
-Routing abstraction POC, incremental context, multi-provider, unified Assistant shell.
+PRIOR — Phase 1.5 + Phase 3
+---------------------------
+Live KiCad context, one-click audits, ReviewReport JSON under kicad_ai/reviews/.
 
 AUTHORITATIVE STATUS
 --------------------
-- tasks/MASTER_TASK_LIST.md (Phase 1.5 + Phase 3 sections)
-- docs/User_Guides/Feature_Overview.md
-- docs/Architecture/ADP-013-Routing-Abstraction.md (shared drc_runner)
+- tasks/MASTER_TASK_LIST.md (Track E — Routing Abstraction)
+- docs/Specifications/Freerouting_Integration.md
+- docs/Architecture/ADP-013-Routing-Abstraction.md
 ```

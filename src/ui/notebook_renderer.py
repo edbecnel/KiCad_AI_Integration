@@ -79,6 +79,13 @@ class CollapsibleSection(wx.Panel):
         self._body.Show(self._expanded)
         self._toggle.SetLabel("▼" if self._expanded else "▶")
         self.Layout()
+        parent = self.GetParent()
+        while parent is not None:
+            if isinstance(parent, wx.ScrolledWindow):
+                parent.Layout()
+                parent.FitInside()
+                break
+            parent = parent.GetParent()
 
 
 def build_field_panel(
@@ -89,11 +96,16 @@ def build_field_panel(
     on_change: OnChangeCallback,
     on_status: Callable[[str], None],
 ) -> wx.Window:
+    """Build a field editor panel; all child widgets must parent to the returned panel."""
+    panel = wx.Panel(parent)
     row = wx.BoxSizer(wx.VERTICAL)
-    row.Add(wx.StaticText(parent, label=field.label), flag=wx.BOTTOM, border=2)
+    label_ctrl = wx.StaticText(panel, label=field.label)
+    if field.metadata.get("question") or len(field.label) > 72:
+        label_ctrl.Wrap(620)
+    row.Add(label_ctrl, flag=wx.BOTTOM, border=4)
 
     if field.editor_kind == "text":
-        editor = wx.TextCtrl(parent, value=str(field.value or ""), style=wx.TE_MULTILINE)
+        editor = wx.TextCtrl(panel, value=str(field.value or ""), style=wx.TE_MULTILINE)
         editor.SetMinSize((-1, 72))
         editor.Bind(
             wx.EVT_TEXT,
@@ -101,8 +113,15 @@ def build_field_panel(
                 vm, s, f, ctrl, on_change, on_status
             ),
         )
+        row.Add(editor, proportion=0, flag=wx.EXPAND)
     elif field.editor_kind == "enum":
-        editor = wx.Choice(parent, choices=field.options)
+        enum_row = wx.BoxSizer(wx.HORIZONTAL)
+        enum_row.Add(
+            wx.StaticText(panel, label="Status:"),
+            flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
+            border=4,
+        )
+        editor = wx.Choice(panel, choices=field.options)
         if field.value in field.options:
             editor.SetStringSelection(str(field.value))
         editor.Bind(
@@ -111,11 +130,13 @@ def build_field_panel(
                 vm, s, f, ctrl, on_change, on_status
             ),
         )
+        enum_row.Add(editor, proportion=1, flag=wx.EXPAND)
+        row.Add(enum_row, proportion=0, flag=wx.EXPAND)
     elif field.editor_kind == "number":
         editor = wx.BoxSizer(wx.HORIZONTAL)
-        value_ctrl = wx.TextCtrl(parent, value=str(field.value if field.value is not None else ""))
+        value_ctrl = wx.TextCtrl(panel, value=str(field.value if field.value is not None else ""))
         unit = field.raw.get("unit")
-        unit_label = wx.StaticText(parent, label=str(unit) if unit else "")
+        unit_label = wx.StaticText(panel, label=str(unit) if unit else "")
         editor.Add(value_ctrl, proportion=1, flag=wx.RIGHT, border=4)
         editor.Add(unit_label, flag=wx.ALIGN_CENTER_VERTICAL)
         value_ctrl.Bind(
@@ -124,22 +145,20 @@ def build_field_panel(
                 vm, s, f, ctrl, on_change, on_status
             ),
         )
-        panel = wx.Panel(parent)
-        panel.SetSizer(editor)
-        return panel
+        row.Add(editor, proportion=0, flag=wx.EXPAND)
     elif field.editor_kind == "measurement":
         editor = wx.BoxSizer(wx.VERTICAL)
         value_row = wx.BoxSizer(wx.HORIZONTAL)
         meas = field.value if isinstance(field.value, dict) else {}
-        value_ctrl = wx.TextCtrl(parent, value=str(meas.get("value", "")))
-        unit_ctrl = wx.TextCtrl(parent, value=str(meas.get("unit", "")))
-        value_row.Add(wx.StaticText(parent, label="Value:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
+        value_ctrl = wx.TextCtrl(panel, value=str(meas.get("value", "")))
+        unit_ctrl = wx.TextCtrl(panel, value=str(meas.get("unit", "")))
+        value_row.Add(wx.StaticText(panel, label="Value:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
         value_row.Add(value_ctrl, proportion=1, flag=wx.RIGHT, border=4)
-        value_row.Add(wx.StaticText(parent, label="Unit:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
+        value_row.Add(wx.StaticText(panel, label="Unit:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
         value_row.Add(unit_ctrl, proportion=1)
-        conditions_ctrl = wx.TextCtrl(parent, value=str(meas.get("conditions", "")))
+        conditions_ctrl = wx.TextCtrl(panel, value=str(meas.get("conditions", "")))
         editor.Add(value_row, flag=wx.EXPAND | wx.BOTTOM, border=4)
-        editor.Add(wx.StaticText(parent, label="Conditions:"), flag=wx.BOTTOM, border=2)
+        editor.Add(wx.StaticText(panel, label="Conditions:"), flag=wx.BOTTOM, border=2)
         editor.Add(conditions_ctrl, flag=wx.EXPAND)
 
         def _bind_measurement(_event: wx.Event) -> None:
@@ -157,29 +176,27 @@ def build_field_panel(
         value_ctrl.Bind(wx.EVT_TEXT, _bind_measurement)
         unit_ctrl.Bind(wx.EVT_TEXT, _bind_measurement)
         conditions_ctrl.Bind(wx.EVT_TEXT, _bind_measurement)
-        panel = wx.Panel(parent)
-        panel.SetSizer(editor)
-        return panel
+        row.Add(editor, proportion=0, flag=wx.EXPAND)
     elif field.editor_kind == "reference":
         editor = wx.BoxSizer(wx.VERTICAL)
         ref = field.value if isinstance(field.value, dict) else {}
         kind_row = wx.BoxSizer(wx.HORIZONTAL)
-        kind_row.Add(wx.StaticText(parent, label="Kind:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
-        kind_ctrl = wx.Choice(parent, choices=reference_kind_choices())
+        kind_row.Add(wx.StaticText(panel, label="Kind:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
+        kind_ctrl = wx.Choice(panel, choices=reference_kind_choices())
         if ref.get("kind") in reference_kind_choices():
             kind_ctrl.SetStringSelection(str(ref.get("kind")))
         kind_row.Add(kind_ctrl, proportion=1)
         ref_row = wx.BoxSizer(wx.HORIZONTAL)
-        ref_row.Add(wx.StaticText(parent, label="Ref:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
-        ref_ctrl = wx.TextCtrl(parent, value=str(ref.get("ref", "")))
+        ref_row.Add(wx.StaticText(panel, label="Ref:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=4)
+        ref_ctrl = wx.TextCtrl(panel, value=str(ref.get("ref", "")))
         ref_row.Add(ref_ctrl, proportion=1)
         sheet_row = wx.BoxSizer(wx.HORIZONTAL)
         sheet_row.Add(
-            wx.StaticText(parent, label="Sheet path:"),
+            wx.StaticText(panel, label="Sheet path:"),
             flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL,
             border=4,
         )
-        sheet_ctrl = wx.TextCtrl(parent, value=str(ref.get("sheet_path", "")))
+        sheet_ctrl = wx.TextCtrl(panel, value=str(ref.get("sheet_path", "")))
         sheet_row.Add(sheet_ctrl, proportion=1)
         editor.Add(kind_row, flag=wx.EXPAND | wx.BOTTOM, border=4)
         editor.Add(ref_row, flag=wx.EXPAND | wx.BOTTOM, border=4)
@@ -200,19 +217,16 @@ def build_field_panel(
         kind_ctrl.Bind(wx.EVT_CHOICE, _bind_reference)
         ref_ctrl.Bind(wx.EVT_TEXT, _bind_reference)
         sheet_ctrl.Bind(wx.EVT_TEXT, _bind_reference)
-        panel = wx.Panel(parent)
-        panel.SetSizer(editor)
-        return panel
+        row.Add(editor, proportion=0, flag=wx.EXPAND)
     else:
         editor = wx.TextCtrl(
-            parent,
+            panel,
             value=field.display_value or str(field.value),
             style=wx.TE_MULTILINE | wx.TE_READONLY,
         )
         editor.SetMinSize((-1, 48))
+        row.Add(editor, proportion=0, flag=wx.EXPAND)
 
-    row.Add(editor, proportion=0, flag=wx.EXPAND)
-    panel = wx.Panel(parent)
     panel.SetSizer(row)
     return panel
 

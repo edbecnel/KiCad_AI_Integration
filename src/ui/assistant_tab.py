@@ -9,7 +9,7 @@ try:
 except ImportError:  # pragma: no cover
     wx = None  # type: ignore[assignment]
 
-ASSISTANT_TAB_IDS = ("chat", "datasheets", "simulation", "aerf", "notebook", "audits")
+ASSISTANT_TAB_IDS = ("chat", "datasheets", "simulation", "aerf", "notebook", "audits", "routing")
 
 
 def tab_index_for_focus(focus_tab: str | None, tab_ids: tuple[str, ...] = ASSISTANT_TAB_IDS) -> int | None:

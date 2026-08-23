@@ -78,7 +78,36 @@ def test_open_questions_map_to_open_items() -> None:
     open_items = next(s for s in doc.sections if s["id"] == "open_items")
     enum_fields = [f for f in open_items["fields"] if f["type"] == "enum"]
     assert len(enum_fields) >= 2
-    assert enum_fields[0]["value"] == "Pending Review"
+    questions = {f["metadata"]["question"] for f in enum_fields}
+    assert "What is measured switching frequency?" in questions
+    assert "Is phasing verified?" in questions
+    assert all(f["value"] == "Pending Review" for f in enum_fields)
+    assert all(f["id"].startswith("open_question_stage_") for f in enum_fields)
+
+
+def test_open_questions_replace_stale_fields_on_rewrite() -> None:
+    doc = EKMDocument.empty()
+    apply_aerf_writeback(doc, _fixture_stages()[:8])
+    open_items = next(s for s in doc.sections if s["id"] == "open_items")
+    first_count = len(open_items["fields"])
+    assert first_count >= 1
+
+    # Legacy index-based ids should be removed on the next write-back.
+    open_items["fields"].append(
+        {
+            "id": "open_question_stage_1_99",
+            "type": "enum",
+            "label": "Open question (stage 1)",
+            "value": "Pending Review",
+            "options": ["Pending Review", "Resolved", "Deferred"],
+            "metadata": {"question": "Stale duplicate"},
+        }
+    )
+    apply_aerf_writeback(doc, _fixture_stages()[:8])
+    open_items = next(s for s in doc.sections if s["id"] == "open_items")
+    field_ids = [f["id"] for f in open_items["fields"]]
+    assert "open_question_stage_1_99" not in field_ids
+    assert len(open_items["fields"]) == first_count
 
 
 def test_write_without_approve_does_not_create_file(tmp_path: Path) -> None:

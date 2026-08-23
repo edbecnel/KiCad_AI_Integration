@@ -5,7 +5,7 @@ from __future__ import annotations
 import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from context.dsn_export import export_specctra_dsn
@@ -89,7 +89,7 @@ class FreeroutingRoutingEngine:
         )
 
     def route(self, request: RoutingRequest) -> RoutingResult:
-        started_at = datetime.now(UTC).isoformat()
+        started_at = datetime.now(timezone.utc).isoformat()
         pcb_path = request.board_reference.resolved_pcb_path()
         if pcb_path is None or not pcb_path.is_file():
             return RoutingResult(
@@ -155,7 +155,7 @@ class FreeroutingRoutingEngine:
                     engine_id=self.ENGINE_ID,
                     invocation_command=" ".join(command),
                     started_at=started_at,
-                    completed_at=datetime.now(UTC).isoformat(),
+                    completed_at=datetime.now(timezone.utc).isoformat(),
                 ),
             )
 
@@ -208,6 +208,6 @@ class FreeroutingRoutingEngine:
                 engine_id=self.ENGINE_ID,
                 invocation_command=" ".join(command),
                 started_at=started_at,
-                completed_at=datetime.now(UTC).isoformat(),
+                completed_at=datetime.now(timezone.utc).isoformat(),
             ),
         )

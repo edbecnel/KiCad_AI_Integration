@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import shutil
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -38,7 +38,7 @@ def create_routing_checkpoint(
   base_exports = exports_dir or (project_root / "kicad_ai" / "exports" / "routing")
   base_exports.mkdir(parents=True, exist_ok=True)
 
-  checkpoint_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+  checkpoint_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
   checkpoint_pcb = base_exports / f"{checkpoint_id}.checkpoint.kicad_pcb"
   shutil.copy2(pcb_path, checkpoint_pcb)
 

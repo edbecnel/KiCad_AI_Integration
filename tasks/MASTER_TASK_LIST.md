@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with six embedded tabs (Chat, Datasheets, Simulation, AERF, Notebook, **Audits**), KiCad ActionPlugin entry, multi-turn Chat with disk persistence and incremental context refresh, centralized context (`ContextController`), multi-provider settings (Claude + Ollama), **live KiCad context** (`context/live/` — pcbnew probe, editor paths, board settings, `kicad-cli pcb drc`), **one-click audits** with structured `ReviewReport` JSON under `kicad_ai/reviews/`, simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`, 373+ tests).
+**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with seven embedded tabs (Chat, Datasheets, Simulation, AERF, Notebook, Audits, **Routing**), KiCad ActionPlugin entry, multi-turn Chat with disk persistence and incremental context refresh, centralized context (`ContextController`), multi-provider settings (Claude + Ollama), live KiCad context (`context/live/`), one-click audits with structured `ReviewReport` JSON, **Freerouting routing tab** with checkpoint workflow, simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`, 380+ tests).
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -307,7 +307,7 @@ response without manual export/copy-paste.
 - [x] Persistent wx panel alongside schematic/PCB editor (non-modal frame host; true AUI dock deferred)
 - [x] Non-blocking UI (API calls on background thread)
 - [x] Resize-friendly layout
-- [x] **ADP-011 Phase C polish** — last tab per project, Datasheets tab badge, Ctrl+1..6 shortcuts
+- [x] **ADP-011 Phase C polish** — last tab per project, Datasheets tab badge, Ctrl+1..7 shortcuts
 - [x] **ADP-011 Phase D cleanup** — removed `launcher_dialog.py` and modal `*_dialog.py` wrappers; `launcher.py` facade; expanded shell tests
 
 ### Conversation Manager
@@ -593,15 +593,15 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] `src/inference/routing.py` — EIE orchestration
 - [x] Config: `freerouting_jar`, `freerouting_cli`, `routing_enabled`, `routing_timeout_sec`
 - [x] Unit tests (mocked subprocess, checkpoint workflow)
-- [ ] E2E test with Freerouting + pcbnew installed
-- [ ] Routing UI tab in Assistant shell
-- [ ] Post-route DRC via `kicad-cli pcb drc`
+- [x] E2E test with Freerouting + pcbnew installed — optional `@pytest.mark.kicad` in `tests/integration/test_routing_e2e.py` (skip unless `FREEROUTING_JAR`/`FREEROUTING_CLI` + open board)
+- [x] Routing UI tab in Assistant shell — `src/ui/routing_tab.py`, `routing_shell.py` (Ctrl+7)
+- [x] Post-route DRC via `kicad-cli pcb drc` — shared `context/live/drc_runner.py` used by `build_routing_quality_report()`
 
 ### Phase 3 — Routing policy
 
 - [x] Structured `RoutingPolicy` type (persistence TBD — not EKM)
 - [x] `build_exclusions_from_policy`, explainability helpers
-- [ ] User approval gate before routing execution (UI)
+- [x] User approval gate before routing execution (UI) — approve-before-route in `RoutingShell`
 - [ ] Routing policy persistence mechanism decision
 
 ### Phase 4 — AI-assisted routing intelligence
@@ -609,7 +609,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] `routing_policy.py` prompt — critical-net classification
 - [x] `post_route_review.py` prompt — post-route quality review
 - [x] `RoutingQualityReport` type
-- [ ] Wire prompts into Assistant shell / chat templates
+- [x] Wire prompts into Assistant shell / chat templates — post-route review button in Routing tab (`run_post_route_review`)
 - [ ] Parse AI policy JSON into `RoutingPolicy`
 
 ### Phase 5 — Closed-loop optimization

@@ -198,3 +198,51 @@ def run_circuit_explanation(
         provider=provider,
         persist=persist,
     )
+
+
+def run_post_route_review(
+    ctx: ProjectContext,
+    *,
+    routing_result_summary: dict[str, Any] | None = None,
+    quality_report: dict[str, Any] | None = None,
+    config: AppConfig | None = None,
+    api_key_override: str | None = None,
+    provider: Any | None = None,
+    persist: bool = True,
+) -> AuditResult:
+    """Run AI post-route review using routing metrics and live DRC context."""
+    from prompts.templates.post_route_review import build_post_route_review_prompt
+
+    cfg = _resolve_config(config, api_key_override)
+    system, user_text = build_post_route_review_prompt(
+        ctx,
+        "Review the autorouted board and recommend accept, revise, or reject.",
+        routing_result_summary=routing_result_summary,
+        quality_report=quality_report,
+    )
+    built = BuiltPrompt(
+        text=user_text + STRUCTURED_FINDINGS_SUFFIX,
+        system=system,
+        template="post_route_review",
+        preview_summary="Post-route review",
+        estimated_text_tokens=max(1, len(user_text) // 4),
+        include_image=False,
+        image_byte_size=0,
+    )
+    resolved_provider = provider or get_provider(cfg)
+    response = resolved_provider.send_message(
+        built.text,
+        system=built.system,
+        config=cfg,
+    )
+    findings = parse_findings_from_response(response.text)
+    report = ReviewReport(
+        audit_type="post_route_review",
+        project_path=ctx.project_path,
+        model=response.model,
+        findings=findings,
+        narrative=response.text,
+        usage=response.usage,
+    )
+    report_path = save_review_report(report) if persist else None
+    return AuditResult(report=report, response=response, built=built, report_path=report_path)

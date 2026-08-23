@@ -86,6 +86,7 @@ The unified **Assistant shell** (`--ui`) provides a shared project header and ta
 | Chat context toggles | Include schematic, PCB, BOM, ERC/DRC, netlist per question |
 | Chat live options | **Focus on KiCad selection** (pcbnew); optional **firmware file** for cross-review |
 | **Audits tab** (`--ui`, Ctrl+6) | One-click schematic/PCB reviews, Explain DRC, isolation/clearance, circuit explanation; reports in `kicad_ai/reviews/` |
+| **Routing tab** (`--ui`, Ctrl+7) | Freerouting autoroute with policy exclusions, checkpoint accept/reject, post-route DRC, optional AI review |
 | Chat audit templates | General review, PCB layout, isolation/clearance, netlist crosscheck (template selector in Chat tab) |
 | Netlist export | Via `kicad-cli` when available |
 | **Simulation / SUBCKT panel** (`--ui-simulation`) | Gap scan, AI SUBCKT generation, spice field write-back to schematic — functional but not production-complete |

@@ -371,18 +371,22 @@ class DatasheetsShell(wx.Panel):
         status_box = wx.StaticBox(self._footer, label="Status")
         status_inner = wx.StaticBoxSizer(status_box, wx.VERTICAL)
         self._status = wx.StaticText(
-            self._footer,
+            status_box,
             label="Loading datasheet list…",
         )
         self._status_detail = wx.TextCtrl(
-            self._footer,
+            status_box,
             value="Progress and results appear here during reset, fetch, and AI discovery.",
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_WORDWRAP | wx.BORDER_NONE,
             size=(-1, 64),
         )
-        self._status_detail.SetBackgroundColour(self._footer.GetBackgroundColour())
+        self._status_detail.SetBackgroundColour(status_box.GetBackgroundColour())
         self._status_detail.SetForegroundColour(wx.Colour(80, 80, 80))
-        self._status_detail.SetMaxSize((-1, 88))
+        if embedded:
+            self._status_detail.SetInitialSize((-1, 48))
+            self._status_detail.SetMaxSize((-1, 64))
+        else:
+            self._status_detail.SetMaxSize((-1, 88))
         status_inner.Add(self._status, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=6)
         status_inner.Add(
             self._status_detail,
@@ -418,12 +422,13 @@ class DatasheetsShell(wx.Panel):
         self._btn_force = wx.Button(self._footer, label="Force refresh all URLs")
         self._btn_cancel = wx.Button(self._footer, label="Cancel")
         self._btn_cancel.Hide()
-        self._btn_close = wx.Button(self._footer, wx.ID_CLOSE, label="Close")
+        self._btn_close: wx.Button | None = None
         btn_row2.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
         btn_row2.Add(self._btn_force, flag=wx.RIGHT, border=6)
         btn_row2.Add(self._btn_cancel, flag=wx.RIGHT, border=6)
         btn_row2.AddStretchSpacer()
         if not self._embedded:
+            self._btn_close = wx.Button(self._footer, wx.ID_CLOSE, label="Close")
             btn_row2.Add(self._btn_close)
         footer_sizer.Add(btn_row2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
 
@@ -432,7 +437,8 @@ class DatasheetsShell(wx.Panel):
 
         self.SetSizer(root)
 
-        self.SetMinSize((840, 640))
+        if not self._embedded:
+            self.SetMinSize((840, 640))
 
         self._btn_attach.Bind(wx.EVT_BUTTON, self._on_attach)
         self._btn_reset.Bind(wx.EVT_BUTTON, self._on_reset)
@@ -443,7 +449,8 @@ class DatasheetsShell(wx.Panel):
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_force.Bind(wx.EVT_BUTTON, self._on_force_refresh)
         self._btn_cancel.Bind(wx.EVT_BUTTON, self._on_cancel)
-        self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
+        if self._btn_close is not None:
+            self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._chk_ai.Bind(wx.EVT_CHECKBOX, self._on_ai_toggle)
         self._chk_write_url.Bind(wx.EVT_CHECKBOX, self._on_write_url_toggle)
         self._update_ai_button_state()
@@ -451,7 +458,7 @@ class DatasheetsShell(wx.Panel):
         self._layout_panel()
 
     def _action_buttons(self) -> list[wx.Button]:
-        return [
+        buttons = [
             self._btn_attach,
             self._btn_reset,
             self._btn_ai,
@@ -461,8 +468,10 @@ class DatasheetsShell(wx.Panel):
             self._btn_refresh,
             self._btn_force,
             self._btn_cancel,
-            self._btn_close,
         ]
+        if self._btn_close is not None:
+            buttons.append(self._btn_close)
+        return buttons
 
     def _set_busy(self, busy: bool) -> None:
         self._busy = busy

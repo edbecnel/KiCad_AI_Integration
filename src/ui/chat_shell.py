@@ -50,20 +50,26 @@ class ChatShell(wx.Panel):
         self._built: BuiltPrompt | None = None
         self._sending = False
         self._session_store = get_session_store()
+        self._scroll: wx.ScrolledWindow | None = None
+        ui_parent: wx.Window = self
+        if embedded:
+            self._scroll = wx.ScrolledWindow(self, style=wx.VSCROLL)
+            self._scroll.SetScrollRate(0, 12)
+            ui_parent = self._scroll
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         key_row = wx.BoxSizer(wx.HORIZONTAL)
-        key_row.Add(wx.StaticText(self, label="API key:"), flag=wx.RIGHT, border=6)
-        self._txt_key = wx.TextCtrl(self, style=wx.TE_PASSWORD)
+        key_row.Add(wx.StaticText(ui_parent, label="API key:"), flag=wx.RIGHT, border=6)
+        self._txt_key = wx.TextCtrl(ui_parent, style=wx.TE_PASSWORD)
         if self._cfg.anthropic_api_key:
             self._txt_key.SetValue(self._cfg.anthropic_api_key)
         key_row.Add(self._txt_key, proportion=1)
         vbox.Add(key_row, flag=wx.EXPAND | wx.ALL, border=8)
 
         template_row = wx.BoxSizer(wx.HORIZONTAL)
-        template_row.Add(wx.StaticText(self, label="Template:"), flag=wx.RIGHT, border=6)
+        template_row.Add(wx.StaticText(ui_parent, label="Template:"), flag=wx.RIGHT, border=6)
         self._template_choice = wx.Choice(
-            self,
+            ui_parent,
             choices=[
                 "General review",
                 "PCB layout audit",
@@ -77,40 +83,40 @@ class ChatShell(wx.Panel):
         template_row.AddStretchSpacer()
         template_row.Add(
             wx.StaticText(
-                self,
+                ui_parent,
                 label="Prompt templates — choose a review style before sending.",
             ),
             flag=wx.ALIGN_CENTER_VERTICAL,
         )
         vbox.Add(template_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
-        self._chk_image = wx.CheckBox(self, label="Include schematic image")
+        self._chk_image = wx.CheckBox(ui_parent, label="Include schematic image")
         vbox.Add(self._chk_image, flag=wx.LEFT | wx.RIGHT, border=8)
 
         from context.live.probe import is_pcbnew_available
 
-        self._chk_selection = wx.CheckBox(self, label="Focus on KiCad selection")
+        self._chk_selection = wx.CheckBox(ui_parent, label="Focus on KiCad selection")
         self._chk_selection.Enable(is_pcbnew_available())
         vbox.Add(self._chk_selection, flag=wx.LEFT | wx.RIGHT, border=8)
 
         fw_row = wx.BoxSizer(wx.HORIZONTAL)
-        fw_row.Add(wx.StaticText(self, label="Firmware file:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=6)
-        self._txt_firmware = wx.TextCtrl(self)
+        fw_row.Add(wx.StaticText(ui_parent, label="Firmware file:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=6)
+        self._txt_firmware = wx.TextCtrl(ui_parent)
         fw_row.Add(self._txt_firmware, proportion=1, flag=wx.RIGHT, border=6)
-        self._btn_firmware = wx.Button(self, label="Browse…")
+        self._btn_firmware = wx.Button(ui_parent, label="Browse…")
         fw_row.Add(self._btn_firmware)
         vbox.Add(fw_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         ctx_row = wx.BoxSizer(wx.HORIZONTAL)
-        self._chk_schematic = wx.CheckBox(self, label="Schematic")
+        self._chk_schematic = wx.CheckBox(ui_parent, label="Schematic")
         self._chk_schematic.SetValue(True)
-        self._chk_pcb = wx.CheckBox(self, label="PCB")
+        self._chk_pcb = wx.CheckBox(ui_parent, label="PCB")
         self._chk_pcb.SetValue(True)
-        self._chk_bom = wx.CheckBox(self, label="BOM")
+        self._chk_bom = wx.CheckBox(ui_parent, label="BOM")
         self._chk_bom.SetValue(True)
-        self._chk_erc_drc = wx.CheckBox(self, label="ERC/DRC")
+        self._chk_erc_drc = wx.CheckBox(ui_parent, label="ERC/DRC")
         self._chk_erc_drc.SetValue(True)
-        self._chk_netlist = wx.CheckBox(self, label="Netlist")
+        self._chk_netlist = wx.CheckBox(ui_parent, label="Netlist")
         self._chk_netlist.SetValue(True)
         for chk in (
             self._chk_schematic,
@@ -122,43 +128,52 @@ class ChatShell(wx.Panel):
             ctx_row.Add(chk, flag=wx.RIGHT, border=8)
         vbox.Add(ctx_row, flag=wx.LEFT | wx.RIGHT, border=8)
 
-        vbox.Add(wx.StaticText(self, label="Design intent (optional):"), flag=wx.LEFT | wx.TOP, border=8)
-        self._txt_intent = wx.TextCtrl(self, style=wx.TE_MULTILINE)
-        self._txt_intent.SetMinSize((-1, 48))
+        vbox.Add(wx.StaticText(ui_parent, label="Design intent (optional):"), flag=wx.LEFT | wx.TOP, border=8)
+        self._txt_intent = wx.TextCtrl(ui_parent, style=wx.TE_MULTILINE)
+        self._txt_intent.SetMinSize((-1, 48 if not embedded else 36))
         vbox.Add(self._txt_intent, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
-        vbox.Add(wx.StaticText(self, label="Your question:"), flag=wx.LEFT | wx.TOP, border=8)
-        self._txt_question = wx.TextCtrl(self, style=wx.TE_MULTILINE)
-        self._txt_question.SetMinSize((-1, 56))
+        vbox.Add(wx.StaticText(ui_parent, label="Your question:"), flag=wx.LEFT | wx.TOP, border=8)
+        self._txt_question = wx.TextCtrl(ui_parent, style=wx.TE_MULTILINE)
+        self._txt_question.SetMinSize((-1, 56 if not embedded else 40))
         vbox.Add(self._txt_question, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
-        vbox.Add(wx.StaticText(self, label="Context preview:"), flag=wx.LEFT | wx.TOP, border=8)
-        self._preview = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self._preview.SetMinSize((-1, 100))
+        vbox.Add(wx.StaticText(ui_parent, label="Context preview:"), flag=wx.LEFT | wx.TOP, border=8)
+        self._preview = wx.TextCtrl(ui_parent, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self._preview.SetMinSize((-1, 100 if not embedded else 72))
         vbox.Add(self._preview, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
         if not self._embedded:
-            self._btn_refresh = wx.Button(self, label="Refresh context")
+            self._btn_refresh = wx.Button(ui_parent, label="Refresh context")
             btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=6)
-        self._btn_send = wx.Button(self, label="Approve && Send")
+        self._btn_send = wx.Button(ui_parent, label="Approve && Send")
         btn_row.Add(self._btn_send, flag=wx.RIGHT, border=6)
-        self._btn_new_conversation = wx.Button(self, label="New conversation")
+        self._btn_new_conversation = wx.Button(ui_parent, label="New conversation")
         btn_row.Add(self._btn_new_conversation, flag=wx.RIGHT, border=6)
         btn_row.AddStretchSpacer()
         if not self._embedded:
-            self._btn_close = wx.Button(self, label="Close")
+            self._btn_close = wx.Button(ui_parent, label="Close")
             btn_row.Add(self._btn_close)
         vbox.Add(btn_row, flag=wx.EXPAND | wx.ALL, border=8)
 
-        vbox.Add(wx.StaticText(self, label="Conversation:"), flag=wx.LEFT, border=8)
-        self._response = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        vbox.Add(self._response, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        vbox.Add(wx.StaticText(ui_parent, label="Conversation:"), flag=wx.LEFT, border=8)
+        self._response = wx.TextCtrl(ui_parent, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self._response.SetMinSize((-1, 120 if embedded else 0))
+        vbox.Add(self._response, proportion=0 if embedded else 1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
-        self._status = wx.StaticText(self, label="Collect context, review preview, then Approve & Send.")
+        self._status = wx.StaticText(ui_parent, label="Collect context, review preview, then Approve & Send.")
         vbox.Add(self._status, flag=wx.ALL, border=8)
 
-        self.SetSizer(vbox)
+        if embedded and self._scroll is not None:
+            self._scroll.SetSizer(vbox)
+            outer = wx.BoxSizer(wx.VERTICAL)
+            outer.Add(self._scroll, proportion=1, flag=wx.EXPAND)
+            self.SetSizer(outer)
+            self.Bind(wx.EVT_SIZE, self._on_embedded_resize)
+            self._scroll.FitInside()
+        else:
+            self.SetSizer(vbox)
 
         if not self._embedded:
             self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
@@ -180,6 +195,11 @@ class ChatShell(wx.Panel):
 
         if not self._embedded:
             self._refresh_context()
+
+    def _on_embedded_resize(self, event: wx.Event) -> None:
+        if self._scroll is not None:
+            self._scroll.FitInside()
+        event.Skip()
 
     def apply_context(self, ctx: ProjectContext) -> None:
         """Use project context from the Assistant shell header."""
