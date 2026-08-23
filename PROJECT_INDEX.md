@@ -12,8 +12,8 @@ This is the primary documentation hub for humans and AI assistants working on Ki
 
 | Item | Status |
 |------|--------|
-| Phase | Post Track C/D — Phase 1 file-based close-out complete; Phase 2 next |
-| Code | Full assistant: chat, datasheets, simulation, AERF, notebook, pin connectivity, gap-fill detection, CI (`pytest`) |
+| Phase | Post Track C/D — Assistant shell with seven embedded tabs; ActionPlugin; Audits and Routing shipped |
+| Code | Chat, datasheets, simulation, AERF, notebook, audits, routing, multi-turn chat, CI (`pytest`) |
 | Documentation framework | EDF Phase 3 — ADRs and architecture stubs complete |
 | License | MIT — see [LICENSE](LICENSE) |
 
@@ -41,7 +41,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [Software Architecture (KiCad Host)](docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 - [ADP-009: Host Integration Layer](docs/Architecture/ADP-009-Host-Integration-Layer.md)
 - [ADP-010: Engineering Inference Engine](docs/Architecture/ADP-010-Engineering-Inference-Engine.md)
-- [ADP-011: Assistant Shell User Interface](docs/Architecture/ADP-011-Assistant-Shell-UI.md) (Phase 1 scaffold)
+- [ADP-011: Assistant Shell User Interface](docs/Architecture/ADP-011-Assistant-Shell-UI.md) (complete — embedded tabs)
 - [Prompt Architecture](docs/Architecture/Prompt_Architecture.md)
 - [AI Provider Interface](docs/Architecture/AI_Provider_Interface.md)
 - [Roadmap](docs/Architecture/Roadmap.md)
@@ -109,10 +109,15 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 
 ### User Guides
 
-- [User Guides](docs/User_Guides/README.md)
-- [Feature Overview](docs/User_Guides/Feature_Overview.md) — KiCad capabilities, platform scope, and how the system works
-- [How AERF Works](docs/User_Guides/How_AERF_Works.md) — staged analysis vs Chat and copy-paste workflows
-- [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — validate chat, AERF, and Notebook with your own schematic
+- [User Guides](docs/User_Guides/README.md) — **start here** for end-user documentation
+- [Getting Started](docs/User_Guides/00_Getting_Started.md) — install plugin, API key, first launch
+- [Assistant Shell](docs/User_Guides/01_Assistant_Shell.md) — tabs, shortcuts, shared header
+- [Chat](docs/User_Guides/02_Chat.md) · [Datasheets](docs/User_Guides/03_Datasheets.md) · [Simulation](docs/User_Guides/04_Simulation_and_SUBCKT.md) · [AERF](docs/User_Guides/05_AERF_Staged_Analysis.md) · [Notebook](docs/User_Guides/06_Engineering_Notebook.md) · [Audits](docs/User_Guides/07_Design_Audits.md) · [Routing](docs/User_Guides/08_PCB_Routing.md)
+- [Configuration](docs/User_Guides/09_Configuration_Reference.md) · [Security](docs/User_Guides/10_Security_and_Approval.md) · [Troubleshooting](docs/User_Guides/11_Troubleshooting.md)
+- [Workflows](docs/User_Guides/Workflows/New_Project_to_EKM.md) — New Project to EKM, PCB review/route, simulation readiness
+- [Feature Overview](docs/User_Guides/Feature_Overview.md) — capability matrix
+- [How AERF Works](docs/User_Guides/How_AERF_Works.md) — staged analysis concepts
+- [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — validation checklist
 
 ### Reference
 
@@ -145,11 +150,11 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 3. ~~Search, collapsible sections, renderer split (`src/ui/notebook_renderer.py`)~~ (done)
 4. ~~Non-modal panel + Advanced JSON view (`--ui-notebook-panel`)~~ (done)
 
-**Recommended next:** Phase 2 — embedded Assistant tabs, dockable KiCad plugin, multi-turn chat. See [Master Task List](tasks/MASTER_TASK_LIST.md).
+**Recommended next:** True in-editor dock panel; simulation closed loop; additional circuit families. See [Master Task List](tasks/MASTER_TASK_LIST.md).
 
-Standing rule: update Feature Overview and [Master Task List](tasks/MASTER_TASK_LIST.md) at each milestone.
+**User documentation:** [User Guides](docs/User_Guides/README.md) — comprehensive step-by-step guides for every Assistant tab.
 
-**Testing:** [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — external-script E2E validation (no native plugin required).
+**Testing:** [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md) — validation checklist.
 
 ## AI Context
 
@@ -157,4 +162,4 @@ AI assistants should begin here, follow links to authoritative documents, and av
 
 ## Last Reviewed
 
-2026-08-07
+2026-08-23

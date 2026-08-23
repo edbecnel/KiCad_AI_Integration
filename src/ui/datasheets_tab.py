@@ -17,6 +17,8 @@ except ImportError:  # pragma: no cover
 class DatasheetsTab(AssistantTabPanel):
     """Hosts DatasheetsShell inline; reloads when project path changes."""
 
+    HELP_TOPIC_ID = "datasheets"
+
     def __init__(self, parent: wx.Window) -> None:
         if wx is None:
             raise RuntimeError("wxPython is required for DatasheetsTab")
@@ -35,6 +37,7 @@ class DatasheetsTab(AssistantTabPanel):
         self._shell_slot.SetSizer(self._shell_sizer)
 
         root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(self.build_help_row(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=4)
         root.Add(self._placeholder, flag=wx.ALL, border=10)
         root.Add(self._shell_slot, proportion=1, flag=wx.EXPAND)
         self.SetSizer(root)

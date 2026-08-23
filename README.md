@@ -4,7 +4,7 @@
 
 **New here?** Read [What is the KiCad AI Integration Project?](PROJECT_OVERVIEW.md) for the project's philosophy, evolution, and long-term vision.
 
-**Documentation:** Start at the [Project Index](PROJECT_INDEX.md) for the full documentation map. **Try it:** `python scripts/run_ai_assistant.py --ui` — [Testing With Your KiCad Project](docs/User_Guides/Testing_With_Your_KiCad_Project.md). Acronyms and terminology: [Glossary](docs/Reference/Glossary.md).
+**Documentation:** Start at the [Project Index](PROJECT_INDEX.md). **User guides:** [docs/User_Guides/README.md](docs/User_Guides/README.md) — install, every tab, workflows. **Quick try:** KiCad **Tools → External Plugins → KiCad AI Assistant** or `python scripts/run_ai_assistant.py --ui`.
 
 ## Overview
 
@@ -31,53 +31,72 @@ The initial implementation targets **Anthropic Claude**, with a long-term archit
 
 ---
 
-# Initial Features (Phase 1)
+# Current Features
 
-The first release will consist of a Python script that executes within KiCad.
+The KiCad AI **Assistant shell** provides seven embedded tabs with shared project context:
 
-Features include:
+| Tab | Shortcut | Purpose |
+|-----|----------|---------|
+| Chat | Ctrl+1 | Multi-turn schematic-aware Q&A with approve-before-send |
+| Datasheets | Ctrl+2 | PDF library, attach, AI discovery |
+| Simulation | Ctrl+3 | SUBCKT gap scan and spice write-back |
+| AERF | Ctrl+4 | Staged analysis (0–7) with EKM write-back |
+| Notebook | Ctrl+5 | Engineering Knowledge editor |
+| Audits | Ctrl+6 | One-click schematic/PCB reviews |
+| Routing | Ctrl+7 | Freerouting autoroute with checkpoint accept/reject |
 
-- Read the active schematic
-- Read the active PCB
-- Extract project metadata
-- Extract component information
-- Extract net information
-- Extract BOM data
-- Read ERC results
-- Read DRC results
+**Launch:** KiCad ActionPlugin (**Tools → External Plugins → KiCad AI Assistant**) or `python scripts/run_ai_assistant.py --ui`.
+
+See [User Guides](docs/User_Guides/README.md) for step-by-step instructions.
+
+---
+
+# Initial Features (Phase 1 — historical)
+
+The first release consisted of a Python script that executes within or alongside KiCad:
+
+- Read schematic and PCB from project files
 - Construct an optimized AI prompt
-- Send requests to Claude Sonnet 3.5 via the Anthropic API
-- Display AI responses inside KiCad
+- Send requests to Claude via the Anthropic API
+- Display responses in wxPython UI
 
-Initially, conversations will be stateless (one request at a time).
-
----
-
-# Planned Features
-
-## Phase 2
-
-- Native KiCad plugin
-- Dockable AI chat window
-- Markdown rendering
-- Conversation history
-- Multiple prompt templates
-- Token usage statistics
-- Cost estimation
-- Context caching
+Many Phase 1 goals are now superseded by the unified Assistant shell above.
 
 ---
 
-## Phase 3
+# Planned / in progress
 
-Advanced engineering capabilities including:
+## Product polish
 
-- Automated schematic review
-- PCB layout review
-- Power integrity analysis
-- Signal integrity guidance
-- EMI/EMC recommendations
-- Design Rule interpretation
+- True wxAUI dock inside PCB editor (Assistant currently uses a non-modal frame)
+- Context preview thumbnail for schematic images
+- Clickable component references in AI responses
+
+## Advanced engineering
+
+- Simulation closed loop ([ADP-006](docs/Architecture/ADP-006-Simulation-Abstraction.md))
+- Deeper PI/SI/EMC guidance beyond current audit templates
+- Notebook AI edit proposals
+
+---
+
+# Legacy roadmap notes (superseded items struck through)
+
+## Phase 2 (largely complete)
+
+- ~~Native KiCad plugin~~ — ActionPlugin shipped
+- ~~Embedded feature tabs~~ — seven tabs in Assistant shell
+- ~~Conversation history~~ — `kicad_ai/conversation.json` per project
+- ~~Multiple prompt templates~~ — Chat template selector
+- ~~Multi-provider profiles~~ — Claude + Ollama in Settings
+- Dockable AI chat window — still deferred (non-modal frame today)
+
+## Phase 3 (partial)
+
+- ~~Automated schematic/PCB review~~ — Audits tab
+- ~~Staged AERF with EKM write-back~~ — shipped
+- Freerouting routing UI — shipped (Routing tab)
+- Power integrity / SI / EMC deep analysis — partial via audits + live context
 - Component comparison
 - Datasheet analysis
 - Circuit explanation

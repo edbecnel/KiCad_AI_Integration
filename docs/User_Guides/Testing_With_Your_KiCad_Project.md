@@ -8,9 +8,11 @@
 > **Last Reviewed:** 2026-08-07
 > **Review Frequency:** Quarterly
 
-This guide walks through testing chat, datasheet management, AERF staged analysis, and the Engineering Notebook using **external Python scripts** — no native KiCad plugin required. KiCad does **not** need to be open; the assistant reads your saved project files from disk.
+This guide is a **validation checklist** for contributors and power users. For install and everyday usage, start at [Getting Started](00_Getting_Started.md) and the [User Guides hub](README.md).
 
-For contributor checklists and QA steps, see [E2E Full Flow](../Developer_Handbook/07_E2E_Full_Flow.md). For how staged AERF analysis works, see [How AERF Works](How_AERF_Works.md).
+You can validate using the **KiCad ActionPlugin** (recommended) or **Terminal** `scripts/run_ai_assistant.py`. Both use the same seven-tab Assistant shell. Context is read from **saved project files on disk** — save in KiCad before **Refresh context**.
+
+For contributor E2E steps, see [E2E Full Flow](../Developer_Handbook/07_E2E_Full_Flow.md). For how staged AERF analysis works, see [How AERF Works](How_AERF_Works.md).
 
 ---
 
@@ -112,7 +114,7 @@ In the unified Assistant shell:
 
 1. Click **Browse…** to select a `.kicad_pro` file (or pass the path on the command line).
 2. Click **Refresh context** — the summary shows symbols, datasheets, **SPICE netlist status**, PCB counts, and simulation gaps.
-3. Use the **Chat**, **Datasheets**, **Simulation**, **AERF**, or **Notebook** tabs (or `Ctrl+1` … `Ctrl+5`).
+3. Use the **Chat**, **Datasheets**, **Simulation**, **AERF**, **Notebook**, **Audits**, or **Routing** tabs (or `Ctrl+1` … `Ctrl+7`).
 
 You do **not** need shell commands to verify netlist export — look for a line like `SPICE netlist: 22 lines (partial — …)` in the context summary.
 

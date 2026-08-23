@@ -16,10 +16,12 @@ This repository implements an **AI-assisted Electrical Engineering Reasoning Pla
 
 | Lens | What you get |
 |------|----------------|
-| **KiCad user today** | Schematic-aware AI chat, datasheet management, early simulation/SUBCKT tooling — run from a script alongside KiCad |
+| **KiCad user today** | Unified Assistant shell: Chat, Datasheets, Simulation, AERF, Notebook, Audits, Routing — KiCad ActionPlugin or `--ui` |
 | **Platform (longer term)** | Host-independent reasoning (EKM, AERF, EIE, prompts, providers) usable from other EDA tools, CLI, web, or lab software |
 
-**Status:** Early working prototype on the KiCad host. Platform frameworks (EKM, AERF, EIE) are implemented; KiCad host Phase 1 file-based close-out is complete. Phase 2 productization (native plugin, embedded tabs) is next.
+**Status:** Working KiCad host prototype. Seven embedded Assistant tabs, ActionPlugin entry, multi-turn chat, one-click audits, and Freerouting routing UI are shipped. True in-canvas dock remains deferred.
+
+For step-by-step usage, see [User Guides](README.md).
 
 ### Separation principle
 
@@ -29,7 +31,7 @@ This repository implements an **AI-assisted Electrical Engineering Reasoning Pla
 
 ## Part 2 — KiCad Host: What Works Today
 
-Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant.py) — recommended: `python scripts/run_ai_assistant.py --ui` (project picker and context refresh). See [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md).
+Launch via KiCad **Tools → External Plugins → KiCad AI Assistant** or [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant.py) with `--ui`. See [Getting Started](00_Getting_Started.md).
 
 ### Working now
 
@@ -51,23 +53,23 @@ Launch panels via [`scripts/run_ai_assistant.py`](../../scripts/run_ai_assistant
 - Large schematics are summarized automatically so requests stay manageable
 - Chat workflow runs through the platform **Engineering Inference Engine (EIE)** (`src/inference/`)
 
-#### User interface (today)
+#### User interface
 
-`--ui` opens the **Assistant shell** ([ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md)): shared project header, tab bar, and **Refresh context**. Each tab opens the existing feature panel (Chat, Datasheets, Simulation, AERF, Notebook). You can also launch panels directly:
+`--ui` opens the **Assistant shell** ([ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md)): shared project header, **seven embedded tabs**, and **Refresh context**. Shortcuts **Ctrl+1** through **Ctrl+7**.
 
-- **Chat** (`--ui-chat` or shell **Chat** tab): ask questions, **approve before sending**, read Claude's answer and token usage
-- **Datasheets** (`--ui-datasheets` or launcher **Datasheets** button): attach PDFs, AI discovery, reset links — **not available inside Chat**
-- **Simulation** (`--ui-simulation`): gap scan, SUBCKT generation, spice write-back
-- **AERF** (`--ui-aerf`): staged circuit analysis with per-stage Approve & Send and optional EKM write-back
-- **Engineering Notebook** (`--ui-notebook`, `--ui-notebook-panel`): view/edit EKM fields; search; Advanced JSON tab
+| Tab | Guide | CLI deep-link |
+|-----|-------|---------------|
+| Chat | [02 — Chat](02_Chat.md) | `--ui-chat` |
+| Datasheets | [03 — Datasheets](03_Datasheets.md) | `--ui-datasheets` |
+| Simulation | [04 — Simulation](04_Simulation_and_SUBCKT.md) | `--ui-simulation` |
+| AERF | [05 — AERF](05_AERF_Staged_Analysis.md) | `--ui-aerf` |
+| Notebook | [06 — Notebook](06_Engineering_Notebook.md) | `--ui-notebook` |
+| Audits | [07 — Audits](07_Design_Audits.md) | `--audit-schematic`, `--audit-pcb` |
+| Routing | [08 — Routing](08_PCB_Routing.md) | `--ui-routing` |
 
-**Known limitation:** Launcher and Chat both use the window title **"KiCad AI Assistant"**, so the launcher is easy to miss when Chat is open. For datasheet attach, use **Datasheets** or `--ui-datasheets` directly — see [Testing With Your KiCad Project](Testing_With_Your_KiCad_Project.md).
+**KiCad ActionPlugin:** PCB Editor → **Tools → External Plugins → KiCad AI Assistant** (non-modal frame; same shell as `--ui`).
 
-Runs from a terminal or KiCad Scripting Console (no native KiCad menu plugin yet). Optional **schematic image** for visual questions (`--image`; large designs are slow and costly — text Q&A is the reliable path today).
-
-#### Assistant shell (Phase 1 scaffold)
-
-The unified **Assistant shell** (`--ui`) provides a shared project header and tab bar; each tab opens the existing modal panel for Chat, Datasheets, Simulation, AERF, or Notebook. Fully embedded tab UIs and KiCad dockable hosting are Phase 2 — see [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md).
+Optional **schematic image** for visual questions (`--image` or Chat checkbox). Multi-turn Chat saves to `kicad_ai/conversation.json`.
 
 #### Security / control
 - Context **preview** before any cloud send (chat UI)
@@ -160,7 +162,7 @@ DesignSnapshot + EKM + Circuit Family KB
 | **EKM** | Authored knowledge — why the design **is this way** | Schema uses `KiCadLink` today; model is host-agnostic — [ADP-001](../Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md) |
 | **AERF** stage outputs | Transient per-analysis reasoning | No — [ADP-008](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) |
 | **Circuit Family KB** | Reusable reference knowledge | No — [`docs/Engineering_Knowledge/`](../Engineering_Knowledge/README.md) |
-| Conversations | Raw chat input (not canonical memory) | No (planned Phase 2) |
+| Conversations | Raw chat input; multi-turn history in `conversation.json` | No |
 | Artifact library | Datasheets, SPICE libs, exports | No (content-addressed store) |
 
 Conversations are **input**; EKM is **distilled output** after user approval.
@@ -209,36 +211,31 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 
 ## Part 4 — Roadmap, Gaps, and Bottom Line
 
-### KiCad host roadmap
+### KiCad host roadmap (remaining)
 
-**Phase 2 — Plugin & conversational UX**
-- Installable KiCad plugin, dockable chat window
-- Conversation Manager (session history) — platform component, KiCad UI shell
-- Markdown rendering, template library, multi-provider profiles
-
-**Phase 3 — Engineering assistant (KiCad UX + platform reasoning)**
-- One-click schematic and PCB audits (**done** — Audits tab)
-- Power/signal integrity and EMC guidance (partial — live board settings in audit context)
-- Staged circuit analysis via **AERF** with **EKM** write-back after approval
-- Engineering Notebook UI for curated project knowledge
+- True wxAUI dock inside PCB editor
+- Context preview thumbnail for schematic images
+- Clickable component references in AI responses
+- Notebook AI edit proposals
+- Simulation closed loop
 
 ### Platform gaps (not KiCad-specific)
 
 | Framework | Status | Next step |
 |-----------|--------|-----------|
-| EKM runtime (`src/ekm/`) | View Model + field registry + write-back | Phase 2 dockable plugin shell |
-| AERF orchestrator (`src/reasoning/`) | Stage registry + KB loader + classifier + enriched prompts/validation | Additional circuit families |
-| EIE (`src/inference/`) | Chat + simulation + AERF pipeline + EKM write-back | Notebook AI edit proposals |
-| Engineering Notebook UI | Full primitive editors, search, JSON view (`--ui-notebook`) | Dockable KiCad plugin (Phase 2) |
-| Conversation Manager | Deferred Phase 2 | Multi-turn transcripts |
-| Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Host-agnostic validation hooks; closed loop deferred |
-| Blocking Oscillator KB | Complete (00–07); **live AERF sign-off** (Bedini API run Aug 2026; fixtures + rubric) | Additional circuit families |
+| EKM runtime (`src/ekm/`) | View Model + field registry + write-back | Notebook AI edit proposals |
+| AERF orchestrator (`src/reasoning/`) | Stage registry + KB loader + classifier | Additional circuit families |
+| EIE (`src/inference/`) | Chat + simulation + AERF + audits + routing | Deeper PI/SI/EMC templates |
+| Engineering Notebook UI | Full editors, search, JSON view | In-canvas dock (deferred) |
+| Conversation Manager | Multi-turn per project | Session export UI |
+| Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Closed loop deferred |
+| Blocking Oscillator KB | Complete with live sign-off fixtures | Additional families |
 
 ### Bottom line
 
 | | |
 |---|---|
-| **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library; simulation/SUBCKT panel; PCB/BOM/ERC/DRC context; live KiCad enrichment; one-click audits; Assistant shell |
+| **KiCad host (proven)** | Seven-tab Assistant shell, ActionPlugin, multi-turn chat, datasheets, simulation/SUBCKT, AERF+EKM, audits, Freerouting routing |
 | **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + **learning loop** (EKM reload, library promotion); EIE chat/simulation/AERF UI; Blocking Oscillator KB |
 | **In progress** | Simulation closed loop; PI/SI/EMC deep guidance |
 | **Later** | Additional hosts, clickable refs in KiCad, project memory via EKM |
@@ -251,6 +248,7 @@ This is a **foundation**, not a finished product. The central idea — automatic
 
 | Topic | Document |
 |-------|----------|
+| **User guides (start here)** | [User Guides](README.md) |
 | Platform architecture | [Platform Architecture](../Architecture/Platform_Architecture.md) |
 | KiCad host implementation | [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md) |
 | Host integration contract | [ADP-009](../Architecture/ADP-009-Host-Integration-Layer.md) |

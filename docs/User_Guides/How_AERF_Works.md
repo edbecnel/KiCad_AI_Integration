@@ -67,16 +67,19 @@ The model returns structured JSON: `determinations`, `confidence`, `unknowns`, `
 
 ---
 
-## Chat vs AERF vs Simulation vs Notebook
+## Chat vs AERF vs Simulation vs Notebook vs Audits vs Routing
 
-| Surface | CLI | Purpose |
-|---------|-----|---------|
-| **Chat** | `--ui-chat` | Ad-hoc Q&A via `general_review` template — **not** full staged AERF |
-| **AERF** | `--ui-aerf` | Staged engineer workflow (stages 0–7), Approve & Send, optional EKM write-back |
-| **Simulation** | `--ui-simulation` | SPICE gap scan, SUBCKT generation, spice field write-back |
-| **Notebook** | `--ui-notebook` | View/edit EKM after analysis or manual authoring |
+| Surface | Shortcut | CLI | Purpose |
+|---------|----------|-----|---------|
+| **Chat** | Ctrl+1 | `--ui-chat` | Ad-hoc Q&A — **not** full staged AERF |
+| **Datasheets** | Ctrl+2 | `--ui-datasheets` | PDF library and symbol linkage |
+| **Simulation** | Ctrl+3 | `--ui-simulation` | SPICE gap scan, SUBCKT generation |
+| **AERF** | Ctrl+4 | `--ui-aerf` | Stages 0–7, Approve & Send, EKM write-back |
+| **Notebook** | Ctrl+5 | `--ui-notebook` | View/edit EKM after write-back |
+| **Audits** | Ctrl+6 | `--audit-schematic` | One-click schematic/PCB/DRC reviews |
+| **Routing** | Ctrl+7 | `--ui-routing` | Freerouting autoroute with checkpoint |
 
-Use **AERF** when you want disciplined, multi-stage analysis. Use **Chat** for quick questions.
+Use **AERF** for disciplined multi-stage analysis. Use **Chat** for quick questions. See [05 — AERF](05_AERF_Staged_Analysis.md) for the UI workflow.
 
 ---
 

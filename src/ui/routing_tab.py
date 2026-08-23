@@ -17,6 +17,8 @@ except ImportError:  # pragma: no cover
 class RoutingTab(AssistantTabPanel):
     """Hosts RoutingShell inline."""
 
+    HELP_TOPIC_ID = "routing"
+
     def __init__(self, parent: wx.Window) -> None:
         if wx is None:
             raise RuntimeError("wxPython is required for RoutingTab")
@@ -35,6 +37,7 @@ class RoutingTab(AssistantTabPanel):
         self._shell_slot.SetSizer(self._shell_sizer)
 
         root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(self.build_help_row(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=4)
         root.Add(self._placeholder, flag=wx.ALL, border=10)
         root.Add(self._shell_slot, proportion=1, flag=wx.EXPAND)
         self.SetSizer(root)

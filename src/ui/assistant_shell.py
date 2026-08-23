@@ -86,9 +86,11 @@ class AssistantShell(wx.Panel):
         self._btn_browse = wx.Button(self, label="Browse…")
         self._btn_refresh = wx.Button(self, label="Refresh context")
         self._btn_settings = wx.Button(self, label="Settings…")
+        self._btn_help = wx.Button(self, label="Help")
         header_btn_row.Add(self._btn_browse, flag=wx.RIGHT, border=4)
         header_btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=4)
-        header_btn_row.Add(self._btn_settings)
+        header_btn_row.Add(self._btn_settings, flag=wx.RIGHT, border=4)
+        header_btn_row.Add(self._btn_help)
         header_btn_row.AddStretchSpacer()
         vbox.Add(header_btn_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
 
@@ -133,6 +135,7 @@ class AssistantShell(wx.Panel):
         self._btn_browse.Bind(wx.EVT_BUTTON, self._on_browse)
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_settings.Bind(wx.EVT_BUTTON, self._on_settings)
+        self._btn_help.Bind(wx.EVT_BUTTON, self._on_help)
         self._notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_tab_changed)
         self.Bind(wx.EVT_CHAR_HOOK, self._on_char_hook)
 
@@ -178,6 +181,16 @@ class AssistantShell(wx.Panel):
         if saved is not None:
             self._controller._config = saved
             self._status.SetLabel(f"Settings saved — provider: {saved.ai_provider}")
+
+    def _on_help(self, _event: wx.CommandEvent) -> None:
+        from ui.help_dialog import show_user_guide
+
+        active = self._active_tab_panel()
+        tab_id = active.help_topic_id() if active is not None else None
+        if tab_id:
+            show_user_guide(self, tab_id=tab_id)
+        else:
+            show_user_guide(self, topic="README.md")
 
     def _on_refresh(self, _event: wx.CommandEvent | None) -> None:
         try:

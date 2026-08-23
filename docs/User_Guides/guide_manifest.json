@@ -1,0 +1,32 @@
+{
+  "default_topic": "README.md",
+  "topics": [
+    {"id": "hub", "title": "User Guides (hub)", "path": "README.md"},
+    {"id": "getting_started", "title": "Getting Started", "path": "00_Getting_Started.md"},
+    {"id": "assistant_shell", "title": "Assistant Shell", "path": "01_Assistant_Shell.md"},
+    {"id": "chat", "title": "Chat", "path": "02_Chat.md"},
+    {"id": "datasheets", "title": "Datasheets", "path": "03_Datasheets.md"},
+    {"id": "simulation", "title": "Simulation and SUBCKT", "path": "04_Simulation_and_SUBCKT.md"},
+    {"id": "aerf", "title": "AERF Staged Analysis", "path": "05_AERF_Staged_Analysis.md"},
+    {"id": "notebook", "title": "Engineering Notebook", "path": "06_Engineering_Notebook.md"},
+    {"id": "audits", "title": "Design Audits", "path": "07_Design_Audits.md"},
+    {"id": "routing", "title": "PCB Routing", "path": "08_PCB_Routing.md"},
+    {"id": "configuration", "title": "Configuration Reference", "path": "09_Configuration_Reference.md"},
+    {"id": "security", "title": "Security and Approval", "path": "10_Security_and_Approval.md"},
+    {"id": "troubleshooting", "title": "Troubleshooting", "path": "11_Troubleshooting.md"},
+    {"id": "workflow_ekm", "title": "Workflow: New Project to EKM", "path": "Workflows/New_Project_to_EKM.md"},
+    {"id": "workflow_pcb", "title": "Workflow: PCB Review and Route", "path": "Workflows/PCB_Layout_Review_and_Route.md"},
+    {"id": "workflow_sim", "title": "Workflow: Simulation Readiness", "path": "Workflows/Simulation_Readiness.md"},
+    {"id": "feature_overview", "title": "Feature Overview", "path": "Feature_Overview.md"},
+    {"id": "how_aerf", "title": "How AERF Works", "path": "How_AERF_Works.md"}
+  ],
+  "tab_topics": {
+    "chat": "02_Chat.md",
+    "datasheets": "03_Datasheets.md",
+    "simulation": "04_Simulation_and_SUBCKT.md",
+    "aerf": "05_AERF_Staged_Analysis.md",
+    "notebook": "06_Engineering_Notebook.md",
+    "audits": "07_Design_Audits.md",
+    "routing": "08_PCB_Routing.md"
+  }
+}

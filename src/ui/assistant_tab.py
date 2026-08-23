@@ -22,6 +22,32 @@ def tab_index_for_focus(focus_tab: str | None, tab_ids: tuple[str, ...] = ASSIST
 class AssistantTabPanel(wx.Panel):
     """Base class for embedded Assistant shell tabs."""
 
+    HELP_TOPIC_ID: str = ""
+
+    def help_topic_id(self) -> str:
+        return self.HELP_TOPIC_ID
+
+    def build_help_row(self) -> wx.Panel:
+        """Top row with context-sensitive help button."""
+        panel = wx.Panel(self)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.AddStretchSpacer()
+        btn = wx.Button(panel, label="?")
+        btn.SetToolTip("Open help for this tab")
+        btn.Bind(wx.EVT_BUTTON, self._on_tab_help)
+        row.Add(btn)
+        panel.SetSizer(row)
+        return panel
+
+    def _on_tab_help(self, _event: wx.Event) -> None:
+        from ui.help_dialog import show_user_guide
+
+        topic = self.help_topic_id()
+        if topic:
+            show_user_guide(self, tab_id=topic)
+        else:
+            show_user_guide(self)
+
     def on_context_refreshed(self, ctx: ProjectContext, summary: str) -> None:
         """Called when the shared header refreshes project context."""
 

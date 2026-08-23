@@ -146,3 +146,15 @@ def show_assistant_shell(
         parent=resolved_parent,
         focus_tab=focus_tab,
     )
+
+
+def show_user_guide(
+    parent: object | None = None,
+    *,
+    topic: str | None = None,
+    tab_id: str | None = None,
+) -> None:
+    """Open the in-app User Guide viewer."""
+    from ui.help_dialog import show_user_guide as _show
+
+    _show(parent, topic=topic, tab_id=tab_id)
