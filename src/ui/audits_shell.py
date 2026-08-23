@@ -10,9 +10,13 @@ from inference.audit import (
     AuditResult,
     run_circuit_explanation,
     run_drc_interpretation,
+    run_emi_emc_audit,
+    run_flyback_recovery_audit,
     run_isolation_clearance_audit,
     run_pcb_layout_review,
+    run_power_integrity_audit,
     run_schematic_review,
+    run_signal_integrity_audit,
 )
 from providers.errors import ProviderError
 from utils.config import load_config
@@ -28,6 +32,10 @@ _AUDIT_RUNNERS = {
     "drc": run_drc_interpretation,
     "isolation": run_isolation_clearance_audit,
     "circuit": run_circuit_explanation,
+    "power_integrity": run_power_integrity_audit,
+    "signal_integrity": run_signal_integrity_audit,
+    "emi_emc": run_emi_emc_audit,
+    "flyback": run_flyback_recovery_audit,
 }
 
 
@@ -67,12 +75,20 @@ class AuditsShell(wx.Panel):
         self._btn_drc = wx.Button(self, label="Explain DRC")
         self._btn_isolation = wx.Button(self, label="Isolation / clearance")
         self._btn_circuit = wx.Button(self, label="Circuit explanation")
+        self._btn_power = wx.Button(self, label="Power integrity")
+        self._btn_signal = wx.Button(self, label="Signal integrity")
+        self._btn_emi = wx.Button(self, label="EMI / EMC")
+        self._btn_flyback = wx.Button(self, label="Flyback recovery")
         for btn in (
             self._btn_schematic,
             self._btn_pcb,
             self._btn_drc,
             self._btn_isolation,
             self._btn_circuit,
+            self._btn_power,
+            self._btn_signal,
+            self._btn_emi,
+            self._btn_flyback,
         ):
             btn_row.Add(btn, flag=wx.RIGHT, border=6)
         vbox.Add(btn_row, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
@@ -89,6 +105,10 @@ class AuditsShell(wx.Panel):
         self._btn_drc.Bind(wx.EVT_BUTTON, lambda _e: self._start_audit("drc"))
         self._btn_isolation.Bind(wx.EVT_BUTTON, lambda _e: self._start_audit("isolation"))
         self._btn_circuit.Bind(wx.EVT_BUTTON, lambda _e: self._start_audit("circuit"))
+        self._btn_power.Bind(wx.EVT_BUTTON, lambda _e: self._start_audit("power_integrity"))
+        self._btn_signal.Bind(wx.EVT_BUTTON, lambda _e: self._start_audit("signal_integrity"))
+        self._btn_emi.Bind(wx.EVT_BUTTON, lambda _e: self._start_audit("emi_emc"))
+        self._btn_flyback.Bind(wx.EVT_BUTTON, lambda _e: self._start_audit("flyback"))
 
     def apply_context(self, ctx: ProjectContext) -> None:
         self._ctx = ctx
@@ -102,6 +122,10 @@ class AuditsShell(wx.Panel):
             self._btn_drc,
             self._btn_isolation,
             self._btn_circuit,
+            self._btn_power,
+            self._btn_signal,
+            self._btn_emi,
+            self._btn_flyback,
         ):
             btn.Enable(not busy)
 

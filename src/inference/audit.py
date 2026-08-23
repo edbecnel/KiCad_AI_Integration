@@ -37,6 +37,18 @@ AUDIT_QUESTIONS = {
     "circuit_explanation": (
         "Walk through the circuit topology and explain how major functional blocks interact."
     ),
+    "power_integrity": (
+        "Review power delivery, decoupling, return paths, and high di/dt switching paths."
+    ),
+    "signal_integrity": (
+        "Review impedance control, differential pairs, return paths, and crosstalk risks."
+    ),
+    "emi_emc": (
+        "Review EMI/EMC risks: loop area, filtering, grounding, and isolation gaps."
+    ),
+    "flyback_recovery": (
+        "Review flyback recovery isolation, switching stress, and netlist consistency."
+    ),
 }
 
 
@@ -192,6 +204,82 @@ def run_circuit_explanation(
     return _run_audit(
         "circuit_explanation",
         "general_review",
+        ctx,
+        config=config,
+        api_key_override=api_key_override,
+        provider=provider,
+        persist=persist,
+    )
+
+
+def run_power_integrity_audit(
+    ctx: ProjectContext,
+    *,
+    config: AppConfig | None = None,
+    api_key_override: str | None = None,
+    provider: Any | None = None,
+    persist: bool = True,
+) -> AuditResult:
+    return _run_audit(
+        "power_integrity",
+        "power_integrity_audit",
+        ctx,
+        config=config,
+        api_key_override=api_key_override,
+        provider=provider,
+        persist=persist,
+    )
+
+
+def run_signal_integrity_audit(
+    ctx: ProjectContext,
+    *,
+    config: AppConfig | None = None,
+    api_key_override: str | None = None,
+    provider: Any | None = None,
+    persist: bool = True,
+) -> AuditResult:
+    return _run_audit(
+        "signal_integrity",
+        "signal_integrity_audit",
+        ctx,
+        config=config,
+        api_key_override=api_key_override,
+        provider=provider,
+        persist=persist,
+    )
+
+
+def run_emi_emc_audit(
+    ctx: ProjectContext,
+    *,
+    config: AppConfig | None = None,
+    api_key_override: str | None = None,
+    provider: Any | None = None,
+    persist: bool = True,
+) -> AuditResult:
+    return _run_audit(
+        "emi_emc",
+        "emi_emc_audit",
+        ctx,
+        config=config,
+        api_key_override=api_key_override,
+        provider=provider,
+        persist=persist,
+    )
+
+
+def run_flyback_recovery_audit(
+    ctx: ProjectContext,
+    *,
+    config: AppConfig | None = None,
+    api_key_override: str | None = None,
+    provider: Any | None = None,
+    persist: bool = True,
+) -> AuditResult:
+    return _run_audit(
+        "flyback_recovery",
+        "flyback_recovery_audit",
         ctx,
         config=config,
         api_key_override=api_key_override,

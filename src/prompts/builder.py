@@ -26,6 +26,19 @@ from prompts.templates.netlist_gap_fill import (
     NETLIST_GAP_FILL_SYSTEM,
     build_netlist_gap_fill_sections,
 )
+from prompts.templates.power_integrity import (
+    POWER_INTEGRITY_SYSTEM,
+    build_power_integrity_sections,
+)
+from prompts.templates.signal_integrity import (
+    SIGNAL_INTEGRITY_SYSTEM,
+    build_signal_integrity_sections,
+)
+from prompts.templates.emi_emc import EMI_EMC_SYSTEM, build_emi_emc_sections
+from prompts.templates.flyback_recovery import (
+    FLYBACK_RECOVERY_SYSTEM,
+    build_flyback_recovery_sections,
+)
 from context.context_flags import ContextIncludeFlags
 
 TemplateName = str
@@ -292,6 +305,106 @@ def build_netlist_gap_fill_prompt(
         template="netlist_gap_fill",
         preview_summary=preview,
         estimated_text_tokens=est,
+    )
+
+
+def _build_domain_audit_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    sections_builder,
+    system: str,
+    template: str,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    sections = sections_builder(
+        ctx,
+        question,
+        functional_description=functional_description,
+        include=include,
+    )
+    text = wrap_xml_sections(sections)
+    preview = build_prompt_summary(ctx, include_image=False)
+    est = estimate_tokens(text)
+    return BuiltPrompt(
+        text=text,
+        system=system,
+        template=template,
+        preview_summary=preview,
+        estimated_text_tokens=est,
+    )
+
+
+def build_power_integrity_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    return _build_domain_audit_prompt(
+        ctx,
+        question,
+        sections_builder=build_power_integrity_sections,
+        system=POWER_INTEGRITY_SYSTEM,
+        template="power_integrity_audit",
+        functional_description=functional_description,
+        include=include,
+    )
+
+
+def build_signal_integrity_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    return _build_domain_audit_prompt(
+        ctx,
+        question,
+        sections_builder=build_signal_integrity_sections,
+        system=SIGNAL_INTEGRITY_SYSTEM,
+        template="signal_integrity_audit",
+        functional_description=functional_description,
+        include=include,
+    )
+
+
+def build_emi_emc_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    return _build_domain_audit_prompt(
+        ctx,
+        question,
+        sections_builder=build_emi_emc_sections,
+        system=EMI_EMC_SYSTEM,
+        template="emi_emc_audit",
+        functional_description=functional_description,
+        include=include,
+    )
+
+
+def build_flyback_recovery_prompt(
+    ctx: ProjectContext,
+    question: str,
+    *,
+    functional_description: str | None = None,
+    include: ContextIncludeFlags | None = None,
+) -> BuiltPrompt:
+    return _build_domain_audit_prompt(
+        ctx,
+        question,
+        sections_builder=build_flyback_recovery_sections,
+        system=FLYBACK_RECOVERY_SYSTEM,
+        template="flyback_recovery_audit",
+        functional_description=functional_description,
+        include=include,
     )
 
 

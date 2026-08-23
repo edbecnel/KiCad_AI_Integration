@@ -251,13 +251,13 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 
 Full-flow checklists: [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [07_E2E_Full_Flow](../docs/Developer_Handbook/07_E2E_Full_Flow.md).
 
-- [ ] Open KiCad PCB Editor → run script → ask engineering question → receive Claude response
-- [ ] Verify no manual export or browser copy-paste required
+- [ ] Open KiCad PCB Editor → run script → ask engineering question → receive Claude response — see [Manual Validation Checklist](../docs/Developer_Handbook/Manual_Validation_Checklist.md)
+- [ ] Verify no manual export or browser copy-paste required — checklist + `scripts/manual_e2e_checklist.py --check-env`
 
 #### Reference example
 
 - [x] Add `examples/minimal_blocking_oscillator/` sample project + updated `examples/bedini_babcock/README.md`
-- [ ] Include pre-built prompt template for flyback recovery audit
+- [x] Include pre-built prompt template for flyback recovery audit — `flyback_recovery_audit` template in Chat and Audits
 - [ ] Document expected inputs and sample questions for manual validation — see [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md)
 
 ### 1.7 Simulation & SUBCKT pipeline
@@ -353,9 +353,9 @@ beyond free-form chat.
 
 ### Domain-specific analysis
 
-- [ ] Power integrity guidance (net class data, layer stackup, decoupling proximity) — partial: live board settings in PCB audit context
-- [ ] Signal integrity guidance (impedance rules, return paths)
-- [ ] EMI/EMC recommendations (loop area, switching path length, isolation gaps)
+- [x] Power integrity guidance (net class data, layer stackup, decoupling proximity) — `power_integrity_audit` template + Audits tab
+- [x] Signal integrity guidance (impedance rules, return paths) — `signal_integrity_audit` template + Audits tab
+- [x] EMI/EMC recommendations (loop area, switching path length, isolation gaps) — `emi_emc_audit` template + Audits tab
 - [x] Design rule interpretation (DRC/ERC results explained in engineering terms) — **Explain DRC** one-click audit
 - [x] Isolation and clearance audit (one-click) — Audits tab + `isolation_clearance` template
 
@@ -548,7 +548,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] Circuit family classifier
 - [x] Per-stage prompt templates (ADP-007)
 - [x] EKM stage-output mapping and write-back (ADP-007) — `src/ekm/aerf_writeback.py`
-- [ ] Simulation closed loop — validate/refine stages (ADP-006) — types + hook translation implemented; host solver integration TBD
+- [x] Simulation closed loop — validate/refine stages (ADP-006) — host runner, AERF sim plan + merge refinement; EKM measurement refs TBD
 - [x] AERF learning loop — EKM auto-reload, generic family, library merge, confidence-gated promotion ([ADP-012](../docs/Architecture/ADP-012-Learning-and-Canonical-Knowledge.md))
 - [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
 - [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
@@ -614,9 +614,9 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 
 ### Phase 5 — Closed-loop optimization
 
-- [ ] Compare routing candidates
-- [ ] Re-route with revised policy (user approval)
-- [ ] Learning candidates via ADP-012 pipeline (not auto-canonical)
+- [x] Compare routing candidates
+- [x] Re-route with revised policy (user approval)
+- [x] Learning candidates via ADP-012 pipeline (not auto-canonical)
 
 ---
 

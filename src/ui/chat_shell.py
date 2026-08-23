@@ -76,6 +76,10 @@ class ChatShell(wx.Panel):
                 "Isolation / clearance",
                 "Netlist crosscheck",
                 "Netlist gap-fill",
+                "Power integrity",
+                "Signal integrity",
+                "EMI / EMC",
+                "Flyback recovery",
             ],
         )
         self._template_choice.SetSelection(0)
@@ -267,6 +271,10 @@ class ChatShell(wx.Panel):
             "isolation_clearance_audit",
             "netlist_crosscheck",
             "netlist_gap_fill",
+            "power_integrity_audit",
+            "signal_integrity_audit",
+            "emi_emc_audit",
+            "flyback_recovery_audit",
         ]
         idx = self._template_choice.GetSelection()
         if idx < 0 or idx >= len(labels):

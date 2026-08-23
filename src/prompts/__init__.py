@@ -3,12 +3,16 @@
 from prompts.builder import (
     BuiltPrompt,
     build_aerf_stage_prompt,
+    build_emi_emc_prompt,
+    build_flyback_recovery_prompt,
     build_general_review_prompt,
     build_isolation_clearance_prompt,
     build_netlist_crosscheck_prompt,
     build_netlist_gap_fill_prompt,
     build_pcb_layout_prompt,
+    build_power_integrity_prompt,
     build_prompt_summary,
+    build_signal_integrity_prompt,
     build_subckt_prompt,
     estimate_tokens,
 )
@@ -16,12 +20,16 @@ from prompts.builder import (
 __all__ = [
     "BuiltPrompt",
     "build_aerf_stage_prompt",
+    "build_emi_emc_prompt",
+    "build_flyback_recovery_prompt",
     "build_general_review_prompt",
     "build_isolation_clearance_prompt",
     "build_netlist_crosscheck_prompt",
     "build_netlist_gap_fill_prompt",
     "build_pcb_layout_prompt",
+    "build_power_integrity_prompt",
     "build_prompt_summary",
+    "build_signal_integrity_prompt",
     "build_subckt_prompt",
     "estimate_tokens",
 ]

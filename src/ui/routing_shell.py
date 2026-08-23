@@ -13,10 +13,13 @@ from inference.routing import (
     accept_routing_result,
     build_routing_quality_report,
     build_routing_request,
+    export_routing_learning_candidate,
+    get_routing_candidates_comparison,
     get_routing_panel_context,
     reject_routing_result,
     run_routing,
     run_routing_policy_generation,
+    save_routing_candidate_record,
 )
 from providers.errors import ProviderError
 from routing.types import RoutingResult
@@ -76,6 +79,9 @@ class RoutingShell(wx.Panel):
         self._btn_accept = wx.Button(self, label="Accept candidate")
         self._btn_reject = wx.Button(self, label="Reject candidate")
         self._btn_review = wx.Button(self, label="Post-route AI review")
+        self._btn_compare = wx.Button(self, label="Compare candidates")
+        self._btn_reroute = wx.Button(self, label="Re-route with policy")
+        self._btn_learning = wx.Button(self, label="Export learning candidate")
         self._btn_accept.Enable(False)
         self._btn_reject.Enable(False)
         self._btn_review.Enable(False)
@@ -85,6 +91,9 @@ class RoutingShell(wx.Panel):
             self._btn_accept,
             self._btn_reject,
             self._btn_review,
+            self._btn_compare,
+            self._btn_reroute,
+            self._btn_learning,
         ):
             btn_row.Add(btn, flag=wx.RIGHT, border=6)
         vbox.Add(btn_row, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
@@ -101,6 +110,9 @@ class RoutingShell(wx.Panel):
         self._btn_accept.Bind(wx.EVT_BUTTON, self._on_accept)
         self._btn_reject.Bind(wx.EVT_BUTTON, self._on_reject)
         self._btn_review.Bind(wx.EVT_BUTTON, self._on_post_route_review)
+        self._btn_compare.Bind(wx.EVT_BUTTON, self._on_compare_candidates)
+        self._btn_reroute.Bind(wx.EVT_BUTTON, self._on_reroute)
+        self._btn_learning.Bind(wx.EVT_BUTTON, self._on_export_learning)
 
     def apply_context(self, ctx: ProjectContext) -> None:
         self._ctx = ctx
@@ -149,6 +161,11 @@ class RoutingShell(wx.Panel):
         )
         self._btn_run.Enable(can_run)
         self._btn_generate.Enable(self._ctx is not None and not self._busy)
+        self._btn_compare.Enable(not self._busy)
+        self._btn_reroute.Enable(can_run)
+        self._btn_learning.Enable(
+            self._panel_ctx is not None and not self._busy
+        )
 
         has_candidate = (
             self._last_result is not None
@@ -220,6 +237,42 @@ class RoutingShell(wx.Panel):
             f"Routing policy generated "
             f"({len(result.policy.net_classifications)} nets).{saved_note}"
         )
+
+    def _on_compare_candidates(self, _event: wx.CommandEvent) -> None:
+        comparison = get_routing_candidates_comparison(self._project_path)
+        lines = ["--- Routing candidate comparison ---", comparison.get("summary", "")]
+        for row in comparison.get("rows") or []:
+            lines.append(
+                f"• {row.get('candidate_id')}: "
+                f"routed={row.get('routed_percentage')}% "
+                f"vias={row.get('via_count')} "
+                f"excluded={row.get('excluded_net_count')}"
+            )
+        self._output.SetValue("\n".join(lines))
+
+    def _on_reroute(self, _event: wx.CommandEvent) -> None:
+        if self._last_result is not None and self._last_result.success:
+            try:
+                reject_routing_result(self._last_result)
+            except (ValueError, OSError):
+                pass
+            self._last_result = None
+            self._last_quality = None
+        self._on_run(_event)
+
+    def _on_export_learning(self, _event: wx.CommandEvent) -> None:
+        if self._panel_ctx is None:
+            return
+        result = export_routing_learning_candidate(
+            self._project_path,
+            self._panel_ctx.policy,
+            quality_summary=self._last_quality,
+            accepted=False,
+            config=self._cfg,
+        )
+        self._status.SetLabel(result.message)
+        if result.path:
+            wx.MessageBox(result.message, "Learning candidate", wx.OK | wx.ICON_INFORMATION)
 
     def _on_run(self, _event: wx.CommandEvent) -> None:
         if self._busy or self._panel_ctx is None:
@@ -307,6 +360,13 @@ class RoutingShell(wx.Panel):
         self._set_busy(False)
         self._last_result = result
         self._last_quality = quality.to_dict()
+        if self._panel_ctx is not None:
+            save_routing_candidate_record(
+                self._project_path,
+                result,
+                policy=self._panel_ctx.policy,
+                quality=self._last_quality,
+            )
         self._output.SetValue(self._format_result_summary(result, self._last_quality))
         self._status.SetLabel(
             "Routing complete — review candidate, then Accept or Reject."
@@ -327,6 +387,14 @@ class RoutingShell(wx.Panel):
         except (ValueError, OSError) as exc:
             wx.MessageBox(str(exc), "Accept failed", wx.OK | wx.ICON_ERROR)
             return
+        if self._panel_ctx is not None:
+            export_routing_learning_candidate(
+                self._project_path,
+                self._panel_ctx.policy,
+                quality_summary=self._last_quality,
+                accepted=True,
+                config=self._cfg,
+            )
         self._last_result = None
         self._last_quality = None
         self._refresh_panel_state()

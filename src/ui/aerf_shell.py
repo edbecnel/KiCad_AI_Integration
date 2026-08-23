@@ -51,6 +51,8 @@ class AERFShell(wx.Panel):
         self._ekm_family_id: str | None = None
         self._built: BuiltPrompt | None = None
         self._approved = False
+        self._last_sim_stage: dict | None = None
+        self._last_sim_result = None
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         key_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -88,10 +90,16 @@ class AERFShell(wx.Panel):
         self._btn_preview = wx.Button(self, label="Preview stage prompt")
         self._btn_send = wx.Button(self, label="Approve && Send stage")
         self._btn_writeback = wx.Button(self, label="Write to EKM…")
+        self._btn_sim_plan = wx.Button(self, label="Run simulation plan")
+        self._btn_merge_sim = wx.Button(self, label="Merge simulation refinement…")
         self._btn_writeback.Enable(False)
+        self._btn_sim_plan.Enable(False)
+        self._btn_merge_sim.Enable(False)
         btn_row.Add(self._btn_preview, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_send, flag=wx.RIGHT, border=6)
         btn_row.Add(self._btn_writeback, flag=wx.RIGHT, border=6)
+        btn_row.Add(self._btn_sim_plan, flag=wx.RIGHT, border=6)
+        btn_row.Add(self._btn_merge_sim, flag=wx.RIGHT, border=6)
         btn_row.AddStretchSpacer()
         if not self._embedded:
             self._btn_close = wx.Button(self, label="Close")
@@ -115,6 +123,8 @@ class AERFShell(wx.Panel):
         self._btn_preview.Bind(wx.EVT_BUTTON, self._on_preview)
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
         self._btn_writeback.Bind(wx.EVT_BUTTON, self._on_writeback)
+        self._btn_sim_plan.Bind(wx.EVT_BUTTON, self._on_run_simulation_plan)
+        self._btn_merge_sim.Bind(wx.EVT_BUTTON, self._on_merge_simulation_refinement)
         if not self._embedded:
             self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._spin_stage.Bind(wx.EVT_SPINCTRL, self._on_stage_change)
@@ -354,5 +364,127 @@ class AERFShell(wx.Panel):
             f"{result.response.usage.output_tokens} out tokens. "
             f"Completed stages: {len(self._completed_stages)}."
         )
+        self._update_writeback_button()
+        self._update_sim_plan_button()
+
+    def _latest_stage_with_hooks(self) -> dict | None:
+        for stage in reversed(self._completed_stages):
+            hooks = stage.get("simulation_hooks")
+            if isinstance(hooks, list) and hooks:
+                return stage
+        return None
+
+    def _update_sim_plan_button(self) -> None:
+        self._btn_sim_plan.Enable(self._latest_stage_with_hooks() is not None)
+
+    def _on_run_simulation_plan(self, _event: wx.CommandEvent) -> None:
+        stage = self._latest_stage_with_hooks()
+        if stage is None:
+            wx.MessageBox(
+                "No completed stage with simulation_hooks found.",
+                "Simulation plan",
+                wx.OK | wx.ICON_INFORMATION,
+            )
+            return
+        if wx.MessageBox(
+            "Run closed-loop simulation plan for the latest stage with hooks?",
+            "Approve simulation",
+            wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        self._btn_sim_plan.Enable(False)
+        self._status.SetLabel("Running simulation plan…")
+        threading.Thread(
+            target=self._run_simulation_plan_background,
+            args=(stage,),
+            daemon=True,
+        ).start()
+
+    def _run_simulation_plan_background(self, stage: dict) -> None:
+        from inference.simulation_closed_loop import translate_simulation_hooks
+        from inference.simulation_runner import run_simulation_plan
+
+        plan = translate_simulation_hooks(stage)
+        if plan is None:
+            wx.CallAfter(
+                self._on_simulation_plan_failed,
+                "Could not translate simulation hooks.",
+            )
+            return
+        result = run_simulation_plan(self._project_path, plan, config=self._cfg)
+        wx.CallAfter(self._on_simulation_plan_succeeded, result)
+
+    def _on_simulation_plan_failed(self, message: str) -> None:
+        self._update_sim_plan_button()
+        self._status.SetLabel(f"Simulation plan failed: {message}")
+        wx.MessageBox(message, "Simulation plan", wx.OK | wx.ICON_ERROR)
+
+    def _on_simulation_plan_succeeded(self, result) -> None:
+        self._last_sim_stage = self._latest_stage_with_hooks()
+        self._last_sim_result = result
+        self._update_sim_plan_button()
+        self._btn_merge_sim.Enable(self._last_sim_stage is not None and result is not None)
+        lines = [
+            self._response.GetValue(),
+            "",
+            "--- Simulation plan result ---",
+            f"Success: {result.success}",
+        ]
+        for measurement in result.measurements:
+            lines.append(f"  {measurement.name}: {measurement.value}")
+        for err in result.errors:
+            lines.append(f"  Error: {err}")
+        if result.log_excerpt:
+            lines.append(result.log_excerpt[-500:])
+        self._response.SetValue("\n".join(lines).strip())
+        self._status.SetLabel(
+            "Simulation plan complete — review results, then Merge simulation refinement if approved."
+        )
+
+    def _on_merge_simulation_refinement(self, _event: wx.CommandEvent) -> None:
+        if self._last_sim_stage is None or self._last_sim_result is None:
+            wx.MessageBox(
+                "Run a simulation plan first.",
+                "Merge refinement",
+                wx.OK | wx.ICON_INFORMATION,
+            )
+            return
+        if wx.MessageBox(
+            "Merge simulation measurements into the stage determinations?",
+            "Approve refinement merge",
+            wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        from inference.simulation_closed_loop import (
+            build_refinement_from_simulation,
+            merge_refinement_into_stage,
+        )
+
+        refinement = build_refinement_from_simulation(
+            self._last_sim_stage,
+            self._last_sim_result,
+            approved=True,
+        )
+        merged = merge_refinement_into_stage(self._last_sim_stage, refinement)
+        stage_id = merged.get("stage_id")
+        replaced = False
+        for index, stage in enumerate(self._completed_stages):
+            if stage.get("stage_id") == stage_id:
+                self._completed_stages[index] = merged
+                replaced = True
+                break
+        if not replaced:
+            self._completed_stages.append(merged)
+        self._response.SetValue(
+            "\n".join(
+                [
+                    self._response.GetValue(),
+                    "",
+                    "--- Merged simulation refinement ---",
+                    f"Stage {stage_id}: simulation_validation written to determinations.",
+                ]
+            ).strip()
+        )
+        self._status.SetLabel("Simulation refinement merged — use Write to EKM to persist.")
         self._update_writeback_button()
 

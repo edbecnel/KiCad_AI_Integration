@@ -20,6 +20,7 @@ New contributors begin with [00_First_Time_Setup.md](./00_First_Time_Setup.md).
 - [05_Testing.md](./05_Testing.md)
 - [06_E2E_Chat_UI.md](./06_E2E_Chat_UI.md)
 - [07_E2E_Full_Flow.md](./07_E2E_Full_Flow.md)
+- [Manual_Validation_Checklist.md](./Manual_Validation_Checklist.md)
 - [kicad_ai_config.example.json](./kicad_ai_config.example.json)
 - [KiCad Python API Scripting Guide](Guide-KiCad_Python_API_Custom_AI_Scripting.md)
 - [Programmatic AI Analysis Guide](Guide-Programmatic_AI_Analysis.md)

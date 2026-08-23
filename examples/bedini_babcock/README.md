@@ -2,6 +2,21 @@
 
 Validation scenario for flyback recovery and patent-driver PCB analysis — not the full project scope.
 
+## Flyback recovery audit template
+
+Use the **Flyback recovery** audit in the **Audits** tab or the **Flyback recovery** Chat template to review:
+
+- Optocoupler / GPIO isolation from HV switching loops
+- Flyback diode and transistor stress
+- Net labels such as `HV_Flyback`, `Coil_Plus`, `PICO_GPIO15` when present
+- Netlist vs schematic consistency
+
+Design intent example for manual validation:
+
+- Switching frequency target and voltage rails
+- Isolation requirements between control and power stages
+- Expected labeled nets for flyback recapture paths
+
 ## Bundled smoke-test project
 
 For CI and local smoke tests without a full Bedini SSG schematic, use:

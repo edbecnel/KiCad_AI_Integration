@@ -57,11 +57,12 @@ Phase 1 investigation and architecture for routing abstraction is complete. Phas
 ## Recommended Next Steps
 
 1. ~~Human architecture review approval~~ — **Done** (2026-08-24)
-2. End-to-end test with Freerouting installed + pcbnew available
+2. Live Freerouting + pcbnew E2E — see [Manual Validation Checklist](../Developer_Handbook/Manual_Validation_Checklist.md)
 3. ~~Routing UI tab in Assistant shell~~ — **Done** (`routing_tab.py`, Ctrl+7)
 4. ~~Live DRC execution via `kicad-cli pcb drc` post-route~~ — **Done** (`build_routing_quality_report`)
-5. Routing policy persistence — `kicad_ai/routing_policy.json` (implemented)
-6. Parse AI policy JSON into `RoutingPolicy` from Routing tab
+5. ~~Routing policy persistence~~ — **Done** (`kicad_ai/routing_policy.json`)
+6. ~~Parse AI policy JSON into `RoutingPolicy`~~ — **Done** (Routing tab)
+7. Track E Phase 5 — candidate compare, re-route, learning export — **Done** (2026-08-24)
 
 ## Parent
 

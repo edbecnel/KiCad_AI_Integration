@@ -16,8 +16,15 @@ from providers import get_provider
 from providers.types import ProviderResponse
 from routing.factory import get_routing_engine
 from routing.policy import build_exclusions_from_policy, explain_exclusion
-from routing.policy_parse import parse_routing_policy_json
+from learning.routing_policy_promotion import export_routing_policy_candidate
+from routing.candidates import (
+    append_routing_candidate,
+    compare_routing_candidates,
+    load_routing_candidates,
+    record_from_routing_run,
+)
 from routing.policy_store import load_routing_policy, save_routing_policy
+from routing.policy_parse import parse_routing_policy_json
 from routing.types import (
     BoardReference,
     RoutingEngineCapabilities,
@@ -219,4 +226,39 @@ def run_routing_policy_generation(
         response=response,
         built=built,
         saved_path=saved_path,
+    )
+
+
+def save_routing_candidate_record(
+    project_path: Path | str,
+    result: RoutingResult,
+    *,
+    policy: RoutingPolicy,
+    quality: RoutingQualityReport | dict[str, Any] | None = None,
+) -> list:
+    """Persist a routing candidate for Phase 5 comparison."""
+    record = record_from_routing_run(result, policy=policy, quality=quality)
+    return append_routing_candidate(project_path, record)
+
+
+def get_routing_candidates_comparison(project_path: Path | str) -> dict[str, Any]:
+    """Return side-by-side comparison of stored routing candidates."""
+    return compare_routing_candidates(load_routing_candidates(project_path))
+
+
+def export_routing_learning_candidate(
+    project_path: Path | str,
+    policy: RoutingPolicy,
+    *,
+    quality_summary: dict[str, Any] | None = None,
+    accepted: bool = False,
+    config: AppConfig | None = None,
+):
+    """Export routing policy as ADP-012 learning candidate (not auto-canonical)."""
+    return export_routing_policy_candidate(
+        project_path,
+        policy,
+        quality_summary=quality_summary,
+        accepted=accepted,
+        config=config,
     )

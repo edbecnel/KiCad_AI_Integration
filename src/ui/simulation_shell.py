@@ -57,7 +57,9 @@ class SimulationShell(wx.Panel if wx else object):  # type: ignore[misc]
                 "Detect missing ngspice SUBCKT models and KiCad 9 simulation hookup gaps. "
                 "Use Apply built-in models for R/C/L/diodes and batteries, or refresh "
                 "project context to apply them automatically. "
-                "Parts already hooked up (Sim.Device=SUBCKT) appear on the All required tab only."
+                "Parts already hooked up (Sim.Device=SUBCKT) appear on the All required tab only. "
+                "For AERF closed-loop simulation (ngspice / KiCad Simulator), use the AERF tab: "
+                "Run simulation plan → Merge simulation refinement."
             ),
         )
         intro.Wrap(820)

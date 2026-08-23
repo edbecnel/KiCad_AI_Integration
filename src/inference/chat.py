@@ -23,11 +23,15 @@ from context.model import ProjectContext
 from conversation.session import ChatSession
 from prompts import (
     BuiltPrompt,
+    build_emi_emc_prompt,
+    build_flyback_recovery_prompt,
     build_general_review_prompt,
     build_isolation_clearance_prompt,
     build_netlist_crosscheck_prompt,
     build_netlist_gap_fill_prompt,
     build_pcb_layout_prompt,
+    build_power_integrity_prompt,
+    build_signal_integrity_prompt,
 )
 from prompts.builder import estimate_tokens
 from providers import get_provider
@@ -77,6 +81,10 @@ def build_chat_prompt(
         "isolation_clearance_audit": build_isolation_clearance_prompt,
         "netlist_crosscheck": build_netlist_crosscheck_prompt,
         "netlist_gap_fill": build_netlist_gap_fill_prompt,
+        "power_integrity_audit": build_power_integrity_prompt,
+        "signal_integrity_audit": build_signal_integrity_prompt,
+        "emi_emc_audit": build_emi_emc_prompt,
+        "flyback_recovery_audit": build_flyback_recovery_prompt,
     }
     builder = builders.get(template, build_general_review_prompt)
     if template == "general_review":

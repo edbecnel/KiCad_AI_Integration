@@ -1,43 +1,33 @@
-HANDOVER — ADP-013 Routing UI (Sprint 11)
+HANDOVER — Sprint 12 (ADP-013 close-out + platform)
 ================================================================================
-Date: 2026-08-23
+Date: 2026-08-24
 Repo: KiCad_AI_Integration
 
 SUMMARY
 -------
-Routing tab added to the Assistant shell (Ctrl+7). Freerouting autoroute workflow
-with approve-before-run, checkpoint accept/reject, live DRC quality report, and
-optional post-route AI review. Phase 1.5/3 work remains on main from prior sprint.
+Closed ADP-013 Phases 1–4 (architecture review, policy persistence, AI policy
+parsing). EDF conformance improved 72% → 98%. Track E Phase 5 routing closed-loop
+started. ADP-006 simulation closed-loop host wiring added. PI/SI/EMC audit templates
+and Bedini flyback recovery template added.
 
 WHAT WAS DONE
 -------------
-1. **Routing tab** — [[routing_tab.py]], [[routing_shell.py]] (Ctrl+7)
-2. **Workflow** — policy summary, approve-before-route, background `run_routing()`,
-   accept/reject checkpoint, post-route DRC via shared `run_live_drc()`
-3. **Post-route AI review** — `run_post_route_review()` in `inference/audit.py`
-4. **CLI** — `--ui-routing` opens shell on Routing tab
-5. **Tests** — ui/routing_*, integration/test_routing_e2e.py (@pytest.mark.kicad)
-6. **380 tests passing**
+1. **Routing policy persistence** — `kicad_ai/routing_policy.json` via `policy_store.py`
+2. **AI policy generation** — Routing tab **Generate policy from AI**
+3. **Phase 5 routing** — candidate compare/re-route, learning candidate export (ADP-012)
+4. **Simulation closed loop** — `simulation_runner.py`, AERF **Run simulation plan**
+5. **Audit templates** — power integrity, signal integrity, EMI/EMC, flyback recovery
+6. **Manual validation** — `docs/Developer_Handbook/Manual_Validation_Checklist.md`
+7. **416 tests passing**
 
-PREREQUISITES (manual E2E — Freerouting KiCad plugin NOT required)
-------------------------------------------------------------------
-- KiCad AI Integration plugin or Scripting Console (pcbnew for DSN/SES)
-- Standalone Freerouting JAR or CLI + `routing_enabled: true`
-- Open `.kicad_pcb` in PCB Editor; optional `kicad-cli` for post-route DRC
-
-STILL OPEN (ADP-013)
---------------------
-- ~~Human architecture review approval~~ — approved 2026-08-24
-- ~~Routing policy persistence~~ — [[routing_policy.json]] via [[policy_store.py]]
-- ~~Phase 4: parse AI policy JSON into RoutingPolicy~~ — Routing tab **Generate policy from AI**
-- Phase 5: compare candidates, re-route loop
-
-PRIOR — Phase 1.5 + Phase 3
----------------------------
-Live KiCad context, one-click audits, ReviewReport JSON under kicad_ai/reviews/.
+STILL OPEN
+----------
+- Track E Phase 5: full candidate diff UI polish; live Freerouting manual sign-off
+- ADP-006: KiCad Simulator/ngspice measurement artifact → EKM references
+- Phase 1 manual E2E sign-off in KiCad (checklist documented)
 
 AUTHORITATIVE STATUS
 --------------------
-- [[tasks/MASTER_TASK_LIST.md]] (Track E — Routing Abstraction)
-- [[docs/Specifications/Freerouting_Integration.md]]
-- [[docs/Architecture/ADP-013-Routing-Abstraction.md]]
+- tasks/MASTER_TASK_LIST.md
+- docs/Architecture/ADP-013-Phase1-Review.md
+- docs/Architecture/ADP-006-Simulation-Abstraction.md
