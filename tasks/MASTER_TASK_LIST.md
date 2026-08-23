@@ -548,7 +548,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] Circuit family classifier
 - [x] Per-stage prompt templates (ADP-007)
 - [x] EKM stage-output mapping and write-back (ADP-007) — `src/ekm/aerf_writeback.py`
-- [ ] Simulation closed loop — validate/refine stages (ADP-006)
+- [ ] Simulation closed loop — validate/refine stages (ADP-006) — types + hook translation implemented; host solver integration TBD
 - [x] AERF learning loop — EKM auto-reload, generic family, library merge, confidence-gated promotion ([ADP-012](../docs/Architecture/ADP-012-Learning-and-Canonical-Knowledge.md))
 - [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
 - [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
@@ -583,7 +583,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] Engine-independent RoutingEngine contract (`src/routing/types.py`)
 - [x] Simulation vs Routing comparison (ADP-013 Appendix A)
 - [x] Engineering Engine Provider watch item (Platform Architecture)
-- [ ] Human architecture review approval
+- [x] Human architecture review approval
 
 ### Phase 2 — Minimal POC
 
@@ -602,7 +602,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] Structured `RoutingPolicy` type (persistence TBD — not EKM)
 - [x] `build_exclusions_from_policy`, explainability helpers
 - [x] User approval gate before routing execution (UI) — approve-before-route in `RoutingShell`
-- [ ] Routing policy persistence mechanism decision
+- [x] Routing policy persistence mechanism decision — `kicad_ai/routing_policy.json` via `src/routing/policy_store.py`
 
 ### Phase 4 — AI-assisted routing intelligence
 
@@ -610,7 +610,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] `post_route_review.py` prompt — post-route quality review
 - [x] `RoutingQualityReport` type
 - [x] Wire prompts into Assistant shell / chat templates — post-route review button in Routing tab (`run_post_route_review`)
-- [ ] Parse AI policy JSON into `RoutingPolicy`
+- [x] Parse AI policy JSON into `RoutingPolicy`
 
 ### Phase 5 — Closed-loop optimization
 

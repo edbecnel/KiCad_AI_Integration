@@ -4,12 +4,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from context.collector import _resolve_project_file
+from context.model import ProjectContext
 from context.pcb_extract import collect_pcb_detail
 from context.routing_checkpoint import RoutingCheckpoint, accept_routing_candidate, reject_routing_candidate
+from prompts import BuiltPrompt
+from prompts.templates.routing_policy import build_routing_policy_prompt
+from providers import get_provider
+from providers.types import ProviderResponse
 from routing.factory import get_routing_engine
 from routing.policy import build_exclusions_from_policy, explain_exclusion
+from routing.policy_parse import parse_routing_policy_json
+from routing.policy_store import load_routing_policy, save_routing_policy
 from routing.types import (
     BoardReference,
     RoutingEngineCapabilities,
@@ -20,6 +28,14 @@ from routing.types import (
     RoutingResult,
 )
 from utils.config import AppConfig, load_config
+
+
+@dataclass
+class RoutingPolicyResult:
+    policy: RoutingPolicy
+    response: ProviderResponse
+    built: BuiltPrompt
+    saved_path: Path | None = None
 
 
 @dataclass
@@ -43,7 +59,7 @@ def get_routing_panel_context(
     engine = get_routing_engine(cfg)
     capabilities = engine.capabilities()
     pcb_detail = collect_pcb_detail(pro_path)
-    active_policy = policy or RoutingPolicy()
+    active_policy = policy or load_routing_policy(pro_path) or RoutingPolicy()
     explanations = [
         explain_exclusion(entry) for entry in active_policy.net_classifications
     ]
@@ -66,7 +82,7 @@ def build_routing_request(
     """Build an engine-independent routing request from project path and policy."""
     cfg = config or load_config()
     pro_path = _resolve_project_file(project_path)
-    active_policy = policy or RoutingPolicy()
+    active_policy = policy or load_routing_policy(pro_path) or RoutingPolicy()
     exclusions = build_exclusions_from_policy(active_policy)
     pcb_path = pro_path.parent / f"{pro_path.stem}.kicad_pcb"
     exec_opts = RoutingExecutionOptions(
@@ -159,3 +175,48 @@ def build_routing_quality_report(
             for line in (drc.get("drc_violation_lines") or [])[:5]:
                 report.notes.append(str(line))
     return report
+
+
+def persist_routing_policy(project_path: Path | str, policy: RoutingPolicy) -> Path:
+    """Save routing policy to ``kicad_ai/routing_policy.json``."""
+    pro_path = _resolve_project_file(Path(project_path))
+    return save_routing_policy(pro_path, policy)
+
+
+def run_routing_policy_generation(
+    ctx: ProjectContext,
+    *,
+    question: str | None = None,
+    config: AppConfig | None = None,
+    provider: Any | None = None,
+    persist: bool = True,
+) -> RoutingPolicyResult:
+    """Generate routing policy via AI and optionally persist to project."""
+    cfg = config or load_config()
+    system, user_text = build_routing_policy_prompt(
+        ctx,
+        question or "Classify nets and propose exclusions for intent-aware autorouting.",
+    )
+    built = BuiltPrompt(
+        text=user_text,
+        system=system,
+        template="routing_policy",
+        preview_summary="Routing policy generation",
+        estimated_text_tokens=max(1, len(user_text) // 4),
+        include_image=False,
+        image_byte_size=0,
+    )
+    resolved_provider = provider or get_provider(cfg)
+    response = resolved_provider.send_message(
+        built.text,
+        system=built.system,
+        config=cfg,
+    )
+    policy = parse_routing_policy_json(response.text)
+    saved_path = persist_routing_policy(ctx.project_path, policy) if persist else None
+    return RoutingPolicyResult(
+        policy=policy,
+        response=response,
+        built=built,
+        saved_path=saved_path,
+    )

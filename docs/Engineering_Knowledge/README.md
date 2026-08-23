@@ -18,7 +18,7 @@ Engineering Knowledge is **reference content** — reusable across projects and 
 
 ## AERF Overview
 
-The [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) defines eight canonical reasoning stages (0–7) that the AI follows before producing engineering conclusions.
+The [AI Engineering Reasoning Framework — AERF](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) defines eight canonical reasoning stages (0–7) that the AI follows before producing engineering conclusions.
 
 Rather than sending a schematic directly to an LLM, the plugin progressively builds engineering understanding through staged reasoning. Simulation validates prior understanding; it does not substitute for it.
 

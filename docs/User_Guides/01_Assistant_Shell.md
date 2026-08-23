@@ -1,4 +1,6 @@
 # Assistant Shell
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [User Guides](README.md) › Assistant Shell
+
 
 [Home](../../README.md) · [User Guides](README.md) · Assistant Shell
 

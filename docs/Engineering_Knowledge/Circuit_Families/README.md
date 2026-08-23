@@ -2,7 +2,7 @@
 
 [Home](../../../README.md) › [Project Index](../../../PROJECT_INDEX.md) › [Engineering Knowledge](../README.md) › Circuit Families
 
-> **Authoritative specification:** [ADP-008 §10–12](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+> **Authoritative specification:** [ADP-008 §10–12](../../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
 
 Circuit families provide reusable domain knowledge organized by AERF reasoning stage. Each family shares the same stage IDs (0–7) and dependency order while allowing stage title overlays and family-specific determinations.
 
@@ -15,6 +15,7 @@ Planned circuit families (content not yet authored):
 | `family_id` | Directory | Status |
 |-------------|-----------|--------|
 | `blocking_oscillator` | `Blocking_Oscillator/` | Complete (reference) — stages 00–07 |
+| `generic` | [Generic/](Generic/README.md) | Draft — fallback scaffold stages 00–07 |
 | `flyback` | `Flyback/` | Planned |
 | `buck` | `Buck/` | Planned |
 | `boost` | `Boost/` | Planned |
@@ -120,14 +121,14 @@ KB content is reference material for prompt injection — not per-project instan
 2. Add `README.md` with overview and recognition signatures
 3. Create stage files `00` through `07` following naming rules
 4. Register the family in this README's registry table
-5. No plugin code changes required (per [ADP-008 §17](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md))
+5. No plugin code changes required (per [ADP-008 §17](../../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md))
 
 ---
 
 ## Related Documents
 
 - [AERF Stage Index](../AERF_Stage_Index.md)
-- [ADP-008: AERF Foundation](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
+- [ADP-008: AERF Foundation](../../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [Engineering Knowledge](../README.md)
 
 ## Parent

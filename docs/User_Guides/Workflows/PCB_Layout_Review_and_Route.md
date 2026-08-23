@@ -1,6 +1,7 @@
 # Workflow: PCB Layout Review and Route
+[Home](../../../README.md) › [Project Index](../../../PROJECT_INDEX.md) › [User Guides](../README.md) › [Workflows](../Step_By_Step_Guides.md) › Workflow: PCB Layout Review and Route
 
-[Home](../../../README.md) · [User Guides](../README.md) · Workflows
+
 
 ## Overview
 

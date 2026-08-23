@@ -2,12 +2,16 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › Phase 1 Review
 
-> **Status:** Draft — ready for human architecture review
+> **Status:** Approved
+> **Owner:** Project maintainers
+> **Applies To:** ADP-013 routing abstraction (Track E)
+> **Last Reviewed:** 2026-08-24
+> **Review Frequency:** Quarterly
 > **Date:** 2026-08-23
 
 ## Summary
 
-Phase 1 investigation and architecture for routing abstraction is complete. Phase 2 POC code has been implemented behind the Phase 2 gate checklist. Human architecture review approval remains open.
+Phase 1 investigation and architecture for routing abstraction is complete. Phase 2 POC code has been implemented and passed the Phase 2 gate checklist. Architecture review approved 2026-08-24 after Sprint 11 delivered the Routing tab, checkpoint workflow, post-route DRC, and post-route AI review.
 
 ## Phase 2 Gate Checklist
 
@@ -19,7 +23,7 @@ Phase 1 investigation and architecture for routing abstraction is complete. Phas
 | Engine-independent RoutingRequest / RoutingEngine | Pass | `src/routing/types.py`, ADP-013 §9 |
 | Freerouting as independently installed external tool | Pass | [Freerouting Integration](../Specifications/Freerouting_Integration.md) FR-1 |
 | Engineering Engine Provider documented without premature framework | Pass | ADP-013 Appendix B, [Platform Architecture](Platform_Architecture.md) |
-| Architecture review approved | **Pending** | Human review |
+| Architecture review approved | Pass | This document — approved 2026-08-24 |
 
 ## Phase 1 Spike Findings
 
@@ -52,11 +56,12 @@ Phase 1 investigation and architecture for routing abstraction is complete. Phas
 
 ## Recommended Next Steps
 
-1. Human architecture review approval
+1. ~~Human architecture review approval~~ — **Done** (2026-08-24)
 2. End-to-end test with Freerouting installed + pcbnew available
-3. Optional routing UI tab in Assistant shell
-4. Live DRC execution via `kicad-cli pcb drc` post-route
-5. Routing policy persistence decision (not EKM — separate lifecycle review)
+3. ~~Routing UI tab in Assistant shell~~ — **Done** (`routing_tab.py`, Ctrl+7)
+4. ~~Live DRC execution via `kicad-cli pcb drc` post-route~~ — **Done** (`build_routing_quality_report`)
+5. Routing policy persistence — `kicad_ai/routing_policy.json` (implemented)
+6. Parse AI policy JSON into `RoutingPolicy` from Routing tab
 
 ## Parent
 

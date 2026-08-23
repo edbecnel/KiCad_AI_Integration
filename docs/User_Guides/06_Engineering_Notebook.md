@@ -1,4 +1,6 @@
 # Engineering Notebook
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [User Guides](README.md) › Engineering Notebook
+
 
 [Home](../../README.md) · [User Guides](README.md) · Engineering Notebook
 

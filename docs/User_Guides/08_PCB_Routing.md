@@ -1,4 +1,6 @@
 # PCB Routing
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [User Guides](README.md) › PCB Routing
+
 
 [Home](../../README.md) · [User Guides](README.md) · PCB Routing
 

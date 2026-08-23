@@ -16,6 +16,7 @@ from inference.routing import (
     get_routing_panel_context,
     reject_routing_result,
     run_routing,
+    run_routing_policy_generation,
 )
 from providers.errors import ProviderError
 from routing.types import RoutingResult
@@ -70,6 +71,7 @@ class RoutingShell(wx.Panel):
         vbox.Add(self._policy, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
+        self._btn_generate = wx.Button(self, label="Generate policy from AI")
         self._btn_run = wx.Button(self, label="Run autoroute")
         self._btn_accept = wx.Button(self, label="Accept candidate")
         self._btn_reject = wx.Button(self, label="Reject candidate")
@@ -77,7 +79,13 @@ class RoutingShell(wx.Panel):
         self._btn_accept.Enable(False)
         self._btn_reject.Enable(False)
         self._btn_review.Enable(False)
-        for btn in (self._btn_run, self._btn_accept, self._btn_reject, self._btn_review):
+        for btn in (
+            self._btn_generate,
+            self._btn_run,
+            self._btn_accept,
+            self._btn_reject,
+            self._btn_review,
+        ):
             btn_row.Add(btn, flag=wx.RIGHT, border=6)
         vbox.Add(btn_row, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
 
@@ -88,6 +96,7 @@ class RoutingShell(wx.Panel):
         vbox.Add(self._status, flag=wx.ALL, border=8)
         self.SetSizer(vbox)
 
+        self._btn_generate.Bind(wx.EVT_BUTTON, self._on_generate_policy)
         self._btn_run.Bind(wx.EVT_BUTTON, self._on_run)
         self._btn_accept.Bind(wx.EVT_BUTTON, self._on_accept)
         self._btn_reject.Bind(wx.EVT_BUTTON, self._on_reject)
@@ -139,6 +148,7 @@ class RoutingShell(wx.Panel):
             and caps.supports_automatic_routing
         )
         self._btn_run.Enable(can_run)
+        self._btn_generate.Enable(self._ctx is not None and not self._busy)
 
         has_candidate = (
             self._last_result is not None
@@ -163,6 +173,53 @@ class RoutingShell(wx.Panel):
     def _set_busy(self, busy: bool) -> None:
         self._busy = busy
         self._refresh_panel_state()
+
+    def _on_generate_policy(self, _event: wx.CommandEvent) -> None:
+        if self._busy or self._ctx is None:
+            return
+        if wx.MessageBox(
+            "Send project context to the AI provider to generate a routing policy?",
+            "Approve transmission",
+            wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        self._set_busy(True)
+        self._status.SetLabel("Generating routing policy from AI…")
+        threading.Thread(target=self._run_generate_policy_background, daemon=True).start()
+
+    def _run_generate_policy_background(self) -> None:
+        if self._ctx is None:
+            wx.CallAfter(self._on_generate_policy_failed, "Project context not loaded.")
+            return
+        try:
+            result = run_routing_policy_generation(self._ctx, config=self._cfg)
+        except ProviderError as exc:
+            wx.CallAfter(self._on_generate_policy_failed, str(exc))
+            return
+        except ValueError as exc:
+            wx.CallAfter(self._on_generate_policy_failed, str(exc))
+            return
+        wx.CallAfter(self._on_generate_policy_succeeded, result)
+
+    def _on_generate_policy_failed(self, message: str) -> None:
+        self._set_busy(False)
+        self._status.SetLabel(f"Policy generation failed: {message}")
+        wx.MessageBox(message, "Policy generation error", wx.OK | wx.ICON_ERROR)
+
+    def _on_generate_policy_succeeded(self, result) -> None:
+        self._set_busy(False)
+        self._panel_ctx = get_routing_panel_context(
+            self._project_path,
+            config=self._cfg,
+            policy=result.policy,
+        )
+        self._refresh_panel_state()
+        saved = result.saved_path
+        saved_note = f" Saved: {saved}" if saved else ""
+        self._status.SetLabel(
+            f"Routing policy generated "
+            f"({len(result.policy.net_classifications)} nets).{saved_note}"
+        )
 
     def _on_run(self, _event: wx.CommandEvent) -> None:
         if self._busy or self._panel_ctx is None:

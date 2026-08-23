@@ -29,7 +29,7 @@ New contributors begin with [00_First_Time_Setup.md](./00_First_Time_Setup.md).
 ## Navigation
 
 - [Project Index](../../PROJECT_INDEX.md)
-- [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
+- [Software Architecture — KiCad Host](../Architecture/KiCad_AI_Integration_Software_Architecture.md)
 - [Platform Architecture](../Architecture/Platform_Architecture.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)
 

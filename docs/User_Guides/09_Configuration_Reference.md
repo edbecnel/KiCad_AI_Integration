@@ -1,4 +1,6 @@
 # Configuration Reference
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [User Guides](README.md) › Configuration Reference
+
 
 [Home](../../README.md) · [User Guides](README.md) · Configuration Reference
 

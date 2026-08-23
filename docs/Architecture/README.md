@@ -11,7 +11,7 @@ System architecture, technical design, diagrams, and architecture decisions for 
 ## Authoritative Documents
 
 - [Platform Architecture](Platform_Architecture.md)
-- [Software Architecture (KiCad Host)](KiCad_AI_Integration_Software_Architecture.md)
+- [Software Architecture — KiCad Host](KiCad_AI_Integration_Software_Architecture.md)
 - [ADP-001: Engineering Knowledge Model Foundation](ADP-001-Engineering-Knowledge-Model-Foundation.md)
 - [ADP-002: EKM Schema and Persistence](ADP-002-EKM-Schema-and-Persistence.md)
 - [ADP-003: Engineering Notebook User Interface](ADP-003-Engineering-Notebook-User-Interface.md)

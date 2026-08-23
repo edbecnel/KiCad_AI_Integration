@@ -55,7 +55,7 @@ class NetClassificationEntry:
 
 @dataclass
 class RoutingPolicy:
-    """Structured, engine-independent routing intent. Persistence mechanism TBD."""
+    """Structured, engine-independent routing intent. Persisted per project."""
 
     net_classifications: list[NetClassificationEntry] = field(default_factory=list)
     notes: str = ""

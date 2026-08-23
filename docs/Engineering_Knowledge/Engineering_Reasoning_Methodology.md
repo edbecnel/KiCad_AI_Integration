@@ -10,7 +10,7 @@ This document defines the **engineering reasoning methodology** common to every 
 
 ## 1. Purpose and Scope
 
-The [AI Engineering Reasoning Framework (AERF)](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) defines **when** reasoning occurs — the canonical sequence of eight stages (0–7) between context collection and EKM population.
+The [AI Engineering Reasoning Framework — AERF](../Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md) defines **when** reasoning occurs — the canonical sequence of eight stages (0–7) between context collection and EKM population.
 
 The [AERF Stage Index](AERF_Stage_Index.md) defines **what** each stage must determine — required determinations, output schemas, and stage-specific engineering questions.
 

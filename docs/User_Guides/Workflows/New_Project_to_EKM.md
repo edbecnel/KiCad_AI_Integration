@@ -1,6 +1,7 @@
 # Workflow: New Project to EKM
+[Home](../../../README.md) › [Project Index](../../../PROJECT_INDEX.md) › [User Guides](../README.md) › [Workflows](../Step_By_Step_Guides.md) › Workflow: New Project to EKM
 
-[Home](../../../README.md) · [User Guides](../README.md) · Workflows
+
 
 ## Overview
 

@@ -1,4 +1,4 @@
-"""Routing policy helpers (Phase 3). Persistence mechanism TBD."""
+"""Routing policy helpers (Phase 3)."""
 
 from __future__ import annotations
 

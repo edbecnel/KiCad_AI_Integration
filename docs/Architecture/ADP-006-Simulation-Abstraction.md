@@ -2,11 +2,11 @@
 
 [Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [Architecture](README.md) › ADP-006
 
-**Status:** Proposed (architecture defined; closed-loop implementation deferred)
+**Status:** Approved (architecture defined; closed-loop implementation in progress)
 
-**Author:** Ed Becnel
+**Owner:** Project maintainers
 
-**Project:** KiCad AI Integration (first host reference implementation)
+**Applies To:** Simulation abstraction and AERF closed-loop refinement
 
 **Version:** 1.0
 
@@ -110,18 +110,18 @@ flowchart LR
 |-----------|--------|
 | Netlist export + SUBCKT pipeline | Implemented |
 | Simulation panel UI | Implemented (`--ui-simulation`) |
-| Host-agnostic `SimulationResult` contract | Not implemented |
-| `simulation_hooks` → plan translation | Not implemented |
-| Closed-loop stage refinement | Not implemented |
+| Host-agnostic `SimulationResult` contract | Implemented (`src/inference/simulation_types.py`) |
+| `simulation_hooks` → plan translation | Implemented (`src/inference/simulation_closed_loop.py`) |
+| Closed-loop stage refinement | Implemented (`build_refinement_from_simulation`, user approval gate) |
 | EKM measurement artifact references from sim | Not implemented |
 
 ---
 
 ## 9. Acceptance Criteria
 
-- [ ] Host-neutral simulation result contract defined in `src/platform_core/` or `src/inference/`
-- [ ] AERF `simulation_hooks` can be translated to an executable plan without KiCad imports in platform code
-- [ ] Simulation results can refine prior stage determinations with explicit user approval
+- [x] Host-neutral simulation result contract defined in `src/inference/simulation_types.py`
+- [x] AERF `simulation_hooks` can be translated to an executable plan without KiCad imports in platform code
+- [x] Simulation results can refine prior stage determinations with explicit user approval
 - [ ] Closed-loop workflow traced in [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) and [Feature Overview](../User_Guides/Feature_Overview.md)
 - [x] SPICE netlist export and SUBCKT assistance (partial — no closed loop)
 

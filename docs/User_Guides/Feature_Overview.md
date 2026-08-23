@@ -1,4 +1,6 @@
 # KiCad AI Integration — Feature Overview
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [User Guides](README.md) › KiCad AI Integration — Feature Overview
+
 
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [User Guides](README.md)
 
@@ -228,7 +230,7 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | EIE (`src/inference/`) | Chat + simulation + AERF + audits + routing | Deeper PI/SI/EMC templates |
 | Engineering Notebook UI | Full editors, search, JSON view | In-canvas dock (deferred) |
 | Conversation Manager | Multi-turn per project | Session export UI |
-| Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Closed loop deferred |
+| Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Hook translation + closed-loop refinement types implemented; host solver wiring TBD |
 | Blocking Oscillator KB | Complete with live sign-off fixtures | Additional families |
 
 ### Bottom line
@@ -237,7 +239,7 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 |---|---|
 | **KiCad host (proven)** | Seven-tab Assistant shell, ActionPlugin, multi-turn chat, datasheets, simulation/SUBCKT, AERF+EKM, audits, Freerouting routing |
 | **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + **learning loop** (EKM reload, library promotion); EIE chat/simulation/AERF UI; Blocking Oscillator KB |
-| **In progress** | Simulation closed loop; PI/SI/EMC deep guidance |
+| **In progress** | Host solver wiring for simulation closed loop; PI/SI/EMC deep guidance |
 | **Later** | Additional hosts, clickable refs in KiCad, project memory via EKM |
 
 This is a **foundation**, not a finished product. The central idea — automatic context, structured engineering reasoning, and controlled AI review — works today for schematic-level questions in KiCad, while the platform architecture is defined to grow beyond any single editor.
@@ -250,7 +252,7 @@ This is a **foundation**, not a finished product. The central idea — automatic
 |-------|----------|
 | **User guides (start here)** | [User Guides](README.md) |
 | Platform architecture | [Platform Architecture](../Architecture/Platform_Architecture.md) |
-| KiCad host implementation | [Software Architecture (KiCad Host)](../Architecture/KiCad_AI_Integration_Software_Architecture.md) |
+| KiCad host implementation | [Software Architecture — KiCad Host](../Architecture/KiCad_AI_Integration_Software_Architecture.md) |
 | Host integration contract | [ADP-009](../Architecture/ADP-009-Host-Integration-Layer.md) |
 | Implementation backlog | [Master Task List](../../tasks/MASTER_TASK_LIST.md) |
 | First run | [First-Time Setup](../Developer_Handbook/00_First_Time_Setup.md) |

@@ -1,4 +1,6 @@
 # How AERF Works
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [User Guides](README.md) › How AERF Works
+
 
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [User Guides](README.md) · How AERF Works
 

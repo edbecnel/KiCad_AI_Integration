@@ -126,7 +126,7 @@ AI / Plugin / ngspice
 
 The EKM becomes the single source of truth for **engineering knowledge** — intent, rationale, assumptions, and curated decisions. It does not replace KiCad or extracted design snapshots (see §16–18).
 
-**AERF (reasoning layer):** Between KiCad context extraction and EKM population, the [AI Engineering Reasoning Framework (ADP-008)](ADP-008-AI-Engineering-Reasoning-Framework.md) progressively builds engineering understanding through eight staged reasoning steps. AERF stage outputs are transient reasoning artifacts; the EKM stores curated conclusions after user approval. Circuit-family reference knowledge lives in [`docs/Engineering_Knowledge/`](../Engineering_Knowledge/README.md).
+**AERF (reasoning layer):** Between KiCad context extraction and EKM population, the [AI Engineering Reasoning Framework — ADP-008](ADP-008-AI-Engineering-Reasoning-Framework.md) progressively builds engineering understanding through eight staged reasoning steps. AERF stage outputs are transient reasoning artifacts; the EKM stores curated conclusions after user approval. Circuit-family reference knowledge lives in [`docs/Engineering_Knowledge/`](../Engineering_Knowledge/README.md).
 
 ---
 

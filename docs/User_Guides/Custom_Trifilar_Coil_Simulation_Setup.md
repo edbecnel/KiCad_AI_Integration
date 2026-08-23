@@ -1,4 +1,6 @@
 # Custom Trifilar Coil — KiCad Simulation Setup
+[Home](../../README.md) › [Project Index](../../PROJECT_INDEX.md) › [User Guides](README.md) › Custom Trifilar Coil — KiCad Simulation Setup
+
 
 [Home](../../README.md) · [Project Index](../../PROJECT_INDEX.md) · [User Guides](README.md) · Custom Trifilar Coil Simulation
 

@@ -1,4 +1,3 @@
-```
 HANDOVER — ADP-013 Routing UI (Sprint 11)
 ================================================================================
 Date: 2026-08-23
@@ -12,7 +11,7 @@ optional post-route AI review. Phase 1.5/3 work remains on main from prior sprin
 
 WHAT WAS DONE
 -------------
-1. **Routing tab** — `src/ui/routing_tab.py`, `src/ui/routing_shell.py` (Ctrl+7)
+1. **Routing tab** — [[routing_tab.py]], [[routing_shell.py]] (Ctrl+7)
 2. **Workflow** — policy summary, approve-before-route, background `run_routing()`,
    accept/reject checkpoint, post-route DRC via shared `run_live_drc()`
 3. **Post-route AI review** — `run_post_route_review()` in `inference/audit.py`
@@ -28,9 +27,9 @@ PREREQUISITES (manual E2E — Freerouting KiCad plugin NOT required)
 
 STILL OPEN (ADP-013)
 --------------------
-- Human architecture review approval
-- Routing policy persistence (`kicad_ai/routing_policy.json` TBD)
-- Phase 4: parse AI policy JSON into RoutingPolicy from Chat
+- ~~Human architecture review approval~~ — approved 2026-08-24
+- ~~Routing policy persistence~~ — [[routing_policy.json]] via [[policy_store.py]]
+- ~~Phase 4: parse AI policy JSON into RoutingPolicy~~ — Routing tab **Generate policy from AI**
 - Phase 5: compare candidates, re-route loop
 
 PRIOR — Phase 1.5 + Phase 3
@@ -39,7 +38,6 @@ Live KiCad context, one-click audits, ReviewReport JSON under kicad_ai/reviews/.
 
 AUTHORITATIVE STATUS
 --------------------
-- tasks/MASTER_TASK_LIST.md (Track E — Routing Abstraction)
-- docs/Specifications/Freerouting_Integration.md
-- docs/Architecture/ADP-013-Routing-Abstraction.md
-```
+- [[tasks/MASTER_TASK_LIST.md]] (Track E — Routing Abstraction)
+- [[docs/Specifications/Freerouting_Integration.md]]
+- [[docs/Architecture/ADP-013-Routing-Abstraction.md]]

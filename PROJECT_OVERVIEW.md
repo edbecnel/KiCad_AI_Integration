@@ -56,7 +56,7 @@ This allows the AI to explain **why** a circuit behaves the way it does—not me
 
 ## The Engineering Knowledge Model
 
-At the center of the architecture is a structured [Engineering Knowledge Model (EKM)](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md).
+At the center of the architecture is a structured [Engineering Knowledge Model — EKM](docs/Architecture/ADP-001-Engineering-Knowledge-Model-Foundation.md).
 
 The EKM serves as the authoritative engineering representation of the project by separating:
 
@@ -76,7 +76,7 @@ This separation ensures that the AI never confuses verified information with inf
 
 ## The AI Engineering Reasoning Framework
 
-Rather than sending raw schematic data in a single ad-hoc prompt, the project introduces an [AI Engineering Reasoning Framework (AERF)](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md).
+Rather than sending raw schematic data in a single ad-hoc prompt, the project introduces an [AI Engineering Reasoning Framework — AERF](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md).
 
 **Before each AERF stage**, the system deterministically:
 
