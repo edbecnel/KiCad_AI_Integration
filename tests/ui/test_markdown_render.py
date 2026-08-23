@@ -77,3 +77,29 @@ def test_convert_body_renders_tables_with_markdown_package() -> None:
     assert "<table" in body
     assert "Getting Started" in body
     assert "|------|" not in body
+
+
+def test_convert_body_renders_ordered_lists_without_markdown_package(monkeypatch) -> None:
+    import builtins
+
+    real_import = builtins.__import__
+
+    def _block_markdown(name, *args, **kwargs):
+        if name == "markdown":
+            raise ImportError("blocked for test")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", _block_markdown)
+    sample = """### 1. View AERF results
+
+1. **Refresh context** after **Write to EKM…**
+2. Open **Notebook** (Ctrl+5).
+3. Expand sections.
+"""
+    body = _convert_body(sample)
+    assert "<ol>" in body
+    assert "<li>" in body
+    assert body.count("<li>") >= 3
+    assert "Refresh context" in body
+    assert "Open <strong>Notebook</strong>" in body or "Notebook" in body
+    assert "1. **Refresh context** 2. Open" not in body

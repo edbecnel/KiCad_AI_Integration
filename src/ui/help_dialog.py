@@ -142,22 +142,35 @@ class UserGuideFrame(wx.Frame if wx else object):  # type: ignore[misc]
     def _populate_tree(self) -> None:
         self._tree.DeleteAllItems()
         root = self._tree.AddRoot("User Guides")
-        for topic in self._manifest.topics:
-            item = self._tree.AppendItem(root, topic.title)
-            self._tree.SetItemData(item, topic.rel_path)
+        by_id = self._manifest.topic_by_id
+        for section in self._manifest.sections:
+            section_item = self._tree.AppendItem(root, section.title)
+            self._tree.SetItemData(section_item, "")
+            for topic_id in section.topic_ids:
+                topic = by_id[topic_id]
+                item = self._tree.AppendItem(section_item, topic.title)
+                self._tree.SetItemData(item, topic.rel_path)
+            self._tree.Expand(section_item)
 
     def _select_tree_for_path(self, rel_path: str) -> None:
         root = self._tree.GetRootItem()
-        child, cookie = self._tree.GetFirstChild(root)
+        self._select_tree_item_for_path(root, rel_path)
+
+    def _select_tree_item_for_path(self, parent: wx.TreeItemId, rel_path: str) -> bool:
+        child, cookie = self._tree.GetFirstChild(parent)
         while child.IsOk():
-            if self._tree.GetItemData(child) == rel_path:
+            data = self._tree.GetItemData(child)
+            if data == rel_path:
                 self._tree.SelectItem(child)
-                return
-            child, cookie = self._tree.GetNextChild(root, cookie)
+                return True
+            if self._select_tree_item_for_path(child, rel_path):
+                return True
+            child, cookie = self._tree.GetNextChild(parent, cookie)
+        return False
 
     def _on_tree_selection(self, event: wx.TreeEvent) -> None:
         rel_path = self._tree.GetItemData(event.GetItem())
-        if isinstance(rel_path, str) and rel_path != self._current_rel_path:
+        if isinstance(rel_path, str) and rel_path and rel_path != self._current_rel_path:
             self._show_guide(rel_path)
         event.Skip()
 

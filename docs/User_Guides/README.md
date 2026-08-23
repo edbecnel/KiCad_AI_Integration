@@ -6,6 +6,21 @@
 
 In the Assistant shell, click **Help** in the header or **?** on any tab to open these guides inside KiCad (rendered markdown with a table of contents).
 
+**Multi-tab walkthroughs:** In Help, open **Step-by-step guides** in the sidebar for end-to-end playbooks (EKM, PCB route, simulation).
+
+---
+
+## Step-by-step guides
+
+End-to-end workflow playbooks that walk across multiple Assistant tabs:
+
+| Playbook | Description |
+|----------|-------------|
+| [Step-by-step guides (hub)](Step_By_Step_Guides.md) | Overview and path chooser |
+| [New Project to EKM](Workflows/New_Project_to_EKM.md) | Datasheets → AERF → Notebook |
+| [PCB Layout Review and Route](Workflows/PCB_Layout_Review_and_Route.md) | Audits → Routing → post-route review |
+| [Simulation Readiness](Workflows/Simulation_Readiness.md) | Datasheets → SUBCKT → Simulator |
+
 ---
 
 ## Reading paths

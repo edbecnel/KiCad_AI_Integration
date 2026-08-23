@@ -57,3 +57,34 @@ def test_assistant_shell_has_help_button() -> None:
     assert shell._btn_help.GetLabel() == "Help"
 
     frame.Destroy()
+
+
+def test_help_tree_has_step_by_step_section() -> None:
+    wx = _ensure_wx_app()
+    from ui.help_dialog import UserGuideFrame, reset_user_guide_for_tests
+
+    reset_user_guide_for_tests()
+    parent = wx.Frame(None, title="parent")
+    parent.Show(False)
+    guide = UserGuideFrame(parent)
+
+    root = guide._tree.GetRootItem()
+    child, cookie = guide._tree.GetFirstChild(root)
+    found_section = False
+    while child.IsOk():
+        if guide._tree.GetItemText(child) == "Step-by-step guides":
+            found_section = True
+            grandchild, gcookie = guide._tree.GetFirstChild(child)
+            titles: list[str] = []
+            while grandchild.IsOk():
+                titles.append(guide._tree.GetItemText(grandchild))
+                grandchild, gcookie = guide._tree.GetNextChild(child, gcookie)
+            assert "Step-by-step guides" in titles
+            assert "New Project to EKM" in titles
+            assert "Simulation Readiness" in titles
+        child, cookie = guide._tree.GetNextChild(root, cookie)
+    assert found_section
+
+    guide.Destroy()
+    parent.Destroy()
+    reset_user_guide_for_tests()

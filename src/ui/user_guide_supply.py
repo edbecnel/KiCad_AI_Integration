@@ -18,12 +18,25 @@ class GuideTopic:
 
 
 @dataclass(frozen=True)
+class GuideSection:
+    """Grouped sidebar section in the Help viewer."""
+
+    title: str
+    topic_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class GuideManifest:
     """Parsed ``guide_manifest.json``."""
 
     default_topic: str
     topics: tuple[GuideTopic, ...]
+    sections: tuple[GuideSection, ...]
     tab_topics: dict[str, str]
+
+    @property
+    def topic_by_id(self) -> dict[str, GuideTopic]:
+        return {topic.topic_id: topic for topic in self.topics}
 
     def path_for_tab(self, tab_id: str) -> str:
         return self.tab_topics.get(tab_id, self.default_topic)
@@ -33,8 +46,11 @@ class GuideManifest:
             return self.default_topic
         if topic.endswith(".md"):
             return topic
+        by_id = self.topic_by_id
+        if topic in by_id:
+            return by_id[topic].rel_path
         for entry in self.topics:
-            if entry.topic_id == topic or entry.rel_path == topic:
+            if entry.rel_path == topic:
                 return entry.rel_path
         if topic in self.tab_topics:
             return self.tab_topics[topic]
@@ -57,9 +73,21 @@ def load_manifest(guides_dir: Path | None = None) -> GuideManifest:
         GuideTopic(topic_id=str(item["id"]), title=str(item["title"]), rel_path=str(item["path"]))
         for item in data.get("topics", [])
     )
+    by_id = {topic.topic_id: topic for topic in topics}
+    sections: list[GuideSection] = []
+    for section in data.get("sections", []):
+        topic_ids = tuple(str(topic_id) for topic_id in section.get("topic_ids", []))
+        if not topic_ids:
+            continue
+        if any(topic_id not in by_id for topic_id in topic_ids):
+            continue
+        sections.append(GuideSection(title=str(section["title"]), topic_ids=topic_ids))
+    if not sections:
+        sections = [GuideSection(title="Guides", topic_ids=tuple(topic.topic_id for topic in topics))]
     return GuideManifest(
         default_topic=str(data.get("default_topic", "README.md")),
         topics=topics,
+        sections=tuple(sections),
         tab_topics={str(k): str(v) for k, v in (data.get("tab_topics") or {}).items()},
     )
 

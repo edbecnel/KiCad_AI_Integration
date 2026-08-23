@@ -29,6 +29,17 @@ def test_manifest_lists_all_tab_topics() -> None:
         assert (user_guides_dir() / rel).is_file()
 
 
+def test_manifest_has_step_by_step_section() -> None:
+    manifest = load_manifest()
+    section_titles = [section.title for section in manifest.sections]
+    assert "Step-by-step guides" in section_titles
+    step_section = next(s for s in manifest.sections if s.title == "Step-by-step guides")
+    assert "step_by_step_hub" in step_section.topic_ids
+    assert "workflow_ekm" in step_section.topic_ids
+    assert manifest.path_for_topic("step_by_step_hub") == "Step_By_Step_Guides.md"
+    assert (user_guides_dir() / "Step_By_Step_Guides.md").is_file()
+
+
 def test_read_guide_markdown_hub() -> None:
     text = read_guide_markdown("README.md")
     assert "User Guides" in text

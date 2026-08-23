@@ -33,7 +33,7 @@ Anyone using `--ui`, the KiCad ActionPlugin, or `show_assistant_shell()` from th
 | **Browse…** | File picker for `.kicad_pro` |
 | **Refresh context** | Re-reads schematic, PCB, BOM, netlist, datasheets from disk; updates summary and all tabs |
 | **Settings…** | Provider profile (Claude / Ollama, API key, models) → saves `~/kicad_ai_config.json` |
-| **Help** | Opens the in-app **User Guide** (rendered markdown). On the active tab, opens that tab's guide |
+| **Help** | Opens the in-app **User Guide** (rendered markdown). On the active tab, opens that tab's guide. Use the **Step-by-step guides** sidebar group for multi-tab workflow playbooks |
 
 ### Context summary panel
 

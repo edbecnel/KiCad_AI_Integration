@@ -45,6 +45,7 @@ hr { border: none; border-top: 1px solid #555; margin: 16px 0; }
 
 _SEPARATOR_CELL_RE = re.compile(r"^:?-{3,}:?$")
 _HTML_TABLE_RE = re.compile(r"<table\b.*?</table>", re.IGNORECASE | re.DOTALL)
+_ORDERED_LIST_RE = re.compile(r"^\d+\.\s+")
 # wx.html ignores stylesheet rules; use light cell backgrounds + dark text there.
 _WX_TH_BG = "#eeeeee"
 _WX_TD_BG = "#ffffff"
@@ -242,6 +243,7 @@ def _minimal_markdown_fragment(text: str) -> str:
     paragraph: list[str] = []
     in_code = False
     code_lines: list[str] = []
+    index = 0
 
     def flush_paragraph() -> None:
         if not paragraph:
@@ -251,8 +253,8 @@ def _minimal_markdown_fragment(text: str) -> str:
             chunks.append(f"<p>{_inline_format(joined)}</p>")
         paragraph.clear()
 
-    for raw in lines:
-        line = raw.rstrip()
+    while index < len(lines):
+        line = lines[index].rstrip()
         if line.strip().startswith("```"):
             if in_code:
                 chunks.append(
@@ -265,12 +267,15 @@ def _minimal_markdown_fragment(text: str) -> str:
             else:
                 flush_paragraph()
                 in_code = True
+            index += 1
             continue
         if in_code:
             code_lines.append(line)
+            index += 1
             continue
         if not line.strip():
             flush_paragraph()
+            index += 1
             continue
         if line.startswith("#### "):
             flush_paragraph()
@@ -284,11 +289,24 @@ def _minimal_markdown_fragment(text: str) -> str:
         elif line.startswith("# "):
             flush_paragraph()
             chunks.append(f"<h1>{html.escape(line[2:])}</h1>")
+        elif _ORDERED_LIST_RE.match(line.strip()):
+            flush_paragraph()
+            list_items: list[str] = []
+            while index < len(lines):
+                current = lines[index].rstrip()
+                if not _ORDERED_LIST_RE.match(current.strip()):
+                    break
+                item_text = _ORDERED_LIST_RE.sub("", current.strip(), count=1)
+                list_items.append(_inline_format(item_text))
+                index += 1
+            chunks.append("<ol>" + "".join(f"<li>{item}</li>" for item in list_items) + "</ol>")
+            continue
         elif line.startswith("- "):
             flush_paragraph()
             chunks.append(f"<ul><li>{_inline_format(line[2:])}</li></ul>")
         else:
             paragraph.append(line)
+        index += 1
     flush_paragraph()
     if in_code and code_lines:
         chunks.append("<pre><code>" + html.escape("\n".join(code_lines)) + "</code></pre>")
