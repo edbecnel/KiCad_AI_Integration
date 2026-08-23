@@ -128,8 +128,9 @@ def build_routing_quality_report(
     project_path: Path,
     *,
     result: RoutingResult | None = None,
+    config: AppConfig | None = None,
 ) -> RoutingQualityReport:
-    """Build structured post-route quality metrics from PCB extract data."""
+    """Build structured post-route quality metrics from PCB extract and live DRC."""
     pro_path = _resolve_project_file(project_path)
     pcb = collect_pcb_detail(pro_path)
     report = RoutingQualityReport()
@@ -147,4 +148,14 @@ def build_routing_quality_report(
         total = result.routed_net_count + result.unrouted_net_count
         if total > 0:
             report.routed_percentage = 100.0 * result.routed_net_count / total
+
+    from context.live.drc_runner import run_live_drc
+
+    drc = run_live_drc(pro_path, config=config or load_config())
+    if drc.get("drc_available"):
+        count = int(drc.get("drc_violation_count") or 0)
+        report.notes.append(f"Live DRC: {count} violation(s).")
+        if count:
+            for line in (drc.get("drc_violation_lines") or [])[:5]:
+                report.notes.append(str(line))
     return report

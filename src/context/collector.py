@@ -183,7 +183,7 @@ def collect_stretch_context(
                 pin_connectivity=pin_connectivity,
             )
     ctx.bom_summary = build_bom_summary(symbols)
-    ctx.erc_drc_summary = collect_erc_drc_summary(pro_path)
+    ctx.erc_drc_summary = collect_erc_drc_summary(pro_path, config=cfg)
     ctx.connectivity_gaps = detect_connectivity_gaps(
         symbols,
         pin_connectivity=pin_connectivity,
@@ -204,6 +204,10 @@ def collect_stretch_context(
             ctx.schematic_image_meta = meta
         except (KicadCliNotFoundError, PdftoppmNotFoundError, SchematicExportError) as exc:
             ctx.schematic_image_error = str(exc)
+
+    from context.live.enrich import enrich_live_context
+
+    enrich_live_context(ctx, pro_path, config=cfg)
 
     return ctx
 

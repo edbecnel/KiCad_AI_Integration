@@ -19,6 +19,13 @@ def compact_snapshot_for_prompt(snapshot: DesignSnapshot) -> dict[str, Any]:
     table plus unresolved datasheet entries only.
     """
     data = snapshot.to_dict(include_image_bytes=False)
+    if isinstance(snapshot, ProjectContext):
+        if snapshot.selection_context:
+            data["selection_context"] = snapshot.selection_context
+        if snapshot.firmware_summary:
+            data["firmware_summary"] = snapshot.firmware_summary
+        if snapshot.live_context:
+            data["live_context"] = snapshot.live_context
     symbols = data.get("symbols") or []
     if len(symbols) <= _SYMBOL_FULL_LIMIT:
         return data

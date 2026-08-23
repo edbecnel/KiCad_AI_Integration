@@ -404,7 +404,23 @@ Use the [AERF Validation Rubric](AERF_Validation_Rubric.md) when reviewing live 
 1. `--ui` → Assistant shell → Refresh context
 2. `--ui-aerf` → stages 0–7 with Approve & Send → Write to EKM
 3. `--ui-notebook` → verify EKM sections
-4. Optional `--ui-chat` smoke test (ad-hoc Q&A, not AERF)
+4. Optional Chat smoke test (ad-hoc Q&A, not AERF)
+5. **Audits tab** (Ctrl+6): run schematic or PCB layout review; confirm `kicad_ai/reviews/*.json` saved
+6. **Live context** (KiCad plugin only): open PCB, enable **Focus on KiCad selection** in Chat; run **Explain DRC** if `kicad-cli` is on PATH
+
+### Live KiCad features (plugin or Scripting Console)
+
+These require KiCad with `pcbnew` in-process. CI uses mocked `pcbnew` stubs.
+
+| Feature | Where | Requirement |
+|---------|-------|-------------|
+| Editor / board paths | Auto on Refresh context | Open `.kicad_pcb` in PCB Editor |
+| Live board settings | `live_context` in prompts | Open board in pcbnew |
+| Live DRC | ERC/DRC summary + Explain DRC audit | `kicad_cli` in config; `.kicad_pcb` on disk |
+| Selection focus | Chat checkbox | Select footprints/nets in PCB Editor |
+| Firmware cross-review | Chat firmware browse | Any text file (e.g. `main.py`) |
+
+CLI shortcuts: `--audit-schematic` or `--audit-pcb` opens the Assistant shell on the Audits tab.
 
 ---
 

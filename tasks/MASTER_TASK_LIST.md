@@ -12,7 +12,7 @@
 > aligned to [Software Architecture](../docs/Architecture/KiCad_AI_Integration_Software_Architecture.md)
 > and [README](../README.md).
 
-**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with all five embedded tabs, KiCad ActionPlugin entry, multi-turn Chat with disk persistence and incremental context refresh, centralized context (`ContextController`), multi-provider settings (Claude + Ollama), simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`). **Still open:** Phase 1.5 live KiCad API extractors.
+**Current repository status:** Phase 1 file-based close-out complete (Aug 2026). **Working:** Assistant shell with six embedded tabs (Chat, Datasheets, Simulation, AERF, Notebook, **Audits**), KiCad ActionPlugin entry, multi-turn Chat with disk persistence and incremental context refresh, centralized context (`ContextController`), multi-provider settings (Claude + Ollama), **live KiCad context** (`context/live/` — pcbnew probe, editor paths, board settings, `kicad-cli pcb drc`), **one-click audits** with structured `ReviewReport` JSON under `kicad_ai/reviews/`, simulation/SUBCKT panel, AERF staged analysis, EKM runtime + write-back, learning loop, CI (`pytest`, 373+ tests).
 
 **Primary goal:** Build an in-KiCad AI engineering assistant that automatically gathers
 project context, constructs optimized prompts, calls Claude 3.5 Sonnet, and displays
@@ -97,13 +97,13 @@ S-expression file parsing.
 - [x] Extract tracks per net (width, length, layer) — file-based via `pcb_extract.py` (not live `pcbnew` API)
 - [x] Extract vias and zones — `pcb_extract.py`
 - [x] Extract net classes (clearance, track width rules) — `pcb_extract.py`
-- [ ] Extract board design settings and constraints (live `pcbnew` API) — Phase 1.5
+- [x] Extract board design settings and constraints (live `pcbnew` API) — `src/context/live/board_settings.py` with `pcb_extract` file fallback
 - [x] Compute board statistics (layer usage, trace totals, etc.) — `pcb_summary` / `pcb_extract`
 
 #### Project metadata
 
 - [x] Read project file for name, paths, and project-level settings — `src/context/project_metadata.py`
-- [ ] Detect active schematic and PCB file paths from open editor context (Phase 1.5 — live KiCad API)
+- [x] Detect active schematic and PCB file paths from open editor context — `src/context/live/editor_context.py`
 
 #### Netlist
 
@@ -119,7 +119,7 @@ S-expression file parsing.
 
 - [x] Gather ERC violation results (read existing report files when present) — `src/context/erc_drc_summary.py`
 - [x] Gather DRC violation results (read existing report files when present) — `src/context/erc_drc_summary.py`
-- [ ] Run ERC/DRC via KiCad API and ingest live results (Phase 1.5)
+- [x] Run ERC/DRC via KiCad API and ingest live results — `src/context/live/drc_runner.py` (`kicad-cli pcb drc`); file `.rpt` fallback retained
 
 #### Optional schematic image (Phase 1 stretch)
 
@@ -158,8 +158,8 @@ S-expression file parsing.
 
 #### Optional (Phase 1 stretch)
 
-- [ ] Extract currently selected schematic/PCB objects as focused context (Phase 1.5)
-- [ ] Accept optional external firmware file path (e.g. Pico `main.py`) for cross-review (Phase 1.5)
+- [x] Extract currently selected schematic/PCB objects as focused context — `src/context/live/selection.py`; Chat **Focus on KiCad selection** toggle
+- [x] Accept optional external firmware file path (e.g. Pico `main.py`) for cross-review — `src/context/live/firmware.py`; Chat firmware browse row
 
 ### 1.2 Project Context Model
 
@@ -170,8 +170,8 @@ S-expression file parsing.
 - [x] Include SPICE netlist summary — `netlist_summary`
 - [x] Include BOM roll-up — `bom_summary`
 - [x] Include ERC/DRC report summaries when files exist — `erc_drc_summary`
-- [ ] Include: full nets, footprints, board_stats, constraints (live pcbnew) — Phase 1.5
-- [ ] Support optional `user_description` (design intent text) and `selection` context — intent in chat UI; selection Phase 1.5
+- [x] Include live board settings / constraints when pcbnew or file parse available — `live_context.board_settings` via `enrich_live_context`
+- [x] Support optional `selection` context and firmware summary — Chat UI toggles; `ProjectContext.selection_context`, `firmware_summary`
 - [x] Serialize to JSON for prompt assembly and debugging
 - [x] Support partial context flags (schematic, PCB, BOM, ERC/DRC, netlist) — `ContextIncludeFlags`; firmware TBD
 - [x] Design for token budgeting (summarization hooks, size estimation) — `src/context/token_budget.py`, `src/prompts/compact.py`
@@ -276,15 +276,15 @@ response without manual export/copy-paste.
 
 ---
 
-## Phase 1.5 — Live KiCad API (deferred)
+## Phase 1.5 — Live KiCad API
 
 **Goal:** Extractors and validators that require in-process KiCad (`pcbnew`, live ERC/DRC). Not CI-gated; best-effort when KiCad is available with file-based fallback.
 
-- [ ] Live `pcbnew` board settings and design constraints
-- [ ] Run ERC/DRC via KiCad API and ingest live results
-- [ ] Detect active schematic and PCB from open editor context
-- [ ] Selected-object focus context for chat
-- [ ] Optional external firmware file path for cross-review
+- [x] Live `pcbnew` board settings and design constraints — `context/live/board_settings.py`
+- [x] Run ERC/DRC via KiCad API and ingest live results — `context/live/drc_runner.py` (shared with routing)
+- [x] Detect active schematic and PCB from open editor context — `context/live/editor_context.py`
+- [x] Selected-object focus context for chat — `context/live/selection.py`
+- [x] Optional external firmware file path for cross-review — `context/live/firmware.py`
 
 ---
 
@@ -307,7 +307,7 @@ response without manual export/copy-paste.
 - [x] Persistent wx panel alongside schematic/PCB editor (non-modal frame host; true AUI dock deferred)
 - [x] Non-blocking UI (API calls on background thread)
 - [x] Resize-friendly layout
-- [x] **ADP-011 Phase C polish** — last tab per project, Datasheets tab badge, Ctrl+1..5 shortcuts
+- [x] **ADP-011 Phase C polish** — last tab per project, Datasheets tab badge, Ctrl+1..6 shortcuts
 - [x] **ADP-011 Phase D cleanup** — removed `launcher_dialog.py` and modal `*_dialog.py` wrappers; `launcher.py` facade; expanded shell tests
 
 ### Conversation Manager
@@ -347,16 +347,17 @@ beyond free-form chat.
 
 ### Automated design review
 
-- [ ] One-click schematic review action
-- [ ] One-click PCB layout review action
-- [ ] Structured review report output (findings, severity, recommendations)
+- [x] One-click schematic review action — Audits tab + `inference/audit.py`
+- [x] One-click PCB layout review action — Audits tab + `inference/audit.py`
+- [x] Structured review report output (findings, severity, recommendations) — `context/review_report.py`, `kicad_ai/reviews/*.json`
 
 ### Domain-specific analysis
 
-- [ ] Power integrity guidance (net class data, layer stackup, decoupling proximity)
+- [ ] Power integrity guidance (net class data, layer stackup, decoupling proximity) — partial: live board settings in PCB audit context
 - [ ] Signal integrity guidance (impedance rules, return paths)
 - [ ] EMI/EMC recommendations (loop area, switching path length, isolation gaps)
-- [ ] Design rule interpretation (DRC/ERC results explained in engineering terms)
+- [x] Design rule interpretation (DRC/ERC results explained in engineering terms) — **Explain DRC** one-click audit
+- [x] Isolation and clearance audit (one-click) — Audits tab + `isolation_clearance` template
 
 ### Component & datasheet intelligence
 
@@ -366,7 +367,7 @@ beyond free-form chat.
 - [x] Per-part datasheet reset — selective hard refresh by Value; Datasheets panel + `--reset-datasheet` CLI (see [Netlist Gap Fill](../docs/Specifications/Netlist_Gap_Fill.md#per-part-datasheet-reset))
 - [ ] Project-wide force refresh datasheets — re-download all HTTPS URLs with full catalog + failed-log bypass (partial: **Force refresh URLs** retries failed fetches only)
 - [x] Datasheet text extraction from resolved PDFs for SUBCKT Tier A — `src/context/pdf_text.py` (see Phase 1 stretch Tier A)
-- [ ] Circuit explanation mode (topology walkthrough from schematic context)
+- [x] Circuit explanation mode (topology walkthrough from schematic context) — **Circuit explanation** one-click audit
 
 ### Code & simulation generation
 
@@ -381,7 +382,7 @@ beyond free-form chat.
 - [ ] Image rendering for schematic snapshots in chat context
 
 **Phase 3 exit criteria:** Domain-specific audit workflows runnable as one-click actions,
-not only free-form chat.
+not only free-form chat. **Met (Aug 2026):** Audits tab with schematic/PCB reviews, structured JSON reports, DRC interpretation, isolation/clearance, and circuit explanation actions; CLI `--audit-schematic` / `--audit-pcb`.
 
 ---
 

@@ -87,6 +87,20 @@ class ChatShell(wx.Panel):
         self._chk_image = wx.CheckBox(self, label="Include schematic image")
         vbox.Add(self._chk_image, flag=wx.LEFT | wx.RIGHT, border=8)
 
+        from context.live.probe import is_pcbnew_available
+
+        self._chk_selection = wx.CheckBox(self, label="Focus on KiCad selection")
+        self._chk_selection.Enable(is_pcbnew_available())
+        vbox.Add(self._chk_selection, flag=wx.LEFT | wx.RIGHT, border=8)
+
+        fw_row = wx.BoxSizer(wx.HORIZONTAL)
+        fw_row.Add(wx.StaticText(self, label="Firmware file:"), flag=wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, border=6)
+        self._txt_firmware = wx.TextCtrl(self)
+        fw_row.Add(self._txt_firmware, proportion=1, flag=wx.RIGHT, border=6)
+        self._btn_firmware = wx.Button(self, label="Browse…")
+        fw_row.Add(self._btn_firmware)
+        vbox.Add(fw_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+
         ctx_row = wx.BoxSizer(wx.HORIZONTAL)
         self._chk_schematic = wx.CheckBox(self, label="Schematic")
         self._chk_schematic.SetValue(True)
@@ -150,6 +164,7 @@ class ChatShell(wx.Panel):
             self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
         self._btn_new_conversation.Bind(wx.EVT_BUTTON, self._on_new_conversation)
+        self._btn_firmware.Bind(wx.EVT_BUTTON, self._on_browse_firmware)
         if not self._embedded:
             self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
         self._chk_image.Bind(wx.EVT_CHECKBOX, self._on_preview_update)
@@ -168,10 +183,39 @@ class ChatShell(wx.Panel):
 
     def apply_context(self, ctx: ProjectContext) -> None:
         """Use project context from the Assistant shell header."""
-        self._ctx = ctx
+        self._ctx = self._apply_live_options(ctx)
         self._update_preview()
         self._refresh_conversation_log()
         self._status.SetLabel("Context ready — review preview, then Approve & Send.")
+
+    def _firmware_path_value(self) -> str | None:
+        value = self._txt_firmware.GetValue().strip()
+        return value or None
+
+    def _apply_live_options(self, ctx: ProjectContext) -> ProjectContext:
+        from context.live.enrich import enrich_live_context
+
+        return enrich_live_context(
+            ctx,
+            self._project_path,
+            config=self._cfg,
+            use_selection=self._chk_selection.GetValue(),
+            firmware_path=self._firmware_path_value(),
+        )
+
+    def _on_browse_firmware(self, _event: wx.CommandEvent) -> None:
+        dlg = wx.FileDialog(
+            self,
+            "Select firmware source file",
+            wildcard="All files (*.*)|*.*",
+            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
+        )
+        if dlg.ShowModal() == wx.ID_OK:
+            self._txt_firmware.SetValue(dlg.GetPath())
+            if self._ctx is not None:
+                self._ctx = self._apply_live_options(self._ctx)
+                self._update_preview()
+        dlg.Destroy()
 
     def _session(self):
         return self._session_store.get_or_create(self._project_path)
@@ -305,6 +349,7 @@ class ChatShell(wx.Panel):
             self._refresh_context()
         if self._ctx is None:
             return
+        self._ctx = self._apply_live_options(self._ctx)
 
         session = self._session()
         is_followup = bool(session.turns)

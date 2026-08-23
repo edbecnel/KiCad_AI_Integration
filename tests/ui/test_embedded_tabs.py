@@ -25,7 +25,7 @@ def _ensure_wx_app():
     return wx
 
 
-@pytest.mark.parametrize("tab_id", ("chat", "datasheets", "simulation", "aerf", "notebook"))
+@pytest.mark.parametrize("tab_id", ("chat", "datasheets", "simulation", "aerf", "notebook", "audits"))
 def test_assistant_shell_embedded_tabs_load_on_refresh(tab_id: str) -> None:
     wx = _ensure_wx_app()
     from ui.assistant_shell import AssistantShell

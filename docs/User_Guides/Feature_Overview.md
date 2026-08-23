@@ -82,29 +82,28 @@ The unified **Assistant shell** (`--ui`) provides a shared project header and ta
 | Net labels from schematic | Basic label extraction |
 | PCB summary | Footprint/net counts plus tracks, vias, zones, net classes when PCB present |
 | BOM summary | Value/footprint roll-up in `ProjectContext` |
-| ERC / DRC reports | Included when report files exist beside the project |
+| ERC / DRC reports | Included when report files exist beside the project; **live DRC** via `kicad-cli pcb drc` when CLI configured |
 | Chat context toggles | Include schematic, PCB, BOM, ERC/DRC, netlist per question |
-| Chat audit templates | General review, PCB layout, isolation/clearance, netlist crosscheck (template selector in `--ui-chat`) |
+| Chat live options | **Focus on KiCad selection** (pcbnew); optional **firmware file** for cross-review |
+| **Audits tab** (`--ui`, Ctrl+6) | One-click schematic/PCB reviews, Explain DRC, isolation/clearance, circuit explanation; reports in `kicad_ai/reviews/` |
+| Chat audit templates | General review, PCB layout, isolation/clearance, netlist crosscheck (template selector in Chat tab) |
 | Netlist export | Via `kicad-cli` when available |
 | **Simulation / SUBCKT panel** (`--ui-simulation`) | Gap scan, AI SUBCKT generation, spice field write-back to schematic — functional but not production-complete |
 | Netlist gap-fill / SUBCKT | Gap detection + connectivity-inference template in chat; SUBCKT Tier A/B/C pipeline implemented — see [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md) |
 | Developer `--ask` shortcut | Works but bypasses approval UI — internal testing only |
 
-### Not built yet (KiCad host — Phase 1 still open)
+### Not built yet (KiCad host — follow-on)
 
 #### Richer project context
-- Live ERC/DRC from KiCad API (today: scan saved report files only) — **Phase 1.5**
+- Full live net/track extraction from pcbnew (today: file-based `pcb_extract` + live board settings summary)
 - Pin-level connectivity from schematic geometry (today: pin lists + netlist graph when exported)
 
 #### More AI capabilities (KiCad host)
 - Project-wide **force refresh datasheets** — **Force refresh all URLs** button re-fetches HTTPS symbol URLs with catalog bypass
 
 #### Product polish (KiCad host)
-- **Embedded tab UIs** and KiCad dockable Assistant shell (Phase 2) — [ADP-011](../Architecture/ADP-011-Assistant-Shell-UI.md)
-- **Native KiCad plugin** (menu/toolbar entry, no separate terminal)
 - Context preview **thumbnail** for schematic images
-- **Multi-turn** conversation (history across questions)
-- Token/cost display in a user-friendly way
+- **Clickable component references** in AI responses (highlight in KiCad)
 
 ### What you can demo today
 
@@ -217,8 +216,8 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 - Markdown rendering, template library, multi-provider profiles
 
 **Phase 3 — Engineering assistant (KiCad UX + platform reasoning)**
-- One-click schematic and PCB audits
-- Power/signal integrity and EMC guidance
+- One-click schematic and PCB audits (**done** — Audits tab)
+- Power/signal integrity and EMC guidance (partial — live board settings in audit context)
 - Staged circuit analysis via **AERF** with **EKM** write-back after approval
 - Engineering Notebook UI for curated project knowledge
 
@@ -238,10 +237,10 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 
 | | |
 |---|---|
-| **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library; simulation/SUBCKT panel; PCB/BOM/ERC/DRC context; Assistant shell scaffold |
+| **KiCad host (proven)** | Schematic-aware AI Q&A with approval; datasheet library; simulation/SUBCKT panel; PCB/BOM/ERC/DRC context; live KiCad enrichment; one-click audits; Assistant shell |
 | **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + **learning loop** (EKM reload, library promotion); EIE chat/simulation/AERF UI; Blocking Oscillator KB |
-| **In progress** | Phase 2 dockable plugin, simulation closed loop |
-| **Later** | Native plugin, additional hosts, conversation persistence via EKM |
+| **In progress** | Simulation closed loop; PI/SI/EMC deep guidance |
+| **Later** | Additional hosts, clickable refs in KiCad, project memory via EKM |
 
 This is a **foundation**, not a finished product. The central idea — automatic context, structured engineering reasoning, and controlled AI review — works today for schematic-level questions in KiCad, while the platform architecture is defined to grow beyond any single editor.
 

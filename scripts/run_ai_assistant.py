@@ -105,6 +105,8 @@ def _parse_cli_args(
     bool,
     bool,
     bool,
+    bool,
+    bool,
     int | None,
     str | None,
     bool,
@@ -128,6 +130,8 @@ def _parse_cli_args(
     ui_notebook = False
     ui_notebook_panel = False
     ui_launcher = False
+    audit_schematic = False
+    audit_pcb = False
     aerf_plan = False
     aerf_stage: int | None = None
     aerf_family: str | None = None
@@ -167,6 +171,10 @@ def _parse_cli_args(
             ui_notebook_panel = True
         elif arg == "--ui":
             ui_launcher = True
+        elif arg == "--audit-schematic":
+            audit_schematic = True
+        elif arg == "--audit-pcb":
+            audit_pcb = True
         elif arg == "--aerf-plan":
             aerf_plan = True
         elif arg == "--aerf-stage":
@@ -225,6 +233,8 @@ def _parse_cli_args(
         ui_notebook,
         ui_notebook_panel,
         ui_launcher,
+        audit_schematic,
+        audit_pcb,
         aerf_plan,
         aerf_stage,
         aerf_family,
@@ -615,6 +625,22 @@ def main_ui_aerf(
     show_assistant_shell(path, focus_tab="aerf")
 
 
+def main_ui_audit(
+    project_path: str | Path | None = None,
+    *,
+    focus_tab: str = "audits",
+) -> None:
+    """Open the Assistant shell on the Audits tab."""
+    try:
+        import wx  # noqa: F401
+    except ImportError:
+        print("Audits UI requires wxPython (run inside KiCad or install wx).")
+        return
+    from ui.assistant_shell import show_assistant_shell
+
+    show_assistant_shell(project_path, focus_tab=focus_tab)
+
+
 def main_ui_launcher(project_path: str | Path | None = None, *, focus_tab: str | None = None) -> None:
     """Open the unified Assistant shell (ADP-011 scaffold)."""
     try:
@@ -780,6 +806,8 @@ if __name__ == "__main__":
         ui_notebook,
         ui_notebook_panel,
         ui_launcher,
+        audit_schematic,
+        audit_pcb,
         aerf_plan,
         aerf_stage,
         aerf_family,
@@ -807,6 +835,10 @@ if __name__ == "__main__":
         main_ui_notebook(arg_path)
     elif ui_notebook_panel:
         main_ui_notebook_panel(arg_path)
+    elif audit_schematic:
+        main_ui_audit(arg_path, focus_tab="audits")
+    elif audit_pcb:
+        main_ui_audit(arg_path, focus_tab="audits")
     elif aerf_plan:
         main_aerf_plan(
             arg_path,

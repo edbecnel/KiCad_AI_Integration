@@ -38,6 +38,10 @@ class ProjectContext:
     token_budget: dict[str, Any] | None = None
     schematic_image_error: str | None = None
     ai_discovery_results: dict[str, Any] = field(default_factory=dict)
+    live_context: dict[str, Any] | None = None
+    live_source: str | None = None
+    selection_context: dict[str, Any] | None = None
+    firmware_summary: dict[str, Any] | None = None
 
     def to_dict(self, *, include_image_bytes: bool = False) -> dict[str, Any]:
         data: dict[str, Any] = {
@@ -80,6 +84,10 @@ class ProjectContext:
             "project_metadata": self.project_metadata,
             "connectivity_gaps": self.connectivity_gaps,
             "token_budget": self.token_budget,
+            "live_context": self.live_context,
+            "live_source": self.live_source,
+            "selection_context": self.selection_context,
+            "firmware_summary": self.firmware_summary,
             "schematic_image_meta": (
                 self.schematic_image_meta.to_dict()
                 if self.schematic_image_meta

@@ -19,6 +19,10 @@ def pytest_configure(config: pytest.Config) -> None:
         "markers",
         "live: tests that call external APIs (skipped unless ANTHROPIC_API_KEY is set)",
     )
+    config.addinivalue_line(
+        "markers",
+        "kicad: tests that require KiCad pcbnew or kicad-cli (optional manual runs)",
+    )
 
 
 @pytest.fixture

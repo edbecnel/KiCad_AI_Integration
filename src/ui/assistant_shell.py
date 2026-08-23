@@ -6,6 +6,7 @@ from pathlib import Path
 
 from context.datasheet_requirements import summarize_required_missing_datasheets
 from ui.aerf_tab import AERFTab
+from ui.audits_tab import AuditsTab
 from ui.assistant_tab import ASSISTANT_TAB_IDS, AssistantTabPanel, tab_index_for_focus
 from ui.chat_tab import ChatTab
 from ui.context_controller import ContextController
@@ -52,6 +53,7 @@ class AssistantShell(wx.Panel):
             "simulation": "Simulation",
             "aerf": "AERF",
             "notebook": "Notebook",
+            "audits": "Audits",
         }
 
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -106,6 +108,10 @@ class AssistantShell(wx.Panel):
         self._notebook.AddPage(notebook_tab, "Notebook")
         self._tabs["notebook"] = notebook_tab
         self._notebook_tab = notebook_tab
+
+        audits_tab = AuditsTab(self._notebook)
+        self._notebook.AddPage(audits_tab, "Audits")
+        self._tabs["audits"] = audits_tab
 
         vbox.Add(self._notebook, proportion=1, flag=wx.EXPAND | wx.ALL, border=8)
 
@@ -202,6 +208,7 @@ class AssistantShell(wx.Panel):
                 ord("3"): "simulation",
                 ord("4"): "aerf",
                 ord("5"): "notebook",
+                ord("6"): "audits",
             }
             tab_id = shortcuts.get(key)
             if tab_id is not None:
