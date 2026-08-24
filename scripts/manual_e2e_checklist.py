@@ -26,6 +26,7 @@ def main() -> int:
     print()
     print("Phase 1 KiCad chat E2E: run inside KiCad with Assistant shell (see checklist).")
     print("Freerouting E2E: Routing tab Ctrl+7 with open board + FREEROUTING_JAR.")
+    print("Sign-off: check boxes in Manual_Validation_Checklist.md — human-only, not automated.")
     print()
 
     if not args.check_env:

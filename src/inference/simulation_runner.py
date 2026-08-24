@@ -9,6 +9,7 @@ from typing import Any
 
 from context.collector import _resolve_project_file
 from context.netlist_export import collect_netlist_summary
+from inference.simulation_artifacts import persist_simulation_run
 from inference.simulation_types import SimulationMeasurement, SimulationPlan, SimulationResult
 from utils.config import AppConfig, load_config
 
@@ -46,7 +47,7 @@ def run_simulation_plan(
         )
 
     if not _ngspice_available():
-        return SimulationResult(
+        result = SimulationResult(
             plan=plan,
             success=False,
             errors=[
@@ -61,6 +62,8 @@ def run_simulation_plan(
                 )
             ],
         )
+        persist_simulation_run(pro_path, result, netlist_path=netlist_path)
+        return result
 
     log_path = netlist_path.with_suffix(".log")
     try:
@@ -98,13 +101,15 @@ def run_simulation_plan(
                 notes=step.hook.description[:200],
             )
         )
-    return SimulationResult(
+    result = SimulationResult(
         plan=plan,
         success=success,
         measurements=measurements,
         log_excerpt=log_text[-2000:],
         errors=[] if success else [f"ngspice exited with code {completed.returncode}"],
     )
+    persist_simulation_run(pro_path, result, netlist_path=netlist_path, log_path=log_path)
+    return result
 
 
 def run_closed_loop_for_stage(

@@ -287,6 +287,45 @@ def _collect_field_specs(
                 ),
             )
 
+    for stage_id in sorted(stages):
+        determinations = stages[stage_id].get("determinations")
+        if not isinstance(determinations, dict):
+            continue
+        sim_validation = determinations.get("simulation_validation")
+        if not isinstance(sim_validation, dict):
+            continue
+        artifact_refs = sim_validation.get("artifact_refs")
+        if isinstance(artifact_refs, list) and artifact_refs:
+            specs.append(
+                (
+                    "analysis",
+                    _text_field(
+                        f"aerf_stage_{stage_id}_simulation_artifacts",
+                        label=f"AERF stage {stage_id} — simulation artifact references",
+                        value=_json_text(artifact_refs),
+                        source=f"aerf_stage_{stage_id}_simulation",
+                        approved_at=approved_at,
+                    ),
+                ),
+            )
+        measurements = {
+            **(sim_validation.get("validated") or {}),
+            **(sim_validation.get("challenged") or {}),
+        }
+        if measurements:
+            specs.append(
+                (
+                    "analysis",
+                    _text_field(
+                        f"aerf_stage_{stage_id}_simulation_measurements",
+                        label=f"AERF stage {stage_id} — simulation measurements",
+                        value=_json_text(measurements),
+                        source=f"aerf_stage_{stage_id}_simulation",
+                        approved_at=approved_at,
+                    ),
+                ),
+            )
+
     return specs
 
 

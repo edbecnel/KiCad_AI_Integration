@@ -432,6 +432,8 @@ class AERFShell(wx.Panel):
         ]
         for measurement in result.measurements:
             lines.append(f"  {measurement.name}: {measurement.value}")
+        for ref in getattr(result, "artifact_references", []) or []:
+            lines.append(f"  Artifact: {ref.get('id')} → {ref.get('path')}")
         for err in result.errors:
             lines.append(f"  Error: {err}")
         if result.log_excerpt:

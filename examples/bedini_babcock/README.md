@@ -11,11 +11,12 @@ Use the **Flyback recovery** audit in the **Audits** tab or the **Flyback recove
 - Net labels such as `HV_Flyback`, `Coil_Plus`, `PICO_GPIO15` when present
 - Netlist vs schematic consistency
 
-Design intent example for manual validation:
+Design intent and firmware stub for manual validation:
 
-- Switching frequency target and voltage rails
-- Isolation requirements between control and power stages
-- Expected labeled nets for flyback recapture paths
+- [design_intent.md](design_intent.md) — switching frequency, voltage targets, isolation requirements
+- [firmware/pico_gpio_stub/](firmware/pico_gpio_stub/) — Pico GPIO timing reference for cross-review
+
+Labeled nets for smoke tests live in [minimal_blocking_oscillator](../minimal_blocking_oscillator/blocking_oscillator.kicad_sch) (`HV_Flyback`, `Coil_Plus`, `PICO_GPIO15`, etc.).
 
 ## Bundled smoke-test project
 

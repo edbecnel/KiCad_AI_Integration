@@ -69,7 +69,7 @@ This ADP does NOT:
 - Mandate automatic routing without user approval
 - Assume EKM as the routing policy persistence layer
 - Implement critical-net AI classification (Phase 4)
-- Implement closed-loop re-routing optimization (Phase 5)
+- Implement closed-loop re-routing optimization (Phase 5) — **implemented** (candidate compare, re-route, ADP-012 learning export)
 - Prematurely generalize simulation and routing into a shared Engineering Engine Provider framework
 - Replace KiCad's native routing tools or Freerouting plugin for interactive use
 
@@ -322,7 +322,7 @@ Explainability applies to future Engineering Engine Providers: what tool was inv
 | Freerouting reference implementation | **Phase 2** | `src/routing/freerouting.py`, [Freerouting Integration](../Specifications/Freerouting_Integration.md) |
 | Structured routing policy | **Phase 3** | `src/routing/policy.py` |
 | AI critical-net classification | **Phase 4** | `src/prompts/templates/routing_policy.py` |
-| Closed-loop re-routing | **Phase 5** | Deferred |
+| Closed-loop re-routing | **Phase 5** | Implemented — `src/routing/candidates.py`, Routing tab |
 
 ---
 
@@ -394,7 +394,7 @@ Gate checklist:
 | Exchange format | SPICE netlist | Provider-specific (Specctra DSN/SES for Freerouting only) |
 | Host adapter role | Netlist export, spice write-back | Board checkpoint, format exchange, result import |
 | Transactional workflow | User-approved write-back | Checkpoint → candidate → accept/reject |
-| Closed loop | Deferred | Deferred (Phase 5) |
+| Closed loop | Implemented (host runner + AERF merge) | Implemented (Phase 5) |
 | Optional dependency | ngspice / KiCad Sim | Freerouting (independently installed) |
 | AI role | Validate/refine AERF determinations | Classify nets, generate policy, post-route review |
 

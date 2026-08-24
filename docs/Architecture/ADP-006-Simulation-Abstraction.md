@@ -113,7 +113,7 @@ flowchart LR
 | Host-agnostic `SimulationResult` contract | Implemented (`src/inference/simulation_types.py`) |
 | `simulation_hooks` → plan translation | Implemented (`src/inference/simulation_closed_loop.py`) |
 | Closed-loop stage refinement | Implemented (`build_refinement_from_simulation`, user approval gate) |
-| EKM measurement artifact references from sim | Not implemented |
+| EKM measurement artifact references from sim | Implemented — `simulation_artifacts.py`, AERF write-back |
 
 ---
 
@@ -122,7 +122,7 @@ flowchart LR
 - [x] Host-neutral simulation result contract defined in `src/inference/simulation_types.py`
 - [x] AERF `simulation_hooks` can be translated to an executable plan without KiCad imports in platform code
 - [x] Simulation results can refine prior stage determinations with explicit user approval
-- [ ] Closed-loop workflow traced in [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) and [Feature Overview](../User_Guides/Feature_Overview.md)
+- [x] Closed-loop workflow traced in [MASTER_TASK_LIST](../../tasks/MASTER_TASK_LIST.md) and [Feature Overview](../User_Guides/Feature_Overview.md)
 - [x] SPICE netlist export and SUBCKT assistance (partial — no closed loop)
 
 ---

@@ -92,6 +92,7 @@ class SimulationResult:
     success: bool
     measurements: list[SimulationMeasurement] = field(default_factory=list)
     waveform_paths: list[str] = field(default_factory=list)
+    artifact_references: list[dict[str, str]] = field(default_factory=list)
     log_excerpt: str = ""
     errors: list[str] = field(default_factory=list)
 
@@ -101,6 +102,7 @@ class SimulationResult:
             "success": self.success,
             "measurements": [m.to_dict() for m in self.measurements],
             "waveform_paths": self.waveform_paths,
+            "artifact_references": self.artifact_references,
             "log_excerpt": self.log_excerpt,
             "errors": self.errors,
         }
@@ -115,6 +117,7 @@ class StageRefinement:
     validated_determinations: dict[str, Any] = field(default_factory=dict)
     challenged_determinations: dict[str, Any] = field(default_factory=dict)
     refinement_notes: list[str] = field(default_factory=list)
+    artifact_references: list[dict[str, str]] = field(default_factory=list)
     approved: bool = False
 
     def to_dict(self) -> dict[str, Any]:
@@ -124,5 +127,6 @@ class StageRefinement:
             "validated_determinations": self.validated_determinations,
             "challenged_determinations": self.challenged_determinations,
             "refinement_notes": self.refinement_notes,
+            "artifact_references": self.artifact_references,
             "approved": self.approved,
         }

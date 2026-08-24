@@ -173,4 +173,32 @@ def compare_routing_candidates(
         "rows": rows,
         "best_candidate_id": best_routed.candidate_id if best_routed else None,
         "summary": summary,
+        "columns": comparison_column_headers(),
+        "table": comparison_table_rows(rows),
     }
+
+
+def comparison_column_headers() -> list[str]:
+    return [
+        "Candidate",
+        "Routed %",
+        "Vias",
+        "Excluded",
+        "Policy notes",
+    ]
+
+
+def comparison_table_rows(rows: list[dict[str, Any]]) -> list[list[str]]:
+    table: list[list[str]] = []
+    for row in rows:
+        routed = row.get("routed_percentage")
+        table.append(
+            [
+                str(row.get("candidate_id") or ""),
+                f"{routed:.1f}" if isinstance(routed, (int, float)) else "—",
+                str(row.get("via_count") if row.get("via_count") is not None else "—"),
+                str(row.get("excluded_net_count") if row.get("excluded_net_count") is not None else "0"),
+                str(row.get("policy_notes") or "")[:60],
+            ]
+        )
+    return table

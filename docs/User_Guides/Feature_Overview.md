@@ -219,7 +219,7 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 - Context preview thumbnail for schematic images
 - Clickable component references in AI responses
 - Notebook AI edit proposals
-- Simulation closed loop
+- Simulation closed loop — host runner + AERF merge wired; EKM measurement artifact refs implemented
 
 ### Platform gaps (not KiCad-specific)
 
@@ -230,7 +230,8 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 | EIE (`src/inference/`) | Chat + simulation + AERF + audits + routing | Deeper PI/SI/EMC templates |
 | Engineering Notebook UI | Full editors, search, JSON view | In-canvas dock (deferred) |
 | Conversation Manager | Multi-turn per project | Session export UI |
-| Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Hook translation + closed-loop refinement types implemented; host solver wiring TBD |
+| Simulation abstraction | [ADP-006](../Architecture/ADP-006-Simulation-Abstraction.md) | Host runner, AERF sim plan + merge; EKM artifact refs in write-back |
+| PI/SI/EMC audits | Dedicated templates | `power_integrity_audit`, `signal_integrity_audit`, `emi_emc_audit` in Audits + Chat |
 | Blocking Oscillator KB | Complete with live sign-off fixtures | Additional families |
 
 ### Bottom line
@@ -239,8 +240,8 @@ Physical `src/hosts/kicad/` reorganization is deferred until a second host is ac
 |---|---|
 | **KiCad host (proven)** | Seven-tab Assistant shell, ActionPlugin, multi-turn chat, datasheets, simulation/SUBCKT, AERF+EKM, audits, Freerouting routing |
 | **Platform (foundation laid)** | EKM runtime + CLI; AERF classifier + prompts + pipeline + write-back + **learning loop** (EKM reload, library promotion); EIE chat/simulation/AERF UI; Blocking Oscillator KB |
-| **In progress** | Host solver wiring for simulation closed loop; PI/SI/EMC deep guidance |
-| **Later** | Additional hosts, clickable refs in KiCad, project memory via EKM |
+| **In progress** | Manual KiCad/Freerouting E2E sign-off; additional circuit families |
+| **Later** | Notebook AI edits, clickable refs, project memory via EKM |
 
 This is a **foundation**, not a finished product. The central idea — automatic context, structured engineering reasoning, and controlled AI review — works today for schematic-level questions in KiCad, while the platform architecture is defined to grow beyond any single editor.
 

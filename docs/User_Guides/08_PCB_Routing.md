@@ -43,6 +43,10 @@ See [09 — Configuration Reference](09_Configuration_Reference.md).
 | **Accept candidate** | Promote checkpoint route to authoritative PCB |
 | **Reject candidate** | Discard checkpoint without changing board |
 | **Post-route AI review** | AI review of routed board (needs API key) |
+| **Compare candidates** | Side-by-side table of saved routing runs (Phase 5) |
+| **Re-route with policy** | Discard last candidate and re-run autoroute with current policy |
+| **Export learning candidate** | Export policy to `kicad_ai/learning/routing_policies/` (ADP-012, not auto-canonical) |
+| **Generate policy from AI** | AI-generated `RoutingPolicy` saved to `kicad_ai/routing_policy.json` |
 | **Output** panel | Quality report, logs, metrics (read-only) |
 | Status line | Phase hints and errors |
 
@@ -76,6 +80,10 @@ After a successful route, **Post-route AI review** → approve → findings in *
 
 See [Workflow: PCB Review and Route](Workflows/PCB_Layout_Review_and_Route.md).
 
+### 5. Compare and iterate (Phase 5)
+
+After multiple autoroute runs, use **Compare candidates** for a side-by-side metrics table. Adjust policy (or **Generate policy from AI**), then **Re-route with policy**. Optionally **Export learning candidate** after accept/reject for ADP-012 review.
+
 ---
 
 ## What gets saved
@@ -83,6 +91,8 @@ See [Workflow: PCB Review and Route](Workflows/PCB_Layout_Review_and_Route.md).
 | Path | Content |
 |------|---------|
 | Routing checkpoint files | Under project `kicad_ai/` (checkpoint workflow) |
+| `kicad_ai/routing_candidates.json` | Saved candidate metrics for comparison |
+| `kicad_ai/routing_policy.json` | Structured routing policy |
 | `<project>/kicad_ai/reviews/` | Post-route AI review JSON |
 | `.kicad_pcb` | Updated only on **Accept candidate** |
 

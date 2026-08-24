@@ -249,10 +249,20 @@ Based on [Direct Claude API Chat guide](../docs/Developer_Handbook/Guide-In_KiCa
 
 #### Manual E2E validation
 
-Full-flow checklists: [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [07_E2E_Full_Flow](../docs/Developer_Handbook/07_E2E_Full_Flow.md).
+Full-flow checklists: [Manual Validation Checklist](../docs/Developer_Handbook/Manual_Validation_Checklist.md) (includes Freerouting install + routing steps), [Testing With Your KiCad Project](../docs/User_Guides/Testing_With_Your_KiCad_Project.md), [07_E2E_Full_Flow](../docs/Developer_Handbook/07_E2E_Full_Flow.md).
 
-- [ ] Open KiCad PCB Editor → run script → ask engineering question → receive Claude response — see [Manual Validation Checklist](../docs/Developer_Handbook/Manual_Validation_Checklist.md)
+**Phase 1 chat (human sign-off in KiCad):**
+
+- [ ] Open KiCad PCB Editor → run script → ask engineering question → receive Claude response — [Manual Validation Checklist §Phase 1](../docs/Developer_Handbook/Manual_Validation_Checklist.md#phase-1--kicad-chat-e2e)
 - [ ] Verify no manual export or browser copy-paste required — checklist + `scripts/manual_e2e_checklist.py --check-env`
+
+**Freerouting routing (human sign-off in KiCad + pcbnew):**
+
+- [ ] Install Freerouting (Java JAR or native CLI) and configure `freerouting_jar` / `FREEROUTING_JAR` — [Manual Validation Checklist §Install Freerouting](../docs/Developer_Handbook/Manual_Validation_Checklist.md#install-freerouting)
+- [ ] Open PCB Editor with saved `.kicad_pcb`; Routing tab shows **Engine: freerouting (installed)**
+- [ ] Run autoroute → checkpoint candidate → review quality report → Accept or Reject — [Manual Validation Checklist §Freerouting routing E2E](../docs/Developer_Handbook/Manual_Validation_Checklist.md#freerouting-routing-e2e)
+- [ ] Optional: Compare candidates / Re-route with policy after multiple runs (Phase 5)
+- [ ] Optional automated helper (env + pytest, not a substitute for manual sign-off): `FREEROUTING_JAR=... pytest -m kicad tests/integration/test_routing_e2e.py`
 
 #### Reference example
 
@@ -548,7 +558,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] Circuit family classifier
 - [x] Per-stage prompt templates (ADP-007)
 - [x] EKM stage-output mapping and write-back (ADP-007) — `src/ekm/aerf_writeback.py`
-- [x] Simulation closed loop — validate/refine stages (ADP-006) — host runner, AERF sim plan + merge refinement; EKM measurement refs TBD
+- [x] Simulation closed loop — validate/refine stages (ADP-006) — host runner, AERF sim plan + merge; EKM measurement artifact refs
 - [x] AERF learning loop — EKM auto-reload, generic family, library merge, confidence-gated promotion ([ADP-012](../docs/Architecture/ADP-012-Learning-and-Canonical-Knowledge.md))
 - [x] AERF multi-stage orchestration with approval gating (`run_aerf_pipeline`, CLI, `--ui-aerf`)
 - [x] AERF UI mode in chat or dedicated analysis panel (`src/ui/aerf_dialog.py`)
@@ -594,6 +604,7 @@ Then iteratively add schematic, BOM, ERC/DRC, netlist, context toggles, and prev
 - [x] Config: `freerouting_jar`, `freerouting_cli`, `routing_enabled`, `routing_timeout_sec`
 - [x] Unit tests (mocked subprocess, checkpoint workflow)
 - [x] E2E test with Freerouting + pcbnew installed — optional `@pytest.mark.kicad` in `tests/integration/test_routing_e2e.py` (skip unless `FREEROUTING_JAR`/`FREEROUTING_CLI` + open board)
+- [ ] **Manual** Freerouting E2E in KiCad (install, autoroute, accept/reject) — [Manual Validation Checklist](../docs/Developer_Handbook/Manual_Validation_Checklist.md) §Freerouting; MASTER_TASK_LIST §1.6
 - [x] Routing UI tab in Assistant shell — `src/ui/routing_tab.py`, `routing_shell.py` (Ctrl+7)
 - [x] Post-route DRC via `kicad-cli pcb drc` — shared `context/live/drc_runner.py` used by `build_routing_quality_report()`
 
@@ -653,9 +664,9 @@ Phase 1 end-to-end, not as the product definition.
 
 ### Setup
 
-- [ ] Sample project with labeled nets (`HV_Flyback`, `Coil_Plus`, `PICO_GPIO15`, etc.)
-- [ ] Raspberry Pi Pico firmware stub for timing/isolation cross-review
-- [ ] Design intent text: switching frequency, voltage targets, isolation requirements
+- [x] Sample project with labeled nets (`HV_Flyback`, `Coil_Plus`, `PICO_GPIO15`, etc.) — `examples/minimal_blocking_oscillator/`
+- [x] Raspberry Pi Pico firmware stub for timing/isolation cross-review — `examples/bedini_babcock/firmware/pico_gpio_stub/`
+- [x] Design intent text: switching frequency, voltage targets, isolation requirements — `examples/bedini_babcock/design_intent.md`
 
 ### Automated pipeline test (replaces manual copy-paste)
 

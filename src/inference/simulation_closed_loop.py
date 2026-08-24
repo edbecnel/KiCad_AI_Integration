@@ -154,6 +154,7 @@ def build_refinement_from_simulation(
         validated_determinations=validated,
         challenged_determinations=challenged,
         refinement_notes=notes,
+        artifact_references=list(result.artifact_references),
         approved=approved,
     )
 
@@ -171,6 +172,8 @@ def merge_refinement_into_stage(
     sim_validation["validated"] = refinement.validated_determinations
     sim_validation["challenged"] = refinement.challenged_determinations
     sim_validation["notes"] = refinement.refinement_notes
+    if refinement.artifact_references:
+        sim_validation["artifact_refs"] = refinement.artifact_references
     determinations["simulation_validation"] = sim_validation
     merged["determinations"] = determinations
     return merged

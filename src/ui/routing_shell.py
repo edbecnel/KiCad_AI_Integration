@@ -23,6 +23,7 @@ from inference.routing import (
 )
 from providers.errors import ProviderError
 from routing.types import RoutingResult
+from ui.routing_compare_dialog import show_routing_comparison_dialog
 from utils.config import AppConfig, load_config
 
 try:
@@ -240,6 +241,19 @@ class RoutingShell(wx.Panel):
 
     def _on_compare_candidates(self, _event: wx.CommandEvent) -> None:
         comparison = get_routing_candidates_comparison(self._project_path)
+        if comparison.get("count", 0) == 0:
+            self._output.SetValue(
+                "\n".join(
+                    [
+                        self._output.GetValue(),
+                        "",
+                        "--- Routing candidate comparison ---",
+                        comparison.get("summary", "No candidates."),
+                    ]
+                ).strip()
+            )
+            return
+        show_routing_comparison_dialog(self, comparison)
         lines = ["--- Routing candidate comparison ---", comparison.get("summary", "")]
         for row in comparison.get("rows") or []:
             lines.append(

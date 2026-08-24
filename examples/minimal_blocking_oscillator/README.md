@@ -7,7 +7,7 @@ Small bundled KiCad project for smoke tests and AERF validation without a full B
 - `Q1` — NPN switching transistor (`Device:Q_NPN_BCE`)
 - `T1` — custom trifilar coil symbol (`Device:T_Custom`)
 - `R1` — base bias resistor with custom field `Vds_max`
-- Net labels: `COIL_PLUS`, `TRIGGER`, `FEEDBACK`
+- Net labels: `COIL_PLUS`, `Coil_Plus`, `TRIGGER`, `FEEDBACK`, `HV_Flyback`, `PICO_GPIO15`
 
 The classifier should recognize this as **blocking_oscillator** (Q + T symbols + coil/trigger net keywords).
 

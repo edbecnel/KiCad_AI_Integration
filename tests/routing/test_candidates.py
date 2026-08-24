@@ -48,3 +48,5 @@ def test_append_and_compare_routing_candidates(blocking_oscillator_pro: Path) ->
     comparison = compare_routing_candidates(loaded)
     assert comparison["count"] == 2
     assert comparison["best_candidate_id"] == "20260824T000001Z"
+    assert comparison["columns"]
+    assert len(comparison["table"]) == 2
