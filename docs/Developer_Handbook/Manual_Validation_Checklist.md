@@ -35,64 +35,128 @@ When Phase 1 chat and Freerouting rows pass, check off the matching items in [`M
 
 ## Install Freerouting
 
-Freerouting is **not bundled** with KiCad AI Integration. You install it separately; KAI invokes it as an external autorouter ([Freerouting Integration](../Specifications/Freerouting_Integration.md)).
+Freerouting is **not bundled** with KiCad AI Integration. You install it separately; KAI invokes it as an external autorouter in headless batch mode (`-de` DSN in, `-do` SES out). See [Freerouting Integration](../Specifications/Freerouting_Integration.md).
+
+### Two different install artifacts
+
+**Important:** the macOS DMG and the standalone JAR are not the same thing. Pick the row that matches what you installed:
+
+| What you installed | What it is | Does KAI find it automatically? |
+| ------------------ | ---------- | --------------------------------- |
+| **`freerouting.app`** from the macOS **`.dmg`** in `/Applications` | GUI app bundle with its own bundled runtime | **No** — set `freerouting_cli` (Option B) |
+| **`freerouting-….jar`** from [GitHub Releases](https://github.com/freerouting/freerouting/releases) | Standalone JAR for `java -jar …` | **Only** on macOS if saved as `~/Applications/freerouting.jar`; otherwise set `freerouting_jar` (Option A) |
+
+Installing **`freerouting.app` does not create a loose `freerouting.jar` in `/Applications`**. Any JAR inside the app bundle is embedded for the GUI launcher — not the path KAI expects. For JAR-based routing, download the platform-independent `.jar` separately (Option A).
 
 ### Requirements
 
 | Requirement | Notes |
 |-------------|--------|
-| **Java 11+** | Required if using the `.jar` distribution (`java -version`) |
+| **Java 25+** (JRE or JDK) | Required for **Option A** (standalone `.jar`). Freerouting 2.2.x is built for Java 25; older Java causes `UnsupportedClassVersionError`. JDK 26 is fine. Not required for **Option B** (native CLI / `.app` bundle includes its own runtime). |
 | **KiCad 8+** with **PCB Editor open** | DSN export and SES import use `pcbnew` — not `kicad-cli` |
 | **Saved `.kicad_pcb`** | Beside your `.kicad_pro` |
+| **`routing_enabled: true`** | Routing tab stays disabled until this is set |
 
-### Option A — JAR (recommended for manual validation)
+### Choose one install path for KAI
 
-1. Download the latest release from [freerouting/freerouting releases](https://github.com/freerouting/freerouting/releases) (e.g. `freerouting-…-jar-with-dependencies.jar`).
-2. Place the file somewhere stable, e.g. `~/Applications/freerouting.jar` (macOS) or `~/bin/freerouting.jar`.
-3. Verify Java can run it:
+KAI needs **either** `freerouting_jar` **or** `freerouting_cli` in [`~/kicad_ai_config.json`](../User_Guides/09_Configuration_Reference.md) (or the matching env var). Do not leave both unset after installing only the GUI app.
 
-```bash
-java -jar /path/to/freerouting.jar -h
-```
+---
 
-You should see Freerouting help text (batch flags include `-de` for DSN input and `-do` for SES output).
+### Option A — Standalone JAR (recommended for manual validation)
 
-### Option B — Native CLI executable
+Use this when you want explicit control over Java and the exact Freerouting version.
 
-Some platforms ship a native `freerouting` executable. If you use it:
+1. **Install Java 25 or newer** (Temurin, Oracle JDK, etc.). Verify:
 
-1. Install per [upstream integrations](https://github.com/freerouting/freerouting/blob/master/docs/integrations.md).
-2. Ensure the binary is on `PATH` or note its full path for config.
+   ```bash
+   java -version
+   ```
 
-### Configure KiCad AI Integration
+   You should see version **25** or higher (e.g. 26).
 
-Edit `~/kicad_ai_config.json` (see [Configuration Reference](../User_Guides/09_Configuration_Reference.md)):
+2. **Download the platform-independent JAR** from [freerouting/freerouting releases](https://github.com/freerouting/freerouting/releases) — the file named like `freerouting-2.2.3.jar` (not the macOS `.dmg`).
 
-```json
-{
-  "routing_enabled": true,
-  "freerouting_jar": "/full/path/to/freerouting.jar"
-}
-```
+3. **Save the JAR to a stable path** (use the full path in config):
 
-Or use a native CLI instead of JAR:
+   - **macOS:** `~/Applications/freerouting.jar` — note **`~` home folder**, not `/Applications`
+   - **Linux:** `~/bin/freerouting.jar`
+   - **Windows:** `C:\Tools\freerouting.jar`
 
-```json
-{
-  "routing_enabled": true,
-  "freerouting_cli": "/full/path/to/freerouting"
-}
-```
+4. **Smoke-test** before configuring KAI:
 
-**Environment variables** (alternative to config file):
+   ```bash
+   java -jar /full/path/to/freerouting.jar -h
+   ```
 
-```bash
-export FREEROUTING_JAR=/path/to/freerouting.jar
-# or
-export FREEROUTING_CLI=/path/to/freerouting
-```
+   **Pass:** Freerouting help text; batch flags include `-de` (DSN input) and `-do` (SES output).
 
-### Verify detection (does not run KiCad)
+5. **Configure KAI** — edit `~/kicad_ai_config.json`:
+
+   ```json
+   {
+     "routing_enabled": true,
+     "freerouting_jar": "/Users/YOUR_USERNAME/Applications/freerouting.jar"
+   }
+   ```
+
+   Replace `YOUR_USERNAME` with your macOS login name, or use the exact path from step 3.
+
+   **Environment variable alternative:**
+
+   ```bash
+   export FREEROUTING_JAR=/Users/YOUR_USERNAME/Applications/freerouting.jar
+   ```
+
+---
+
+### Option B — Native executable (macOS `.app`, Linux zip, Windows MSI)
+
+Use this when you already installed **`freerouting.app`** from the DMG or another native installer. KAI calls the **binary inside the bundle**, not the Finder shortcut.
+
+#### macOS — `freerouting.app` in `/Applications`
+
+1. Confirm the app is installed:
+
+   ```bash
+   ls /Applications/freerouting.app/Contents/MacOS/freerouting
+   ```
+
+2. **Smoke-test** the CLI entry point (same binary KAI will invoke):
+
+   ```bash
+   /Applications/freerouting.app/Contents/MacOS/freerouting -h
+   ```
+
+   **Pass:** help text with `-de` / `-do` flags. If this fails, fix the app install before configuring KAI.
+
+3. **Configure KAI** — edit `~/kicad_ai_config.json`:
+
+   ```json
+   {
+     "routing_enabled": true,
+     "freerouting_cli": "/Applications/freerouting.app/Contents/MacOS/freerouting"
+   }
+   ```
+
+   **Environment variable alternative:**
+
+   ```bash
+   export FREEROUTING_CLI="/Applications/freerouting.app/Contents/MacOS/freerouting"
+   ```
+
+   Do **not** set `freerouting_jar` to a path inside `freerouting.app/Contents/…` unless you have verified that file exists and runs with your system Java. Prefer `freerouting_cli` for DMG installs.
+
+#### Linux / Windows
+
+1. Install per [upstream integrations](https://github.com/freerouting/freerouting/blob/master/docs/integrations.md) (e.g. unzip Linux release, or Windows MSI).
+2. Note the full path to the `freerouting` executable (or ensure it is on `PATH` as `freerouting`).
+3. Smoke-test: `freerouting -h` or `/full/path/to/freerouting -h`.
+4. Set `freerouting_cli` in `~/kicad_ai_config.json` to that full path.
+
+---
+
+### Verify KAI can see Freerouting (does not run KiCad)
 
 From the repository root:
 
@@ -100,7 +164,14 @@ From the repository root:
 python scripts/manual_e2e_checklist.py --check-env
 ```
 
-Confirm `FREEROUTING_JAR` or `FREEROUTING_CLI` is set and `java` is on PATH when using the JAR.
+Confirm **one** of the following is set:
+
+- `FREEROUTING_JAR` → full path to your standalone `.jar` (Option A), **or**
+- `FREEROUTING_CLI` → full path to the native binary (Option B)
+
+For Option A, also confirm `java -version` shows 25+ and `java` is on `PATH`.
+
+Then open KiCad → **Routing** tab (**Ctrl+7**) → status line should read **Engine: freerouting (installed)**. If it says **not installed**, the path in config/env is wrong or the smoke test in Option A/B failed.
 
 ---
 
@@ -136,8 +207,10 @@ Confirm `FREEROUTING_JAR` or `FREEROUTING_CLI` is set and `java` is on PATH when
 
 | Symptom | Check |
 |---------|--------|
-| Run autoroute disabled | `routing_enabled`, Freerouting path, saved `.kicad_pcb` |
-| Engine not installed | Config path, `manual_e2e_checklist.py --check-env`, Java for JAR |
+| Run autoroute disabled | `routing_enabled: true`, Freerouting path set, saved `.kicad_pcb` |
+| Engine not installed | Config path must be **full path** to standalone JAR (Option A) or CLI binary (Option B). Installing `freerouting.app` alone is not enough — set `freerouting_cli` to `/Applications/freerouting.app/Contents/MacOS/freerouting` |
+| Installed DMG but no JAR found | Expected — DMG does not install `freerouting.jar` in `/Applications`. Use Option B (`freerouting_cli`) or download the `.jar` separately (Option A) |
+| `UnsupportedClassVersionError` (JAR) | Freerouting 2.2+ needs **Java 25+**; run `java -version` and upgrade |
 | DSN/SES failed | Run from **inside** PCB Editor (pcbnew required) |
 | Timeout | Increase `routing_timeout_sec` in config (default 600s) |
 

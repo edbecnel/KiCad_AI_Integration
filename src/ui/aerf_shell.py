@@ -8,6 +8,7 @@ from pathlib import Path
 from context.model import ProjectContext
 from prompts import BuiltPrompt
 from providers.errors import ProviderError
+from ui.api_key_row import ApiKeyRow
 from ui.aerf_supply import (
     build_aerf_stage_prompt_bundle,
     collect_aerf_context,
@@ -55,13 +56,12 @@ class AERFShell(wx.Panel):
         self._last_sim_result = None
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        key_row = wx.BoxSizer(wx.HORIZONTAL)
-        key_row.Add(wx.StaticText(self, label="API key:"), flag=wx.RIGHT, border=6)
-        self._txt_key = wx.TextCtrl(self, style=wx.TE_PASSWORD)
-        if self._cfg.anthropic_api_key:
-            self._txt_key.SetValue(self._cfg.anthropic_api_key)
-        key_row.Add(self._txt_key, proportion=1)
-        vbox.Add(key_row, flag=wx.EXPAND | wx.ALL, border=8)
+        api_key_row = ApiKeyRow.create(
+            self,
+            initial_value=self._cfg.anthropic_api_key,
+        )
+        self._api_key_row = api_key_row
+        vbox.Add(api_key_row.sizer, flag=wx.EXPAND | wx.ALL, border=8)
 
         fam_row = wx.BoxSizer(wx.HORIZONTAL)
         fam_row.Add(wx.StaticText(self, label="Circuit family:"), flag=wx.RIGHT, border=6)
@@ -318,7 +318,7 @@ class AERFShell(wx.Panel):
         self._status.SetLabel(f"Sending stage {self._current_stage}…")
         self.Layout()
 
-        api_key = self._txt_key.GetValue().strip() or None
+        api_key = self._api_key_row.get_value().strip() or None
         threading.Thread(
             target=self._send_in_background,
             args=(built, plan.stage.stage_id, api_key),

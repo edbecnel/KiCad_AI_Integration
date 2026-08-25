@@ -18,6 +18,7 @@ from ui.chat_supply import (
     send_chat_prompt,
 )
 from inference.chat import build_followup_prompt, prepare_followup_context
+from ui.api_key_row import ApiKeyRow
 from utils.config import load_config
 
 try:
@@ -58,13 +59,12 @@ class ChatShell(wx.Panel):
             ui_parent = self._scroll
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        key_row = wx.BoxSizer(wx.HORIZONTAL)
-        key_row.Add(wx.StaticText(ui_parent, label="API key:"), flag=wx.RIGHT, border=6)
-        self._txt_key = wx.TextCtrl(ui_parent, style=wx.TE_PASSWORD)
-        if self._cfg.anthropic_api_key:
-            self._txt_key.SetValue(self._cfg.anthropic_api_key)
-        key_row.Add(self._txt_key, proportion=1)
-        vbox.Add(key_row, flag=wx.EXPAND | wx.ALL, border=8)
+        api_key_row = ApiKeyRow.create(
+            ui_parent,
+            initial_value=self._cfg.anthropic_api_key,
+        )
+        self._api_key_row = api_key_row
+        vbox.Add(api_key_row.sizer, flag=wx.EXPAND | wx.ALL, border=8)
 
         template_row = wx.BoxSizer(wx.HORIZONTAL)
         template_row.Add(wx.StaticText(ui_parent, label="Template:"), flag=wx.RIGHT, border=6)
@@ -437,7 +437,7 @@ class ChatShell(wx.Panel):
                 include=self._context_flags(),
                 template=template,
             )
-        api_key = self._txt_key.GetValue().strip() or None
+        api_key = self._api_key_row.get_value().strip() or None
         approx_mb = (len(built.text) + built.image_byte_size) / (1024 * 1024)
         if built.include_image:
             self._status.SetLabel(
