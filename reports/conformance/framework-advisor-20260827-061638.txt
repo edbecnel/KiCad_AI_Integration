@@ -1,0 +1,109 @@
+Engineering Documentation Framework Adoption Conformance Validation
+===================================================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Started: 2026-08-27 06:16:38 +0800
+
+Framework Advisor conformance analysis
+--------------------------------------
+Engineering Documentation Framework Advisor
+Ruleset: 2026-07-10-stage1
+===========================================
+
+Project root: /Users/edbecnel/Development/GitHub/KiCad_AI_Integration
+Project name: KiCad_AI_Integration
+Repository mode: EDF adopting project
+Overall compliance: 96%
+Structure score: 100%
+AI score: 100%
+Navigation score: 92%
+Governance score: 94%
+
+This report is read-only.
+No files or folders were created, modified, moved, renamed, or deleted.
+
+Missing required directories
+----------------------------
+None.
+
+Missing recommended root files
+------------------------------
+None.
+
+Missing AI handbook files
+-------------------------
+None.
+
+Missing Governance files
+------------------------
+None.
+
+Broken links
+------------
+None.
+
+Orphan documents
+----------------
+- .cursor/plans/comprehensive_user_guide.plan.md
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- reports/handover/HANDOVER-20260801.md
+
+Navigation issues
+-----------------
+None.
+
+Governance metadata and lifecycle issues
+----------------------------------------
+- docs/Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md: authoritative document cannot be Draft or Archived.
+- docs/Developer_Handbook/Manual_Validation_Checklist.md: missing or invalid Status.
+
+Overdue reviews
+---------------
+None.
+
+Markdown outside canonical locations
+------------------------------------
+- .cursor/plans/comprehensive_user_guide.plan.md
+- .cursor/Handover.md
+- .pytest_cache/README.md
+- CONTRIBUTING.md
+- examples/minimal_blocking_oscillator/README.md
+- examples/bedini_babcock/firmware/pico_gpio_stub/README.md
+- examples/bedini_babcock/README.md
+- examples/bedini_babcock/design_intent.md
+- Architecture_Inventory.md
+- HANDOVER.md
+- reports/handover/HANDOVER-20260801.md
+
+Warnings
+--------
+None.
+
+Recommendations
+---------------
+- Audit Markdown outside canonical locations.
+- Link orphan documents from the project hierarchy.
+- Correct governance metadata and lifecycle issues.
+
+
+Validation completed: 2026-08-27 06:17:11 +0800
+
+============================================================
+Conformance validation completed successfully.
+
+Report:
+reports/conformance/framework-advisor-20260827-061638.txt
+
+Compliance scores:
+- Overall: 96%
+- Structure: 100%
+- AI: 100%
+- Navigation: 92%
+- Governance: 94%
+
+Next recommended actions:
+- Audit Markdown outside canonical locations.
+- Link orphan documents from the project hierarchy.
+- Correct governance metadata and lifecycle issues.
+============================================================

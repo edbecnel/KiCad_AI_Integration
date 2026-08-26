@@ -14,7 +14,7 @@ Use the **Flyback recovery** audit in the **Audits** tab or the **Flyback recove
 Design intent and firmware stub for manual validation:
 
 - [design_intent.md](design_intent.md) — switching frequency, voltage targets, isolation requirements
-- [firmware/pico_gpio_stub/](firmware/pico_gpio_stub/) — Pico GPIO timing reference for cross-review
+- [firmware/pico_gpio_stub/](firmware/pico_gpio_stub/) — Pico GPIO timing reference for cross-review and future Level 1 DCBM validation ([ADP-014](../../docs/Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md))
 
 Labeled nets for smoke tests live in [minimal_blocking_oscillator](../minimal_blocking_oscillator/blocking_oscillator.kicad_sch) (`HV_Flyback`, `Coil_Plus`, `PICO_GPIO15`, etc.).
 

@@ -417,7 +417,9 @@ Gate checklist:
 
 ## Appendix B — Engineering Engine Provider Pattern (Watch Item)
 
-KAI is developing capability-specific abstractions (Simulation, Routing). The same pattern is likely to recur for thermal, SI, EMI/EMC, electromagnetic, mechanical, manufacturing, FPGA synthesis, firmware analysis, and other external engineering solvers.
+KAI is developing capability-specific abstractions (Simulation, Routing, firmware-aware mixed-domain simulation). The same pattern is likely to recur for thermal, SI, EMI/EMC, electromagnetic, mechanical, manufacturing, FPGA synthesis, firmware analysis, and other external engineering solvers.
+
+**Mixed-domain simulation:** [ADP-014](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) proposes DCBM and MCU emulator providers under the same watch-item pattern; not yet implemented.
 
 ```text
 KAI Engineering Intelligence
@@ -465,6 +467,7 @@ Architecture, KiCad integration, Freerouting, routing constraints, state/safety,
 
 - [Freerouting Integration](../Specifications/Freerouting_Integration.md) — first reference implementation
 - [ADP-006: Simulation Abstraction](ADP-006-Simulation-Abstraction.md)
+- [ADP-014: Firmware-Aware Mixed-Domain Simulation](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md)
 - [ADP-009: Host Integration Layer](ADP-009-Host-Integration-Layer.md)
 - [ADP-010: Engineering Inference Engine](ADP-010-Engineering-Inference-Engine.md)
 - [ADP-012: Learning and Canonical Knowledge](ADP-012-Learning-and-Canonical-Knowledge.md)

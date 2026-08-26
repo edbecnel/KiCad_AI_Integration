@@ -58,7 +58,8 @@ AI-assisted Electrical Engineering Reasoning Platform
 | **Artifact Library** | Content-addressed datasheets, SPICE libs, exports | [Netlist Gap Fill](../Specifications/Netlist_Gap_Fill.md) | `src/context/artifacts/` |
 | **Engineering Knowledge Libraries** | Circuit-family reference content | [Engineering Knowledge](../Engineering_Knowledge/README.md) | `docs/Engineering_Knowledge/` |
 | **Conversation Manager** | Raw multi-turn transcripts (input, not canonical knowledge) | Software Architecture Component 5 | Deferred Phase 2+ |
-| **Simulation Abstraction** | Validation hooks independent of ngspice/KiCad sim | [ADP-006](ADP-006-Simulation-Abstraction.md) | Closed loop deferred |
+| **Simulation Abstraction** | Validation hooks independent of ngspice/KiCad sim | [ADP-006](ADP-006-Simulation-Abstraction.md) | Analog closed loop implemented |
+| **Firmware-Aware Mixed-Domain Simulation** | MCU firmware → DCBM → analog stimuli | [ADP-014](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) | Proposed — DCBM / Level 1 not implemented |
 | **Routing Abstraction** | Intent-aware PCB routing via replaceable engines | [ADP-013](ADP-013-Routing-Abstraction.md) | Phase 2 POC (Freerouting reference) |
 
 ### AERF vs EIE
@@ -147,7 +148,8 @@ Physical reorganization into `src/hosts/kicad/` is deferred until a second host 
 
 KAI is developing capability-specific abstractions for externally orchestrated engineering tools. Two domains now exhibit a common pattern:
 
-- **Simulation Abstraction** ([ADP-006](ADP-006-Simulation-Abstraction.md))
+- **Simulation Abstraction** ([ADP-006](ADP-006-Simulation-Abstraction.md)) — analog closed loop
+- **Firmware-Aware Mixed-Domain Simulation** ([ADP-014](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md)) — DCBM / MCU stimuli (proposed)
 - **Routing Abstraction** ([ADP-013](ADP-013-Routing-Abstraction.md))
 
 The same pattern is likely to recur for thermal, signal integrity, EMI/EMC, manufacturing, and other specialized solvers.

@@ -104,8 +104,16 @@ Already has Sim.Device=SUBCKT hookup — may only need `.lib` file on disk.
 
 ---
 
+## Future: firmware-aware simulation (ADP-014)
+
+The Simulation tab today covers analog netlist gaps, SUBCKT generation, and spice write-back. **Firmware-aware mixed-domain simulation** — translating MCU GPIO/PWM timing into SPICE stimuli via a Digital Control Behavior Model (DCBM) — is proposed in [ADP-014: Firmware-Aware Mixed-Domain Simulation](../Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) and is **not yet implemented**. Chat firmware cross-review and simulation DCBM generation are separate paths. Reference fixture: [Bedini pico_gpio_stub](../../examples/bedini_babcock/firmware/pico_gpio_stub/).
+
+---
+
 ## Related documents
 
+- [ADP-006: Simulation Abstraction](../Architecture/ADP-006-Simulation-Abstraction.md)
+- [ADP-014: Firmware-Aware Mixed-Domain Simulation](../Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md)
 - [Custom Trifilar Coil Simulation Setup](Custom_Trifilar_Coil_Simulation_Setup.md)
 - [Workflow: Simulation Readiness](Workflows/Simulation_Readiness.md)
 

@@ -127,8 +127,22 @@ flowchart LR
 
 ---
 
+## 10. Relationship to ADP-014 (Firmware-Aware Mixed-Domain Simulation)
+
+[ADP-014](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) extends this ADP into the digital/firmware domain. It does **not** replace analog `SimulationPlan`, closed-loop refinement, or SUBCKT tooling defined here.
+
+| Layer | ADP | Status |
+|-------|-----|--------|
+| Analog hooks → plan → `SimulationResult` → stage refinement | ADP-006 (this document) | Implemented |
+| Firmware → DCBM → SPICE stimuli | ADP-014 | Proposed — not implemented |
+
+Chat firmware cross-review (`<pico_firmware>`) and simulation DCBM generation remain separate paths today ([Prompt Architecture](Prompt_Architecture.md), [ADP-014 §2](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md#2-problem-statement)).
+
+---
+
 ## Related Documents
 
+- [ADP-014: Firmware-Aware Mixed-Domain Simulation](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md)
 - [ADP-008: AI Engineering Reasoning Framework](ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [ADP-010: Engineering Inference Engine](ADP-010-Engineering-Inference-Engine.md)
 - [Platform Architecture](Platform_Architecture.md)

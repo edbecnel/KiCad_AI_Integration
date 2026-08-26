@@ -26,6 +26,7 @@ Tracked platform and product gaps deferred after Sprint 12. See [`tasks/MASTER_T
 
 | Item | Notes |
 |------|-------|
+| DCBM / Level 1 firmware→SPICE pipeline | [ADP-014](Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) — DCBM schema, timing extractor, ngspice adapter; Bedini `pico_gpio_stub` reference fixture |
 | True wxAUI dock in PCB editor | ADP-011 Phase 2 |
 | Clickable component refs in AI responses | R1 → highlight in KiCad |
 | `HostLink` beyond `KiCadLink` | ADP-009 — second host |

@@ -280,6 +280,13 @@ Full-flow checklists: [Manual Validation Checklist](../docs/Developer_Handbook/M
 - [x] Datasheet discovery prompt template — `src/prompts/templates/datasheet_discovery.py`
 - [x] Simulation gap summary in launcher — `summarize_simulation_gaps` in `launcher_dialog.py`
 
+### 1.8 Firmware-aware mixed-domain simulation (ADP-014)
+
+- [ ] DCBM schema v1 documented (`controller`, `signals`, `events`) — [ADP-014](../docs/Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md)
+- [ ] Level 1: firmware timing extractor → DCBM artifact
+- [ ] ngspice adapter: DCBM → PULSE/PWL stimuli (host-neutral)
+- [ ] Bedini [pico_gpio_stub](../examples/bedini_babcock/firmware/pico_gpio_stub/) as reference validation fixture
+
 **Phase 1 exit criteria:** Engineer opens KiCad, runs one script, asks a design question,
 reviews the context preview, approves transmission, and receives a context-aware Claude
 response without manual export/copy-paste.
@@ -406,7 +413,8 @@ not only free-form chat. **Met (Aug 2026):** Audits tab with schematic/PCB revie
 - [x] Feature Overview: KiCad host capabilities, platform scope, how-it-works, and gap summary — [Feature Overview](../docs/User_Guides/Feature_Overview.md) (authoritative scope reference)
 - [x] [Custom Trifilar Coil Simulation Setup](../docs/User_Guides/Custom_Trifilar_Coil_Simulation_Setup.md) user guide
 - [x] ADR-0010: AERP Platform Umbrella acronym — [ADR-0010](../docs/Architecture/ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md)
-- [x] ADP-006: Simulation abstraction (architecture) — [ADP-006](../docs/Architecture/ADP-006-Simulation-Abstraction.md); closed-loop implementation open
+- [x] ADP-006: Simulation abstraction (architecture) — [ADP-006](../docs/Architecture/ADP-006-Simulation-Abstraction.md); analog closed loop implemented
+- [ ] ADP-014: Firmware-aware mixed-domain simulation — [ADP-014](../docs/Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md); DCBM / Level 1 open
 - [x] ADP-007: AERF prompt integration and EKM write-back — [ADP-007](../docs/Architecture/ADP-007-AERF-Prompt-Integration.md)
 - [x] Keep README current status section updated per phase completion
 

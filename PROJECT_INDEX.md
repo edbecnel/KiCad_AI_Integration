@@ -59,6 +59,7 @@ KiCad AI Integration is the **first host integration** of the AI-assisted Electr
 - [ADR-0010: AERP Platform Umbrella Acronym](docs/Architecture/ADRs/ADR-0010-AERP-Platform-Umbrella-Acronym.md)
 - [ADP-008: AI Engineering Reasoning Framework](docs/Architecture/ADP-008-AI-Engineering-Reasoning-Framework.md)
 - [ADP-013: Routing Abstraction](docs/Architecture/ADP-013-Routing-Abstraction.md) (draft)
+- [ADP-014: Firmware-Aware Mixed-Domain Simulation](docs/Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) (proposed — DCBM / Level 1 not implemented)
 
 ### Engineering Knowledge
 

@@ -362,7 +362,7 @@ Simulation supports AERF; it does not replace it.
 2. **Validate and refine** — Simulation results from Stage 7 (or earlier `simulation_hooks`) confirm, challenge, or refine prior determinations.
 3. **Never substitute** — The AI must not defer Stage 3 (Physical Principles) or Stage 4 (Component Roles) to "run a simulation and see."
 4. **Explicit hooks** — Each stage may emit `simulation_hooks` describing what to simulate, expected outcomes, and which prior determination would be validated.
-5. **Closed loop (future)** — Per [ADP-006](ADP-006-Simulation-Abstraction.md), simulation results feed back into stage refinement; implementation is deferred.
+5. **Closed loop** — Per [ADP-006](ADP-006-Simulation-Abstraction.md), simulation results feed back into stage refinement (implemented). [ADP-014](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) adds firmware-aware mixed-domain simulation on top — DCBM and Level 1 static timing are proposed, not yet implemented.
 
 ### Relationship to existing SUBCKT workflow
 
@@ -511,6 +511,8 @@ Detailed schemas are in [`AERF_Stage_Index.md`](../Engineering_Knowledge/AERF_St
 - [AERF Stage Index](../Engineering_Knowledge/AERF_Stage_Index.md)
 - [Engineering Reasoning Methodology](../Engineering_Knowledge/Engineering_Reasoning_Methodology.md)
 - [Circuit Families](../Engineering_Knowledge/Circuit_Families/README.md)
+- [ADP-006: Simulation Abstraction](ADP-006-Simulation-Abstraction.md)
+- [ADP-014: Firmware-Aware Mixed-Domain Simulation](ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md)
 - [Master Task List](../../tasks/MASTER_TASK_LIST.md)
 
 ## Parent

@@ -92,7 +92,8 @@ These frameworks are components of **AERP** — the host-agnostic stack. See [AE
 | **ADP-001** | Engineering Knowledge Model Foundation |
 | **ADP-002** | EKM Schema and Persistence |
 | **ADP-003** | Engineering Notebook User Interface |
-| **ADP-006** | Simulation Abstraction (proposed — closed loop deferred) |
+| **ADP-006** | Simulation Abstraction (analog closed loop implemented) |
+| **ADP-014** | Firmware-Aware Mixed-Domain Simulation (proposed — DCBM / Level 1 not implemented) |
 | **ADP-007** | AERF Prompt Integration and EKM Write-Back (implemented) |
 | **ADP-008** | AI Engineering Reasoning Framework |
 | **ADP-009** | Host Integration Layer |
@@ -145,6 +146,9 @@ AERP packages **must not** import KiCad parsers, `pcbnew`, or wxPython. See [Pla
 | **DRC** | Design Rules Check — PCB layout rule violations. |
 | **SUBCKT** | SPICE subcircuit definition; AI-assisted generation is a Tier A/B/C workflow in the simulation panel. |
 | **SPICE** / **ngspice** | Circuit simulation; gap-fill and model generation targets ngspice-friendly `.lib` files. |
+| **DCBM** | **D**igital **C**ontrol **B**ehavior **M**odel — simulator-independent artifact for MCU outputs, timing, PWM, and events. See [ADP-014](../Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md). |
+| **Mixed-domain simulation** | Combined digital control (MCU firmware behavior) and analog circuit simulation. Level 1: static timing; Level 2: behavioral controller; Level 3: firmware co-simulation. |
+| **Simulation Coordinator** | Runtime component exchanging data between DCBM/controller models and analog solvers in closed-loop mixed-signal simulation (future). |
 | **Netlist** | Connectivity export; used for context collection and gap-fill analysis. |
 | **Datasheet tier A / B / C** | SUBCKT evidence tiers: datasheet-backed, context synthesis, or last-resort inference. See [Prompt Architecture](../Architecture/Prompt_Architecture.md). |
 

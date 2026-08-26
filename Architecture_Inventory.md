@@ -18,6 +18,8 @@ docs/Architecture/
 ├── ADP-002-EKM-Schema-and-Persistence.md
 ├── ADP-003-Engineering-Notebook-User-Interface.md
 ├── ADP-006-Simulation-Abstraction.md
+├── ADP-013-Routing-Abstraction.md
+├── ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md
 ├── ADP-007-AERF-Prompt-Integration.md
 ├── ADP-008-AI-Engineering-Reasoning-Framework.md
 ├── ADP-009-Host-Integration-Layer.md
@@ -336,7 +338,7 @@ Phase 1 supports optional multimodal schematic context via an external export pi
 
 **Status:** Accepted (2026-07-28)
 
-The project adopts the Engineering Knowledge Model (EKM) as the canonical representation of project engineering knowledge. EKM runtime, schema validation, Notebook UI, and AERF write-back are implemented (Tracks B–D). NL conversion (ADP-004), provenance (ADP-005), and simulation closed loop (ADP-006) remain deferred per ADP-001 Appendix A.
+The project adopts the Engineering Knowledge Model (EKM) as the canonical representation of project engineering knowledge. EKM runtime, schema validation, Notebook UI, and AERF write-back are implemented (Tracks B–D). NL conversion (ADP-004) and provenance (ADP-005) remain deferred per ADP-001 Appendix A. Analog simulation closed loop (ADP-006) is implemented; firmware-aware mixed-domain simulation (ADP-014) is proposed.
 
 ---
 
@@ -352,7 +354,7 @@ The Engineering Notebook is adopted as the primary user-facing interface to the 
 
 **Status:** Accepted (2026-07-28)
 
-The project adopts AERF as a foundational pillar alongside the EKM. Orchestration, classifier, per-stage prompts (ADP-007), Blocking Oscillator KB, and EKM write-back are implemented. Simulation closed loop (ADP-006) remains open.
+The project adopts AERF as a foundational pillar alongside the EKM. Orchestration, classifier, per-stage prompts (ADP-007), Blocking Oscillator KB, and EKM write-back are implemented. Analog simulation closed loop (ADP-006) is implemented; firmware-aware mixed-domain simulation (ADP-014) is proposed.
 
 ---
 
@@ -378,7 +380,7 @@ The project adopts a three-layer platform architecture (Platform / Frameworks / 
 
 **Status:** Accepted (v1.1, 2026-07-28), ratified by ADR-0005
 
-ADP-001 defines the Engineering Knowledge Model as canonical project engineering knowledge. Tracks B–D implemented EKM runtime, Notebook UI, AERF, and prompt/write-back integration (ADP-007). ADP-004, ADP-005, and ADP-006 closed loop remain deferred.
+ADP-001 defines the Engineering Knowledge Model as canonical project engineering knowledge. Tracks B–D implemented EKM runtime, Notebook UI, AERF, and prompt/write-back integration (ADP-007). ADP-004 and ADP-005 remain deferred. ADP-006 analog closed loop is implemented; ADP-014 firmware-aware mixed-domain simulation is proposed.
 
 ---
 
@@ -402,7 +404,7 @@ ADP-003 defines the Engineering Notebook as the primary human interface to the E
 
 **Status:** Accepted (v1.1, 2026-07-29), ratified by ADR-0007, builds on ADP-001
 
-ADP-008 defines AERF as a standardized eight-stage engineering reasoning process. Orchestration, per-stage prompts (ADP-007), classifier, Blocking Oscillator KB, and EKM write-back are implemented. Simulation closed loop remains under ADP-006.
+ADP-008 defines AERF as a standardized eight-stage engineering reasoning process. Orchestration, per-stage prompts (ADP-007), classifier, Blocking Oscillator KB, and EKM write-back are implemented. Analog simulation closed loop is implemented under ADP-006; firmware-aware mixed-domain simulation is proposed under ADP-014.
 
 ---
 
@@ -418,15 +420,23 @@ ADP-009 defines the Host Integration Layer contract: `DesignSnapshot` protocol (
 
 **Status:** Accepted (v1.0, 2026-07-29), ratified by ADR-0009, builds on ADP-008 and ADP-009
 
-ADP-010 defines EIE as the platform runtime orchestrator. Chat, simulation/SUBCKT, AERF pipeline, and EKM write-back are implemented in `src/inference/` and `src/ekm/`. Simulation closed loop remains under ADP-006.
+ADP-010 defines EIE as the platform runtime orchestrator. Chat, simulation/SUBCKT, AERF pipeline, and EKM write-back are implemented in `src/inference/` and `src/ekm/`. Analog simulation closed loop is implemented under ADP-006; firmware-aware mixed-domain simulation (ADP-014) is proposed.
 
 ---
 
 ## ADP-006: Simulation Abstraction
 
-**Status:** Proposed (v1.0, 2026-08-07), builds on ADP-008, ADP-009, ADP-010
+**Status:** Approved (v1.0, 2026-08-07), builds on ADP-008, ADP-009, ADP-010
 
-Defines host-agnostic simulation abstraction and closed-loop stage refinement. SPICE netlist export and SUBCKT pipeline are implemented; closed-loop validation/refinement is deferred.
+Defines host-agnostic simulation abstraction and closed-loop stage refinement. SPICE netlist export, SUBCKT pipeline, and analog closed loop are implemented. Extends to firmware/digital domain via ADP-014 (proposed).
+
+---
+
+## ADP-014: Firmware-Aware Mixed-Domain Simulation
+
+**Status:** Proposed (v1.0, 2026-08-27), builds on ADP-006, ADP-008, ADP-010, Platform Architecture
+
+Defines Digital Control Behavior Model (DCBM) and Level 1–3 MCU simulation maturity (static timing → behavioral controller → firmware co-simulation). DCBM artifact and firmware→stimuli pipeline not yet implemented. Reference validation fixture: `examples/bedini_babcock/firmware/pico_gpio_stub/`.
 
 ---
 
@@ -462,6 +472,7 @@ Defines unified tabbed Assistant shell replacing launcher + separate modals. Tar
 | ADP-002 (EKM Schema and Persistence) | ADR-0008 |
 | ADP-003 (Engineering Notebook UI) | ADR-0006 |
 | ADP-006 (Simulation Abstraction) | — (proposed) |
+| ADP-014 (Firmware-Aware Mixed-Domain Simulation) | — (proposed) |
 | ADP-007 (AERF Prompt Integration) | — (retrospective ADP) |
 | ADP-008 (AERF) | ADR-0007 |
 | ADP-009 (Host Integration Layer) | ADR-0009 |
@@ -479,9 +490,10 @@ ADP-002 → ADP-003, ADP-004, ADP-005, ADP-006, ADP-007
 ADP-003 → ADP-004
 ADP-005 → ADP-007
 ADP-008 → ADP-007, ADP-006
+ADP-006 → ADP-014
 ```
 
-ADP-003 depends on ADP-001 and ADP-002 (ratified). ADP-008 builds on ADP-001; ADP-007 documents prompt integration (implemented). ADP-006 covers simulation closed loop (deferred).
+ADP-003 depends on ADP-001 and ADP-002 (ratified). ADP-008 builds on ADP-001; ADP-007 documents prompt integration (implemented). ADP-006 covers analog simulation closed loop (implemented). ADP-014 extends ADP-006 into firmware-aware mixed-domain simulation (proposed).
 
 ## Software Architecture as component hub
 
@@ -614,7 +626,7 @@ The following architecture topics are documented under `docs/Architecture/`:
 - Domain independence and extensibility
 - JSON persistence under `kicad_ai/` with `schema_version`
 - Relationship to `ProjectContext` and Conversation Manager
-- Deferred topics: provenance (ADP-004), NL conversion (ADP-005), simulation closed loop (ADP-006); prompt integration (ADP-007) implemented
+- Deferred topics: provenance (ADP-004), NL conversion (ADP-005), firmware-aware mixed-domain simulation (ADP-014); prompt integration (ADP-007) and analog simulation closed loop (ADP-006) implemented
 
 ## Engineering Notebook UI
 
@@ -670,11 +682,11 @@ The `docs/Architecture/` directory contains **24 Markdown files** organized into
 
 - **Index documents (2):** `README.md` files at the Architecture root and in `ADRs/` serve as navigation hubs.
 - **Top-level architecture (6):** Platform Architecture is Canonical; Software Architecture (KiCad host) and Roadmap are Draft; Prompt Architecture and AI Provider Interface document implemented Phase 1 behavior.
-- **ADPs (9):** ADP-001 through ADP-003, ADP-008 through ADP-011 are Accepted or Proposed; ADP-006 (simulation abstraction) and ADP-007 (prompt integration) added 2026-08-07.
+- **ADPs (11+):** ADP-001 through ADP-003, ADP-006 through ADP-011, ADP-013, ADP-014 are Accepted or Proposed; ADP-014 (firmware-aware mixed-domain simulation) added 2026-08-27.
 - **ADRs (10):** All Accepted. ADR-0001 through ADR-0004 establish Phase 1 foundation. ADR-0005 through ADR-0008 ratify EKM, Notebook, AERF, and EKM schema. ADR-0009 ratifies platform architecture foundation. ADR-0010 ratifies AERP umbrella acronym.
 
 **Architectural themes documented:** In-KiCad AI assistant with phased delivery; context collection from KiCad projects; structured prompt construction with optional multimodal schematic images; provider abstraction starting with Claude; persistent engineering knowledge via EKM and Engineering Notebook UI; staged circuit analysis via AERF with circuit-family knowledge overlays; explicit security and user-approval boundaries for cloud transmission.
 
 **Cross-referencing:** Documents are heavily interlinked. `README.md` is the central hub. ADPs and ADRs form ratification pairs. ADP-001 Appendix A documents a dependency graph for future ADPs. Multiple documents reference external domains (`docs/AI/`, `docs/Engineering_Knowledge/`, `docs/Database/`, `docs/Specifications/`, `tasks/MASTER_TASK_LIST.md`, and source code paths).
 
-**Implementation state as documented:** Phase 1 components and Tracks B–D (EKM runtime, Notebook UI, AERF orchestration, EIE, ADP-007 write-back) are implemented. Simulation closed loop (ADP-006), unified Assistant shell (ADP-011), and Conversation Manager remain open.
+**Implementation state as documented:** Phase 1 components and Tracks B–D (EKM runtime, Notebook UI, AERF orchestration, EIE, ADP-007 write-back, ADP-006 analog closed loop) are implemented. Firmware-aware mixed-domain simulation (ADP-014), unified Assistant shell completion (ADP-011), and Conversation Manager remain open.
