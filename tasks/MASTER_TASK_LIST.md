@@ -282,9 +282,15 @@ Full-flow checklists: [Manual Validation Checklist](../docs/Developer_Handbook/M
 
 ### 1.8 Firmware-aware mixed-domain simulation (ADP-014)
 
-- [ ] DCBM schema v1 documented (`controller`, `signals`, `events`) — [ADP-014](../docs/Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md)
-- [ ] Level 1: firmware timing extractor → DCBM artifact
-- [ ] ngspice adapter: DCBM → PULSE/PWL stimuli (host-neutral)
+- [ ] DCBM schema v1 with `dcbm_version`, provenance, and confidence fields — [ADP-014](../docs/Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md) §8
+- [ ] Electrical-relevance / simulation-scope slicing in EIE — ADP-014 §9
+- [ ] DCBM validation stage (detection-only; no silent auto-correction) — ADP-014 §10
+- [ ] Static-analysis classifications (`deterministic_static` … `unresolved`) surfaced to user — ADP-014 §11
+- [ ] DCBM producer vs consumer provider interfaces — ADP-014 §16
+- [ ] Level 1: firmware timing extractor → DCBM candidate → validation → artifact
+- [ ] ngspice adapter (DCBM consumer): validated DCBM → PULSE/PWL stimuli (host-neutral)
+- [ ] Manual DCBM authoring path supported
+- [ ] Measured-trace → DCBM import path (future) — logic analyzer / oscilloscope CSV
 - [ ] Bedini [pico_gpio_stub](../examples/bedini_babcock/firmware/pico_gpio_stub/) as reference validation fixture
 
 **Phase 1 exit criteria:** Engineer opens KiCad, runs one script, asks a design question,

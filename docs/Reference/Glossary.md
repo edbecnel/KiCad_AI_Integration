@@ -146,7 +146,10 @@ AERP packages **must not** import KiCad parsers, `pcbnew`, or wxPython. See [Pla
 | **DRC** | Design Rules Check — PCB layout rule violations. |
 | **SUBCKT** | SPICE subcircuit definition; AI-assisted generation is a Tier A/B/C workflow in the simulation panel. |
 | **SPICE** / **ngspice** | Circuit simulation; gap-fill and model generation targets ngspice-friendly `.lib` files. |
-| **DCBM** | **D**igital **C**ontrol **B**ehavior **M**odel — simulator-independent artifact for MCU outputs, timing, PWM, and events. See [ADP-014](../Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md). |
+| **DCBM** | **D**igital **C**ontrol **B**ehavior **M**odel — simulator-independent engineering contract for electrically relevant discrete/digital control behavior (firmware, measured traces, manual spec, etc.). Includes provenance, confidence, and validation metadata. See [ADP-014](../Architecture/ADP-014-Firmware-Aware-Mixed-Domain-Simulation.md). |
+| **DCBM producer** | Engineering Engine Provider role that **creates** DCBM from firmware analysis, trace import, manual authoring, HIL capture, etc. |
+| **DCBM consumer** | Simulation adapter or engine provider that **consumes** validated DCBM and produces simulator-specific stimuli or runs mixed-domain simulation. |
+| **Simulation-scope slice** | Subset of firmware/control behavior included in a DCBM based on simulation objective and electrical relevance analysis (EIE responsibility). |
 | **Mixed-domain simulation** | Combined digital control (MCU firmware behavior) and analog circuit simulation. Level 1: static timing; Level 2: behavioral controller; Level 3: firmware co-simulation. |
 | **Simulation Coordinator** | Runtime component exchanging data between DCBM/controller models and analog solvers in closed-loop mixed-signal simulation (future). |
 | **Netlist** | Connectivity export; used for context collection and gap-fill analysis. |

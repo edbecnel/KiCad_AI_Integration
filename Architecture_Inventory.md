@@ -434,9 +434,9 @@ Defines host-agnostic simulation abstraction and closed-loop stage refinement. S
 
 ## ADP-014: Firmware-Aware Mixed-Domain Simulation
 
-**Status:** Proposed (v1.0, 2026-08-27), builds on ADP-006, ADP-008, ADP-010, Platform Architecture
+**Status:** Draft (v1.1, 2026-08-27), builds on ADP-006, ADP-008, ADP-010, Platform Architecture
 
-Defines Digital Control Behavior Model (DCBM) and Level 1–3 MCU simulation maturity (static timing → behavioral controller → firmware co-simulation). DCBM artifact and firmware→stimuli pipeline not yet implemented. Reference validation fixture: `examples/bedini_babcock/firmware/pico_gpio_stub/`.
+Defines DCBM as a provenance-aware, validated, simulator-independent engineering contract between control-behavior producers and simulation consumers. Covers electrical-relevance slicing, DCBM validation (detection ≠ correction), producer/consumer provider separation, static-analysis limitations, and Level 1–3 simulation maturity. DCBM pipeline not yet implemented. Reference validation fixture: `examples/bedini_babcock/firmware/pico_gpio_stub/`.
 
 ---
 
