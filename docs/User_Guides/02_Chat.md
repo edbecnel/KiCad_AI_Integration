@@ -43,7 +43,7 @@ Engineers who want schematic-aware AI help without running the full eight-stage 
 | **Approve & Send** | Confirm and transmit to provider |
 | **New conversation** | Clear session history for this project |
 | **Conversation** | Read-only log of turns |
-| **Expand…** | Open the conversation in a larger resizable **markdown** viewer (stays in sync as you chat); **Save as markdown…** exports a `.md` file |
+| **Expand…** | Open the conversation in a larger resizable viewer (**Rendered markdown** or **Raw text**); **Save as markdown…** exports a `.md` file |
 | **Copy** | Copy the full conversation log to the clipboard |
 | **Clear** | Clear the conversation log and reset chat history (keeps **Your question**) |
 | Status line | Hints and send state |

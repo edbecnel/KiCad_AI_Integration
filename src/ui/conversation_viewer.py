@@ -53,12 +53,29 @@ class ConversationViewerFrame(wx.Frame if wx else object):  # type: ignore[misc]
         intro = wx.StaticText(
             self,
             label=(
-                "Conversation shown as rendered markdown. "
+                "Review the conversation in rendered markdown or raw text. "
                 "Use Refresh after new replies, or leave this open while you chat."
             ),
         )
         intro.Wrap(880)
         root.Add(intro, flag=wx.EXPAND | wx.ALL, border=8)
+
+        view_row = wx.BoxSizer(wx.HORIZONTAL)
+        view_row.Add(
+            wx.StaticText(self, label="View:"),
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
+            border=8,
+        )
+        self._view_mode = wx.RadioBox(
+            self,
+            label="",
+            choices=["Rendered markdown", "Raw text"],
+            majorDimension=2,
+            style=wx.RA_SPECIFY_COLS,
+        )
+        self._view_mode.SetSelection(0)
+        view_row.Add(self._view_mode, flag=wx.EXPAND)
+        root.Add(view_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         self._html = wx.html.HtmlWindow(self)
         self._text = wx.TextCtrl(
@@ -88,6 +105,7 @@ class ConversationViewerFrame(wx.Frame if wx else object):  # type: ignore[misc]
         self._btn_save_md.Bind(wx.EVT_BUTTON, self._on_save_markdown_clicked)
         self._btn_close.Bind(wx.EVT_BUTTON, lambda _e: self.Close())
         self._html.Bind(wx.html.EVT_HTML_LINK_CLICKED, self._on_html_link)
+        self._view_mode.Bind(wx.EVT_RADIOBOX, self._on_view_mode_changed)
         self.Bind(wx.EVT_CLOSE, self._on_close)
 
         self._refresh_callback: Callable[[], str] | None = None
@@ -110,7 +128,13 @@ class ConversationViewerFrame(wx.Frame if wx else object):  # type: ignore[misc]
 
     def set_content(self, text: str) -> None:
         self._plain_log = text
-        self._render_markdown_view()
+        self._update_view()
+
+    def _is_raw_text_view(self) -> bool:
+        return self._view_mode.GetSelection() == 1
+
+    def _on_view_mode_changed(self, _event: wx.CommandEvent) -> None:
+        self._update_view()
 
     def _markdown_for_view(self) -> str:
         if self._markdown_callback is not None:
@@ -125,7 +149,21 @@ class ConversationViewerFrame(wx.Frame if wx else object):  # type: ignore[misc]
             return conversation_log_to_markdown(plain) or plain
         return ""
 
-    def _render_markdown_view(self) -> None:
+    def _raw_text_for_view(self) -> str:
+        plain = self._plain_log.strip()
+        if plain:
+            return self._plain_log
+        return "(No messages yet — send a question to start the conversation.)"
+
+    def _update_view(self) -> None:
+        if self._is_raw_text_view():
+            self._html.Hide()
+            self._text.Show()
+            self._text.SetValue(self._raw_text_for_view())
+            self._text.ShowPosition(0)
+            self.Layout()
+            return
+
         markdown = self._markdown_for_view()
         if not markdown:
             markdown = "_No messages yet — send a question to start the conversation._"
@@ -135,7 +173,7 @@ class ConversationViewerFrame(wx.Frame if wx else object):  # type: ignore[misc]
         if not self._html.SetPage(html_document):
             self._html.Hide()
             self._text.Show()
-            self._text.SetValue(self._plain_log)
+            self._text.SetValue(self._raw_text_for_view())
             self._text.ShowPosition(0)
         self.Layout()
 
@@ -150,7 +188,10 @@ class ConversationViewerFrame(wx.Frame if wx else object):  # type: ignore[misc]
             )
 
     def _on_copy_clicked(self, _event: wx.CommandEvent) -> None:
-        text = self._markdown_for_view() or self._plain_log
+        if self._is_raw_text_view():
+            text = self._raw_text_for_view()
+        else:
+            text = self._markdown_for_view() or self._plain_log
         if not text.strip():
             wx.MessageBox("Conversation is empty.", "Copy", wx.OK | wx.ICON_INFORMATION)
             return
