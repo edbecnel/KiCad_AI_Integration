@@ -60,6 +60,34 @@ _STANDARD_DIODE_VALUES = re.compile(
     re.I,
 )
 
+# Schematic values like 6V, 12 VDC — supply labels, not orderable part numbers.
+_VOLTAGE_VALUE = re.compile(r"^\d+(\.\d+)?\s*V(A|DC|AC|CC|PP|RMS)?$", re.I)
+
+
+def _is_battery_symbol(symbol: SymbolInstance) -> bool:
+    lib_id = (symbol.lib_id or "").lower()
+    ref = symbol.reference.strip().upper()
+    if lib_id.startswith("device:battery") or ":battery" in lib_id:
+        return True
+    if ref.startswith("BT") and _VOLTAGE_VALUE.match((symbol.value or "").strip()):
+        return True
+    return False
+
+
+def _is_custom_magnetic_symbol(symbol: SymbolInstance) -> bool:
+    """Hand-wound coils / custom transformers — modeled via .lib, not manufacturer PDFs."""
+    lib_id = (symbol.lib_id or "").lower()
+    ref = symbol.reference.strip().upper()
+    if "custom_inductors" in lib_id or "bedini_coil" in lib_id:
+        return True
+    if ref.startswith("T") and any(
+        hint in lib_id for hint in ("coil", "transformer", "inductors:")
+    ):
+        return True
+    if "transformer" in lib_id and not lib_id.startswith("device:l"):
+        return True
+    return False
+
 
 def classify_datasheet_requirement(symbol: SymbolInstance) -> DatasheetRequirement:
     """Classify whether a symbol typically needs a user-supplied datasheet PDF."""
@@ -75,6 +103,12 @@ def classify_datasheet_requirement(symbol: SymbolInstance) -> DatasheetRequireme
         return "not_applicable"
 
     if lib_id.startswith("power:"):
+        return "not_applicable"
+
+    if _is_battery_symbol(symbol):
+        return "not_applicable"
+
+    if _is_custom_magnetic_symbol(symbol):
         return "not_applicable"
 
     if lib_id.startswith(_PASSIVE_LIB_PREFIXES):

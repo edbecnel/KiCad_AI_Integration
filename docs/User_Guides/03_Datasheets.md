@@ -8,6 +8,8 @@
 
 The **Datasheets** tab manages PDF datasheets for parts that need them for SUBCKT generation and detailed AI analysis. PDFs live in a **shared library** (`~/kicad_ai_library/` by default) and are linked to schematic symbol **Value** fields.
 
+**Not required:** supply symbols (e.g. **Device:Battery** with Value `6V`) and custom magnetics (e.g. hand-wound coils) — those use simulation sources or project `.lib` models, not manufacturer PDFs.
+
 **Rationale:** AI analysis of custom parts (transformers, complex ICs) requires datasheet text. This tab is separate from Chat — attach and resolve PDFs here first.
 
 ## Who this is for

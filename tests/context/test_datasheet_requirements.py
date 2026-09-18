@@ -40,6 +40,33 @@ def test_fet_required() -> None:
     assert needs_user_pdf("fetch_failed", "required")
 
 
+def test_battery_voltage_not_applicable() -> None:
+    sym = SymbolInstance(
+        reference="PrimaryBT1",
+        value="6V",
+        lib_id="Device:Battery",
+        footprint="Battery:Keystone_103_1",
+        sheet_path="p.kicad_sch",
+    )
+    assert classify_datasheet_requirement(sym) == "not_applicable"
+    assert not needs_user_pdf("missing", "not_applicable")
+
+
+def test_custom_coil_not_applicable() -> None:
+    sym = SymbolInstance(
+        reference="T1",
+        value="Multi-Strand SSG",
+        lib_id="Custom_Inductors:Bedini_Coil_1",
+        footprint="Custom:Bedini_Coil",
+        spice_model="BEDINI_TRIFILAR",
+        spice_lib="/tmp/Multi-Strand_SSG.lib",
+        sim_device="SUBCKT",
+        sheet_path="p.kicad_sch",
+        custom_fields={"Coil_Turns": "450"},
+    )
+    assert classify_datasheet_requirement(sym) == "not_applicable"
+
+
 def test_optocoupler_required() -> None:
     sym = SymbolInstance(
         reference="U2",
