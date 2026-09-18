@@ -28,6 +28,10 @@ For CI and local smoke tests without a full Bedini SSG schematic, use:
 
 Live AERF stages 0–7 sign-off uses captured fixtures in `tests/fixtures/bedini_aerf_live/` and the [AERF Validation Rubric](../../docs/User_Guides/AERF_Validation_Rubric.md). Run against your own Bedini project when available.
 
+## Sample Chat export
+
+[Bedini_SSG_Radiant_Oscillator_conversation.md](Bedini_SSG_Radiant_Oscillator_conversation.md) — example markdown saved from **Chat → Expand… → Save as markdown…** (flyback recovery audit on the Bedini SSG schematic). Use it to see headings, tables, and token metadata in the export format.
+
 ## Sample questions
 
 - Summarize the active silicon parts and their datasheet coverage.
