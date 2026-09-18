@@ -15,6 +15,7 @@ from providers.errors import (
 )
 from providers.types import ProviderResponse, TokenUsage
 from utils.config import AppConfig, load_config
+from utils.ssl_context import urlopen_https
 
 HttpOpener = Callable[[urllib.request.Request, float], Any]
 
@@ -29,7 +30,7 @@ class OllamaProvider:
         opener: HttpOpener | None = None,
     ) -> None:
         self._config = config or load_config()
-        self._opener = opener or urllib.request.urlopen
+        self._opener = opener or urlopen_https
 
     def send_message(
         self,

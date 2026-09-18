@@ -15,11 +15,25 @@ from pathlib import Path
 from typing import Callable
 from urllib.parse import urljoin, urlparse
 
+from utils.ssl_context import default_ssl_context
+
 DEFAULT_MAX_BYTES = 25 * 1024 * 1024
 DEFAULT_CONNECT_TIMEOUT_SEC = 10
 DEFAULT_READ_TIMEOUT_SEC = 60
 DEFAULT_DNS_TIMEOUT_SEC = 5
 MAX_REDIRECTS = 10
+
+def is_recoverable_ssl_fetch_error(message: str | None) -> bool:
+    """True when a prior fetch failed due to TLS trust (often fixed after certifi install)."""
+    if not message:
+        return False
+    upper = message.upper()
+    return (
+        "CERTIFICATE_VERIFY_FAILED" in upper
+        or "UNABLE TO GET LOCAL ISSUER CERTIFICATE" in upper
+        or ("SSL" in upper and "CERTIFICATE" in upper)
+    )
+
 
 DEFAULT_FETCH_HEADERS = {
     "User-Agent": (
@@ -103,7 +117,7 @@ class _TimeoutHTTPSHandler(urllib.request.HTTPSHandler):
         *,
         context: ssl.SSLContext | None = None,
     ) -> None:
-        super().__init__(context=context or ssl.create_default_context())
+        super().__init__(context=context or default_ssl_context())
         self._connect_timeout = connect_timeout
         self._read_timeout = read_timeout
 
@@ -306,7 +320,7 @@ def _https_fetch_bytes(
     read_timeout: float,
 ) -> tuple[bytes, str]:
     current = url
-    context = ssl.create_default_context()
+    context = default_ssl_context()
 
     for _ in range(MAX_REDIRECTS):
         validate_url(current)

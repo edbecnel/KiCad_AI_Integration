@@ -58,6 +58,13 @@ class AssistantTabPanel(wx.Panel):
         """Return False to veto shell close when this tab has unsaved edits."""
         return True
 
+    def export_session_state(self) -> dict[str, object]:
+        """Return tab-specific UI state for session save (no secrets)."""
+        return {}
+
+    def import_session_state(self, data: dict[str, object]) -> None:
+        """Restore tab-specific UI state from a saved session."""
+
     def _hide_placeholder(self) -> None:
         """Drop the idle-state label from layout so it cannot paint over the shell."""
         sizer = self.GetSizer()

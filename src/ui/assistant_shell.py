@@ -21,6 +21,7 @@ from ui.kicad_host import prepare_kicad_ui_launch
 from ui.project_path import normalize_launcher_project_path
 from ui.notebook_tab import NotebookTab
 from ui.simulation_tab import SimulationTab
+from ui.assistant_session import load_session, save_session, session_path_for_project
 from ui.shell_preferences import get_last_tab, set_last_tab
 from ui.settings_dialog import show_settings_dialog
 from utils.config import load_config
@@ -48,6 +49,7 @@ class AssistantShell(wx.Panel):
         self._controller.bind_listener(self._on_context_refreshed)
         self._tabs: dict[str, AssistantTabPanel] = {}
         self._notebook_tab: NotebookTab | None = None
+        self._session_restored_for_path: Path | None = None
         self._tab_labels: dict[str, str] = {
             "chat": "Chat",
             "datasheets": "Datasheets",
@@ -86,10 +88,14 @@ class AssistantShell(wx.Panel):
         self._btn_browse = wx.Button(self, label="Browse…")
         self._btn_refresh = wx.Button(self, label="Refresh context")
         self._btn_settings = wx.Button(self, label="Settings…")
+        self._btn_save_session = wx.Button(self, label="Save session")
+        self._btn_load_session = wx.Button(self, label="Load session")
         self._btn_help = wx.Button(self, label="Help")
         header_btn_row.Add(self._btn_browse, flag=wx.RIGHT, border=4)
         header_btn_row.Add(self._btn_refresh, flag=wx.RIGHT, border=4)
         header_btn_row.Add(self._btn_settings, flag=wx.RIGHT, border=4)
+        header_btn_row.Add(self._btn_save_session, flag=wx.RIGHT, border=4)
+        header_btn_row.Add(self._btn_load_session, flag=wx.RIGHT, border=4)
         header_btn_row.Add(self._btn_help)
         header_btn_row.AddStretchSpacer()
         vbox.Add(header_btn_row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=8)
@@ -135,6 +141,8 @@ class AssistantShell(wx.Panel):
         self._btn_browse.Bind(wx.EVT_BUTTON, self._on_browse)
         self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_settings.Bind(wx.EVT_BUTTON, self._on_settings)
+        self._btn_save_session.Bind(wx.EVT_BUTTON, self._on_save_session)
+        self._btn_load_session.Bind(wx.EVT_BUTTON, self._on_load_session)
         self._btn_help.Bind(wx.EVT_BUTTON, self._on_help)
         self._notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self._on_tab_changed)
         self.Bind(wx.EVT_CHAR_HOOK, self._on_char_hook)
@@ -156,6 +164,7 @@ class AssistantShell(wx.Panel):
         for tab in self._tabs.values():
             if not tab.confirm_discard():
                 return False
+        self._save_session_quiet()
         return True
 
     def focus_tab(self, tab_id: str) -> None:
@@ -182,6 +191,83 @@ class AssistantShell(wx.Panel):
             self._controller._config = saved
             self._status.SetLabel(f"Settings saved — provider: {saved.ai_provider}")
 
+    def _on_save_session(self, _event: wx.CommandEvent) -> None:
+        try:
+            pro = normalize_launcher_project_path(self._txt_path.GetValue())
+        except (ValueError, FileNotFoundError, OSError) as exc:
+            wx.MessageBox(str(exc), "Save session", wx.OK | wx.ICON_WARNING)
+            return
+        payload = self._collect_session_payload()
+        try:
+            path = save_session(pro, payload)
+        except OSError as exc:
+            wx.MessageBox(str(exc), "Save session", wx.OK | wx.ICON_ERROR)
+            return
+        self._status.SetLabel(f"Session saved — {path.relative_to(pro.parent)}")
+
+    def _on_load_session(self, _event: wx.CommandEvent) -> None:
+        try:
+            pro = normalize_launcher_project_path(self._txt_path.GetValue())
+        except (ValueError, FileNotFoundError, OSError) as exc:
+            wx.MessageBox(str(exc), "Load session", wx.OK | wx.ICON_WARNING)
+            return
+        data = load_session(pro)
+        if data is None:
+            path = session_path_for_project(pro)
+            wx.MessageBox(
+                f"No saved session at:\n{path}\n\nUse Save session after configuring tabs.",
+                "Load session",
+                wx.OK | wx.ICON_INFORMATION,
+            )
+            return
+        self._apply_session_payload(data)
+        self._session_restored_for_path = pro.expanduser().resolve()
+        self._status.SetLabel("Session loaded from project kicad_ai/assistant_session.json")
+
+    def _collect_session_payload(self) -> dict[str, object]:
+        idx = self._notebook.GetSelection()
+        active_tab = (
+            ASSISTANT_TAB_IDS[idx] if 0 <= idx < len(ASSISTANT_TAB_IDS) else "chat"
+        )
+        tabs: dict[str, object] = {}
+        for tab_id, tab in self._tabs.items():
+            exported = tab.export_session_state()
+            if exported:
+                tabs[tab_id] = exported
+        return {"active_tab": active_tab, "tabs": tabs}
+
+    def _apply_session_payload(self, data: dict[str, object]) -> None:
+        tabs = data.get("tabs")
+        if isinstance(tabs, dict):
+            for tab_id, tab in self._tabs.items():
+                block = tabs.get(tab_id)
+                if isinstance(block, dict):
+                    tab.import_session_state(block)
+        active = data.get("active_tab")
+        if isinstance(active, str) and active in ASSISTANT_TAB_IDS:
+            self.focus_tab(active)
+
+    def _save_session_quiet(self) -> None:
+        try:
+            pro = normalize_launcher_project_path(self._txt_path.GetValue())
+        except (ValueError, FileNotFoundError, OSError):
+            return
+        try:
+            save_session(pro, self._collect_session_payload())
+        except OSError:
+            return
+
+    def _maybe_auto_load_session(self, pro: Path) -> None:
+        resolved = pro.expanduser().resolve()
+        if self._session_restored_for_path == resolved:
+            return
+        data = load_session(pro)
+        if data is None:
+            self._session_restored_for_path = resolved
+            return
+        self._apply_session_payload(data)
+        self._session_restored_for_path = resolved
+
     def _on_help(self, _event: wx.CommandEvent) -> None:
         from ui.help_dialog import show_user_guide
 
@@ -207,6 +293,7 @@ class AssistantShell(wx.Panel):
         self._summary.SetValue(self._controller.summary_text)
         self._status.SetLabel(f"Context ready — {pro.name}")
         self._update_tab_badges(self._controller.context)
+        self._maybe_auto_load_session(pro)
 
     def _update_tab_badges(self, ctx) -> None:
         if ctx is None:

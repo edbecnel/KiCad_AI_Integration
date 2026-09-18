@@ -109,6 +109,30 @@ report_status() {
   fi
 }
 
+discover_kicad_python() {
+  local app="/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/3.9/bin/python3"
+  if [[ -x "$app" ]]; then
+    echo "$app"
+    return
+  fi
+  echo ""
+}
+
+install_kicad_ssl_deps() {
+  local py
+  py="$(discover_kicad_python)"
+  if [[ -z "$py" ]]; then
+    echo "KiCad embedded Python not found; skip certifi install (Terminal python3 may still work)."
+    return 0
+  fi
+  echo "Installing certifi for KiCad Python: $py"
+  if ! "$py" -m pip install --user certifi; then
+    echo "WARN: could not install certifi into KiCad Python (HTTPS may fail until fixed)." >&2
+    return 0
+  fi
+  "$py" -c "import certifi; print('certifi:', certifi.where())"
+}
+
 verify_link() {
   if [[ ! -L "$LINK_PATH" ]]; then
     echo "FAIL: symlink missing at $LINK_PATH" >&2
@@ -144,6 +168,8 @@ fi
 
 echo
 verify_link
+echo
+install_kicad_ssl_deps
 echo
 echo "Next steps:"
 echo "  1. Restart KiCad PCB Editor (required to reload Python after code changes)."

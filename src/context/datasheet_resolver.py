@@ -14,7 +14,7 @@ from context.artifacts.manifest import Manifest
 from context.artifacts.store import ArtifactStore, ProjectContextInfo
 from context.schematic_parse import SymbolInstance
 from utils.config import AppConfig
-from utils.url_fetch import UrlFetchError, fetch_url_to_file
+from utils.url_fetch import UrlFetchError, fetch_url_to_file, is_recoverable_ssl_fetch_error
 
 ResolutionStatus = Literal["resolved", "missing", "fetch_failed"]
 TierHint = Literal["A", "B", "C"]
@@ -444,6 +444,12 @@ class DatasheetResolver:
             retry_failed = (
                 self._session is not None and self._session.retry_failed_urls
             ) or force
+            retry_ssl = (
+                url_log is not None
+                and url_log.status == "failed"
+                and is_recoverable_ssl_fetch_error(url_log.error)
+            )
+            allow_url_retry = retry_failed or retry_ssl
             if policy == "never":
                 resolution.sources_tried.append("https_fetch_disabled")
                 if cached_id is not None:
@@ -454,7 +460,7 @@ class DatasheetResolver:
                 resolution.url_fetch_outcome = "downloaded"
                 return self._resolved(resolution, cached_id, cached_path, symbol)
             elif (
-                not retry_failed
+                not allow_url_retry
                 and norm_url in self._known_failed_urls()
             ):
                 resolution.sources_tried.append("url_fetch_log:failed")

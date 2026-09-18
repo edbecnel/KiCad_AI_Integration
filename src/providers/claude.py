@@ -18,6 +18,7 @@ from providers.errors import (
 )
 from providers.types import ProviderResponse, TokenUsage
 from utils.config import AppConfig, load_config
+from utils.ssl_context import urlopen_https
 
 ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -35,7 +36,7 @@ class ClaudeProvider:
         opener: HttpOpener | None = None,
     ) -> None:
         self._config = config or load_config()
-        self._opener = opener or urllib.request.urlopen
+        self._opener = opener or urlopen_https
 
     def send_message(
         self,

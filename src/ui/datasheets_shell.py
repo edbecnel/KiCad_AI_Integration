@@ -636,6 +636,20 @@ class DatasheetsShell(wx.Panel):
             return self._rows_all
         return self._rows_field
 
+    def export_ui_state(self) -> dict[str, object]:
+        return {
+            "ai_discovery": self._chk_ai.GetValue(),
+            "write_symbol_url": self._chk_write_url.GetValue(),
+            "notebook_page": self._notebook.GetSelection(),
+        }
+
+    def apply_ui_state(self, data: dict[str, object]) -> None:
+        self._chk_ai.SetValue(bool(data.get("ai_discovery", False)))
+        self._chk_write_url.SetValue(bool(data.get("write_symbol_url", False)))
+        page = data.get("notebook_page")
+        if isinstance(page, int) and 0 <= page < self._notebook.GetPageCount():
+            self._notebook.SetSelection(page)
+
     def confirm_close(self) -> bool:
         if not self._busy:
             return True

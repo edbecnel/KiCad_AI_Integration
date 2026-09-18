@@ -26,6 +26,30 @@ try:
 except ImportError:  # pragma: no cover
     wx = None  # type: ignore[assignment]
 
+CHAT_TEMPLATE_IDS = (
+    "general_review",
+    "pcb_layout_audit",
+    "isolation_clearance_audit",
+    "netlist_crosscheck",
+    "netlist_gap_fill",
+    "power_integrity_audit",
+    "signal_integrity_audit",
+    "emi_emc_audit",
+    "flyback_recovery_audit",
+)
+
+CHAT_TEMPLATE_LABELS = (
+    "General review",
+    "PCB layout audit",
+    "Isolation / clearance",
+    "Netlist crosscheck",
+    "Netlist gap-fill",
+    "Power integrity",
+    "Signal integrity",
+    "EMI / EMC",
+    "Flyback recovery",
+)
+
 
 class ChatShell(wx.Panel):
     """Embeddable chat panel: preview context, approve, then send to Claude."""
@@ -68,20 +92,7 @@ class ChatShell(wx.Panel):
 
         template_row = wx.BoxSizer(wx.HORIZONTAL)
         template_row.Add(wx.StaticText(ui_parent, label="Template:"), flag=wx.RIGHT, border=6)
-        self._template_choice = wx.Choice(
-            ui_parent,
-            choices=[
-                "General review",
-                "PCB layout audit",
-                "Isolation / clearance",
-                "Netlist crosscheck",
-                "Netlist gap-fill",
-                "Power integrity",
-                "Signal integrity",
-                "EMI / EMC",
-                "Flyback recovery",
-            ],
-        )
+        self._template_choice = wx.Choice(ui_parent, choices=list(CHAT_TEMPLATE_LABELS))
         self._template_choice.SetSelection(0)
         template_row.Add(self._template_choice, proportion=1)
         template_row.AddStretchSpacer()
@@ -161,7 +172,18 @@ class ChatShell(wx.Panel):
             btn_row.Add(self._btn_close)
         vbox.Add(btn_row, flag=wx.EXPAND | wx.ALL, border=8)
 
-        vbox.Add(wx.StaticText(ui_parent, label="Conversation:"), flag=wx.LEFT, border=8)
+        conv_header = wx.BoxSizer(wx.HORIZONTAL)
+        conv_header.Add(
+            wx.StaticText(ui_parent, label="Conversation:"),
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
+            border=6,
+        )
+        conv_header.AddStretchSpacer()
+        self._btn_copy_conversation = wx.Button(ui_parent, label="Copy")
+        self._btn_copy_conversation.SetToolTip("Copy the full conversation log to the clipboard")
+        conv_header.Add(self._btn_copy_conversation)
+        vbox.Add(conv_header, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+
         self._response = wx.TextCtrl(ui_parent, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self._response.SetMinSize((-1, 120 if embedded else 0))
         vbox.Add(self._response, proportion=0 if embedded else 1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
@@ -183,6 +205,7 @@ class ChatShell(wx.Panel):
             self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
         self._btn_new_conversation.Bind(wx.EVT_BUTTON, self._on_new_conversation)
+        self._btn_copy_conversation.Bind(wx.EVT_BUTTON, self._on_copy_conversation)
         self._btn_firmware.Bind(wx.EVT_BUTTON, self._on_browse_firmware)
         if not self._embedded:
             self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
@@ -247,6 +270,18 @@ class ChatShell(wx.Panel):
     def _refresh_conversation_log(self) -> None:
         self._response.SetValue(self._session().format_conversation_log())
 
+    def _on_copy_conversation(self, _event: wx.CommandEvent) -> None:
+        text = self._response.GetValue()
+        if not text.strip():
+            self._status.SetLabel("Nothing to copy — conversation is empty.")
+            return
+        if wx.TheClipboard.Open():
+            wx.TheClipboard.SetData(wx.TextDataObject(text))
+            wx.TheClipboard.Close()
+            self._status.SetLabel("Conversation copied to clipboard.")
+        else:
+            self._status.SetLabel("Could not open clipboard.")
+
     def _on_new_conversation(self, _event: wx.CommandEvent) -> None:
         if self._sending:
             return
@@ -265,21 +300,45 @@ class ChatShell(wx.Panel):
         return True
 
     def _selected_template(self) -> str:
-        labels = [
-            "general_review",
-            "pcb_layout_audit",
-            "isolation_clearance_audit",
-            "netlist_crosscheck",
-            "netlist_gap_fill",
-            "power_integrity_audit",
-            "signal_integrity_audit",
-            "emi_emc_audit",
-            "flyback_recovery_audit",
-        ]
         idx = self._template_choice.GetSelection()
-        if idx < 0 or idx >= len(labels):
-            return "general_review"
-        return labels[idx]
+        if idx < 0 or idx >= len(CHAT_TEMPLATE_IDS):
+            return CHAT_TEMPLATE_IDS[0]
+        return CHAT_TEMPLATE_IDS[idx]
+
+    def export_ui_state(self) -> dict[str, object]:
+        return {
+            "template": self._selected_template(),
+            "include_schematic_image": self._chk_image.GetValue(),
+            "focus_selection": self._chk_selection.GetValue(),
+            "firmware_file": self._txt_firmware.GetValue(),
+            "include_schematic": self._chk_schematic.GetValue(),
+            "include_pcb": self._chk_pcb.GetValue(),
+            "include_bom": self._chk_bom.GetValue(),
+            "include_erc_drc": self._chk_erc_drc.GetValue(),
+            "include_netlist": self._chk_netlist.GetValue(),
+            "design_intent": self._txt_intent.GetValue(),
+            "question_draft": self._txt_question.GetValue(),
+        }
+
+    def apply_ui_state(self, data: dict[str, object]) -> None:
+        template = str(data.get("template", CHAT_TEMPLATE_IDS[0]))
+        if template in CHAT_TEMPLATE_IDS:
+            self._template_choice.SetSelection(CHAT_TEMPLATE_IDS.index(template))
+        self._chk_image.SetValue(bool(data.get("include_schematic_image", False)))
+        if self._chk_selection.IsEnabled():
+            self._chk_selection.SetValue(bool(data.get("focus_selection", False)))
+        self._txt_firmware.SetValue(str(data.get("firmware_file", "")))
+        self._chk_schematic.SetValue(bool(data.get("include_schematic", True)))
+        self._chk_pcb.SetValue(bool(data.get("include_pcb", True)))
+        self._chk_bom.SetValue(bool(data.get("include_bom", True)))
+        self._chk_erc_drc.SetValue(bool(data.get("include_erc_drc", True)))
+        self._chk_netlist.SetValue(bool(data.get("include_netlist", True)))
+        self._txt_intent.SetValue(str(data.get("design_intent", "")))
+        if "question_draft" in data:
+            self._txt_question.SetValue(str(data.get("question_draft", "")))
+        if self._ctx is not None:
+            self._ctx = self._apply_live_options(self._ctx)
+            self._update_preview()
 
     def _context_flags(self) -> ContextIncludeFlags:
         return ContextIncludeFlags(

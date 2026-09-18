@@ -24,7 +24,7 @@ Example template: [docs/Developer_Handbook/kicad_ai_config.example.json](../Deve
 |-------|------------|---------|
 | Provider | `ai_provider` | `claude` or `ollama` |
 | Anthropic API key | `anthropic_api_key` | Claude API key |
-| Claude model | `claude_model` | Model id (e.g. `claude-3-5-sonnet-20241022`) |
+| Claude model | `claude_model` | Model id (e.g. `claude-sonnet-4-6`) |
 | Ollama base URL | `ollama_base_url` | Default `http://localhost:11434` |
 | Ollama model | `ollama_model` | Local model name |
 
@@ -44,7 +44,7 @@ Example template: [docs/Developer_Handbook/kicad_ai_config.example.json](../Deve
 | `kicad_cli` | `null` | Path to `kicad-cli` binary | Config file |
 | `anthropic_api_key` | env / null | Claude API key | Settings + config |
 | `ai_provider` | `claude` | `claude` or `ollama` | Settings + config |
-| `claude_model` | `claude-3-5-sonnet-20241022` | Claude model | Settings + config |
+| `claude_model` | `claude-sonnet-4-6` | Claude model | Settings + config |
 | `ollama_base_url` | `http://localhost:11434` | Ollama server | Settings + config |
 | `ollama_model` | `llama3.2` | Ollama model | Settings + config |
 | `provider_timeout_sec` | `120` | Provider connect timeout | Config file |

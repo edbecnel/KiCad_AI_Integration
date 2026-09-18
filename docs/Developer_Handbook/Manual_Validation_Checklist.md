@@ -23,10 +23,10 @@ When Phase 1 chat and Freerouting rows pass, check off the matching items in [`M
 
 ## Phase 1 — KiCad chat E2E
 
-- [ ] Open KiCad PCB Editor with a saved `.kicad_pro` project.
-- [ ] Launch **Tools → External Plugins → KiCad AI Assistant** (or Scripting Console).
-- [ ] Click **Refresh context** on the Assistant shell.
-- [ ] Open **Chat** tab, select a template, enter an engineering question.
+- [x] Open KiCad PCB Editor with a saved `.kicad_pro` project.
+- [x] Launch **Tools → External Plugins → KiCad AI Assistant** (or Scripting Console).
+- [x] Click **Refresh context** on the Assistant shell.
+- [x] Open **Chat** tab, select a template, enter an engineering question.
 - [ ] Click **Approve & Send** and confirm a context-aware response without manual export/copy-paste.
 
 **Pass criteria:** Response references project symbols/nets from the active design.

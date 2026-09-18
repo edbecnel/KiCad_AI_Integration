@@ -5,7 +5,12 @@ from unittest.mock import patch
 
 import pytest
 
-from utils.url_fetch import UrlFetchError, fetch_url_to_file, validate_url
+from utils.url_fetch import (
+    UrlFetchError,
+    fetch_url_to_file,
+    is_recoverable_ssl_fetch_error,
+    validate_url,
+)
 
 
 def test_reject_http_scheme() -> None:
@@ -68,6 +73,13 @@ def test_fetch_uses_connect_and_read_timeouts(tmp_path: Path) -> None:
                 read_timeout_sec=60,
             )
     assert seen == [(10.0, 60.0)]
+
+
+def test_is_recoverable_ssl_fetch_error() -> None:
+    assert is_recoverable_ssl_fetch_error(
+        "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"
+    )
+    assert not is_recoverable_ssl_fetch_error("HTTP 404 Not Found")
 
 
 def test_bot_wall_html_raises_clear_error() -> None:

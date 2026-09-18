@@ -2,7 +2,7 @@
   "_comment": "Copy to ~/kicad_ai_config.json and replace placeholder values. Never commit real API keys.",
   "anthropic_api_key": "sk-ant-REPLACE_ME",
   "ai_provider": "claude",
-  "claude_model": "claude-3-5-sonnet-20241022",
+  "claude_model": "claude-sonnet-4-6",
   "artifact_library_path": "~/kicad_ai_library",
   "kicad_cli": "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli",
   "datasheet_url_fetch": "if_missing",

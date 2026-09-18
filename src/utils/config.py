@@ -15,7 +15,22 @@ DEFAULT_URL_FETCH_READ_TIMEOUT_SEC = 60
 DEFAULT_URL_FETCH_WARMUP = True
 DEFAULT_CONFIG_FILENAME = "kicad_ai_config.json"
 DEFAULT_AI_PROVIDER = "claude"
-DEFAULT_CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-6"
+
+# Retired Anthropic model IDs → current Sonnet (see Anthropic model deprecations).
+DEPRECATED_CLAUDE_MODELS: dict[str, str] = {
+    "claude-3-5-sonnet-20241022": DEFAULT_CLAUDE_MODEL,
+    "claude-3-5-sonnet-20240620": DEFAULT_CLAUDE_MODEL,
+    "claude-3-7-sonnet-20250219": DEFAULT_CLAUDE_MODEL,
+}
+
+
+def resolve_claude_model(model: str) -> str:
+    """Map retired Claude model IDs to a supported default."""
+    key = (model or "").strip()
+    if not key:
+        return DEFAULT_CLAUDE_MODEL
+    return DEPRECATED_CLAUDE_MODELS.get(key, key)
 DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
 DEFAULT_OLLAMA_MODEL = "llama3.2"
 DEFAULT_PROVIDER_TIMEOUT_SEC = 120
@@ -127,7 +142,9 @@ class AppConfig:
             anthropic_api_key=data.get("anthropic_api_key")
             or os.environ.get("ANTHROPIC_API_KEY"),
             ai_provider=_parse_ai_provider(data),
-            claude_model=str(data.get("claude_model", DEFAULT_CLAUDE_MODEL)),
+            claude_model=resolve_claude_model(
+                str(data.get("claude_model", DEFAULT_CLAUDE_MODEL))
+            ),
             ollama_base_url=str(data.get("ollama_base_url", DEFAULT_OLLAMA_BASE_URL)),
             ollama_model=str(data.get("ollama_model", DEFAULT_OLLAMA_MODEL)),
             provider_timeout_sec=int(

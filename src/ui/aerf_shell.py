@@ -490,3 +490,21 @@ class AERFShell(wx.Panel):
         self._status.SetLabel("Simulation refinement merged — use Write to EKM to persist.")
         self._update_writeback_button()
 
+    def export_ui_state(self) -> dict[str, object]:
+        return {
+            "circuit_family": self._txt_family.GetValue(),
+            "stage": int(self._spin_stage.GetValue()),
+            "include_schematic_image": self._chk_image.GetValue(),
+        }
+
+    def apply_ui_state(self, data: dict[str, object]) -> None:
+        family = str(data.get("circuit_family", "")).strip()
+        if family:
+            self._txt_family.SetValue(family)
+            self._family_id = family
+        stage = data.get("stage")
+        if isinstance(stage, int) and 0 <= stage <= 7:
+            self._spin_stage.SetValue(stage)
+            self._current_stage = stage
+        self._chk_image.SetValue(bool(data.get("include_schematic_image", False)))
+

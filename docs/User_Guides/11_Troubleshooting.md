@@ -62,9 +62,28 @@ Check path is valid `.kicad_pro`; project directory readable.
 - Or `export ANTHROPIC_API_KEY=...`
 - For Ollama: set `"ai_provider": "ollama"` and start Ollama service
 
+### Provider error mentioning `claude-3-5-sonnet-20241022` (or another old model id)
+
+Anthropic **retired** Claude 3.5 Sonnet (`claude-3-5-sonnet-20241022`) in late 2025. Update `claude_model` in **Settings…** or `~/kicad_ai_config.json` to a current id (default in recent builds: `claude-sonnet-4-6`). Older configs are auto-mapped on load when you use an up-to-date plugin build.
+
 ### Timeout / long hangs
 
 Increase `provider_read_timeout_sec` in config. Large schematics produce large prompts.
+
+### `[SSL: CERTIFICATE_VERIFY_FAILED]` (macOS, KiCad plugin)
+
+KiCad’s embedded Python may not trust HTTPS CAs. The assistant uses **certifi** when installed.
+
+1. From the repo: `./scripts/install_kicad_plugin.sh` (installs **certifi** into KiCad’s Python when found).
+2. Or manually:  
+   `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/3.9/bin/python3 -m pip install --user certifi`
+3. **Restart KiCad PCB Editor** after installing.
+4. Workaround: run `python3 scripts/run_ai_assistant.py "/path/to/project.kicad_pro" --ui` from Terminal (uses your shell Python).
+
+Optional: set `SSL_CERT_FILE` to the path printed by  
+`python3 -c "import certifi; print(certifi.where())"` before launching KiCad.
+
+If Chat worked but a part shows **Datasheet fetch failed (SSL error)** in the AI reply, the HTTPS datasheet download hit the same issue. After updating the plugin, click **Refresh context** (failed SSL URLs are retried automatically). Or use **Datasheets → Force refresh URLs**.
 
 ---
 

@@ -43,6 +43,7 @@ Engineers who want schematic-aware AI help without running the full eight-stage 
 | **Approve & Send** | Confirm and transmit to provider |
 | **New conversation** | Clear session history for this project |
 | **Conversation** | Read-only log of turns |
+| **Copy** | Copy the full conversation log to the clipboard |
 | Status line | Hints and send state |
 
 ---
@@ -80,6 +81,9 @@ Click **New conversation** to reset history (does not delete `kicad_ai/conversat
 | Path | Content |
 |------|---------|
 | `<project>/kicad_ai/conversation.json` | Multi-turn session history |
+| `<project>/kicad_ai/assistant_session.json` | Chat template, context toggles, design intent, and other Assistant tab options (auto-saved on close; **Save session** / **Load session** in the shell header) |
+
+API keys are **not** stored in the session file — use **Settings…** or `~/kicad_ai_config.json`.
 
 ---
 

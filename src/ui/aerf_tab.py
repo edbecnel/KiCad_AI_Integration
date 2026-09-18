@@ -58,6 +58,16 @@ class AERFTab(AssistantTabPanel):
         self._shell_slot.Layout()
         self.Layout()
 
+    def export_session_state(self) -> dict[str, object]:
+        if self._shell is None:
+            return {}
+        return {"aerf": self._shell.export_ui_state()}
+
+    def import_session_state(self, data: dict[str, object]) -> None:
+        block = data.get("aerf")
+        if self._shell is not None and isinstance(block, dict):
+            self._shell.apply_ui_state(block)
+
     def _clear_shell(self) -> None:
         if self._shell is not None:
             self._shell.Destroy()
