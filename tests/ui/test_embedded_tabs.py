@@ -102,6 +102,59 @@ def test_embedded_chat_shell_uses_vertical_scroll() -> None:
     frame.Destroy()
 
 
+def test_assistant_shell_auto_load_applies_question_draft() -> None:
+    """Auto-load must apply question_draft when a session file appears mid-run."""
+    wx = _ensure_wx_app()
+    from ui.assistant_session import save_session
+    from ui.assistant_shell import AssistantShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    frame = wx.Frame(None, title="test")
+    shell = AssistantShell(frame, initial_path=pro)
+    frame.Show(False)
+
+    chat_tab = shell._tabs["chat"]
+    assert chat_tab._shell is not None
+    chat_tab._shell._txt_question.SetValue("")
+    save_session(
+        pro,
+        {
+            "active_tab": "chat",
+            "tabs": {
+                "chat": {
+                    "template": "general_review",
+                    "question_draft": "Trace the flyback path through D1",
+                }
+            },
+        },
+    )
+    shell._session_restored_for_path = None
+    shell._maybe_auto_load_session(pro.resolve())
+
+    question = chat_tab._shell._txt_question.GetValue()
+    assert "Trace the flyback path through D1" in question
+
+    frame.Destroy()
+
+
+def test_chat_shell_apply_ui_state_restores_question_draft() -> None:
+    wx = _ensure_wx_app()
+    from ui.chat_shell import ChatShell
+
+    pro = FIXTURES / "testproj.kicad_pro"
+    frame = wx.Frame(None, title="test")
+    panel = wx.Panel(frame)
+    shell = ChatShell(panel, pro, embedded=True)
+    shell.apply_ui_state(
+        {
+            "template": "general_review",
+            "question_draft": "Check D1 flyback polarity",
+        }
+    )
+    assert "Check D1 flyback polarity" in shell._txt_question.GetValue()
+    frame.Destroy()
+
+
 def test_embedded_tabs_receive_updated_summary_on_refresh() -> None:
     wx = _ensure_wx_app()
     from ui.assistant_shell import AssistantShell

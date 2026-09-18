@@ -237,12 +237,20 @@ class AssistantShell(wx.Panel):
         return {"active_tab": active_tab, "tabs": tabs}
 
     def _apply_session_payload(self, data: dict[str, object]) -> None:
+        resolved: Path | None = None
+        try:
+            resolved = normalize_launcher_project_path(self._txt_path.GetValue()).expanduser().resolve()
+        except (ValueError, FileNotFoundError, OSError):
+            pass
         tabs = data.get("tabs")
         if isinstance(tabs, dict):
             for tab_id, tab in self._tabs.items():
                 block = tabs.get(tab_id)
                 if isinstance(block, dict):
-                    tab.import_session_state(block)
+                    if tab_id == "chat" and resolved is not None:
+                        tab.import_session_state(block, project_path=resolved)
+                    else:
+                        tab.import_session_state(block)
         active = data.get("active_tab")
         if isinstance(active, str) and active in ASSISTANT_TAB_IDS:
             self.focus_tab(active)
@@ -263,7 +271,7 @@ class AssistantShell(wx.Panel):
             return
         data = load_session(pro)
         if data is None:
-            self._session_restored_for_path = resolved
+            # Do not mark restored — user may Save session later in this KiCad run.
             return
         self._apply_session_payload(data)
         self._session_restored_for_path = resolved

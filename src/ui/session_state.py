@@ -9,7 +9,12 @@ def normalize_tab_session_block(
     data: dict[str, Any],
     *,
     nested_key: str,
-    state_keys: tuple[str, ...] = ("template", "design_intent", "question_draft"),
+    state_keys: tuple[str, ...] = (
+        "template",
+        "design_intent",
+        "question_draft",
+        "question",
+    ),
 ) -> dict[str, Any] | None:
     """
     Accept either flat tab state or legacy ``{nested_key: {...}}`` wrappers.

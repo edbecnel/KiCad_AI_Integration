@@ -410,7 +410,12 @@ class ChatShell(wx.Panel):
         self._chk_erc_drc.SetValue(bool(data.get("include_erc_drc", True)))
         self._chk_netlist.SetValue(bool(data.get("include_netlist", True)))
         self._txt_intent.SetValue(str(data.get("design_intent", "")))
-        self._txt_question.SetValue(str(data.get("question_draft", "")))
+        question = data.get("question_draft", data.get("question", ""))
+        self._txt_question.SetValue(str(question))
+        self._txt_intent.Update()
+        self._txt_question.Update()
+        self._txt_intent.Refresh()
+        self._txt_question.Refresh()
         if self._ctx is not None:
             self._ctx = self._apply_live_options(self._ctx)
             self._update_preview()

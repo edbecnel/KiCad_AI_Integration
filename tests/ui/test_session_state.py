@@ -10,6 +10,11 @@ def test_normalize_chat_block_flat() -> None:
     assert normalize_tab_session_block(flat, nested_key="chat") == flat
 
 
+def test_normalize_chat_block_question_alias() -> None:
+    flat = {"template": "general_review", "question": "legacy key"}
+    assert normalize_tab_session_block(flat, nested_key="chat") == flat
+
+
 def test_normalize_chat_block_legacy_nested() -> None:
     inner = {"design_intent": "flyback", "question_draft": "trace D1"}
     wrapped = {"chat": inner}
