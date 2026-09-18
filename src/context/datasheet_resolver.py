@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 import tempfile
 from dataclasses import dataclass, field
@@ -14,7 +15,13 @@ from context.artifacts.manifest import Manifest
 from context.artifacts.store import ArtifactStore, ProjectContextInfo
 from context.schematic_parse import SymbolInstance
 from utils.config import AppConfig
+from utils.ssl_context import configure_https_environment
 from utils.url_fetch import UrlFetchError, fetch_url_to_file, is_recoverable_ssl_fetch_error
+
+_ONSEMI_LEGACY_PDF = re.compile(
+    r"^https://www\.onsemi\.com/pdf/datasheet/([a-z0-9-]+)\.pdf$",
+    re.IGNORECASE,
+)
 
 ResolutionStatus = Literal["resolved", "missing", "fetch_failed"]
 TierHint = Literal["A", "B", "C"]
@@ -63,7 +70,12 @@ def normalize_datasheet_url(url: str) -> str:
         netloc = f"{host}:{port}"
     path = parsed.path.rstrip("/") or "/"
     query = f"?{parsed.query}" if parsed.query else ""
-    return f"{parsed.scheme.lower()}://{netloc}{path}{query}"
+    canonical = f"{parsed.scheme.lower()}://{netloc}{path}{query}"
+    match = _ONSEMI_LEGACY_PDF.match(canonical)
+    if match:
+        slug = match.group(1).lower()
+        return f"https://www.onsemi.com/download/data-sheet/pdf/{slug}.pdf"
+    return canonical
 
 
 def _resolve_local_path(
@@ -559,7 +571,7 @@ class DatasheetResolver:
                     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
                         tmp_path = Path(tmp.name)
                     self.fetch_fn(
-                        symbol.datasheet,
+                        norm_url,
                         tmp_path,
                         timeout_sec=self.config.url_fetch_timeout_sec,
                         read_timeout_sec=self.config.url_fetch_read_timeout_sec,
@@ -650,6 +662,10 @@ class DatasheetResolver:
     ) -> dict[str, DatasheetResolution]:
         manifest = Manifest.load(project.project_pro_path)
         self.store.bootstrap()
+        configure_https_environment()
+        purged = self.store.url_fetch_log.purge_recoverable_ssl_failures()
+        if purged and self.verbose:
+            _log(f"  Cleared {purged} stale SSL datasheet fetch log entries (retrying HTTPS).")
         refresh_parts = {p.strip() for p in (force_refresh_parts or set())}
         retry = retry_failed_urls or bool(refresh_parts)
         self._session = _ResolveSession(
@@ -658,7 +674,7 @@ class DatasheetResolver:
             failed_urls=(
                 set()
                 if retry
-                else self.store.url_fetch_log.failed_urls()
+                else self.store.url_fetch_log.failed_urls_blocking_retry()
             ),
             urls_attempted=set(),
             retry_failed_urls=retry,

@@ -23,7 +23,12 @@ def test_save_and_load_session_round_trip(tmp_path: Path) -> None:
     pro.write_text("{}", encoding="utf-8")
     payload = {
         "active_tab": "chat",
-        "tabs": {"chat": {"chat": {"template": "general_review"}}},
+        "tabs": {
+            "chat": {
+                "template": "general_review",
+                "question_draft": "Analyze Q1 flyback path",
+            }
+        },
     }
     path = save_session(pro, payload)
     assert path.is_file()
@@ -31,4 +36,5 @@ def test_save_and_load_session_round_trip(tmp_path: Path) -> None:
     assert loaded is not None
     assert loaded["version"] == SESSION_VERSION
     assert loaded["active_tab"] == "chat"
-    assert loaded["tabs"]["chat"]["chat"]["template"] == "general_review"
+    assert loaded["tabs"]["chat"]["template"] == "general_review"
+    assert loaded["tabs"]["chat"]["question_draft"] == "Analyze Q1 flyback path"

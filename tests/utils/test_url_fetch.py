@@ -79,7 +79,13 @@ def test_is_recoverable_ssl_fetch_error() -> None:
     assert is_recoverable_ssl_fetch_error(
         "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"
     )
+    assert is_recoverable_ssl_fetch_error(
+        "Fetch failed: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED]>"
+    )
     assert not is_recoverable_ssl_fetch_error("HTTP 404 Not Found")
+    assert not is_recoverable_ssl_fetch_error(
+        "Site blocked automated download (bot protection)"
+    )
 
 
 def test_bot_wall_html_raises_clear_error() -> None:

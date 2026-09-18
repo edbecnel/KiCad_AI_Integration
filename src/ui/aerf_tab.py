@@ -6,6 +6,7 @@ from pathlib import Path
 
 from context.model import ProjectContext
 from ui.aerf_shell import AERFShell
+from ui.session_state import normalize_tab_session_block
 from ui.assistant_tab import AssistantTabPanel
 
 try:
@@ -61,11 +62,15 @@ class AERFTab(AssistantTabPanel):
     def export_session_state(self) -> dict[str, object]:
         if self._shell is None:
             return {}
-        return {"aerf": self._shell.export_ui_state()}
+        return self._shell.export_ui_state()
 
     def import_session_state(self, data: dict[str, object]) -> None:
-        block = data.get("aerf")
-        if self._shell is not None and isinstance(block, dict):
+        block = normalize_tab_session_block(
+            data,
+            nested_key="aerf",
+            state_keys=("circuit_family", "stage", "include_schematic_image"),
+        )
+        if self._shell is not None and block is not None:
             self._shell.apply_ui_state(block)
 
     def _clear_shell(self) -> None:

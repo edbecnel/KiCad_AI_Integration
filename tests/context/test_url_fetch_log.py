@@ -7,6 +7,7 @@ from context.artifacts.store import ArtifactStore, ProjectContextInfo
 from context.datasheet_resolver import DatasheetResolver
 from context.schematic_parse import SymbolInstance
 from utils.config import AppConfig
+from utils.url_fetch import UrlFetchError
 
 
 def test_url_fetch_log_records_downloaded(tmp_path: Path) -> None:
@@ -66,6 +67,47 @@ def test_failed_url_skipped_on_second_run(tmp_path: Path) -> None:
     assert second.needs_ai_datasheet_discovery is True
     assert "url_fetch_log:failed" in second.sources_tried
     assert fetch_fn.call_count == 1
+
+
+def test_ssl_logged_failure_retried_on_next_resolve(tmp_path: Path) -> None:
+    pro = tmp_path / "p.kicad_pro"
+    pro.touch()
+    config = AppConfig(artifact_library_path=tmp_path / "lib", datasheet_url_fetch="if_missing")
+    attempt = 0
+    urls: list[str] = []
+
+    def fake_fetch(url, dest, **kwargs):
+        nonlocal attempt
+        attempt += 1
+        urls.append(url)
+        if attempt == 1:
+            raise UrlFetchError(
+                "Fetch failed: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"
+            )
+        dest.write_bytes(b"%PDF-1.4 fetched")
+        from utils.url_fetch import FetchResult
+
+        return FetchResult(path=dest, content_type="application/pdf", byte_size=14)
+
+    project = ProjectContextInfo(project_pro_path=pro, schematic_paths=[])
+    symbol = SymbolInstance(
+        reference="Q1",
+        value="BD243C",
+        datasheet="https://www.onsemi.com/pdf/datasheet/bd243c-d.pdf",
+        sheet_path="p.kicad_sch",
+    )
+    first = DatasheetResolver(config, fetch_fn=fake_fetch, verbose=False).resolve_all(
+        [symbol], project
+    )["Q1"]
+    assert first.status == "fetch_failed"
+    assert attempt == 1
+
+    second = DatasheetResolver(config, fetch_fn=fake_fetch, verbose=False).resolve_all(
+        [symbol], project
+    )["Q1"]
+    assert second.status == "resolved"
+    assert attempt == 2
+    assert urls[-1] == "https://www.onsemi.com/download/data-sheet/pdf/bd243c-d.pdf"
 
 
 def test_new_url_retried_after_prior_failure(tmp_path: Path) -> None:

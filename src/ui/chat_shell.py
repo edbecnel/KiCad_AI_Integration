@@ -74,6 +74,7 @@ class ChatShell(wx.Panel):
         self._ctx: ProjectContext | None = None
         self._built: BuiltPrompt | None = None
         self._sending = False
+        self._conversation_viewer: object | None = None
         self._session_store = get_session_store()
         self._scroll: wx.ScrolledWindow | None = None
         ui_parent: wx.Window = self
@@ -179,9 +180,20 @@ class ChatShell(wx.Panel):
             border=6,
         )
         conv_header.AddStretchSpacer()
+        self._btn_expand_conversation = wx.Button(ui_parent, label="Expand…")
+        self._btn_expand_conversation.SetToolTip(
+            "Open the conversation in a larger resizable window"
+        )
+        conv_header.Add(self._btn_expand_conversation, flag=wx.LEFT, border=6)
         self._btn_copy_conversation = wx.Button(ui_parent, label="Copy")
         self._btn_copy_conversation.SetToolTip("Copy the full conversation log to the clipboard")
-        conv_header.Add(self._btn_copy_conversation)
+        conv_header.Add(self._btn_copy_conversation, flag=wx.LEFT, border=6)
+        self._btn_clear_conversation = wx.Button(ui_parent, label="Clear")
+        self._btn_clear_conversation.SetToolTip(
+            "Clear the conversation log and reset chat history for this project "
+            "(does not clear Your question)"
+        )
+        conv_header.Add(self._btn_clear_conversation)
         vbox.Add(conv_header, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
 
         self._response = wx.TextCtrl(ui_parent, style=wx.TE_MULTILINE | wx.TE_READONLY)
@@ -205,7 +217,9 @@ class ChatShell(wx.Panel):
             self._btn_refresh.Bind(wx.EVT_BUTTON, self._on_refresh)
         self._btn_send.Bind(wx.EVT_BUTTON, self._on_send)
         self._btn_new_conversation.Bind(wx.EVT_BUTTON, self._on_new_conversation)
+        self._btn_expand_conversation.Bind(wx.EVT_BUTTON, self._on_expand_conversation)
         self._btn_copy_conversation.Bind(wx.EVT_BUTTON, self._on_copy_conversation)
+        self._btn_clear_conversation.Bind(wx.EVT_BUTTON, self._on_clear_conversation)
         self._btn_firmware.Bind(wx.EVT_BUTTON, self._on_browse_firmware)
         if not self._embedded:
             self._btn_close.Bind(wx.EVT_BUTTON, self._on_close)
@@ -267,8 +281,64 @@ class ChatShell(wx.Panel):
     def _session(self):
         return self._session_store.get_or_create(self._project_path)
 
+    def _conversation_log_text(self) -> str:
+        return self._session().format_conversation_log()
+
     def _refresh_conversation_log(self) -> None:
-        self._response.SetValue(self._session().format_conversation_log())
+        text = self._conversation_log_text()
+        self._response.SetValue(text)
+        self._sync_conversation_viewer(text)
+
+    def _sync_conversation_viewer(self, text: str) -> None:
+        viewer = self._conversation_viewer
+        if viewer is None:
+            return
+        try:
+            from ui.conversation_viewer import ConversationViewerFrame
+
+            if isinstance(viewer, ConversationViewerFrame) and viewer.IsShown():
+                viewer.set_content(text)
+        except RuntimeError:
+            self._conversation_viewer = None
+
+    def _on_expand_conversation(self, _event: wx.CommandEvent) -> None:
+        from ui.conversation_viewer import ConversationViewerFrame, show_conversation_viewer
+
+        text = self._conversation_log_text()
+        placeholder = "(No messages yet — send a question to start the conversation.)"
+        viewer = self._conversation_viewer
+        if isinstance(viewer, ConversationViewerFrame):
+            try:
+                if viewer.IsShown():
+                    viewer.set_content(text or placeholder)
+                    viewer.Raise()
+                    return
+            except RuntimeError:
+                self._conversation_viewer = None
+
+        def on_closed() -> None:
+            self._conversation_viewer = None
+
+        self._conversation_viewer = show_conversation_viewer(
+            self,
+            text or placeholder,
+            refresh_callback=self._conversation_log_text,
+            on_closed=on_closed,
+        )
+
+    def _on_clear_conversation(self, _event: wx.CommandEvent) -> None:
+        if self._sending:
+            return
+        if self._session().turns and wx.MessageBox(
+            "Clear the conversation log? Chat history for this project will be reset "
+            "and follow-up requests will not include prior turns.",
+            "Clear conversation",
+            wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        self._session_store.reset(self._project_path)
+        self._refresh_conversation_log()
+        self._status.SetLabel("Conversation cleared — enter a question, then Approve & Send.")
 
     def _on_copy_conversation(self, _event: wx.CommandEvent) -> None:
         text = self._response.GetValue()
@@ -306,6 +376,9 @@ class ChatShell(wx.Panel):
         return CHAT_TEMPLATE_IDS[idx]
 
     def export_ui_state(self) -> dict[str, object]:
+        # Ensure pending edits in multiline fields are flushed (macOS wx).
+        self._txt_intent.Update()
+        self._txt_question.Update()
         return {
             "template": self._selected_template(),
             "include_schematic_image": self._chk_image.GetValue(),
@@ -334,8 +407,7 @@ class ChatShell(wx.Panel):
         self._chk_erc_drc.SetValue(bool(data.get("include_erc_drc", True)))
         self._chk_netlist.SetValue(bool(data.get("include_netlist", True)))
         self._txt_intent.SetValue(str(data.get("design_intent", "")))
-        if "question_draft" in data:
-            self._txt_question.SetValue(str(data.get("question_draft", "")))
+        self._txt_question.SetValue(str(data.get("question_draft", "")))
         if self._ctx is not None:
             self._ctx = self._apply_live_options(self._ctx)
             self._update_preview()

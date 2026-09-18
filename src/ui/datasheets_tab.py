@@ -7,6 +7,7 @@ from pathlib import Path
 from context.model import ProjectContext
 from ui.assistant_tab import AssistantTabPanel
 from ui.datasheets_shell import DatasheetsShell
+from ui.session_state import normalize_tab_session_block
 
 try:
     import wx
@@ -68,11 +69,15 @@ class DatasheetsTab(AssistantTabPanel):
     def export_session_state(self) -> dict[str, object]:
         if self._shell is None:
             return {}
-        return {"datasheets": self._shell.export_ui_state()}
+        return self._shell.export_ui_state()
 
     def import_session_state(self, data: dict[str, object]) -> None:
-        block = data.get("datasheets")
-        if self._shell is not None and isinstance(block, dict):
+        block = normalize_tab_session_block(
+            data,
+            nested_key="datasheets",
+            state_keys=("ai_discovery", "write_symbol_url", "notebook_page"),
+        )
+        if self._shell is not None and block is not None:
             self._shell.apply_ui_state(block)
 
     def _clear_shell(self) -> None:

@@ -26,6 +26,7 @@ from context.schematic_parse import (
     parse_project_schematics,
 )
 from utils.config import AppConfig, DatasheetUrlFetchPolicy, load_config
+from utils.ssl_context import configure_https_environment
 
 
 def collect_stretch_context(
@@ -52,6 +53,7 @@ def collect_stretch_context(
 
     project_path may be a .kicad_pro file or project directory containing one.
     """
+    configure_https_environment()
     cfg = config or load_config()
     if datasheet_url_fetch is not None:
         cfg.datasheet_url_fetch = datasheet_url_fetch

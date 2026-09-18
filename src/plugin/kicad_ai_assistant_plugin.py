@@ -34,6 +34,14 @@ def _ensure_src_on_path() -> Path | None:
 
 _SRC_ROOT = _ensure_src_on_path()
 
+if _SRC_ROOT is not None:
+    try:
+        from utils.ssl_context import configure_https_environment
+
+        configure_https_environment()
+    except ImportError:
+        pass
+
 try:
     import pcbnew  # type: ignore[import-untyped]
 except ImportError:  # pragma: no cover

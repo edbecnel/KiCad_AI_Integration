@@ -28,10 +28,15 @@ def is_recoverable_ssl_fetch_error(message: str | None) -> bool:
     if not message:
         return False
     upper = message.upper()
+    if "CERTIFICATE_VERIFY_FAILED" in upper or "UNABLE TO GET LOCAL ISSUER" in upper:
+        return True
+    if "SSL" not in upper:
+        return False
     return (
-        "CERTIFICATE_VERIFY_FAILED" in upper
-        or "UNABLE TO GET LOCAL ISSUER CERTIFICATE" in upper
-        or ("SSL" in upper and "CERTIFICATE" in upper)
+        "CERTIFICATE" in upper
+        or "FETCH FAILED" in upper
+        or "URLOPEN ERROR" in upper
+        or "SSLError" in upper
     )
 
 

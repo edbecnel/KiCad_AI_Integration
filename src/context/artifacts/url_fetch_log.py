@@ -81,6 +81,36 @@ class UrlFetchLog:
     def failed_urls(self) -> set[str]:
         return {entry.source_url for entry in self.entries if entry.status == "failed"}
 
+    def failed_urls_blocking_retry(self) -> set[str]:
+        """Failed URLs that should skip auto-fetch (excludes recoverable TLS failures)."""
+        from utils.url_fetch import is_recoverable_ssl_fetch_error
+
+        return {
+            entry.source_url
+            for entry in self.entries
+            if entry.status == "failed"
+            and not is_recoverable_ssl_fetch_error(entry.error)
+        }
+
+    def purge_recoverable_ssl_failures(self) -> int:
+        """Remove stale TLS-failure log rows so HTTPS can be retried after certifi install."""
+        from utils.url_fetch import is_recoverable_ssl_fetch_error
+
+        entries = self.entries
+        kept = [
+            entry
+            for entry in entries
+            if not (
+                entry.status == "failed"
+                and is_recoverable_ssl_fetch_error(entry.error)
+            )
+        ]
+        removed = len(entries) - len(kept)
+        if removed:
+            self._entries = kept
+            self._dirty = True
+        return removed
+
     def get(self, part: str, source_url: str) -> UrlFetchEntry | None:
         part_norm = part.strip()
         for entry in reversed(self.entries):

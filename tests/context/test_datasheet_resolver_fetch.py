@@ -15,6 +15,13 @@ def test_normalize_datasheet_url() -> None:
     )
 
 
+def test_normalize_onsemi_legacy_pdf_url() -> None:
+    assert (
+        normalize_datasheet_url("https://www.onsemi.com/pdf/datasheet/bd243c-d.pdf")
+        == "https://www.onsemi.com/download/data-sheet/pdf/bd243c-d.pdf"
+    )
+
+
 def test_https_fetch_deduped_by_url(tmp_path: Path) -> None:
     pro = tmp_path / "p.kicad_pro"
     pro.touch()

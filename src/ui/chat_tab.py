@@ -7,6 +7,7 @@ from pathlib import Path
 from context.model import ProjectContext
 from ui.assistant_tab import AssistantTabPanel
 from ui.chat_shell import ChatShell
+from ui.session_state import normalize_tab_session_block
 
 try:
     import wx
@@ -25,6 +26,7 @@ class ChatTab(AssistantTabPanel):
         super().__init__(parent)
         self._loaded_path: Path | None = None
         self._shell: ChatShell | None = None
+        self._pending_chat_ui_state: dict[str, object] | None = None
 
         self._placeholder = wx.StaticText(
             self,
@@ -55,17 +57,22 @@ class ChatTab(AssistantTabPanel):
         self._shell = ChatShell(self._shell_slot, new_path, embedded=True)
         self._shell_sizer.Add(self._shell, proportion=1, flag=wx.EXPAND)
         self._shell.apply_context(ctx)
+        if self._pending_chat_ui_state is not None:
+            self._shell.apply_ui_state(self._pending_chat_ui_state)
         self._shell_slot.Layout()
         self.Layout()
 
     def export_session_state(self) -> dict[str, object]:
         if self._shell is None:
             return {}
-        return {"chat": self._shell.export_ui_state()}
+        return self._shell.export_ui_state()
 
     def import_session_state(self, data: dict[str, object]) -> None:
-        block = data.get("chat")
-        if self._shell is not None and isinstance(block, dict):
+        block = normalize_tab_session_block(data, nested_key="chat")
+        if block is None:
+            return
+        self._pending_chat_ui_state = block
+        if self._shell is not None:
             self._shell.apply_ui_state(block)
 
     def _clear_shell(self) -> None:
