@@ -27,7 +27,7 @@ When Phase 1 chat and Freerouting rows pass, check off the matching items in [`M
 - [x] Launch **Tools → External Plugins → KiCad AI Assistant** (or Scripting Console).
 - [x] Click **Refresh context** on the Assistant shell.
 - [x] Open **Chat** tab, select a template, enter an engineering question.
-- [ ] Click **Approve & Send** and confirm a context-aware response without manual export/copy-paste.
+- [x] Click **Approve & Send** and confirm a context-aware response without manual export/copy-paste.
 
 **Pass criteria:** Response references project symbols/nets from the active design.
 
