@@ -6,6 +6,7 @@ from ui.markdown_render import (
     _convert_body,
     _gfm_table_block_to_html,
     _replace_gfm_tables,
+    conversation_markdown_to_html,
     markdown_to_html,
 )
 
@@ -22,6 +23,14 @@ def test_markdown_to_html_includes_heading_and_code() -> None:
     assert "Hello" in html_doc
     assert "<code" in html_doc or "Refresh context" in html_doc
     assert "<style>" in html_doc
+
+
+def test_conversation_markdown_to_html_renders_turn_headings() -> None:
+    md = "## You\n\nHello\n\n---\n\n## Assistant\n\n**Hi**"
+    html_doc = conversation_markdown_to_html(md)
+    assert "<h2" in html_doc
+    assert "Assistant" in html_doc
+    assert "KiCad AI Conversation" in html_doc
 
 
 def test_markdown_to_html_renders_link() -> None:

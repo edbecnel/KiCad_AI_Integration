@@ -319,10 +319,13 @@ class ChatShell(wx.Panel):
         def on_closed() -> None:
             self._conversation_viewer = None
 
+        save_name = f"{self._project_path.stem}_conversation.md"
         self._conversation_viewer = show_conversation_viewer(
             self,
             text or placeholder,
             refresh_callback=self._conversation_log_text,
+            markdown_callback=lambda: self._session().format_conversation_markdown(),
+            default_save_name=save_name,
             on_closed=on_closed,
         )
 

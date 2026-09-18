@@ -52,15 +52,35 @@ _WX_TD_BG = "#ffffff"
 _WX_CELL_TEXT = "#1a1a1a"
 
 
-def markdown_to_html(markdown_text: str, *, title: str = "User Guide") -> str:
+_CONVERSATION_CSS_EXTRA = """
+body { font-size: 15px; }
+h2 { margin-top: 1.4em; border-bottom: 1px solid #555; padding-bottom: 0.25em; }
+"""
+
+
+def markdown_to_html(
+    markdown_text: str,
+    *,
+    title: str = "User Guide",
+    extra_css: str = "",
+) -> str:
     """Render markdown to a full HTML document."""
     body = _convert_body(markdown_text)
     safe_title = html.escape(title)
     return (
         "<!DOCTYPE html><html><head>"
         f"<meta charset='utf-8'><title>{safe_title}</title>"
-        f"<style>{_GUIDE_CSS}</style>"
+        f"<style>{_GUIDE_CSS}{extra_css}</style>"
         f"</head><body>{body}</body></html>"
+    )
+
+
+def conversation_markdown_to_html(markdown_text: str) -> str:
+    """HTML for the Chat conversation pop-out (readable body size, turn headings)."""
+    return markdown_to_html(
+        markdown_text,
+        title="KiCad AI Conversation",
+        extra_css=_CONVERSATION_CSS_EXTRA,
     )
 
 

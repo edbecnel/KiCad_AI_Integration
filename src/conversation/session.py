@@ -102,3 +102,8 @@ class ChatSession:
                     lines.append(f"[{' · '.join(parts)}]")
             lines.append("")
         return "\n".join(lines).rstrip()
+
+    def format_conversation_markdown(self) -> str:
+        from conversation.formatting import format_session_as_markdown
+
+        return format_session_as_markdown(self)
